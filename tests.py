@@ -26,5 +26,34 @@ class TestFmtStr(unittest.TestCase):
         #for element in random.sample(self.seq, 5):
             #self.assertTrue(element in self.seq)
 
+class TestConvenience(unittest.TestCase):
+    def test_fg(self):
+        fmtstr.red('asdf')
+        fmtstr.blue('asdf')
+        self.assertTrue(True)
+
+    def test_bg(self):
+        fmtstr.on_red('asdf')
+        fmtstr.on_blue('asdf')
+        self.assertTrue(True)
+
+    def test_text_xforms(self):
+        fmtstr.upper('asdf')
+        fmtstr.title('asdf')
+        self.assertTrue(True)
+
+    def test_styles(self):
+        fmtstr.underline('asdf')
+        fmtstr.blink('asdf')
+        self.assertTrue(True)
+
+class TestComposition(unittest.TestCase):
+
+    def test_simple_composition(self):
+        a = fmtstr.FmtStr('hello ', 'underline', 'on_blue')
+        b = fmtstr.FmtStr('there', 'red', 'on_blue')
+        c = a + b
+        self.assertTrue(True)
+
 if __name__ == '__main__':
     unittest.main()
