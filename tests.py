@@ -1,21 +1,21 @@
 import unittest
-import fmtstr
+from fmtstr import *
 
 class TestFmtStrInitialization(unittest.TestCase):
     def test_bad(self):
         # Can't specify fg or bg color two ways
-        self.assertRaises(ValueError, fmtstr.FmtStr, 'hello', 'blue', {'fg':30})
-        self.assertRaises(ValueError, fmtstr.FmtStr, 'hello', 'on_blue', {'bg':40})
+        self.assertRaises(ValueError, FmtStr, 'hello', 'blue', {'fg':30})
+        self.assertRaises(ValueError, FmtStr, 'hello', 'on_blue', {'bg':40})
         # Only specific fg and bg colors are allowed
-        self.assertRaises(ValueError, fmtstr.FmtStr, 'hello', {'bg':30})
-        self.assertRaises(ValueError, fmtstr.FmtStr, 'hello', {'fg':40})
+        self.assertRaises(ValueError, FmtStr, 'hello', {'bg':30})
+        self.assertRaises(ValueError, FmtStr, 'hello', {'fg':40})
         # Only existing xforms can be used in kwargs
-        self.assertRaises(ValueError, fmtstr.FmtStr, 'hello', 'make it big')
+        self.assertRaises(ValueError, FmtStr, 'hello', 'make it big')
 
 class TestFmtStr(unittest.TestCase):
 
     def setUp(self):
-        self.s = fmtstr.FmtStr('hello!', 'upper', fg='red')
+        self.s = FmtStr('hello!', 'upper', fg='red')
 
     def test_length(self):
         self.assertEqual(len(self.s), len(self.s.string))
@@ -26,34 +26,62 @@ class TestFmtStr(unittest.TestCase):
         #for element in random.sample(self.seq, 5):
             #self.assertTrue(element in self.seq)
 
+class TestDoubleUnders(unittest.TestCase):
+    def test_equality(self):
+        x = FmtStr("adfs")
+        self.assertEqual(x, x)
+        self.assertTrue(FmtStr("adfs"), FmtStr("adfs"))
+        self.assertTrue(FmtStr("adfs", 'blue'), FmtStr("adfs", fg='blue'))
+
 class TestConvenience(unittest.TestCase):
     def test_fg(self):
-        fmtstr.red('asdf')
-        fmtstr.blue('asdf')
+        red('asdf')
+        blue('asdf')
         self.assertTrue(True)
 
     def test_bg(self):
-        fmtstr.on_red('asdf')
-        fmtstr.on_blue('asdf')
+        on_red('asdf')
+        on_blue('asdf')
         self.assertTrue(True)
 
     def test_text_xforms(self):
-        fmtstr.upper('asdf')
-        fmtstr.title('asdf')
+        upper('asdf')
+        title('asdf')
         self.assertTrue(True)
 
     def test_styles(self):
-        fmtstr.underline('asdf')
-        fmtstr.blink('asdf')
+        underline('asdf')
+        blink('asdf')
         self.assertTrue(True)
+
+class TestSlicing(unittest.TestCase):
+    def test_index(self):
+        self.assertEqual(FmtStr('Hi!', 'blue')[0], FmtStr('H', 'blue'))
+        self.assertRaises(IndexError, FmtStr('Hi!', 'blue').__getitem__, 5)
+    def test_slice(self):
+        self.assertEqual(FmtStr('Hi!', 'blue')[1:2], FmtStr('i', 'blue'))
+        self.assertEqual(FmtStr('Hi!', 'blue')[1:], FmtStr('i!', 'blue'))
+        self.assertEqual(FmtStr('Hi!', 'blue')[15:18], FmtStr('', 'blue'))
+
+    def AWLKJAS_set_index(self):
+        f = FmtStr('Hi!', 'blue')
+        self.assertRaises(IndexError, f.__setitem__, 12, 'a')
+        f = FmtStr('Hi!', 'blue')
+        f[1] = FmtStr('o')
+        changed = blue('H') + plain('o') + blue('!')
+        self.assertEqual(str(f), str(changed))
+        self.assertEqual(f, changed)
+
 
 class TestComposition(unittest.TestCase):
 
     def test_simple_composition(self):
-        a = fmtstr.FmtStr('hello ', 'underline', 'on_blue')
-        b = fmtstr.FmtStr('there', 'red', 'on_blue')
+        a = FmtStr('hello ', 'underline', 'on_blue')
+        b = FmtStr('there', 'red', 'on_blue')
         c = a + b
+        fmtstr(c, bg='red')
         self.assertTrue(True)
+
 
 if __name__ == '__main__':
     unittest.main()
