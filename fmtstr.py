@@ -1,4 +1,3 @@
-
 """
 >>> s = fmtstr("Hey there!", 'red')
 >>> s
@@ -12,18 +11,18 @@ import copy
 
 from parse import parse
 from termformatconstants import FG_COLORS, BG_COLORS, STYLES
-from termformatconstants import FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR, NUMBER_TO_STYLE
+from termformatconstants import FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR
 from termformatconstants import RESET_ALL, RESET_BG, RESET_FG
 from termformatconstants import seq
 
 xforms = {
-    'fg' : lambda x, v: ('[%sm' % v)+x+seq(RESET_FG),
-    'bg' : lambda x, v: ('[%sm' % v)+x+seq(RESET_BG),
-    'bold' : lambda x: ('[%sm' % STYLES['bold'])+x+seq(RESET_ALL),
-    'underline' : lambda x: ('[%sm' % STYLES['underline'])+x+seq(RESET_ALL),
-    'blink' : lambda x: ('[%sm' % STYLES['blink'])+x+seq(RESET_ALL),
-    'invert' : lambda x: ('[%sm' % STYLES['invert'])+x+seq(RESET_ALL),
-    }
+    'fg' : lambda x, v: seq(v)+x+seq(RESET_FG),
+    'bg' : lambda x, v: seq(v)+x+seq(RESET_BG),
+    'bold' : lambda x: seq(STYLES['bold'])+x+seq(RESET_ALL),
+    'underline' : lambda x: seq(STYLES['underline'])+x+seq(RESET_ALL),
+    'blink' : lambda x: seq(STYLES['blink'])+x+seq(RESET_ALL),
+    'invert' : lambda x: seq(STYLES['invert'])+x+seq(RESET_ALL),
+}
 
 class BaseFmtStr(object):
     """Formatting annotations on strings"""
@@ -56,7 +55,6 @@ class BaseFmtStr(object):
                         pp_att(att)+'('
                         for att in sorted(self.atts)) +
                ('"%s"' % self.s) + ')'*len(self.atts))
-
 
 class FmtStr(object):
     def __init__(self, *components):
@@ -98,6 +96,26 @@ class FmtStr(object):
             return FmtStr(*(copy.deepcopy(x) for x in (self.fmtstrs + [BaseFmtStr(other)])))
         else:
             raise TypeError('Can\'t add those')
+
+    def __radd__(self, other):
+        if isinstance(other, FmtStr):
+            return FmtStr(*(copy.deepcopy(x) for x in (other.fmtstrs + self.fmtstrs)))
+        elif isinstance(other, str):
+            return FmtStr(*(copy.deepcopy(x) for x in ([BaseFmtStr(other)] + self.fmtstrs)))
+        else:
+            raise TypeError('Can\'t add those')
+
+    def __getattr__(self, att):
+        # thanks to @aerenchyma/@jczetta
+        def func_help(*args, **kwargs):
+             result = getattr(self.s, att)(*args, **kwargs)
+             if isinstance(result, basestring):
+                 return FmtStr(result, atts=self.atts)
+             elif isinstance(result, list):
+                 return [FmtStr(x, atts=self.atts) for x in result]
+             else:
+                 return result
+        return func_help
 
     def normalize_slice(self, index):
         if isinstance(index, int):
@@ -198,7 +216,6 @@ def fmtstr(string, *args, **kwargs):
     else:
         raise ValueError("Bad Args")
 
-# convenience functions
 for att in itertools.chain(FG_COLORS, ('on_'+x for x in BG_COLORS), STYLES):
     locals()[att] = functools.partial(fmtstr, style=att)
 plain = functools.partial(fmtstr)
