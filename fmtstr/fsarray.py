@@ -28,9 +28,16 @@ Format String 2D array
 
 from fmtstr import fmtstr
 from fmtstr import normalize_slice
+from fmtstr import FmtStr
 
 def slicesize(s):
     return int((s.stop - s.start) / (s.step if s.step else 1))
+
+def fsarray(strings, *args, **kwargs):
+    arr = FSArray(len(strings), max(len(s) for s in strings) if strings else 0, *args, **kwargs)
+    for fs, s in zip(arr.rows, strings):
+        fs[0:len(s)] = s if isinstance(s, FmtStr) else fmtstr(s, *args, **kwargs)
+    return arr
 
 class FSArray(object):
     #TODO add constructor that takes fmtstrs instead of dims
@@ -89,4 +96,7 @@ class FSArray(object):
 if __name__ == '__main__':
     a = FSArray(10, 80, bg='blue')
     a[0:2, 5:11] = fmtstr("hey", 'on_blue') + ' ' + fmtstr('yo', 'on_red'), fmtstr('qwe qw')
+    a.dumb_display()
+
+    a = fsarray(['hey', 'there', 'schoolgirl'])
     a.dumb_display()
