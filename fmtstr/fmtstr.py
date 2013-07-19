@@ -69,7 +69,7 @@ class FmtStr(object):
         for x in tokens_and_strings:
             if isinstance(x, dict):
                 cur_fmt = x
-            elif isinstance(x, str):
+            elif isinstance(x, basestring):
                 atts = parse_args('', {k:v for k,v in cur_fmt.items() if v is not None})
                 bases.append(BaseFmtStr(x, atts=atts))
             else:
@@ -93,7 +93,7 @@ class FmtStr(object):
     def __add__(self, other):
         if isinstance(other, FmtStr):
             return FmtStr(*(copy.deepcopy(x) for x in (self.fmtstrs + other.fmtstrs)))
-        elif isinstance(other, str):
+        elif isinstance(other, basestring):
             return FmtStr(*(copy.deepcopy(x) for x in (self.fmtstrs + [BaseFmtStr(other)])))
         else:
             raise TypeError('Can\'t add those')
@@ -101,7 +101,7 @@ class FmtStr(object):
     def __radd__(self, other):
         if isinstance(other, FmtStr):
             return FmtStr(*(copy.deepcopy(x) for x in (other.fmtstrs + self.fmtstrs)))
-        elif isinstance(other, str):
+        elif isinstance(other, basestring):
             return FmtStr(*(copy.deepcopy(x) for x in ([BaseFmtStr(other)] + self.fmtstrs)))
         else:
             raise TypeError('Can\'t add those')
@@ -136,7 +136,7 @@ class FmtStr(object):
 
     def __setitem__(self, index, value):
         index = normalize_slice(len(self), index)
-        if isinstance(value, str):
+        if isinstance(value, basestring):
             value = FmtStr(BaseFmtStr(value))
         elif not isinstance(value, FmtStr):
             raise ValueError('Should be str or FmtStr')
@@ -216,10 +216,12 @@ def fmtstr(string, *args, **kwargs):
     if isinstance(string, FmtStr):
         string.set_attributes(**atts)
         return string
-    elif isinstance(string, str):
-        return FmtStr(BaseFmtStr(string, atts=atts))
+    elif isinstance(string, basestring):
+        string = FmtStr.from_str(string)
+        string.set_attributes(**atts)
+        return string
     else:
-        raise ValueError("Bad Args")
+        raise ValueError("Bad Args: %r %r %r" % (string, args, kwargs))
 
 for att in itertools.chain(FG_COLORS, ('on_'+x for x in BG_COLORS), STYLES):
     locals()[att] = functools.partial(fmtstr, style=att)
