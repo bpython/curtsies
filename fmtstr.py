@@ -5,6 +5,7 @@ red("Hey there!")
 >>> s[4:7]
 "\b
 """
+#TODO add a way to composite text without losing original formatting information
 import itertools
 import functools
 import copy
