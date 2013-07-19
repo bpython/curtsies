@@ -118,23 +118,12 @@ class FmtStr(object):
                  return result
         return func_help
 
-    def normalize_slice(self, index):
-        if isinstance(index, int):
-            index = slice(index, index+1)
-        if index.start < -1:
-            index = slice(len(self) - index.start, index.stop, index.step)
-        if index.stop < -1:
-            index = slice(index.start, len(self) - index.stop, index.step)
-        if index.step is not None:
-            raise NotImplementedError("You can't use steps with slicing yet")
-        return index
-
     @property
     def s(self):
         return "".join(fs.s for fs in self.fmtstrs)
 
     def __getitem__(self, index):
-        index = self.normalize_slice(index)
+        index = normalize_slice(len(self), index)
         counter = 0
         output = ''
         for fs in self.fmtstrs:
@@ -146,7 +135,7 @@ class FmtStr(object):
         return output
 
     def __setitem__(self, index, value):
-        index = self.normalize_slice(index)
+        index = normalize_slice(len(self), index)
         if isinstance(value, str):
             value = FmtStr(BaseFmtStr(value))
         elif not isinstance(value, FmtStr):
@@ -173,6 +162,21 @@ class FmtStr(object):
             else:
                 self.fmtstrs.append(fs)
             counter += len(fs)
+
+def normalize_slice(length, index):
+    if isinstance(index, int):
+        index = slice(index, index+1)
+    if index.start is None:
+        index = slice(0, index.stop, index.step)
+    if index.stop is None:
+        index = slice(index.start, length, index.step)
+    if index.start < -1:
+        index = slice(length - index.start, index.stop, index.step)
+    if index.stop < -1:
+        index = slice(index.start, length - index.stop, index.step)
+    if index.step is not None:
+        raise NotImplementedError("You can't use steps with slicing yet")
+    return index
 
 def parse_args(args, kwargs):
     if 'style' in kwargs:
