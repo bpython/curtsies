@@ -34,9 +34,10 @@ def slicesize(s):
     return int((s.stop - s.start) / (s.step if s.step else 1))
 
 def fsarray(strings, *args, **kwargs):
-    arr = FSArray(len(strings), max(len(s) for s in strings) if strings else 0, *args, **kwargs)
-    for fs, s in zip(arr.rows, strings):
-        fs[0:len(s)] = s if isinstance(s, FmtStr) else fmtstr(s, *args, **kwargs)
+    fstrings = [s if isinstance(s, FmtStr) else fmtstr(s, *args, **kwargs) for s in strings]
+    arr = FSArray(len(fstrings), max(len(s) for s in fstrings) if fstrings else 0, *args, **kwargs)
+    for fs, s in zip(arr.rows, fstrings):
+        fs[0:len(s)] = s
     return arr
 
 class FSArray(object):
