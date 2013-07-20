@@ -45,7 +45,7 @@ class BaseFmtStr(object):
         return s
 
     def __getitem__(self, index):
-        return str(self)[index]
+        return fmtstr(str(self)[index])
 
     def __repr__(self):
         def pp_att(att):
