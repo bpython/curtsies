@@ -164,7 +164,9 @@ class FmtStr(object):
             counter += len(fs)
 
 def normalize_slice(length, index):
+    is_int = False
     if isinstance(index, int):
+        is_int = True
         index = slice(index, index+1)
     if index.start is None:
         index = slice(0, index.stop, index.step)
@@ -176,6 +178,9 @@ def normalize_slice(length, index):
         index = slice(index.start, length - index.stop, index.step)
     if index.step is not None:
         raise NotImplementedError("You can't use steps with slicing yet")
+    if is_int:
+        if index.start < 0 or index.start > length:
+            raise IndexError("index out of bounds")
     return index
 
 def parse_args(args, kwargs):
