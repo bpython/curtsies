@@ -1,9 +1,9 @@
-"""
+r"""
 >>> s = fmtstr("Hey there!", 'red')
 >>> s
 red("Hey there!")
 >>> s[4:7]
-"\b
+'\x1b[31mthe\x1b[39m'
 """
 #TODO add a way to composite text without losing original formatting information
 import itertools
@@ -63,12 +63,18 @@ class FmtStr(object):
 
     @classmethod
     def from_str(cls, s):
+        r"""
+        >>> fmtstr("|"+on_blue(red("hey"))+"|")
+        "|"+on_blue(red("hey"))+"|"
+        >>> fmtstr('|\x1b[31m\x1b[44mhey\x1b[49m\x1b[39m|')
+        "|"+on_blue(red("hey"))+"|"
+        """
         tokens_and_strings = parse(s)
         bases = []
         cur_fmt = {}
         for x in tokens_and_strings:
             if isinstance(x, dict):
-                cur_fmt = x
+                cur_fmt.update(x)
             elif isinstance(x, basestring):
                 atts = parse_args('', {k:v for k,v in cur_fmt.items() if v is not None})
                 bases.append(BaseFmtStr(x, atts=atts))
@@ -233,6 +239,8 @@ for att in itertools.chain(FG_COLORS, ('on_'+x for x in BG_COLORS), STYLES):
 plain = functools.partial(fmtstr)
 
 if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
     print blue('adf')
     print blue(on_red('ad'))
     print blue('asdf') + on_red('adsf')
@@ -244,3 +252,11 @@ if __name__ == '__main__':
     print f
     f = FmtStr.from_str(str(blue('tom')))
     print repr(f)
+
+    print '=---'
+
+    f = on_blue(red('stuff'))
+    print repr(f)
+    print repr(str(f))
+    print f
+    print (f + '!')[0:6] + '?'
