@@ -10,7 +10,7 @@ import itertools
 import functools
 import copy
 
-from parse import parse
+from escseqparse import parse
 from termformatconstants import FG_COLORS, BG_COLORS, STYLES
 from termformatconstants import FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR
 from termformatconstants import RESET_ALL, RESET_BG, RESET_FG
@@ -59,6 +59,7 @@ class BaseFmtStr(object):
 
 class FmtStr(object):
     def __init__(self, *components):
+        assert all(isinstance(x, BaseFmtStr) for x in components)
         self.fmtstrs = [x for x in components if len(x) > 0]
 
     @classmethod
@@ -102,7 +103,7 @@ class FmtStr(object):
         elif isinstance(other, basestring):
             return FmtStr(*(copy.deepcopy(x) for x in (self.fmtstrs + [BaseFmtStr(other)])))
         else:
-            raise TypeError('Can\'t add those')
+            raise TypeError('Can\'t add %r and %r' % (self, other))
 
     def __radd__(self, other):
         if isinstance(other, FmtStr):
@@ -112,14 +113,26 @@ class FmtStr(object):
         else:
             raise TypeError('Can\'t add those')
 
+    @property
+    def shared_atts(self):
+        """Gets atts shared among all nonzero length component BaseFmtStrs"""
+        #TODO cache this, could get ugly for large FmtStrs
+        atts = {}
+        first = self.fmtstrs[0]
+        for att in first.atts:
+            #TODO how to write this without the '???'?
+            if all(fs.atts.get(att, '???') == first.atts[att] for fs in self.fmtstrs if len(fs) > 0):
+                atts[att] = first.atts[att]
+        return atts
+
     def __getattr__(self, att):
         # thanks to @aerenchyma/@jczetta
         def func_help(*args, **kwargs):
              result = getattr(self.s, att)(*args, **kwargs)
              if isinstance(result, basestring):
-                 return FmtStr(result, atts=self.atts)
+                 return fmtstr(result, **self.shared_atts)
              elif isinstance(result, list):
-                 return [FmtStr(x, atts=self.atts) for x in result]
+                 return [fmtstr(x, **self.shared_atts) for x in result]
              else:
                  return result
         return func_help
