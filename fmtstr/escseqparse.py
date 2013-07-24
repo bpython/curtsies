@@ -12,10 +12,12 @@ import re
 
 
 def parse(s):
-    """
+    r"""
     >>> parse(">>> []")
-    ['[]']
+    ['>>> []']
+    >>> parse("\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39")
     """
+    assert isinstance(s, basestring)
     stuff = []
     rest = s
     while True:
@@ -26,7 +28,7 @@ def parse(s):
             try:
                 stuff.append(token_type(token))
             except ValueError as e:
-                raise ValueError("Can't parse escape sequence: %r %r %r %r %r" % (s, repr(front), token, repr(rest)))
+                raise ValueError("Can't parse escape sequence: %r %r %r %r" % (s, repr(front), token, repr(rest)))
         if not rest:
             break
     return stuff

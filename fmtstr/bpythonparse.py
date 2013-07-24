@@ -59,6 +59,15 @@ def peel_off_string(s):
     del d['rest']
     return d, rest
 
+def string_to_fmtstr(x):
+    from pygments import format
+    from bpython.formatter import BPythonFormatter
+    from bpython._py3compat import PythonLexer
+    from bpython.config import Struct, loadini, default_config_path
+    config = Struct()
+    loadini(config, default_config_path())
+    return parse(format(PythonLexer().get_tokens(x), BPythonFormatter(config.color_scheme)))
+
 def test():
     from pygments import format
     from bpython.formatter import BPythonFormatter
@@ -73,6 +82,8 @@ def test():
     fs = parse(formatted_line)
     print repr(fs)
     print fs
+
+    string_to_fmtstr()
 
 if __name__ == '__main__':
     import doctest; doctest.testmod()
