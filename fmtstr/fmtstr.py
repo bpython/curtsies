@@ -154,7 +154,7 @@ class FmtStr(object):
                 piece = str(BaseFmtStr(s_part, fs.atts))
                 output += piece
             counter += len(fs)
-        return output
+        return fmtstr(output)
 
     def __setitem__(self, index, value):
         index = normalize_slice(len(self), index)
