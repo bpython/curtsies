@@ -97,6 +97,9 @@ class FmtStr(object):
     def __repr__(self):
         return '+'.join(repr(fs) for fs in self.fmtstrs)
 
+    def __eq__(self, other):
+        return str(self) == str(other)
+
     def __add__(self, other):
         if isinstance(other, FmtStr):
             return FmtStr(*(copy.deepcopy(x) for x in (self.fmtstrs + other.fmtstrs)))
