@@ -12,6 +12,10 @@ import re
 
 
 def parse(s):
+    """
+    >>> parse(">>> []")
+    ['[]']
+    """
     stuff = []
     rest = s
     while True:
@@ -19,7 +23,10 @@ def parse(s):
         if front:
             stuff.append(front)
         if token:
-            stuff.append(token_type(token))
+            try:
+                stuff.append(token_type(token))
+            except ValueError as e:
+                raise ValueError("Can't parse escape sequence: %r %r %r %r %r" % (s, repr(front), token, repr(rest)))
         if not rest:
             break
     return stuff
@@ -61,6 +68,8 @@ def peel_off_esc_code(s):
         return s, None, ''
 
 def token_type(info):
+    """
+    """
     if info['command'] == 'm':
         value, = info['numbers']
         if value in FG_NUMBER_TO_COLOR: return {'fg':FG_NUMBER_TO_COLOR[value]}

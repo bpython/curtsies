@@ -28,17 +28,24 @@ def fs_from_match(d):
         if color != 'default':
             atts['fg'] = FG_COLORS[color]
     if d['bg']:
-        color = cnames[d['fg'].lower()]
+        if d['bg'] == 'I':
+            color = colors[(colors.index(color) + (len(colors)/2)) % len(colors)] # hack for finding the "inverse"
+        else:
+            color = cnames[d['bg'].lower()]
         if color != 'default':
-            atts['bg'] = FG_COLORS[color]
+            atts['bg'] = BG_COLORS[color]
     if d['bold']:
         atts['bold'] = True
     return fmtstr(d['string'], **atts)
 
 def peel_off_string(s):
+    r"""
+    >>> peel_off_string('\x01RI\x03]\x04asdf')
+    ({'bg': 'I', 'string': ']', 'fg': 'R', 'colormarker': '\x01RI', 'bold': ''}, 'asdf')
+    """
     p = r"""(?P<colormarker>\x01
                 (?P<fg>[krgybmcwdKRGYBMCWD]?)
-                (?P<bg>[krgybmcwdKRGYBMCWD]?)?)
+                (?P<bg>[krgybmcwdKRGYBMCWDI]?)?)
             (?P<bold>\x01?)
             \x03
             (?P<string>[^\x04]+)
@@ -46,6 +53,7 @@ def peel_off_string(s):
             (?P<rest>.*)
             """
     m = re.match(p, s, re.X | re.DOTALL)
+    assert m, repr(s)
     d = m.groupdict()
     rest = d['rest']
     del d['rest']
