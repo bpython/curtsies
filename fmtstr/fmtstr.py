@@ -3,7 +3,7 @@ r"""
 >>> s
 red("Hey there!")
 >>> s[4:7]
-'\x1b[31mthe\x1b[39m'
+red("the")
 """
 #TODO add a way to composite text without losing original formatting information
 import itertools
@@ -239,6 +239,12 @@ def parse_args(args, kwargs):
 
 # convenience functions
 def fmtstr(string, *args, **kwargs):
+    """
+    Convenience function for creating a FmtStr
+
+    >>> fmtstr('asdf', 'blue', 'on_red')
+    on_red(blue("asdf"))
+    """
     atts = parse_args(args, kwargs)
     if isinstance(string, FmtStr):
         string.set_attributes(**atts)
@@ -253,6 +259,9 @@ def fmtstr(string, *args, **kwargs):
 for att in itertools.chain(FG_COLORS, ('on_'+x for x in BG_COLORS), STYLES):
     locals()[att] = functools.partial(fmtstr, style=att)
 plain = functools.partial(fmtstr)
+
+def blue(string):
+    return fmtstr(string, style='blue')
 
 if __name__ == '__main__':
     import doctest

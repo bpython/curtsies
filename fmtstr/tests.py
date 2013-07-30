@@ -15,7 +15,7 @@ class TestFmtStrInitialization(unittest.TestCase):
 class TestFmtStr(unittest.TestCase):
 
     def setUp(self):
-        self.s = FmtStr('hello!', 'upper', fg='red')
+        self.s = FmtStr('hello!', 'on_blue', fg='red')
 
     def test_length(self):
         self.assertEqual(len(self.s), len(self.s.string))

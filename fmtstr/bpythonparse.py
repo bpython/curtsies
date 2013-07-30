@@ -48,7 +48,7 @@ def peel_off_string(s):
                 (?P<bg>[krgybmcwdKRGYBMCWDI]?)?)
             (?P<bold>\x01?)
             \x03
-            (?P<string>[^\x04]+)
+            (?P<string>[^\x04]*)
             \x04
             (?P<rest>.*)
             """

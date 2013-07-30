@@ -101,3 +101,11 @@ if __name__ == '__main__':
 
     a = fsarray(['hey', 'there', 'schoolgirl'])
     a.dumb_display()
+
+    def ttt():
+        a = FSArray(8, 12, bg='blue')
+        a[4, 4:6] = '--'
+        a.dumb_display()
+
+    ttt()
+

@@ -14,6 +14,6 @@ class TestManyBrackets(unittest.TestCase):
         self.assertEqual(fs, fs2)
 
 if __name__ == '__main__':
-    #unittest.main()
-    print string_to_fmtstr('[][][][]')
-    print parse(str(string_to_fmtstr('[][][][]')))
+    unittest.main()
+    #print string_to_fmtstr('[][][][]')
+    #print parse(str(string_to_fmtstr('[][][][]')))
