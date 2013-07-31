@@ -72,13 +72,8 @@ class FSArray(object):
         """shape, for imitating numpy arrays"""
         return len(self.rows), self.columns
 
-    @property
-    def height(self):
-        return len(self.rows)
-
-    @property
-    def width(self):
-        return self.columns
+    height = property(lambda self: len(self.rows))
+    width = property(lambda self: self.columns)
 
     def __setitem__(self, slicetuple, value):
         if isinstance(slicetuple, slice):
