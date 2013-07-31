@@ -25,6 +25,7 @@ Format String 2D array
 >>> a.rows[0] = []
 """
 
+import sys
 
 from fmtstr import fmtstr
 from fmtstr import normalize_slice
@@ -80,7 +81,7 @@ class FSArray(object):
         if value.__class__.__name__ == 'ndarray':
             value = [fmtstr(''.join(line)) for line in value]
 
-        rowslice = normalize_slice(len(self.rows), rowslice)
+        rowslice = normalize_slice(sys.maxint, rowslice)
         additional_rows = max(0, rowslice.stop - len(self.rows))
         self.rows.extend([fmtstr(' '*self.columns, *self.saved_args, **self.saved_kwargs)
                           for _ in range(additional_rows)])
