@@ -1,40 +1,53 @@
-"""Marked up text
+Text objects that behave mostly like strings
 
-text should only be marked up with characteristics that don't change the number
-of characters (uppercase is fine - spaces between characters is not)
+fmtstr.FmtStr
+-------------
 
-Ideally these objects can be processed like normal strings
+    >>> fromt fmtstr.fmtstr import fmtstr
+    >>> red_on_blue = fmtstr('hello', 'red', 'on_blue')
+    >>> blue_on_red = fmtstr('there', fg='blue', bg='red')
+    >>> green = fmtstr('!', 'green')
+    >>> full = red_on_blue + ' ' + blue_on_red + green
+    >>> full
+    on_blue(red("hello"))+" "+on_red(blue("there"))+green("!")
+    >>> str(full)
+    '\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m'
 
-Limited to 
+and `print full` should display something like this:
 
-Use something like colorama for Windows output? Skip for now
+<span style="color:red;"></span><span style="color:red;background-color:blue;">hello</span><span style="color:red;background-color:white;"></span><span style="color:black;background-color:white;"> </span><span style="color:blue;background-color:white;"></span><span style="color:blue;background-color:red;">there</span><span style="color:blue;background-color:white;"></span><span style="color:black;background-color:white;"></span><span style="color:green;background-color:white;">!</span><span style="color:black;background-color:white;">
 
-Similar to https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py
+You can use convenience functions instead:
 
-str: printable (and marked up) text in terminal - minimal amount of markup?
-repl: representation of tree structure
-getitem: array and farray representation
-len: length of version
-iteration?
+    >>> from fmtstr.fmtstr import *
+    >>> blue(on_red('hey')) + " " + underline("there")
 
-Buildable from escape codes
-Buildable from array and farry
-Buildable from simple init
-Buildable by combining into tree structure
-
-which is the true internal representation?
-Probably the array one, can build a tree for repr with cool tree combinators!
-No, probably the terminal escape one
-
-
-What to do on unclosed (uncleared) escape code input?
-Close it! Shouldn't be called on just an initial section!
-"""
+* str(FmtStr) -> escape sequence-laden text bound that looks cool in a terminal
+* repr(FmtStr) -> how to create an identical FmtStr
+* FmtStr[3:10] -> a new FmtStr
+* FmtStr.upper (any string method) -> a new FmtStr or list of FmtStrs or int (str.count)
 
 
+fmtstr.FSArray
+--------------
 
+2d array in which each line is a FmtStr
 
+    >>> a = FSArray(3, 14, bg='blue')
+    >>> a[0:2, 5:11] = fmtstr("hey", 'on_blue') + ' ' + fmtstr('yo', 'on_red'), fmtstr('qwe qw')
+    >>> a.dumb_display()
 
+<span style="background-color:blue;">     </span><span style="background-color:white;"></span><span style="background-color:blue;">hey</span><span style="background-color:white;"> </span><span style="background-color:red;">yo</span><span style="background-color:white;"></span><span style="background-color:blue;">   </span><span style="background-color:white;">
+</span><span style="background-color:blue;">     </span><span style="background-color:white;">qwe qw</span><span style="background-color:blue;">   </span><span style="background-color:white;">
+</span><span style="background-color:blue;">              </span><span style="background-color:white;">
 
+    >>> a = fsarray(['hey', 'there'], bg='cyan')
+    >>> a.dumb_display()
 
+</span><span style="background-color:teal;">hey</span><span style="background-color:white;"></span><span style="background-color:teal;">  </span><span style="background-color:white;">
+</span><span style="background-color:teal;">there</span><span style="background-color:white;">
+</span>
 
+See also
+
+* https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py

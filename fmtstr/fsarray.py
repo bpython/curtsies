@@ -100,17 +100,9 @@ class FSArray(object):
 
 
 if __name__ == '__main__':
-    a = FSArray(10, 80, bg='blue')
+    a = FSArray(3, 14, bg='blue')
     a[0:2, 5:11] = fmtstr("hey", 'on_blue') + ' ' + fmtstr('yo', 'on_red'), fmtstr('qwe qw')
     a.dumb_display()
 
-    a = fsarray(['hey', 'there', 'schoolgirl'])
+    a = fsarray(['hey', 'there'], bg='cyan')
     a.dumb_display()
-
-    def ttt():
-        a = FSArray(8, 12, bg='blue')
-        a[4, 4:6] = '--'
-        a.dumb_display()
-
-    ttt()
-
