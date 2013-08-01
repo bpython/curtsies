@@ -4,6 +4,14 @@ r"""
 red("Hey there!")
 >>> s[4:7]
 red("the")
+>>> red_on_blue = fmtstr('hello', 'red', 'on_blue')
+>>> blue_on_red = fmtstr('there', fg='blue', bg='red')
+>>> green = fmtstr('!', 'green')
+>>> full = red_on_blue + ' ' + blue_on_red + green
+>>> full
+on_blue(red("hello"))+" "+on_red(blue("there"))+green("!")
+>>> str(full)
+'\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m'
 """
 #TODO add a way to composite text without losing original formatting information
 import itertools

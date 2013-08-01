@@ -3,15 +3,7 @@ Text objects that behave mostly like strings
 fmtstr.FmtStr
 -------------
 
-    >>> fromt fmtstr.fmtstr import fmtstr
-    >>> red_on_blue = fmtstr('hello', 'red', 'on_blue')
-    >>> blue_on_red = fmtstr('there', fg='blue', bg='red')
-    >>> green = fmtstr('!', 'green')
-    >>> full = red_on_blue + ' ' + blue_on_red + green
-    >>> full
-    on_blue(red("hello"))+" "+on_red(blue("there"))+green("!")
-    >>> str(full)
-    '\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m'
+![fmtstr example screenshot](http://i.imgur.com/7lFaxsz.png)
 
 and `print full` should display something like this:
 
@@ -33,20 +25,7 @@ fmtstr.FSArray
 
 2d array in which each line is a FmtStr
 
-    >>> a = FSArray(3, 14, bg='blue')
-    >>> a[0:2, 5:11] = fmtstr("hey", 'on_blue') + ' ' + fmtstr('yo', 'on_red'), fmtstr('qwe qw')
-    >>> a.dumb_display()
-
-<span style="background-color:blue;">     </span><span style="background-color:white;"></span><span style="background-color:blue;">hey</span><span style="background-color:white;"> </span><span style="background-color:red;">yo</span><span style="background-color:white;"></span><span style="background-color:blue;">   </span><span style="background-color:white;">
-</span><span style="background-color:blue;">     </span><span style="background-color:white;">qwe qw</span><span style="background-color:blue;">   </span><span style="background-color:white;">
-</span><span style="background-color:blue;">              </span><span style="background-color:white;">
-
-    >>> a = fsarray(['hey', 'there'], bg='cyan')
-    >>> a.dumb_display()
-
-</span><span style="background-color:teal;">hey</span><span style="background-color:white;"></span><span style="background-color:teal;">  </span><span style="background-color:white;">
-</span><span style="background-color:teal;">there</span><span style="background-color:white;">
-</span>
+![fsarray example screenshot](http://i.imgur.com/rvTRPv1.png)
 
 See also
 
