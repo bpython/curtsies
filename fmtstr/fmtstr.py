@@ -1,4 +1,5 @@
-r"""
+r"""Colored strings that behave mostly like strings
+
 >>> s = fmtstr("Hey there!", 'red')
 >>> s
 red("Hey there!")
@@ -34,7 +35,7 @@ xforms = {
 }
 
 class BaseFmtStr(object):
-    """Formatting annotations on strings"""
+    """Formatting annotations on a string"""
     def __init__(self, string, atts=None):
         self.s = string
         self.atts = {k:v for k,v in atts.items()} if atts else {}
@@ -68,7 +69,7 @@ class BaseFmtStr(object):
 class FmtStr(object):
     def __init__(self, *components):
         assert all(isinstance(x, BaseFmtStr) for x in components)
-        self.fmtstrs = [x for x in components if len(x) > 0]
+        self.basefmtstrs = [x for x in components if len(x) > 0]
 
     @classmethod
     def from_str(cls, s):
@@ -93,34 +94,34 @@ class FmtStr(object):
 
     def set_attributes(self, **attributes):
         for k, v in attributes.items():
-            for fs in self.fmtstrs:
+            for fs in self.basefmtstrs:
                 fs.atts[k] = v
 
     def __str__(self):
-        return ''.join(str(fs) for fs in self.fmtstrs)
+        return ''.join(str(fs) for fs in self.basefmtstrs)
 
     def __len__(self):
-        return sum(len(fs) for fs in self.fmtstrs)
+        return sum(len(fs) for fs in self.basefmtstrs)
 
     def __repr__(self):
-        return '+'.join(repr(fs) for fs in self.fmtstrs)
+        return '+'.join(repr(fs) for fs in self.basefmtstrs)
 
     def __eq__(self, other):
         return str(self) == str(other)
 
     def __add__(self, other):
         if isinstance(other, FmtStr):
-            return FmtStr(*(copy.deepcopy(x) for x in (self.fmtstrs + other.fmtstrs)))
+            return FmtStr(*(copy.deepcopy(x) for x in (self.basefmtstrs + other.basefmtstrs)))
         elif isinstance(other, basestring):
-            return FmtStr(*(copy.deepcopy(x) for x in (self.fmtstrs + [BaseFmtStr(other)])))
+            return FmtStr(*(copy.deepcopy(x) for x in (self.basefmtstrs + [BaseFmtStr(other)])))
         else:
             raise TypeError('Can\'t add %r and %r' % (self, other))
 
     def __radd__(self, other):
         if isinstance(other, FmtStr):
-            return FmtStr(*(copy.deepcopy(x) for x in (other.fmtstrs + self.fmtstrs)))
+            return FmtStr(*(copy.deepcopy(x) for x in (other.basefmtstrs + self.basefmtstrs)))
         elif isinstance(other, basestring):
-            return FmtStr(*(copy.deepcopy(x) for x in ([BaseFmtStr(other)] + self.fmtstrs)))
+            return FmtStr(*(copy.deepcopy(x) for x in ([BaseFmtStr(other)] + self.basefmtstrs)))
         else:
             raise TypeError('Can\'t add those')
 
@@ -129,10 +130,10 @@ class FmtStr(object):
         """Gets atts shared among all nonzero length component BaseFmtStrs"""
         #TODO cache this, could get ugly for large FmtStrs
         atts = {}
-        first = self.fmtstrs[0]
+        first = self.basefmtstrs[0]
         for att in first.atts:
             #TODO how to write this without the '???'?
-            if all(fs.atts.get(att, '???') == first.atts[att] for fs in self.fmtstrs if len(fs) > 0):
+            if all(fs.atts.get(att, '???') == first.atts[att] for fs in self.basefmtstrs if len(fs) > 0):
                 atts[att] = first.atts[att]
         return atts
 
@@ -150,13 +151,13 @@ class FmtStr(object):
 
     @property
     def s(self):
-        return "".join(fs.s for fs in self.fmtstrs)
+        return "".join(fs.s for fs in self.basefmtstrs)
 
     def __getitem__(self, index):
         index = normalize_slice(len(self), index)
         counter = 0
         output = ''
-        for fs in self.fmtstrs:
+        for fs in self.basefmtstrs:
             if index.start < counter + len(fs) and index.stop > counter:
                 s_part = fs.s[max(0, index.start - counter):index.stop - counter]
                 piece = str(BaseFmtStr(s_part, fs.atts))
@@ -171,10 +172,10 @@ class FmtStr(object):
         elif not isinstance(value, FmtStr):
             raise ValueError('Should be str or FmtStr')
         counter = 0
-        old_fmtstrs = self.fmtstrs[:]
-        self.fmtstrs = []
+        old_basefmtstrs = self.basefmtstrs[:]
+        self.basefmtstrs = []
         inserted = False
-        for fs in old_fmtstrs:
+        for fs in old_basefmtstrs:
             if index.start < counter + len(fs) and index.stop > counter:
                 start = max(0, index.start - counter)
                 end = index.stop - counter
@@ -183,14 +184,14 @@ class FmtStr(object):
                 new = value
                 back = BaseFmtStr(fs.s[end:], fs.atts)
                 if len(front) > 0:
-                    self.fmtstrs.append(front)
+                    self.basefmtstrs.append(front)
                 if len(new) > 0 and not inserted:
-                    self.fmtstrs.extend(new.fmtstrs)
+                    self.basefmtstrs.extend(new.basefmtstrs)
                     inserted = True
                 if len(back) > 0:
-                    self.fmtstrs.append(back)
+                    self.basefmtstrs.append(back)
             else:
-                self.fmtstrs.append(fs)
+                self.basefmtstrs.append(fs)
             counter += len(fs)
 
 def normalize_slice(length, index):
@@ -268,9 +269,6 @@ for att in itertools.chain(FG_COLORS, ('on_'+x for x in BG_COLORS), STYLES):
     locals()[att] = functools.partial(fmtstr, style=att)
 plain = functools.partial(fmtstr)
 
-def blue(string):
-    return fmtstr(string, style='blue')
-
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
@@ -285,8 +283,6 @@ if __name__ == '__main__':
     print f
     f = FmtStr.from_str(str(blue('tom')))
     print repr(f)
-
-    print '=---'
 
     f = on_blue(red('stuff'))
     print repr(f)
