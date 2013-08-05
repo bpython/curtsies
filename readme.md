@@ -5,10 +5,6 @@ fmtstr.FmtStr
 
 ![fmtstr example screenshot](http://i.imgur.com/7lFaxsz.png)
 
-and `print full` should display something like this:
-
-<span style="color:red;"></span><span style="color:red;background-color:blue;">hello</span><span style="color:red;background-color:white;"></span><span style="color:black;background-color:white;"> </span><span style="color:blue;background-color:white;"></span><span style="color:blue;background-color:red;">there</span><span style="color:blue;background-color:white;"></span><span style="color:black;background-color:white;"></span><span style="color:green;background-color:white;">!</span><span style="color:black;background-color:white;">
-
 You can use convenience functions instead:
 
     >>> from fmtstr.fmtstr import *
