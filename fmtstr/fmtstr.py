@@ -14,7 +14,7 @@ on_blue(red("hello"))+" "+on_red(blue("there"))+green("!")
 >>> str(full)
 '\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m'
 >>> fmtstr(', ').join(['a', fmtstr('b'), blue('c')])
-"a"+"b"+blue("c")
+"a"+", "+"b"+", "+blue("c")
 """
 #TODO add a way to composite text without losing original formatting information
 import itertools
@@ -100,14 +100,17 @@ class FmtStr(object):
                 fs.atts[k] = v
 
     def join(self, iterable):
+        iterable = list(iterable)
         basefmtstrs = []
-        for s in iterable:
+        for i, s in enumerate(iterable):
             if isinstance(s, FmtStr):
                 basefmtstrs.extend(s.basefmtstrs)
             elif isinstance(s, basestring):
                 basefmtstrs.extend(fmtstr(s).basefmtstrs) #TODO just make a basefmtstr directly
             else:
                 raise TypeError("expected basestring or FmtStr, %r found" % type(s))
+            if i < len(iterable) - 1:
+                basefmtstrs.extend(self.basefmtstrs)
         return FmtStr(*basefmtstrs)
 
     def __str__(self):
