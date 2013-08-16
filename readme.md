@@ -36,4 +36,5 @@ fmtstr.FSArray
 
 See also
 
-* https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py
+* https://github.com/verigak/colors/ (`pip install colors`)
+* https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py (`pip install clint`)
