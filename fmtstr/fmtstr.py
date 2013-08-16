@@ -39,8 +39,10 @@ xforms = {
 class BaseFmtStr(object):
     """Formatting annotations on a string"""
     def __init__(self, string, atts=None):
-        self.s = string
+        self._s = string
         self.atts = {k:v for k,v in atts.items()} if atts else {}
+
+    s = property(lambda self: self._s) #making self.s immutable
 
     def __len__(self):
         return len(self.s)
@@ -135,9 +137,9 @@ class FmtStr(object):
 
     def __radd__(self, other):
         if isinstance(other, FmtStr):
-            return FmtStr(*(copy.deepcopy(x) for x in (other.basefmtstrs + self.basefmtstrs)))
+            return FmtStr(*(x for x in (other.basefmtstrs + self.basefmtstrs)))
         elif isinstance(other, basestring):
-            return FmtStr(*(copy.deepcopy(x) for x in ([BaseFmtStr(other)] + self.basefmtstrs)))
+            return FmtStr(*(x for x in ([BaseFmtStr(other)] + self.basefmtstrs)))
         else:
             raise TypeError('Can\'t add those')
 
@@ -179,6 +181,8 @@ class FmtStr(object):
                 piece = str(BaseFmtStr(s_part, fs.atts))
                 output += piece
             counter += len(fs)
+            if index.stop < counter:
+                break
         return fmtstr(output)
 
     def __setitem__(self, index, value):
