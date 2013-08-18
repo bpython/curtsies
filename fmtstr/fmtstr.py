@@ -13,13 +13,10 @@ red("the")
 on_blue(red("hello"))+" "+on_red(blue("there"))+green("!")
 >>> str(full)
 '\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m'
->>> fmtstr(', ').join(['a', fmtstr('b'), blue('c')])
+>>> fmtstr(', ').join(['a', fmtstr('b'), fmtstr('c', 'blue')])
 "a"+", "+"b"+", "+blue("c")
 """
 #TODO add a way to composite text without losing original formatting information
-import itertools
-import functools
-import copy
 
 from escseqparse import parse
 from termformatconstants import FG_COLORS, BG_COLORS, STYLES
@@ -78,7 +75,7 @@ class FmtStr(object):
     @classmethod
     def from_str(cls, s):
         r"""
-        >>> fmtstr("|"+on_blue(red("hey"))+"|")
+        >>> fmtstr("|"+fmtstr("hey", fg='red', bg='blue')+"|")
         "|"+on_blue(red("hey"))+"|"
         >>> fmtstr('|\x1b[31m\x1b[44mhey\x1b[49m\x1b[39m|')
         "|"+on_blue(red("hey"))+"|"
@@ -129,9 +126,9 @@ class FmtStr(object):
 
     def __add__(self, other):
         if isinstance(other, FmtStr):
-            return FmtStr(*(copy.deepcopy(x) for x in (self.basefmtstrs + other.basefmtstrs)))
+            return FmtStr(*(self.basefmtstrs + other.basefmtstrs))
         elif isinstance(other, basestring):
-            return FmtStr(*(copy.deepcopy(x) for x in (self.basefmtstrs + [BaseFmtStr(other)])))
+            return FmtStr(*(self.basefmtstrs + [BaseFmtStr(other)]))
         else:
             raise TypeError('Can\'t add %r and %r' % (self, other))
 
@@ -266,7 +263,6 @@ def parse_args(args, kwargs):
             raise ValueError("Bad bg value: %s", kwargs['bg'])
     return kwargs
 
-# convenience functions
 def fmtstr(string, *args, **kwargs):
     """
     Convenience function for creating a FmtStr
@@ -285,27 +281,9 @@ def fmtstr(string, *args, **kwargs):
     else:
         raise ValueError("Bad Args: %r %r %r" % (string, args, kwargs))
 
-for att in itertools.chain(FG_COLORS, ('on_'+x for x in BG_COLORS), STYLES):
-    locals()[att] = functools.partial(fmtstr, style=att)
-plain = functools.partial(fmtstr)
-
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
-    print blue('adf')
-    print blue(on_red('ad'))
-    print blue('asdf') + on_red('adsf')
-    print (blue('asdf') + on_red('adsf'))[3:7]
-    f = blue('hey there') + on_red(' Tom!')
-    print f
-    f[1:3] = 'ot'
-    print repr(f)
-    print f
-    f = FmtStr.from_str(str(blue('tom')))
+    f = FmtStr.from_str(str(fmtstr('tom', 'blue')))
     print repr(f)
 
-    f = on_blue(red('stuff'))
-    print repr(f)
-    print repr(str(f))
-    print f
-    print (f + '!')[0:6] + '?'
