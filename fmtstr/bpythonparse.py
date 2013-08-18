@@ -24,6 +24,12 @@ def parse(s):
 def fs_from_match(d):
     atts = {}
     if d['fg']:
+
+        # this isn't according to spec as I understand it
+        if d['fg'] != d['fg'].lower():
+            d['bold'] = True
+        #TODO figure out why boldness isn't based on presence of \x02
+
         color = cnames[d['fg'].lower()]
         if color != 'default':
             atts['fg'] = FG_COLORS[color]
@@ -46,7 +52,7 @@ def peel_off_string(s):
     p = r"""(?P<colormarker>\x01
                 (?P<fg>[krgybmcwdKRGYBMCWD]?)
                 (?P<bg>[krgybmcwdKRGYBMCWDI]?)?)
-            (?P<bold>\x01?)
+            (?P<bold>\x02?)
             \x03
             (?P<string>[^\x04]*)
             \x04
@@ -83,7 +89,7 @@ def test():
     print repr(fs)
     print fs
 
-    string_to_fmtstr()
+    string_to_fmtstr('asdf')
 
 if __name__ == '__main__':
     import doctest; doctest.testmod()
