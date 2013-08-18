@@ -105,3 +105,35 @@ it:
     f = bold(red('hi')+' '+on_blue('there')
     >>> f.center(10)
     bold(" hi there ")
+
+Terminal
+========
+
+Interact with the Terminal object by passing it 2d numpy arrays of characters;
+OR even better, arrays of FmtStr objects! Terminal objects typically need a
+TerminalController passed to them in their init methods, which sets the terminal
+window up and catches input in raw mode. Context managers make it so fatal
+exceptions won't prevent necessary cleanup to make the terminal usable again.
+Putting all that together:
+
+    import sys
+    from fmtstr.fmtfuncs import *
+    from fmtstr.terminal import Terminal
+    from fmtstr.terminalcontrol import TerminalController
+
+    with TerminalController(sys.stdin, sys.stdout) as tc:
+        with Terminal(tc) as t:
+            rows, columns = t.tc.get_screen_size()
+            while True:
+                c = t.tc.get_event()
+                if c == "":
+                    sys.exit()
+                elif c == "a":
+                    a = [blue(on_red(c*columns)) for _ in range(rows)]
+                    # covers the entire screen with blue a's on a red background
+                elif c == "b":
+                    a = t.array_from_text("this is a small array")
+                    # renders a small array where the cursor is
+                else:
+                    a = t.array_from_text("try a, b, or ctrl-D")
+                t.render_to_terminal(a)
