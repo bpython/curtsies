@@ -26,6 +26,19 @@ CURSOR_UP, CURSOR_DOWN, CURSOR_FORWARD, CURSOR_BACK = ["[%s" for char in 'ABCD'
 ERASE_REST_OF_LINE = "[K"
 ERASE_LINE = "[2K"
 
+CURSES_TABLE = {}
+CURSES_TABLE['\x1b[15~'] = 'KEY_F(5)'
+CURSES_TABLE['\x1b[17~'] = 'KEY_F(6)'
+CURSES_TABLE['\x1b[18~'] = 'KEY_F(7)'
+CURSES_TABLE['\x1b[19~'] = 'KEY_F(8)'
+CURSES_TABLE['\x1b[20~'] = 'KEY_F(9)'
+CURSES_TABLE['\x1b[21~'] = 'KEY_F(10)'
+CURSES_TABLE['\x1b[23~'] = 'KEY_F(11)'
+CURSES_TABLE['\x1b[24~'] = 'KEY_F(12)'
+CURSES_TABLE['\x1b[A'] = 'KEY_UP'
+CURSES_TABLE['\x1b[B'] = 'KEY_DOWN'
+CURSES_TABLE['\x1b[C'] = 'KEY_RIGHT'
+CURSES_TABLE['\x1b[D'] = 'KEY_LEFT'
 
 def produce_simple_sequence(seq):
     def func(out_stream):
@@ -69,7 +82,14 @@ class TerminalController(object):
     erase_rest_of_line = produce_simple_sequence(ERASE_REST_OF_LINE)
     erase_line = produce_simple_sequence(ERASE_LINE)
 
-    def get_event(self):
+    def get_event_curses(self):
+        """get event, with keypress events translated to their curses equivalent"""
+        e = self.get_event()
+        if e in CURSES_TABLE:
+            return CURSES_TABLE[e]
+        return e
+
+    def get_event(self, use_curses_aliases=True):
         """Blocks and returns the next event"""
         #TODO make this cooler - generator? Trie?
         chars = []
@@ -81,14 +101,11 @@ class TerminalController(object):
                 return events.WindowChangeEvent(*self.get_screen_size())
             #TODO properly detect escape key! Probably via a timer, or nonblocking read?
 
-            if chars and chars[0] != '\x1b':
-                return ''.join(chars)
-            if len(chars) == 2 and chars[1] not in ['[', 'O', '\x1b']:
-                return ''.join(chars)
-            if len(chars) == 4 and chars[1] == '\x1b' and chars[2] == '[':
-                return ''.join(chars)
-            if len(chars) > 2 and chars[1] in ['[', 'O'] and chars[-1] not in tuple('1234567890;'):
-                return ''.join(chars)
+            if ((chars and chars[0] != '\x1b') or
+            (len(chars) == 2 and chars[1] not in ['[', 'O', '\x1b']) or
+            (len(chars) == 4 and chars[1] == '\x1b' and chars[2] == '[') or
+            (len(chars) > 2 and chars[1] in ['[', 'O'] and chars[-1] not in tuple('1234567890;'))):
+                return ''.join(chars) if not use_curses_aliases else CURSES_TABLE.get(''.join(chars), ''.join(chars))
             if self.in_buffer:
                 chars.append(self.in_buffer.pop(0))
                 continue
