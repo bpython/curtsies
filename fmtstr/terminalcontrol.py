@@ -79,13 +79,15 @@ class TerminalController(object):
                 self.sigwinch_counter = _SIGWINCH_COUNTER
                 self.in_buffer = chars + self.in_buffer
                 return events.WindowChangeEvent(*self.get_screen_size())
-            if chars == ['\x1b', '\x1b']:
-                return '\x1b'
+            #TODO properly detect escape key! Probably via a timer, or nonblocking read?
+
             if chars and chars[0] != '\x1b':
                 return ''.join(chars)
-            if len(chars) == 2 and chars[1] != '[':
+            if len(chars) == 2 and chars[1] not in ['[', 'O', '\x1b']:
                 return ''.join(chars)
-            if len(chars) > 2 and chars[1] == '[' and chars[-1] not in tuple('1234567890;'):
+            if len(chars) == 4 and chars[1] == '\x1b' and chars[2] == '[':
+                return ''.join(chars)
+            if len(chars) > 2 and chars[1] in ['[', 'O'] and chars[-1] not in tuple('1234567890;'):
                 return ''.join(chars)
             if self.in_buffer:
                 chars.append(self.in_buffer.pop(0))
