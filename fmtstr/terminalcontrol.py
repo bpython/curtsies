@@ -39,6 +39,11 @@ CURSES_TABLE['\x1b[A'] = 'KEY_UP'
 CURSES_TABLE['\x1b[B'] = 'KEY_DOWN'
 CURSES_TABLE['\x1b[C'] = 'KEY_RIGHT'
 CURSES_TABLE['\x1b[D'] = 'KEY_LEFT'
+CURSES_TABLE['\x08'] = 'KEY_BACKSPACE'
+CURSES_TABLE['\x1b[3~'] = 'KEY_DC'
+CURSES_TABLE['\x1b[5~'] = 'KEY_PPAGE'
+CURSES_TABLE['\x1b[6~'] = 'KEY_NPAGE'
+#TODO add home and end? and everything else
 
 def produce_simple_sequence(seq):
     def func(out_stream):
