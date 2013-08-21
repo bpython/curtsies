@@ -282,8 +282,10 @@ def fmtstr(string, *args, **kwargs):
         raise ValueError("Bad Args: %r %r %r" % (string, args, kwargs))
 
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
+    #import doctest
+    #doctest.testmod()
     f = FmtStr.from_str(str(fmtstr('tom', 'blue')))
-    print repr(f)
+    print(repr(f))
+    f = fmtstr('stuff', fg='blue', bold=True)
+    print(repr(f))
 

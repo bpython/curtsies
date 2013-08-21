@@ -96,7 +96,7 @@ class FSArray(object):
 
     def dumb_display(self):
         for line in self.rows:
-            print line
+            print(line)
 
 
 if __name__ == '__main__':

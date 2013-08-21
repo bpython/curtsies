@@ -2,10 +2,22 @@ from bpython import formatter
 from termformatconstants import FG_COLORS, BG_COLORS, colors
 from fmtstr import fmtstr
 
+from functools import partial
+
 import re
 
 
 cnames = dict(zip('krgybmcwd', colors + ('default',)))
+
+def func_for_letter(l, default='k'):
+    if l == 'd':
+        l = default
+    return partial(fg=cnames[l], bold=(l.lower() != l))
+
+def color_for_letter(l, default='k'):
+    if l == 'd':
+        l = default
+    return cnames[l]
 
 def parse(s):
     r"""
@@ -84,10 +96,10 @@ def test():
 
     all_tokens = list(PythonLexer().get_tokens('print 1 + 2'))
     formatted_line = format(all_tokens, BPythonFormatter(config.color_scheme))
-    print repr(formatted_line)
+    print(repr(formatted_line))
     fs = parse(formatted_line)
-    print repr(fs)
-    print fs
+    print(repr(fs))
+    print(fs)
 
     string_to_fmtstr('asdf')
 

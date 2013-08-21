@@ -84,7 +84,7 @@ def token_type(info):
 
 if __name__ == '__main__':
     import doctest; doctest.testmod()
-    #print peel_off_esc_code('[2Astuff')
-    #print peel_off_esc_code('Amore')
-    print repr(parse('[31mstuff is the best[32myay'))
+    #print(peel_off_esc_code('[2Astuff'))
+    #print(peel_off_esc_code('Amore'))
+    print(repr(parse('[31mstuff is the best[32myay')))
 
