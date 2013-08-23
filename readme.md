@@ -20,7 +20,7 @@ fmtstr.FmtStr
 
 You can use convenience functions instead:
 
-    >>> from fmtstr.fmtstr import *
+    >>> from fmtstr.fmtfuncs import *
     >>> blue(on_red('hey')) + " " + underline("there")
 
 * str(FmtStr) -> escape sequence-laden text bound that looks cool in a terminal
@@ -68,7 +68,10 @@ It's easy to turn ANSI terminal encoded strings into FmtStrs:
     >>> FmtStr.from_str(str(blue('tom')))
     blue("tom")
 
-And it's easy to use all sorts of string methods on a FmtStr, so you can often
+Using str methods on FmtStr objects
+-----------------------------------
+
+It's easy to use all sorts of string methods on a FmtStr, so you can often
 use FmtStr objects where you had string in your program before:
 
     >>> from fmtstr.fmtstr import *
@@ -80,13 +83,10 @@ use FmtStr objects where you had string in your program before:
     >>> blue(', ').join(['a', red('b')])
     "a"+blue(", ")+red("b")
 
-
-Using str methods on FmtStr objects
------------------------------------
-
 If FmtStr doesn't implement a method, it tries its best to use the string
 method, which often works pretty well:
 
+    >>> from fmtstr.fmtstr import *
     >>> f = blue(underline('As you like it'))
     >>> f.center(20)
     blue(underline("   As you like it   "))
@@ -102,7 +102,10 @@ method, which often works pretty well:
 But formatting information will be lost if the FmtStr has different formats in
 it:
 
-    f = bold(red('hi')+' '+on_blue('there')
+    >>> from fmtstr.fmtstr import *
+    >>> f = bold(red('hi')+' '+on_blue('there'))
+    >>> f
+    bold(red('hi'))+bold(' ')+bold(on_blue('there'))
     >>> f.center(10)
     bold(" hi there ")
 
@@ -110,7 +113,7 @@ Terminal
 ========
 
 Interact with the Terminal object by passing it 2d numpy arrays of characters;
-OR even better, arrays of FmtStr objects! Terminal objects typically need a
+or even better, arrays of FmtStr objects! Terminal objects typically need a
 TerminalController passed to them in their init methods, which sets the terminal
 window up and catches input in raw mode. Context managers make it so fatal
 exceptions won't prevent necessary cleanup to make the terminal usable again.
@@ -137,3 +140,9 @@ Putting all that together:
                 else:
                     a = t.array_from_text("try a, b, or ctrl-D")
                 t.render_to_terminal(a)
+
+When a Terminal object is passed an array with more rows than it's height, it writes
+the entire array to the terminal, scrolling down so that the extra rows at the
+top of the 2d array end up out of view. This behavior is particularly useful for
+writing command line interfaces like the REPL
+[scottwasright](https://github.com/thomasballinger/scottwasright).
