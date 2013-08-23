@@ -50,6 +50,8 @@ class BaseFmtStr(object):
             if k not in xforms: continue
             if v is True:
                 s = xforms[k](s)
+            elif v is False:
+                continue
             else:
                 s = xforms[k](s, v)
         return s
