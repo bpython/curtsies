@@ -1,6 +1,6 @@
 import sys
 
-from fmtstr.fmtfuncs import *
+from fmtstr.fmtfuncs import blue, red, bold, on_red
 
 from fmtstr.terminal import Terminal
 from fmtstr.terminalcontrol import TerminalController
@@ -17,7 +17,7 @@ with TerminalController(sys.stdin, sys.stdout) as tc:
             elif c == "a":
                 a = [blue(on_red(c*columns)) for _ in range(rows)]
             elif c == "b":
-                a = t.array_from_text("a for small array")
+                a = t.array_from_text("a small array")
             else:
                 a = t.array_from_text("try a, b, or ctrl-D")
             t.render_to_terminal(a)
