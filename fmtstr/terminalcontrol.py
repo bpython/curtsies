@@ -12,7 +12,7 @@ import sys
 import tty
 import signal
 import re
-import subprocess
+import termios
 import logging
 
 from . import events
@@ -72,13 +72,15 @@ class TerminalController(object):
         signal.signal(signal.SIGWINCH, signal_handler)
 
         #TODO implement this with termios/tty instead of subprocess
-        self.original_stty = subprocess.check_output(['stty', '-g'])
+        #self.original_stty = subprocess.check_output(['stty', '-g'])
+        self.original_stty = termios.tcgetattr(self.out_stream)
         tty.setraw(self.in_stream)
         return self
 
     def __exit__(self, type, value, traceback):
         signal.signal(signal.SIGWINCH, lambda: None)
-        os.system('stty '+self.original_stty)
+        termios.tcsetattr(self.out_stream, termios.TCSANOW, self.original_stty)
+        #os.system('stty '+self.original_stty)
 
     up, down, forward, back = [produce_cursor_sequence(c) for c in 'ABCD']
     fwd = forward
