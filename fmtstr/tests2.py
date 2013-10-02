@@ -1,7 +1,7 @@
 import unittest
-from fmtstr import *
-from bpythonparse import string_to_fmtstr
-from escseqparse import parse
+from .fmtstr import *
+from .bpythonparse import string_to_fmtstr
+from .escseqparse import parse
 
 class TestManyBrackets(unittest.TestCase):
     def test_three_brackets(self):

@@ -7,7 +7,7 @@ Parses ascii escape sequences into marked up strings
 ('', {'csi': '\x1b[', 'seq': '\x1b[2A', 'intermed': '', 'private': '', 'command': 'A', 'numbers': [2]}, 'stuff')
 """
 
-from termformatconstants import *
+from .termformatconstants import *
 import re
 
 
@@ -17,7 +17,7 @@ def parse(s):
     ['>>> []']
     >>> parse("\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39")
     """
-    assert isinstance(s, basestring)
+    assert isinstance(s, str)
     stuff = []
     rest = s
     while True:
@@ -86,5 +86,5 @@ if __name__ == '__main__':
     import doctest; doctest.testmod()
     #print(peel_off_esc_code('[2Astuff'))
     #print(peel_off_esc_code('Amore'))
-    print(repr(parse('[31mstuff is the best[32myay')))
+    print((repr(parse('[31mstuff is the best[32myay'))))
 

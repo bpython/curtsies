@@ -4,10 +4,10 @@ import sys
 import os
 import logging
 
-from fmtstr import fmtstr
-from fsarray import FSArray
+from .fmtstr import fmtstr
+from .fsarray import FSArray
 
-import events
+from . import events
 
 logging.basicConfig(filename='terminal.log',level=logging.DEBUG, format='%(asctime)s %(message)s')
 
@@ -63,7 +63,7 @@ class Terminal(object):
         #TODO take a formatting array with same dimensions as array
 
         height, width = self.tc.get_screen_size()
-        rows_for_use = range(self.top_usable_row, height + 1)
+        rows_for_use = list(range(self.top_usable_row, height + 1))
         shared = min(len(array), len(rows_for_use))
         for row, line in zip(rows_for_use[:shared], array[:shared]):
             self.tc.set_cursor_position((row, 1))
@@ -105,7 +105,7 @@ class Terminal(object):
         return arr
 
 def test():
-    import terminalcontrol
+    from . import terminalcontrol
     with terminalcontrol.TerminalController(sys.stdin, sys.stdout) as tc:
         with Terminal(tc) as t:
             rows, columns = t.tc.get_screen_size()
@@ -131,7 +131,7 @@ def test():
                     a = [fmtstr(c*columns) for _ in range(1)]
                 elif isinstance(c, events.WindowChangeEvent):
                     a = t.array_from_text("window just changed to %d rows and %d columns" % (c.rows, c.columns))
-                elif c == "":
+                elif c == '\x0c': # ctrl-L
                     [t.tc.write('\n') for _ in range(rows)]
                     continue
                 else:
@@ -158,8 +158,8 @@ def test_array_from_text():
     a = t.array_from_text('\n\nhey there\nyo')
     os.system('reset')
     for line in a:
-        print str(line)
-    raw_input()
+        print(str(line))
+    input()
 
 if __name__ == '__main__':
     test_array_from_text()

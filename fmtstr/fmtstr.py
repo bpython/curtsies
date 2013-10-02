@@ -18,11 +18,11 @@ on_blue(red("hello"))+" "+on_red(blue("there"))+green("!")
 """
 #TODO add a way to composite text without losing original formatting information
 
-from escseqparse import parse
-from termformatconstants import FG_COLORS, BG_COLORS, STYLES
-from termformatconstants import FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR
-from termformatconstants import RESET_ALL, RESET_BG, RESET_FG
-from termformatconstants import seq
+from .escseqparse import parse
+from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
+from .termformatconstants import FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR
+from .termformatconstants import RESET_ALL, RESET_BG, RESET_FG
+from .termformatconstants import seq
 
 xforms = {
     'fg' : lambda x, v: seq(v)+x+seq(RESET_FG),
@@ -37,7 +37,7 @@ class BaseFmtStr(object):
     """Formatting annotations on a string"""
     def __init__(self, string, atts=None):
         self._s = string
-        self.atts = {k:v for k,v in atts.items()} if atts else {}
+        self.atts = {k:v for k,v in list(atts.items())} if atts else {}
 
     s = property(lambda self: self._s) #making self.s immutable
 
@@ -46,7 +46,7 @@ class BaseFmtStr(object):
 
     def __str__(self):
         s = self.s
-        for k, v in self.atts.items():
+        for k, v in list(self.atts.items()):
             if k not in xforms: continue
             if v is True:
                 s = xforms[k](s)
@@ -88,15 +88,15 @@ class FmtStr(object):
         for x in tokens_and_strings:
             if isinstance(x, dict):
                 cur_fmt.update(x)
-            elif isinstance(x, basestring):
-                atts = parse_args('', {k:v for k,v in cur_fmt.items() if v is not None})
+            elif isinstance(x, str):
+                atts = parse_args('', {k:v for k,v in list(cur_fmt.items()) if v is not None})
                 bases.append(BaseFmtStr(x, atts=atts))
             else:
                 raise Exception("logic error")
         return FmtStr(*bases)
 
     def set_attributes(self, **attributes):
-        for k, v in attributes.items():
+        for k, v in list(attributes.items()):
             for fs in self.basefmtstrs:
                 fs.atts[k] = v
 
@@ -106,7 +106,7 @@ class FmtStr(object):
         for i, s in enumerate(iterable):
             if isinstance(s, FmtStr):
                 basefmtstrs.extend(s.basefmtstrs)
-            elif isinstance(s, basestring):
+            elif isinstance(s, str):
                 basefmtstrs.extend(fmtstr(s).basefmtstrs) #TODO just make a basefmtstr directly
             else:
                 raise TypeError("expected basestring or FmtStr, %r found" % type(s))
@@ -129,7 +129,7 @@ class FmtStr(object):
     def __add__(self, other):
         if isinstance(other, FmtStr):
             return FmtStr(*(self.basefmtstrs + other.basefmtstrs))
-        elif isinstance(other, basestring):
+        elif isinstance(other, str):
             return FmtStr(*(self.basefmtstrs + [BaseFmtStr(other)]))
         else:
             raise TypeError('Can\'t add %r and %r' % (self, other))
@@ -137,7 +137,7 @@ class FmtStr(object):
     def __radd__(self, other):
         if isinstance(other, FmtStr):
             return FmtStr(*(x for x in (other.basefmtstrs + self.basefmtstrs)))
-        elif isinstance(other, basestring):
+        elif isinstance(other, str):
             return FmtStr(*(x for x in ([BaseFmtStr(other)] + self.basefmtstrs)))
         else:
             raise TypeError('Can\'t add those')
@@ -158,7 +158,7 @@ class FmtStr(object):
         # thanks to @aerenchyma/@jczetta
         def func_help(*args, **kwargs):
              result = getattr(self.s, att)(*args, **kwargs)
-             if isinstance(result, basestring):
+             if isinstance(result, str):
                  return fmtstr(result, **self.shared_atts)
              elif isinstance(result, list):
                  return [fmtstr(x, **self.shared_atts) for x in result]
@@ -186,7 +186,7 @@ class FmtStr(object):
 
     def __setitem__(self, index, value):
         index = normalize_slice(len(self), index)
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             value = FmtStr(BaseFmtStr(value))
         elif not isinstance(value, FmtStr):
             raise ValueError('Should be str or FmtStr')
@@ -238,7 +238,7 @@ def parse_args(args, kwargs):
         args += (kwargs['style'],)
         del kwargs['style']
     for arg in args:
-        if not isinstance(arg, basestring):
+        if not isinstance(arg, str):
             raise ValueError("args must be strings:" + repr(args))
         if arg.lower() in FG_COLORS:
             if 'fg' in kwargs: raise ValueError("fg specified twice")
@@ -251,17 +251,17 @@ def parse_args(args, kwargs):
         else:
             raise ValueError("couldn't process arg: "+repr(arg))
     for k in kwargs:
-        if k not in ['fg', 'bg'] + STYLES.keys():
+        if k not in ['fg', 'bg'] + list(STYLES.keys()):
             raise ValueError("Can't apply that transformation")
     if 'fg' in kwargs:
         if kwargs['fg'] in FG_COLORS:
             kwargs['fg'] = FG_COLORS[kwargs['fg']]
-        if kwargs['fg'] not in FG_COLORS.values():
+        if kwargs['fg'] not in list(FG_COLORS.values()):
             raise ValueError("Bad fg value: %s", kwargs['fg'])
     if 'bg' in kwargs:
         if kwargs['bg'] in BG_COLORS:
             kwargs['bg'] = BG_COLORS[kwargs['bg']]
-        if kwargs['bg'] not in BG_COLORS.values():
+        if kwargs['bg'] not in list(BG_COLORS.values()):
             raise ValueError("Bad bg value: %s", kwargs['bg'])
     return kwargs
 
@@ -276,7 +276,7 @@ def fmtstr(string, *args, **kwargs):
     if isinstance(string, FmtStr):
         string.set_attributes(**atts)
         return string
-    elif isinstance(string, basestring):
+    elif isinstance(string, str):
         string = FmtStr.from_str(string)
         string.set_attributes(**atts)
         return string
@@ -287,7 +287,7 @@ if __name__ == '__main__':
     #import doctest
     #doctest.testmod()
     f = FmtStr.from_str(str(fmtstr('tom', 'blue')))
-    print(repr(f))
+    print((repr(f)))
     f = fmtstr('stuff', fg='blue', bold=True)
-    print(repr(f))
+    print((repr(f)))
 

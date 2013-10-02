@@ -15,7 +15,7 @@ import re
 import subprocess
 import logging
 
-import events
+from . import events
 
 
 _SIGWINCH_COUNTER = 0
@@ -143,7 +143,8 @@ class TerminalController(object):
                 self.in_buffer.extend(list(m.groupdict()['extra']))
                 return (row, col)
 
-    def set_cursor_position(self, (row, col)):
+    def set_cursor_position(self, xxx_todo_changeme):
+        (row, col) = xxx_todo_changeme
         self.out_stream.write("[%d;%dH" % (row, col))
 
     def get_screen_size(self):

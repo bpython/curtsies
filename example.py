@@ -5,7 +5,7 @@ from fmtstr.fmtfuncs import *
 from fmtstr.terminal import Terminal
 from fmtstr.terminalcontrol import TerminalController
 
-print blue('hey') + ' ' + red('there') + ' ' + red(bold('you'))
+print(blue('hey') + ' ' + red('there') + ' ' + red(bold('you')))
 
 with TerminalController(sys.stdin, sys.stdout) as tc:
     with Terminal(tc) as t:

@@ -27,9 +27,9 @@ Format String 2D array
 
 import sys
 
-from fmtstr import fmtstr
-from fmtstr import normalize_slice
-from fmtstr import FmtStr
+from .fmtstr import fmtstr
+from .fmtstr import normalize_slice
+from .fmtstr import FmtStr
 
 def slicesize(s):
     return int((s.stop - s.start) / (s.step if s.step else 1))
@@ -85,7 +85,7 @@ class FSArray(object):
         if value.__class__.__name__ == 'ndarray':
             value = [fmtstr(''.join(line)) for line in value]
 
-        rowslice = normalize_slice(sys.maxint, rowslice)
+        rowslice = normalize_slice(sys.maxsize, rowslice)
         additional_rows = max(0, rowslice.stop - len(self.rows))
         self.rows.extend([fmtstr(' '*self.columns, *self.saved_args, **self.saved_kwargs)
                           for _ in range(additional_rows)])

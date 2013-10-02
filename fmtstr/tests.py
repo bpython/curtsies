@@ -1,5 +1,5 @@
 import unittest
-from fmtstr import *
+from .fmtstr import *
 
 class TestFmtStrInitialization(unittest.TestCase):
     def test_bad(self):
