@@ -3,6 +3,7 @@ venv
 *.swp
 *.swo
 *.egg-info
+*.log
 
 build
 dist
