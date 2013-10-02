@@ -46,8 +46,8 @@ CURSES_TABLE['\x1b[6~'] = 'KEY_NPAGE'
 #TODO add home and end? and everything else
 
 def produce_simple_sequence(seq):
-    def func(out_stream):
-        out_stream.write(seq)
+    def func(ts):
+        ts.write(seq)
     return func
 
 def produce_cursor_sequence(char):
@@ -128,6 +128,7 @@ class TerminalController(object):
 
     def write(self, msg):
         self.out_stream.write(msg)
+        self.out_stream.flush()
 
     def get_cursor_position(self):
         """Returns the terminal (row, column) of the cursor"""
@@ -174,6 +175,11 @@ def test():
             tc.back(len(repr(e)))
             if e == '':
                 sys.exit()
+
+def test_cursor():
+    with TerminalController() as tc:
+        pos = tc.get_cursor_position()
+    print(pos)
 
 if __name__ == '__main__':
     test()
