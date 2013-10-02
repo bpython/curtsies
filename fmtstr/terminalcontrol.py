@@ -12,7 +12,7 @@ import sys
 import tty
 import signal
 import re
-import subprocess
+import termios
 import logging
 
 from . import events
@@ -46,8 +46,8 @@ CURSES_TABLE['\x1b[6~'] = 'KEY_NPAGE'
 #TODO add home and end? and everything else
 
 def produce_simple_sequence(seq):
-    def func(out_stream):
-        out_stream.write(seq)
+    def func(ts):
+        ts.write(seq)
     return func
 
 def produce_cursor_sequence(char):
@@ -72,13 +72,15 @@ class TerminalController(object):
         signal.signal(signal.SIGWINCH, signal_handler)
 
         #TODO implement this with termios/tty instead of subprocess
-        self.original_stty = subprocess.check_output(['stty', '-g'])
+        #self.original_stty = subprocess.check_output(['stty', '-g'])
+        self.original_stty = termios.tcgetattr(self.out_stream)
         tty.setraw(self.in_stream)
         return self
 
     def __exit__(self, type, value, traceback):
         signal.signal(signal.SIGWINCH, lambda: None)
-        os.system('stty '+self.original_stty)
+        termios.tcsetattr(self.out_stream, termios.TCSANOW, self.original_stty)
+        #os.system('stty '+self.original_stty)
 
     up, down, forward, back = [produce_cursor_sequence(c) for c in 'ABCD']
     fwd = forward
@@ -128,6 +130,7 @@ class TerminalController(object):
 
     def write(self, msg):
         self.out_stream.write(msg)
+        self.out_stream.flush()
 
     def get_cursor_position(self):
         """Returns the terminal (row, column) of the cursor"""
@@ -174,6 +177,11 @@ def test():
             tc.back(len(repr(e)))
             if e == '':
                 sys.exit()
+
+def test_cursor():
+    with TerminalController() as tc:
+        pos = tc.get_cursor_position()
+    print(pos)
 
 if __name__ == '__main__':
     test()
