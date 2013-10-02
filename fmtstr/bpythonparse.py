@@ -47,7 +47,7 @@ def fs_from_match(d):
             atts['fg'] = FG_COLORS[color]
     if d['bg']:
         if d['bg'] == 'I':
-            color = colors[(colors.index(color) + (len(colors)/2)) % len(colors)] # hack for finding the "inverse"
+            color = colors[(colors.index(color) + (len(colors) // 2)) % len(colors)] # hack for finding the "inverse"
         else:
             color = cnames[d['bg'].lower()]
         if color != 'default':
