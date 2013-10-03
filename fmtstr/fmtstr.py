@@ -71,8 +71,10 @@ class BaseFmtStr(object):
 
 class FmtStr(object):
     def __init__(self, *components):
-        assert all(isinstance(x, BaseFmtStr) for x in components), "use the constructor helper fmtstr instead for normal use"
-        self.basefmtstrs = [x for x in components if len(x) > 0]
+        # The assertions below could be useful for debugging, but slow things down considerably
+        #assert all([len(x) > 0 for x in components])
+        #self.basefmtstrs = [x for x in components if len(x) > 0]
+        self.basefmtstrs = components
 
     @classmethod
     def from_str(cls, s):
