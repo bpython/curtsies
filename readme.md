@@ -1,20 +1,13 @@
-Text objects that behave mostly like strings
-============================================
+Terminal-formatting annotated text objects
+==========================================
 
-`fmtstr` lets you work with colored strings like they are strings.
+`fmtstr` annotates portions of strings with terminal colors and formatting
 `str(yourstring)` will be the string with [ANSI escape codes]
 (http://en.wikipedia.org/wiki/ANSI_escape_code)
-specifying color to a terminal.
-
-A 2d character array is also included, which allows compositing of these
-formatted strings, useful for example for a terminal GUI display.
-
-This library was created for
-[scottwasright](https://github.com/thomasballinger/scottwasright),
-but is probably the more reusable and useful project of the two.
+specifying color and other formatting to a terminal.
 
 fmtstr.FmtStr
--------------
+=============
 
 ![fmtstr example screenshot](http://i.imgur.com/7lFaxsz.png)
 
@@ -23,45 +16,46 @@ You can use convenience functions instead:
     >>> from fmtstr.fmtfuncs import *
     >>> blue(on_red('hey')) + " " + underline("there")
 
-* str(FmtStr) -> escape sequence-laden text bound that looks cool in a terminal
-* repr(FmtStr) -> how to create an identical FmtStr
-* FmtStr[3:10] -> a new FmtStr
-* FmtStr.upper (any string method) -> a new FmtStr or list of FmtStrs or int (str.count)
-
-fmtstr.FSArray
---------------
-
-2d array in which each line is a FmtStr
-
-![fsarray example screenshot](http://i.imgur.com/rvTRPv1.png)
+* `str(FmtStr)` -> escape sequence-laden text bound that looks cool in a terminal
+* `repr(FmtStr)` -> how to create an identical FmtStr
+* `FmtStr[3:10]` -> a new FmtStr
+* `FmtStr.upper()` (any string method) -> a new FmtStr or list of FmtStrs or int (str.count)
 
 See also
 
 * https://github.com/verigak/colors/ (`pip install colors`)
 * https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py (`pip install clint`)
 
-Why this one?
-=============
+Details
+-------
 
-Other Python libraries do this, and those libraries have more tests! Why should I
-use fmtstr?
+One FmtStr can have several kinds of formatting applied to different parts of it.
 
-FmtStr objects have multiple component strings, so one FmtStr can have several
-kinds of formatting applied to different parts of it. They allow slicing and
-compositing (`__getitem__` and `__setitem__`) of FmtStr objects, so can be
-useful for building complexly formatted colored strings.
-
-    >>> from fmtstr.fmtstr import *
+    >>> from fmtstr.fmtfuncs import *
     >>> (blue('asdf') + on_red('adsf'))[3:7]
     blue("f")+on_red("ads")
+
+They allow slicing and compositing (`__getitem__` and `__setitem__`) of FmtStr objects.
+
+    >>> from fmtstr.fmtfuncs import *
     >>> f = blue('hey there') + on_red(' Tom!')
     >>> f[1:3] = 'ot'
     >>> f
     blue("h")+"ot"+blue(" there")+on_red(" Tom!")
 
-It's easy to turn ANSI terminal encoded strings into FmtStrs:
+FmtStrs greedily absorb strings, but no formatting is applied
 
-    >>> from fmtstr.fmtstr import *
+    >>> from fmtstr.fmtfuncs import *
+    >>> f = blue("The story so far:") + "In the beginning..."
+    >>> type(f)
+    <class fmtstr.fmtstr.FmtStr>
+    >>> f
+    blue("The story so far:")+"In the beginning..."
+
+It's easy to turn ANSI terminal formatted strings into FmtStrs:
+
+    >>> from fmtstr.fmtfuncs import *
+    >>> from fmtstr.fmtstr import FmtStr
     >>> s = str(blue('tom'))
     >>> s
     '\x1b[34mtom\x1b[39m'
@@ -71,12 +65,12 @@ It's easy to turn ANSI terminal encoded strings into FmtStrs:
 Using str methods on FmtStr objects
 -----------------------------------
 
-It's easy to use all sorts of string methods on a FmtStr, so you can often
+All sorts of string methods can be used on a FmtStr, so you can often
 use FmtStr objects where you had string in your program before:
 
     >>> from fmtstr.fmtstr import *
     >>> f = blue(underline('As you like it'))
-    >>> len(f)  # (len(str(f) -> 32)
+    >>> len(f)
     14 
     >>> f == underline(blue('As you like it')) + red('')
     True
@@ -99,8 +93,7 @@ method, which often works pretty well:
     >>> f.split(' ')
     [blue(underline("As")), blue(underline("you")), blue(underline("like")), blue(underline("it"))]
 
-But formatting information will be lost if the FmtStr has different formats in
-it:
+But formatting information will be lost for attributes which are not the same through the whole string
 
     >>> from fmtstr.fmtstr import *
     >>> f = bold(red('hi')+' '+on_blue('there'))
@@ -108,6 +101,13 @@ it:
     bold(red('hi'))+bold(' ')+bold(on_blue('there'))
     >>> f.center(10)
     bold(" hi there ")
+
+fmtstr.FSArray
+==============
+
+2d array in which each line is a FmtStr
+
+![fsarray example screenshot](http://i.imgur.com/rvTRPv1.png)
 
 Terminal
 ========
