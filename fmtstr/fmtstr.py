@@ -39,7 +39,7 @@ class BaseFmtStr(object):
         self._s = string
         self.atts = {k:v for k,v in list(atts.items())} if atts else {}
 
-    s = property(lambda self: self._s) #making self.s immutable
+    s = property(lambda self: self._s) #makes self.s immutable
 
     def __len__(self):
         return len(self.s)
@@ -71,7 +71,7 @@ class BaseFmtStr(object):
 
 class FmtStr(object):
     def __init__(self, *components):
-        assert all(isinstance(x, BaseFmtStr) for x in components)
+        assert all(isinstance(x, BaseFmtStr) for x in components), "use the constructor helper fmtstr instead for normal use"
         self.basefmtstrs = [x for x in components if len(x) > 0]
 
     @classmethod
@@ -234,6 +234,7 @@ def normalize_slice(length, index):
     return index
 
 def parse_args(args, kwargs):
+    """Returns a kwargs dictionary by turning args into kwargs"""
     if 'style' in kwargs:
         args += (kwargs['style'],)
         del kwargs['style']
@@ -281,7 +282,7 @@ def fmtstr(string, *args, **kwargs):
         string.set_attributes(**atts)
         return string
     else:
-        raise ValueError("Bad Args: %r %r %r" % (string, args, kwargs))
+        raise ValueError("Bad Args: %r (of type %s), %r, %r" % (string, type(string), args, kwargs))
 
 if __name__ == '__main__':
     #import doctest
