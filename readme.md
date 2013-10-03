@@ -32,16 +32,26 @@ Details
 One FmtStr can have several kinds of formatting applied to different parts of it.
 
     >>> from fmtstr.fmtfuncs import *
+    >>> blue('asdf') + on_red('adsf')
+    blue("asdf")+on_red("adsf")
+
+They allow slicing, which returns a new FmtStr object:
+
+    >>> from fmtstr.fmtfuncs import *
     >>> (blue('asdf') + on_red('adsf'))[3:7]
     blue("f")+on_red("ads")
 
-They allow slicing and compositing (`__getitem__` and `__setitem__`) of FmtStr objects.
+FmtStrs are *mutable* - you can change them via slice assignment:
 
     >>> from fmtstr.fmtfuncs import *
     >>> f = blue('hey there') + on_red(' Tom!')
     >>> f[1:3] = 'ot'
     >>> f
     blue("h")+"ot"+blue(" there")+on_red(" Tom!")
+
+But you can't change their length:
+
+    >>> f[1:3] = 'something longer'
 
 FmtStrs greedily absorb strings, but no formatting is applied
 
