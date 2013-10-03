@@ -1,6 +1,7 @@
 import unittest
 from fmtstr.fmtstr import FmtStr
 from fmtstr.fmtfuncs import *
+from fmtstr.termformatconstants import FG_COLORS
 
 class TestFmtStrInitialization(unittest.TestCase):
     def test_bad(self):
@@ -15,6 +16,22 @@ class TestFmtStrInitialization(unittest.TestCase):
 
     def test_actual_init(self):
         FmtStr()
+
+class TestImMutability(unittest.TestCase):
+
+    def test_fmt_strings_remain_unchanged_when_used_to_construct_other_ones(self):
+        a = fmtstr('hi', 'blue')
+        b = fmtstr('there', 'red')
+        c = a + b
+        d = green(c)
+        self.assertEqual(a.shared_atts['fg'], FG_COLORS['blue'])
+        self.assertEqual(b.shared_atts['fg'], FG_COLORS['red'])
+
+    def test_immutibility_of_FmtStr(self):
+        a = fmtstr('hi', 'blue')
+        b = green(a)
+        self.assertEqual(a.shared_atts['fg'], FG_COLORS['blue'])
+        self.assertEqual(b.shared_atts['fg'], FG_COLORS['green'])
 
 class TestFmtStr(unittest.TestCase):
 
