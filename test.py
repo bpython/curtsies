@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import unittest
-from fmtstr.fmtstr import FmtStr
+from fmtstr.fmtstr import FmtStr, fmtstr, BaseFmtStr
 from fmtstr.fmtfuncs import *
 from fmtstr.escseqparse import parse
+from fmtstr.fsarray import fsarray, FSArray
 
 try:
     unicode = unicode
@@ -45,6 +46,10 @@ class TestFmtStr(unittest.TestCase):
         #self.assertEqual(
         #        bold(blue('hey')+green('there')+blue('hey')+green('there')),
         #        bold(blue('hey')+green('there'))*2)
+
+class TestBaseFmtStr(unittest.TestCase):
+    def test_getitem(self):
+        self.assertEqual(BaseFmtStr('hi', {'fg':38})[5], 'h')
 
 class TestDoubleUnders(unittest.TestCase):
     def test_equality(self):
@@ -125,13 +130,55 @@ class TestUnicode(unittest.TestCase):
         unicode(fmtstr(u'⁇', 'blue'))
         self.assertTrue(True)
 
-    def right_sequence_in_py3(self):
+    def test_right_sequence_in_py3(self):
         red_on_blue = fmtstr('hello', 'red', 'on_blue')
         blue_on_red = fmtstr('there', fg='blue', bg='red')
-        green = fmtstr('!', 'green')
-        full = red_on_blue + ' ' + blue_on_red + green
+        green_s = fmtstr('!', 'green')
+        full = red_on_blue + ' ' + blue_on_red + green_s
         self.assertEqual(full, on_blue(red("hello"))+" "+on_red(blue("there"))+green("!"))
         self.assertEqual(str(full), '\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m')
+
+    def test_len_of_unicode(self):
+        self.assertEqual(len(fmtstr(u'┌─')), 2)
+        lines = [u'┌─', 'an', u'┌─']
+        r = fsarray(lines)
+        self.assertEqual(r.shape, (3, 2))
+        self.assertEqual(len(fmtstr(fmtstr(u'┌─'))), len(fmtstr(u'┌─')))
+        self.assertEqual(fmtstr(fmtstr(u'┌─')), fmtstr(u'┌─'))
+        #TODO should we make this one work?
+        # always coerce everything to unicode?
+        #self.assertEqual(len(fmtstr('┌─')), 2)
+
+    def test_len_of_unicode_in_fsarray(self):
+
+        fsa = FSArray(3, 2)
+        fsa.rows[0][0:2] = u'┌─'
+        self.assertEqual(fsa.shape, (3, 2))
+        fsa.rows[0][0:2] = fmtstr(u'┌─', 'blue')
+        self.assertEqual(fsa.shape, (3, 2))
+
+
+
+        #lines = [u'┌─', 'an', u'┌─']
+        #r = fsarray(lines[:3])
+        #self.assertEqual(r.shape, (3, 2))
+        #self.assertEqual(fsarray(r).shape, (3, 2))
+        #self.assertEqual(fsarray(r[:]).shape, (3, 2))
+        #self.assertEqual(fsarray(r[:, :]).shape, (3, 2))
+
+    def test_add_unicode_to_byte(self):
+        fmtstr(u'┌') + fmtstr('a')
+        fmtstr('a') + fmtstr(u'┌')
+        u'┌' + fmtstr(u'┌')
+        u'┌' + fmtstr('a')
+        fmtstr(u'┌') + u'┌'
+        fmtstr('a') + u'┌'
+
+    def test_unicode_slicing(self):
+        self.assertEqual(fmtstr(u'┌adfs', 'blue')[:2], fmtstr(u'┌a', 'blue'))
+        self.assertEqual(type(fmtstr(u'┌adfs', 'blue')[:2].s), type(fmtstr(u'┌a', 'blue').s))
+        self.assertEqual(len(fmtstr(u'┌adfs', 'blue')[:2]), 2)
+
 
 class TestRemovalOfBlanks(unittest.TestCase):
     def test_parse_empties(self):

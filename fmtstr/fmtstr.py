@@ -79,7 +79,7 @@ class BaseFmtStr(object):
             return unicode(self).encode('utf8')
 
     def __getitem__(self, index):
-        return fmtstr(str(self)[index])
+        return fmtstr(self.color_str[index])
 
     def __repr__(self):
         def pp_att(att):
@@ -130,7 +130,7 @@ class FmtStr(object):
         for i, s in enumerate(iterable):
             if isinstance(s, FmtStr):
                 basefmtstrs.extend(s.basefmtstrs)
-            elif isinstance(s, str):
+            elif isinstance(s, (bytes, unicode)):
                 basefmtstrs.extend(fmtstr(s).basefmtstrs) #TODO just make a basefmtstr directly
             else:
                 raise TypeError("expected str or FmtStr, %r found" % type(s))
@@ -164,7 +164,7 @@ class FmtStr(object):
     def __add__(self, other):
         if isinstance(other, FmtStr):
             return FmtStr(*(self.basefmtstrs + other.basefmtstrs))
-        elif isinstance(other, str):
+        elif isinstance(other, (bytes, unicode)):
             return FmtStr(*(self.basefmtstrs + [BaseFmtStr(other)]))
         else:
             raise TypeError('Can\'t add %r and %r' % (self, other))
@@ -172,7 +172,7 @@ class FmtStr(object):
     def __radd__(self, other):
         if isinstance(other, FmtStr):
             return FmtStr(*(x for x in (other.basefmtstrs + self.basefmtstrs)))
-        elif isinstance(other, str):
+        elif isinstance(other, (bytes, unicode)):
             return FmtStr(*(x for x in ([BaseFmtStr(other)] + self.basefmtstrs)))
         else:
             raise TypeError('Can\'t add those')
@@ -199,7 +199,7 @@ class FmtStr(object):
         # thanks to @aerenchyma/@jczetta
         def func_help(*args, **kwargs):
              result = getattr(self.s, att)(*args, **kwargs)
-             if isinstance(result, str):
+             if isinstance(result, (bytes, unicode)):
                  return fmtstr(result, **self.shared_atts)
              elif isinstance(result, list):
                  return [fmtstr(x, **self.shared_atts) for x in result]
@@ -218,7 +218,7 @@ class FmtStr(object):
         for fs in self.basefmtstrs:
             if index.start < counter + len(fs) and index.stop > counter:
                 s_part = fs.s[max(0, index.start - counter):index.stop - counter]
-                piece = str(BaseFmtStr(s_part, fs.atts))
+                piece = BaseFmtStr(s_part, fs.atts).color_str
                 output += piece
             counter += len(fs)
             if index.stop < counter:
@@ -227,7 +227,7 @@ class FmtStr(object):
 
     def __setitem__(self, index, value):
         index = normalize_slice(len(self), index)
-        if isinstance(value, str):
+        if isinstance(value, (bytes, unicode)):
             value = FmtStr(BaseFmtStr(value))
         elif not isinstance(value, FmtStr):
             raise ValueError('Should be str or FmtStr')
@@ -280,7 +280,7 @@ def parse_args(args, kwargs):
         args += (kwargs['style'],)
         del kwargs['style']
     for arg in args:
-        if not isinstance(arg, str):
+        if not isinstance(arg, (bytes, unicode)):
             raise ValueError("args must be strings:" + repr(args))
         if arg.lower() in FG_COLORS:
             if 'fg' in kwargs: raise ValueError("fg specified twice")
