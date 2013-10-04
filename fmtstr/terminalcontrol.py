@@ -54,8 +54,8 @@ def produce_simple_sequence(seq):
 
 def produce_cursor_sequence(char):
     """Returns a method that issues a cursor control sequence."""
-    def func(self, n=1):
-        if n: self.out_stream.write("[%d%s" % (n, char))
+    def func(ts, n=1):
+        if n: ts.write("[%d%s" % (n, char))
     return func
 
 class TerminalController(object):
@@ -131,6 +131,7 @@ class TerminalController(object):
                 logging.debug('read interrupted, retrying')
 
     def write(self, msg):
+        logging.debug('sending to terminal: %s (%r)' % (type(msg), msg))
         self.out_stream.write(msg)
         self.out_stream.flush()
 
@@ -150,7 +151,7 @@ class TerminalController(object):
 
     def set_cursor_position(self, xxx_todo_changeme):
         (row, col) = xxx_todo_changeme
-        self.out_stream.write("[%d;%dH" % (row, col))
+        self.write("[%d;%dH" % (row, col))
 
     def get_screen_size(self):
         #TODO generalize get_cursor_position code and use it here instead
