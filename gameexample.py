@@ -1,6 +1,6 @@
 import sys
 
-from fmtstr.fmtfuncs import blue, red, bold, on_red, green, on_blue
+from fmtstr.fmtfuncs import blue, red, bold, on_red, green, on_blue, yellow, on_green
 
 from fmtstr.terminal import Terminal
 from fmtstr.terminalcontrol import TerminalController
@@ -36,11 +36,11 @@ class World(object):
     def process_event(self, c):
         if c == "":
             sys.exit()
-        elif c in ('w', 'a', 's', 'd'):
-            self.move_entity(self.player, *{'w':(0,self.player.speed),
-                                            'a':(-self.player.speed, 0),
-                                            's':(0,-self.player.speed),
-                                            'd':(self.player.speed, 0)}[c])
+        elif c in ('KEY_UP', 'KEY_LEFT', 'KEY_DOWN', 'KEY_RIGHT'):
+            self.move_entity(self.player, *{'KEY_UP':(0,self.player.speed),
+                                            'KEY_LEFT':(-self.player.speed, 0),
+                                            'KEY_DOWN':(0,-self.player.speed),
+                                            'KEY_RIGHT':(self.player.speed, 0)}[c])
         else:
             self.msg = Terminal.array_from_text_rc("try w, a, s, d, or ctrl-D", self.height, self.width)
         self.tick()
@@ -56,6 +56,8 @@ class World(object):
                         sys.exit()
                     entity1.speed = 0
                     entity2.speed = 0
+                    entity1.display = on_green(bold(yellow('o')))
+                    entity2.display = on_green(bold(yellow('o')))
 
         self.turn += 1
         if self.turn % 20 == 0:
