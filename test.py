@@ -36,11 +36,15 @@ class TestFmtStr(unittest.TestCase):
         s = blue('hello there')
         self.assertEqual(s.split(' '), [s[:5], s[6:]])
 
-    #def test_sample(self):
-        #with self.assertRaises(ValueError):
-            #random.sample(self.seq, 20)
-        #for element in random.sample(self.seq, 5):
-            #self.assertTrue(element in self.seq)
+    def test_mul(self):
+        self.assertEqual(fmtstr('heyhey'), fmtstr('hey')*2)
+        pass
+        #TODO raise common attributes when doing equality or when
+        # doing multiplication, addition etc. to make these pass
+        #self.assertEqual(blue('hellohellohello'), blue('hello')*3)
+        #self.assertEqual(
+        #        bold(blue('hey')+green('there')+blue('hey')+green('there')),
+        #        bold(blue('hey')+green('there'))*2)
 
 class TestDoubleUnders(unittest.TestCase):
     def test_equality(self):

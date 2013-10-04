@@ -177,6 +177,12 @@ class FmtStr(object):
         else:
             raise TypeError('Can\'t add those')
 
+    def __mul__(self, other):
+        if isinstance(other, int):
+            return sum([FmtStr(*(x for x in self.basefmtstrs)) for _ in range(other)], FmtStr())
+        raise TypeError('Can\'t mulitply those')
+    #TODO ensure emtpy FmtStr isn't a problem
+
     @property
     def shared_atts(self):
         """Gets atts shared among all nonzero length component BaseFmtStrs"""
