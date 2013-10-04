@@ -17,7 +17,7 @@ class Terminal(object):
     #TODO: when less than whole screen owned, deal with that:
     #    -render the top of the screen at the first clear row
     #    -scroll down before rendering as necessary
-    def __init__(self, tc, keep_last_line=False):
+    def __init__(self, tc, keep_last_line=False, hide_cursor=True):
         """
         tc expected to have must have methods:
             get_cursor_position()
@@ -32,9 +32,11 @@ class Terminal(object):
         logging.debug('-------initializing Terminal object %r------' % self)
         self.tc = tc
         self.keep_last_line = keep_last_line
+        self.hide_cursor = hide_cursor
 
     def __enter__(self):
-        self.tc.hide_cursor()
+        if self.hide_cursor:
+            self.tc.hide_cursor()
         self.top_usable_row, _ = self.tc.get_cursor_position()
         logging.debug('initial top_usable_row: %d' % self.top_usable_row)
         return self
@@ -49,7 +51,8 @@ class Terminal(object):
             self.tc.down()
         self.tc.set_cursor_position((row, 1))
         self.tc.erase_rest_of_line()
-        self.tc.show_cursor()
+        if self.hide_cursor:
+            self.tc.show_cursor()
 
     def render_to_terminal(self, array, cursor_pos=(0,0)):
         """Renders array to terminal, returns the number of lines
