@@ -66,11 +66,13 @@ class TerminalController(object):
         self.out_stream = out_stream
         self.in_buffer = []
         self.sigwinch_counter = _SIGWINCH_COUNTER - 1
+        self.last_screen_size = None
 
     def __enter__(self):
         def signal_handler(signum, frame):
             global _SIGWINCH_COUNTER
             _SIGWINCH_COUNTER += 1
+            self.last_screen_size = None
         signal.signal(signal.SIGWINCH, signal_handler)
 
         self.original_stty = termios.tcgetattr(self.out_stream)
@@ -153,8 +155,10 @@ class TerminalController(object):
         (row, col) = xxx_todo_changeme
         self.write("[%d;%dH" % (row, col))
 
-    def get_screen_size(self):
+    def get_screen_size(self, break_cache=False):
         #TODO generalize get_cursor_position code and use it here instead
+        if self.last_screen_size and not break_cache:
+            return self.last_screen_size
         orig = self.get_cursor_position()
         self.fwd(10000) # 10000 is much larger than any reasonable terminal
         self.down(10000)
