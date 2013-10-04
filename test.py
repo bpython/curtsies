@@ -4,6 +4,11 @@ from fmtstr.fmtstr import FmtStr
 from fmtstr.fmtfuncs import *
 from fmtstr.escseqparse import parse
 
+try:
+    unicode = unicode
+except:
+    unicode = str
+
 class TestFmtStrInitialization(unittest.TestCase):
     def test_bad(self):
         # Can't specify fg or bg color two ways
@@ -83,13 +88,14 @@ class TestComposition(unittest.TestCase):
         fmtstr(c, bg='red')
         self.assertTrue(True)
 
+
 class TestUnicode(unittest.TestCase):
 
     def test_output_type(self):
-        self.assertIsInstance(str(fmtstr('hello', 'blue')), str)
-        self.assertIsInstance(unicode(fmtstr('hello', 'blue')), unicode)
-        self.assertIsInstance(str(fmtstr(u'hello', 'blue')), str)
-        self.assertIsInstance(unicode(fmtstr(u'hello', 'blue')), unicode)
+        self.assertEqual(type(str(fmtstr('hello', 'blue'))), str)
+        self.assertEqual(type(unicode(fmtstr('hello', 'blue'))), unicode)
+        self.assertEqual(type(str(fmtstr(u'hello', 'blue'))), str)
+        self.assertEqual(type(unicode(fmtstr(u'hello', 'blue'))), unicode)
 
     def test_normal_chars(self):
         fmtstr('a', 'blue')
@@ -103,11 +109,20 @@ class TestUnicode(unittest.TestCase):
     def test_funny_chars(self):
         fmtstr('⁇', 'blue')
         fmtstr(u'⁇', 'blue')
+        fmtstr(u'⁇', 'blue')
         str(fmtstr('⁇', 'blue'))
         str(fmtstr(u'⁇', 'blue'))
         unicode(fmtstr('⁇', 'blue'))
         unicode(fmtstr(u'⁇', 'blue'))
         self.assertTrue(True)
+
+    def right_sequence_in_py3(self):
+        red_on_blue = fmtstr('hello', 'red', 'on_blue')
+        blue_on_red = fmtstr('there', fg='blue', bg='red')
+        green = fmtstr('!', 'green')
+        full = red_on_blue + ' ' + blue_on_red + green
+        self.assertEqual(full, on_blue(red("hello"))+" "+on_red(blue("there"))+green("!"))
+        self.assertEqual(str(full), '\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m')
 
 class TestRemovalOfBlanks(unittest.TestCase):
     def test_parse_empties(self):

@@ -1,9 +1,10 @@
-venv
+venv*
 *.pyc
 *.swp
 *.swo
 *.egg-info
 *.log
+.tox
 
 build
 dist

@@ -28,6 +28,9 @@ from .termformatconstants import seq
 
 PY3 = sys.version_info[0] >= 3
 
+if PY3:
+    unicode = str
+
 xforms = {
     'fg' : lambda x, v: '%s%s%s' % (seq(v), x, seq(RESET_FG)),
     'bg' : lambda x, v: seq(v)+x+seq(RESET_BG),
@@ -41,7 +44,7 @@ class BaseFmtStr(object):
     """Formatting annotations on a string"""
     def __init__(self, string, atts=None):
         self._s = string
-        self.atts = {k:v for k,v in list(atts.items())} if atts else {}
+        self.atts = dict((k,v) for k,v in atts.items()) if atts else {}
 
     s = property(lambda self: self._s) #makes self.s immutable
 
@@ -52,7 +55,7 @@ class BaseFmtStr(object):
     @property
     def color_str(self):
         s = self.s
-        for k, v in list(self.atts.items()):
+        for k, v in sorted(self.atts.items()):
             if k not in xforms: continue
             if v is True:
                 s = xforms[k](s)
@@ -108,15 +111,15 @@ class FmtStr(object):
         for x in tokens_and_strings:
             if isinstance(x, dict):
                 cur_fmt.update(x)
-            elif isinstance(x, basestring):
-                atts = parse_args('', {k:v for k,v in list(cur_fmt.items()) if v is not None})
+            elif isinstance(x, (bytes, unicode)):
+                atts = parse_args('', dict((k, v) for k,v in cur_fmt.items() if v is not None))
                 bases.append(BaseFmtStr(x, atts=atts))
             else:
                 raise Exception("logic error")
         return FmtStr(*bases)
 
     def set_attributes(self, **attributes):
-        for k, v in list(attributes.items()):
+        for k, v in attributes.items():
             for fs in self.basefmtstrs:
                 fs.atts[k] = v
 
@@ -129,7 +132,7 @@ class FmtStr(object):
             elif isinstance(s, str):
                 basefmtstrs.extend(fmtstr(s).basefmtstrs) #TODO just make a basefmtstr directly
             else:
-                raise TypeError("expected basestring or FmtStr, %r found" % type(s))
+                raise TypeError("expected str or FmtStr, %r found" % type(s))
             if i < len(iterable) - 1:
                 basefmtstrs.extend(self.basefmtstrs)
         return FmtStr(*basefmtstrs)
@@ -171,7 +174,7 @@ class FmtStr(object):
         #TODO cache this, could get ugly for large FmtStrs
         atts = {}
         first = self.basefmtstrs[0]
-        for att in first.atts:
+        for att in sorted(first.atts):
             #TODO how to write this without the '???'?
             if all(fs.atts.get(att, '???') == first.atts[att] for fs in self.basefmtstrs if len(fs) > 0):
                 atts[att] = first.atts[att]
@@ -300,7 +303,7 @@ def fmtstr(string, *args, **kwargs):
     if isinstance(string, FmtStr):
         string.set_attributes(**atts)
         return string
-    elif isinstance(string, basestring):
+    elif isinstance(string, (bytes, unicode)):
         string = FmtStr.from_str(string)
         string.set_attributes(**atts)
         return string
