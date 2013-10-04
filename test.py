@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 import unittest
 from fmtstr.fmtstr import FmtStr
 from fmtstr.fmtfuncs import *
+from fmtstr.escseqparse import parse
 
 class TestFmtStrInitialization(unittest.TestCase):
     def test_bad(self):
@@ -81,6 +83,36 @@ class TestComposition(unittest.TestCase):
         fmtstr(c, bg='red')
         self.assertTrue(True)
 
+class TestUnicode(unittest.TestCase):
+
+    def test_output_type(self):
+        self.assertIsInstance(str(fmtstr('hello', 'blue')), str)
+        self.assertIsInstance(unicode(fmtstr('hello', 'blue')), unicode)
+        self.assertIsInstance(str(fmtstr(u'hello', 'blue')), str)
+        self.assertIsInstance(unicode(fmtstr(u'hello', 'blue')), unicode)
+
+    def test_normal_chars(self):
+        fmtstr('a', 'blue')
+        fmtstr(u'a', 'blue')
+        str(fmtstr('a', 'blue'))
+        str(fmtstr(u'a', 'blue'))
+        unicode(fmtstr('a', 'blue'))
+        unicode(fmtstr(u'a', 'blue'))
+        self.assertTrue(True)
+
+    def test_funny_chars(self):
+        fmtstr('⁇', 'blue')
+        fmtstr(u'⁇', 'blue')
+        str(fmtstr('⁇', 'blue'))
+        str(fmtstr(u'⁇', 'blue'))
+        unicode(fmtstr('⁇', 'blue'))
+        unicode(fmtstr(u'⁇', 'blue'))
+        self.assertTrue(True)
+
+class TestRemovalOfBlanks(unittest.TestCase):
+    def test_parse_empties(self):
+        pass
 
 if __name__ == '__main__':
+    import fmtstr.fmtstr
     unittest.main()

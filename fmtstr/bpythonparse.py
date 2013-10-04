@@ -21,8 +21,8 @@ def color_for_letter(l, default='k'):
 
 def parse(s):
     r"""
-    >>> parse(u'\x01y\x03print\x04\x01C\x03 \x04\x01G\x031\x04\x01C\x03 \x04\x01Y\x03+\x04\x01C\x03 \x04\x01G\x032\x04')
-    yellow("print")+cyan(" ")+green("1")+cyan(" ")+yellow("+")+cyan(" ")+green("2")
+    >>> parse(u'\x01y\x03print\x04\x01c\x03 \x04\x01g\x031\x04\x01c\x03 \x04\x01Y\x03+\x04\x01c\x03 \x04\x01g\x032\x04')
+    yellow("print")+cyan(" ")+green("1")+cyan(" ")+bold(yellow("+"))+cyan(" ")+green("2")
     """
     rest = s
     stuff = []

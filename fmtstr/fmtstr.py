@@ -18,14 +18,18 @@ on_blue(red("hello"))+" "+on_red(blue("there"))+green("!")
 """
 #TODO add a way to composite text without losing original formatting information
 
+import sys
+
 from .escseqparse import parse
 from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
 from .termformatconstants import FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR
 from .termformatconstants import RESET_ALL, RESET_BG, RESET_FG
 from .termformatconstants import seq
 
+PY3 = sys.version_info[0] >= 3
+
 xforms = {
-    'fg' : lambda x, v: seq(v)+x+seq(RESET_FG),
+    'fg' : lambda x, v: '%s%s%s' % (seq(v), x, seq(RESET_FG)),
     'bg' : lambda x, v: seq(v)+x+seq(RESET_BG),
     'bold' : lambda x: seq(STYLES['bold'])+x+seq(RESET_ALL),
     'underline' : lambda x: seq(STYLES['underline'])+x+seq(RESET_ALL),
@@ -44,7 +48,9 @@ class BaseFmtStr(object):
     def __len__(self):
         return len(self.s)
 
-    def __str__(self):
+    #TODO cache this if immutable
+    @property
+    def color_str(self):
         s = self.s
         for k, v in list(self.atts.items()):
             if k not in xforms: continue
@@ -55,6 +61,18 @@ class BaseFmtStr(object):
             else:
                 s = xforms[k](s, v)
         return s
+
+    def __unicode__(self):
+        value = self.color_str
+        if isinstance(value, bytes):
+            return value.decode('utf8')
+        return value
+
+    if PY3:
+        __str__ = __unicode__
+    else:
+        def __str__(self):
+            return unicode(self).encode('utf8')
 
     def __getitem__(self, index):
         return fmtstr(str(self)[index])
@@ -74,7 +92,7 @@ class FmtStr(object):
         # The assertions below could be useful for debugging, but slow things down considerably
         #assert all([len(x) > 0 for x in components])
         #self.basefmtstrs = [x for x in components if len(x) > 0]
-        self.basefmtstrs = components
+        self.basefmtstrs = list(components)
 
     @classmethod
     def from_str(cls, s):
@@ -90,7 +108,7 @@ class FmtStr(object):
         for x in tokens_and_strings:
             if isinstance(x, dict):
                 cur_fmt.update(x)
-            elif isinstance(x, str):
+            elif isinstance(x, basestring):
                 atts = parse_args('', {k:v for k,v in list(cur_fmt.items()) if v is not None})
                 bases.append(BaseFmtStr(x, atts=atts))
             else:
@@ -115,6 +133,9 @@ class FmtStr(object):
             if i < len(iterable) - 1:
                 basefmtstrs.extend(self.basefmtstrs)
         return FmtStr(*basefmtstrs)
+
+    def __unicode__(self):
+        return ''.join(unicode(fs) for fs in self.basefmtstrs)
 
     def __str__(self):
         return ''.join(str(fs) for fs in self.basefmtstrs)
@@ -279,7 +300,7 @@ def fmtstr(string, *args, **kwargs):
     if isinstance(string, FmtStr):
         string.set_attributes(**atts)
         return string
-    elif isinstance(string, str):
+    elif isinstance(string, basestring):
         string = FmtStr.from_str(string)
         string.set_attributes(**atts)
         return string

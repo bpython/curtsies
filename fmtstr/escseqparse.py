@@ -15,9 +15,8 @@ def parse(s):
     r"""
     >>> parse(">>> []")
     ['>>> []']
-    >>> parse("\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39")
+    >>> #parse("\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m")
     """
-    assert isinstance(s, str)
     stuff = []
     rest = s
     while True:
