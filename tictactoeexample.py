@@ -16,7 +16,7 @@ class Board(object):
     0
     >>> Board().whose_turn
     'x'
-    >>> b = Board().move(2); print b
+    >>> b = Board().move(2); print(b)
      | |x
     -----
      | | 
@@ -50,7 +50,7 @@ class Board(object):
         if not self.spots[pos] == ' ': raise ValueError('That spot it taken')
         new = Board(len(self.rows), len(self.columns))
         new._rows = list(list(row) for row in self.rows)
-        new._rows[pos / 3][pos % 3] = self.whose_turn
+        new._rows[pos // 3][pos % 3] = self.whose_turn
         return new
     def possible(self):
         return [self.move(p) for p in range(len(self.spots)) if self.spots[p] == ' ']
@@ -103,7 +103,7 @@ def ai(board, who='x'):
     >>> ai(b)
     < Board |xo.xo.x..| >
     """
-    return sorted([(value(b, who), b) for b in board.possible()])[-1][1]
+    return sorted(board.possible(), key=lambda b: value(b, who))[-1]
 
 def main():
     with TerminalController(sys.stdin, sys.stdout) as tc:

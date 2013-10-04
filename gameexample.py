@@ -83,7 +83,7 @@ def main():
                 msg = world.process_event(c)
                 if msg:
                     break
-    print msg
+    print(msg)
 
 if __name__ == '__main__':
     main()
