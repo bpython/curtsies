@@ -19,6 +19,7 @@ on_blue(red("hello"))+" "+on_red(blue("there"))+green("!")
 #TODO add a way to composite text without losing original formatting information
 
 import sys
+import re
 
 from .escseqparse import parse
 from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
@@ -136,6 +137,14 @@ class FmtStr(object):
             if i < len(iterable) - 1:
                 basefmtstrs.extend(self.basefmtstrs)
         return FmtStr(*basefmtstrs)
+
+    #TODO make this split work like str.split
+    def split(self, on_char):
+        s = self.s
+        matches = list(re.finditer(on_char, s))
+        return [self[start:end] for start, end in zip(
+            [0] + [m.end() for m in matches],
+            [m.start() for m in matches] + [len(s)])]
 
     def __unicode__(self):
         return ''.join(unicode(fs) for fs in self.basefmtstrs)

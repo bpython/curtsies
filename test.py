@@ -31,6 +31,11 @@ class TestFmtStr(unittest.TestCase):
     def test_length(self):
         self.assertEqual(len(self.s), len(self.s.s))
 
+    def test_split(self):
+        self.assertEqual(blue('hello there').split(' '), [blue('hello'), blue('there')])
+        s = blue('hello there')
+        self.assertEqual(s.split(' '), [s[:5], s[6:]])
+
     #def test_sample(self):
         #with self.assertRaises(ValueError):
             #random.sample(self.seq, 20)
