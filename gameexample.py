@@ -1,6 +1,6 @@
 import sys
 
-from fmtstr.fmtfuncs import blue, red, bold, on_red, green, on_blue, yellow, on_green
+from fmtstr.fmtfuncs import red, bold, green, on_blue, yellow, on_red
 
 from fmtstr.terminal import Terminal
 from fmtstr.terminalcontrol import TerminalController
@@ -43,7 +43,7 @@ class World(object):
                                             'KEY_RIGHT':(self.player.speed, 0)}[c])
         else:
             self.msg = Terminal.array_from_text_rc("try w, a, s, d, or ctrl-D", self.height, self.width)
-        self.tick()
+        return self.tick()
 
     def tick(self):
         for npc in self.npcs:
@@ -53,12 +53,14 @@ class World(object):
                 if entity1 is entity2: continue
                 if (entity1.x, entity1.y) == (entity2.x, entity2.y):
                     if entity1 is self.player:
-                        sys.exit()
+                        return 'you lost on turn %d' % self.turn
                     entity1.speed = 0
                     entity2.speed = 0
-                    entity1.display = on_green(bold(yellow('o')))
-                    entity2.display = on_green(bold(yellow('o')))
+                    entity1.display = on_red(bold(yellow('o')))
+                    entity2.display = on_red(bold(yellow('o')))
 
+        if all(npc.speed == 0 for npc in self.npcs):
+            return 'you won on turn %d' % self.turn
         self.turn += 1
         if self.turn % 20 == 0:
             self.player.speed = max(0, self.player.speed - 1)
@@ -71,7 +73,6 @@ class World(object):
         return a
 
 def main():
-
     with TerminalController(sys.stdin, sys.stdout) as tc:
         with Terminal(tc) as t:
             rows, columns = t.tc.get_screen_size()
@@ -79,7 +80,10 @@ def main():
             while True:
                 t.render_to_terminal(world.get_array())
                 c = t.tc.get_event()
-                world.process_event(c)
+                msg = world.process_event(c)
+                if msg:
+                    break
+    print msg
 
 if __name__ == '__main__':
     main()

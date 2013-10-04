@@ -73,8 +73,6 @@ class TerminalController(object):
             _SIGWINCH_COUNTER += 1
         signal.signal(signal.SIGWINCH, signal_handler)
 
-        #TODO implement this with termios/tty instead of subprocess
-        #self.original_stty = subprocess.check_output(['stty', '-g'])
         self.original_stty = termios.tcgetattr(self.out_stream)
         tty.setraw(self.in_stream)
         return self
