@@ -104,6 +104,20 @@ class Terminal(object):
             i += 1
         return arr
 
+    @classmethod
+    def array_from_text_rc(cls, msg, rows, columns):
+        arr = FSArray(0, columns)
+        i = 0
+        for c in msg:
+            if i >= rows * columns:
+                return arr
+            elif c in '\r\n':
+                i = ((i // columns) + 1) * columns
+            else:
+                arr[i // arr.columns, i % arr.columns] = [fmtstr(c)]
+            i += 1
+        return arr
+
 def test():
     from . import terminalcontrol
     with terminalcontrol.TerminalController(sys.stdin, sys.stdout) as tc:
