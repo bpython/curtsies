@@ -25,6 +25,8 @@ SCROLL_DOWN = "D"
 CURSOR_UP, CURSOR_DOWN, CURSOR_FORWARD, CURSOR_BACK = ["[%s" for char in 'ABCD']
 ERASE_REST_OF_LINE = "[K"
 ERASE_LINE = "[2K"
+HIDE_CURSOR = "[?25l"
+SHOW_CURSOR = "[?25h"
 
 CURSES_TABLE = {}
 CURSES_TABLE['\x1b[15~'] = 'KEY_F(5)'
@@ -88,6 +90,8 @@ class TerminalController(object):
     scroll_down = produce_simple_sequence(SCROLL_DOWN)
     erase_rest_of_line = produce_simple_sequence(ERASE_REST_OF_LINE)
     erase_line = produce_simple_sequence(ERASE_LINE)
+    hide_cursor = produce_simple_sequence(HIDE_CURSOR)
+    show_cursor = produce_simple_sequence(SHOW_CURSOR)
 
     def get_event_curses(self):
         """get event, with keypress events translated to their curses equivalent"""
