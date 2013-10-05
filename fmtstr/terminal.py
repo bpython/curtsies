@@ -65,6 +65,8 @@ class Terminal(object):
         if array received is of height too large, render it, scroll down,
             and render the rest of it, then return how much we scrolled down
         """
+        # caching of write and tc (avoiding the self. lookups etc) made
+        # no significant performance difference here
         height, width = self.tc.get_screen_size()
         rows_for_use = list(range(self.top_usable_row, height + 1))
         shared = min(len(array), len(rows_for_use))

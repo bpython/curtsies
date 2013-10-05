@@ -98,6 +98,11 @@ class FmtStr(object):
         #self.basefmtstrs = [x for x in components if len(x) > 0]
         self.basefmtstrs = list(components)
 
+        # caching these leads to a significant speedup
+        self._str = None
+        self._unicode = None
+        self._len = None
+
     @classmethod
     def from_str(cls, s):
         r"""
@@ -120,6 +125,8 @@ class FmtStr(object):
         return FmtStr(*bases)
 
     def set_attributes(self, **attributes):
+        self._unicode = None
+        self._str = None
         for k, v in attributes.items():
             for fs in self.basefmtstrs:
                 fs.atts[k] = v
@@ -147,13 +154,22 @@ class FmtStr(object):
             [m.start() for m in matches] + [len(s)])]
 
     def __unicode__(self):
-        return ''.join(unicode(fs) for fs in self.basefmtstrs)
+        if self._unicode is not None:
+            return self._unicode
+        self._unicode = ''.join(unicode(fs) for fs in self.basefmtstrs)
+        return self._unicode
 
     def __str__(self):
-        return ''.join(str(fs) for fs in self.basefmtstrs)
+        if self._str is not None:
+            return self._str
+        self._str = ''.join(str(fs) for fs in self.basefmtstrs)
+        return self._str
 
     def __len__(self):
-        return sum(len(fs) for fs in self.basefmtstrs)
+        if self._len is not None:
+            return self._len
+        self._len = sum(len(fs) for fs in self.basefmtstrs)
+        return self._len
 
     def __repr__(self):
         return '+'.join(repr(fs) for fs in self.basefmtstrs)
@@ -226,6 +242,9 @@ class FmtStr(object):
         return fmtstr(output)
 
     def __setitem__(self, index, value):
+        self._unicode = None
+        self._str = None
+        self._len = None
         index = normalize_slice(len(self), index)
         if isinstance(value, (bytes, unicode)):
             value = FmtStr(BaseFmtStr(value))
