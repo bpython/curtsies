@@ -254,6 +254,9 @@ class FmtStr(object):
                 self.basefmtstrs.append(fs)
             counter += len(fs)
 
+    def copy(self):
+        return FmtStr(*self.basefmtstrs)
+
 def normalize_slice(length, index):
     is_int = False
     if isinstance(index, int):
