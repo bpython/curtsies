@@ -135,8 +135,13 @@ class TerminalController(object):
                 logging.debug('read interrupted, retrying')
 
     def write(self, msg):
-        logging.debug('sending to terminal: %s (%r)' % (type(msg), msg))
         self.out_stream.write(msg)
+        self.out_stream.flush()
+
+    def write_no_flush(self, msg):
+        self.out_stream.write(msg)
+
+    def flush(self):
         self.out_stream.flush()
 
     def get_cursor_position(self):
