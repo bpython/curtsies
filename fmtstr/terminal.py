@@ -9,8 +9,6 @@ from .fsarray import FSArray
 
 from . import events
 
-logging.basicConfig(filename='terminal.log',level=logging.DEBUG, format='%(asctime)s %(message)s')
-
 
 class Terminal(object):
     """ Renders 2D arrays of characters and cursor position """
@@ -93,6 +91,7 @@ class Terminal(object):
                 self.top_usable_row -= 1
             else:
                 offscreen_scrolls += 1
+            self._current_lines_by_row = {}
             logging.debug('new top_usable_row: %d' % self.top_usable_row)
             self.tc.set_cursor_position((height, 1)) # since scrolling moves the cursor
             self.tc.write(str(line))
