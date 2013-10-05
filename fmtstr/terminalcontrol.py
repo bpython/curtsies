@@ -171,6 +171,7 @@ class TerminalController(object):
         self.down(10000)
         size = self.get_cursor_position()
         self.set_cursor_position(orig)
+        self.last_screen_size = size
         return size
 
 def test():
