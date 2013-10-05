@@ -38,4 +38,4 @@ if __name__ == '__main__':
 
     s = """ all different: %f\tall identical: %f\tchange on character %f\t%d iterations\t""" % (t1 - t0, t3 - t2, t5 - t4, n)
     os.system('echo `git log --pretty=oneline -n 1` '+s+' >> times.txt')
-    print s
+    print(s)
