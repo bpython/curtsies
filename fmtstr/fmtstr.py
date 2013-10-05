@@ -111,18 +111,21 @@ class FmtStr(object):
         >>> fmtstr('|\x1b[31m\x1b[44mhey\x1b[49m\x1b[39m|')
         "|"+on_blue(red("hey"))+"|"
         """
-        tokens_and_strings = parse(s)
-        bases = []
-        cur_fmt = {}
-        for x in tokens_and_strings:
-            if isinstance(x, dict):
-                cur_fmt.update(x)
-            elif isinstance(x, (bytes, unicode)):
-                atts = parse_args('', dict((k, v) for k,v in cur_fmt.items() if v is not None))
-                bases.append(BaseFmtStr(x, atts=atts))
-            else:
-                raise Exception("logic error")
-        return FmtStr(*bases)
+        if '\x1b[' in s:
+            tokens_and_strings = parse(s)
+            bases = []
+            cur_fmt = {}
+            for x in tokens_and_strings:
+                if isinstance(x, dict):
+                    cur_fmt.update(x)
+                elif isinstance(x, (bytes, unicode)):
+                    atts = parse_args('', dict((k, v) for k,v in cur_fmt.items() if v is not None))
+                    bases.append(BaseFmtStr(x, atts=atts))
+                else:
+                    raise Exception("logic error")
+            return FmtStr(*bases)
+        else:
+            return FmtStr(BaseFmtStr(s))
 
     def set_attributes(self, **attributes):
         self._unicode = None
