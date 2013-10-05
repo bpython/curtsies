@@ -27,6 +27,7 @@ ERASE_REST_OF_LINE = "[K"
 ERASE_LINE = "[2K"
 HIDE_CURSOR = "[?25l"
 SHOW_CURSOR = "[?25h"
+ERASE_REST_OF_SCREEN = "[0J"
 
 CURSES_TABLE = {}
 CURSES_TABLE['\x1b[15~'] = 'KEY_F(5)'
@@ -92,6 +93,7 @@ class TerminalController(object):
     erase_line = produce_simple_sequence(ERASE_LINE)
     hide_cursor = produce_simple_sequence(HIDE_CURSOR)
     show_cursor = produce_simple_sequence(SHOW_CURSOR)
+    erase_rest_of_screen = produce_simple_sequence(ERASE_REST_OF_SCREEN)
 
     def get_event_curses(self):
         """get event, with keypress events translated to their curses equivalent"""
