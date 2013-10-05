@@ -33,6 +33,7 @@ class Terminal(object):
         self.tc = tc
         self.keep_last_line = keep_last_line
         self.hide_cursor = hide_cursor
+        self._current_lines_by_row = {}
 
     def __enter__(self):
         if self.hide_cursor:
@@ -73,15 +74,21 @@ class Terminal(object):
         rows_for_use = list(range(self.top_usable_row, height + 1))
         shared = min(len(array), len(rows_for_use))
         for row, line in zip(rows_for_use[:shared], array[:shared]):
+            if line == self._current_lines_by_row.get(row, None):
+                logging.debug('using cache for line %d', row)
+                continue
             self.tc.set_cursor_position((row, 1))
             self.tc.write(str(line))
+            self._current_lines_by_row[row] = line
             if len(line) < width:
                 self.tc.erase_rest_of_line()
         rest_of_lines = array[shared:]
         rest_of_rows = rows_for_use[shared:]
         for row in rest_of_rows: # if array too small
+            if row not in self._current_lines_by_row: continue
             self.tc.set_cursor_position((row, 1))
             self.tc.erase_line()
+            self._current_lines_by_row[row] = None
         offscreen_scrolls = 0
         for line in rest_of_lines: # if array too big
             logging.debug('sending scroll down message')

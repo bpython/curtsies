@@ -11,23 +11,24 @@ import time
 if __name__ == '__main__':
 
     print(blue('hey') + ' ' + red('there') + ' ' + red(bold('you')))
+    n = int(sys.argv[1]) if len(sys.argv) > 1 else 100
 
     with TerminalController(sys.stdin, sys.stdout) as tc:
         with Terminal(tc) as t:
             rows, columns = t.tc.get_screen_size()
             t0 = time.time()
-            for i in range(100):
+            for i in range(n):
                 a = [blue(on_red('qwertyuiop'[i%10]*columns)) for _ in range(rows)]
                 t.render_to_terminal(a)
             t1 = time.time()
             t2 = time.time()
-            for i in range(100):
+            for i in range(n):
                 a = [blue(on_red('q'[i%1]*columns)) for _ in range(rows)]
                 t.render_to_terminal(a)
             t3 = time.time()
             t4 = time.time()
             a = [blue(on_red('q'*columns)) for _ in range(rows)]
-            for i in range(100):
+            for i in range(n):
                 a[i // columns][i % columns] = 'x'
                 t.render_to_terminal(a)
             t5 = time.time()
