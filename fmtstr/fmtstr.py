@@ -72,6 +72,9 @@ class BaseFmtStr(object):
             return value.decode('utf8')
         return value
 
+    def __eq__(self, other):
+        return self.s == other.s and self.atts == other.atts
+
     if PY3:
         __str__ = __unicode__
     else:
@@ -79,7 +82,7 @@ class BaseFmtStr(object):
             return unicode(self).encode('utf8')
 
     def __getitem__(self, index):
-        return fmtstr(self.color_str[index])
+        return self.color_str[index]
 
     def __repr__(self):
         def pp_att(att):
@@ -102,6 +105,7 @@ class FmtStr(object):
         self._str = None
         self._unicode = None
         self._len = None
+        self._s = None
 
     @classmethod
     def from_str(cls, s):
@@ -228,7 +232,10 @@ class FmtStr(object):
 
     @property
     def s(self):
-        return "".join(fs.s for fs in self.basefmtstrs)
+        if self._s is not None:
+            return self._s
+        self._s = "".join(fs.s for fs in self.basefmtstrs)
+        return self._s
 
     def __getitem__(self, index):
         index = normalize_slice(len(self), index)

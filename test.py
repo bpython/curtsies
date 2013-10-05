@@ -49,7 +49,7 @@ class TestFmtStr(unittest.TestCase):
 
 class TestBaseFmtStr(unittest.TestCase):
     def test_getitem(self):
-        self.assertEqual(BaseFmtStr('hi', {'fg':38})[5], 'h')
+        self.assertEqual(BaseFmtStr('hi', {'fg':37})[5], 'h')
 
 class TestDoubleUnders(unittest.TestCase):
     def test_equality(self):
