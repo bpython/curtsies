@@ -102,7 +102,7 @@ class TerminalController(object):
             return CURSES_TABLE[e]
         return e
 
-    def get_event(self, use_curses_aliases=True):
+    def get_event(self, use_curses_aliases=True, fake_input=None):
         """Blocks and returns the next event"""
         #TODO make this cooler - generator? Trie?
         chars = []
@@ -119,6 +119,8 @@ class TerminalController(object):
             (len(chars) == 4 and chars[1] == '\x1b' and chars[2] == '[') or
             (len(chars) > 2 and chars[1] in ['[', 'O'] and chars[-1] not in tuple('1234567890;'))):
                 return ''.join(chars) if not use_curses_aliases else CURSES_TABLE.get(''.join(chars), ''.join(chars))
+            if fake_input:
+                self.in_buffer.extend(list(fake_input))
             if self.in_buffer:
                 chars.append(self.in_buffer.pop(0))
                 continue
