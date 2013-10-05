@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='fmtstr',
-      version='0.0.7',
+      version='0.0.8',
       description='string-like objects marked up with terminal formatting',
       url='https://github.com/thomasballinger/fmtstr',
       author='Thomas Ballinger',
