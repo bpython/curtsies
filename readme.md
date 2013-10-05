@@ -1,13 +1,13 @@
-Terminal-formatting annotated text objects
-==========================================
+Colored/Styled Strings for the Terminal
+=======================================
 
 `fmtstr` annotates portions of strings with terminal colors and formatting
 `str(yourstring)` will be the string with [ANSI escape codes]
 (http://en.wikipedia.org/wiki/ANSI_escape_code)
 specifying color and other formatting to a terminal.
 
-fmtstr.FmtStr
-=============
+`FmtStr`s
+=========
 
 ![fmtstr example screenshot](http://i.imgur.com/7lFaxsz.png)
 
@@ -16,7 +16,7 @@ You can use convenience functions instead:
     >>> from fmtstr.fmtfuncs import *
     >>> blue(on_red('hey')) + " " + underline("there")
 
-* `str(FmtStr)` -> escape sequence-laden text bound that looks cool in a terminal
+* `str(FmtStr)` -> escape sequence-laden text that looks cool in an ANSI-compatible terminal
 * `repr(FmtStr)` -> how to create an identical FmtStr
 * `FmtStr[3:10]` -> a new FmtStr
 * `FmtStr.upper()` (any string method) -> a new FmtStr or list of FmtStrs or int (str.count)
@@ -49,9 +49,11 @@ FmtStrs are *mutable* - you can change them via slice assignment:
     >>> f
     blue("h")+"ot"+blue(" there")+on_red(" Tom!")
 
-But you can't change their length:
+You can even change their length:
 
     >>> f[1:3] = 'something longer'
+
+though this will be fixed and FmtStrs won't be mutable at all due to efforts of @OufeiDong
 
 FmtStrs greedily absorb strings, but no formatting is applied
 
@@ -76,7 +78,7 @@ Using str methods on FmtStr objects
 -----------------------------------
 
 All sorts of string methods can be used on a FmtStr, so you can often
-use FmtStr objects where you had string in your program before:
+use FmtStr objects where you had strings in your program before:
 
     >>> from fmtstr.fmtstr import *
     >>> f = blue(underline('As you like it'))
@@ -112,15 +114,15 @@ But formatting information will be lost for attributes which are not the same th
     >>> f.center(10)
     bold(" hi there ")
 
-fmtstr.FSArray
-==============
+`FSArray`
+=========
 
 2d array in which each line is a FmtStr
 
 ![fsarray example screenshot](http://i.imgur.com/rvTRPv1.png)
 
-Terminal
-========
+`Terminal`
+==========
 
 Interact with the Terminal object by passing it 2d numpy arrays of characters;
 or even better, arrays of FmtStr objects! Terminal objects typically need a
@@ -156,3 +158,7 @@ the entire array to the terminal, scrolling down so that the extra rows at the
 top of the 2d array end up out of view. This behavior is particularly useful for
 writing command line interfaces like the REPL
 [scottwasright](https://github.com/thomasballinger/scottwasright).
+
+No Windows support currently - hoping to use [colorama](https://pypi.python.org/pypi/colorama)
+for this, but currently Colorama doesn't implement many of the ANSI terminal control sequences
+used by the terminal controller.
