@@ -81,7 +81,8 @@ class TestSlicing(unittest.TestCase):
     def test_slice(self):
         self.assertEqual(fmtstr('Hi!', 'blue')[1:2], fmtstr('i', 'blue'))
         self.assertEqual(fmtstr('Hi!', 'blue')[1:], fmtstr('i!', 'blue'))
-        self.assertEqual(fmtstr('Hi!', 'blue')[15:18], fmtstr('', 'blue'))
+        # considering changing behavior so that this doens't work
+        # self.assertEqual(fmtstr('Hi!', 'blue')[15:18], fmtstr('', 'blue'))
 
     def AWLKJAS_set_index(self):
         f = fmtstr('Hi!', 'blue')

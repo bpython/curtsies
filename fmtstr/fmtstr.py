@@ -233,6 +233,25 @@ class FmtStr(object):
     def __getitem__(self, index):
         index = normalize_slice(len(self), index)
         counter = 0
+        parts = []
+        for fs in self.basefmtstrs:
+            if index.start < counter + len(fs) and index.stop > counter:
+                start = max(0, index.start - counter)
+                end = index.stop - counter
+                if end - start == len(fs):
+                    parts.append(fs)
+                else:
+                    s_part = fs.s[max(0, index.start - counter):index.stop - counter]
+                    parts.append(BaseFmtStr(s_part, fs.atts))
+            counter += len(fs)
+            if index.stop < counter:
+                break
+        return FmtStr(*parts)
+
+    def _getitem_normalized(self, index):
+        """Builds the more compact fmtstrs by using fromstr( of the control sequences)"""
+        index = normalize_slice(len(self), index)
+        counter = 0
         output = ''
         for fs in self.basefmtstrs:
             if index.start < counter + len(fs) and index.stop > counter:
