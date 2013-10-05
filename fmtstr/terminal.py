@@ -72,7 +72,7 @@ class Terminal(object):
             if line == self._current_lines_by_row.get(row, None):
                 continue
             self.tc.set_cursor_position((row, 1))
-            self.tc.write_no_flush(str(line))
+            self.tc.write(str(line))
             self._current_lines_by_row[row] = line
             if len(line) < width:
                 self.tc.erase_rest_of_line()
@@ -93,7 +93,7 @@ class Terminal(object):
                 offscreen_scrolls += 1
             logging.debug('new top_usable_row: %d' % self.top_usable_row)
             self.tc.set_cursor_position((height, 1)) # since scrolling moves the cursor
-            self.tc.write_no_flush(str(line))
+            self.tc.write(str(line))
 
         self.tc.set_cursor_position((cursor_pos[0]-offscreen_scrolls+self.top_usable_row, cursor_pos[1]+1))
         return offscreen_scrolls

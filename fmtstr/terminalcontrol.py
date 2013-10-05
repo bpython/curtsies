@@ -138,12 +138,6 @@ class TerminalController(object):
         self.out_stream.write(msg)
         self.out_stream.flush()
 
-    def write_no_flush(self, msg):
-        self.out_stream.write(msg)
-
-    def flush(self):
-        self.out_stream.flush()
-
     def get_cursor_position(self):
         """Returns the terminal (row, column) of the cursor"""
         self.query_cursor_position()
