@@ -12,12 +12,12 @@ cnames = dict(list(zip('krgybmcwd', colors + ('default',))))
 def func_for_letter(l, default='k'):
     if l == 'd':
         l = default
-    return partial(fmtstr, fg=cnames[l], bold=(l.lower() != l))
+    return partial(fmtstr, fg=cnames[l.lower()], bold=(l.lower() != l))
 
 def color_for_letter(l, default='k'):
     if l == 'd':
         l = default
-    return cnames[l]
+    return cnames[l.lower()]
 
 def parse(s):
     r"""
