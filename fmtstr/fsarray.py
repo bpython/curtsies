@@ -78,6 +78,11 @@ class FSArray(object):
     def __setitem__(self, slicetuple, value):
         if isinstance(slicetuple, slice):
             rowslice, colslice = slicetuple, slice(None)
+        elif isinstance(slicetuple, int):
+            #TODO incorporate normalize_slice here
+            normalize_slice(self.height, slicetuple)
+            self.rows[slicetuple] = value
+            return
         else:
             rowslice, colslice = slicetuple
 

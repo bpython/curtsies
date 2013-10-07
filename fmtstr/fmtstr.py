@@ -18,14 +18,22 @@ on_blue(red("hello"))+" "+on_red(blue("there"))+green("!")
 """
 #TODO add a way to composite text without losing original formatting information
 
+import sys
+import re
+
 from .escseqparse import parse
 from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
 from .termformatconstants import FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR
 from .termformatconstants import RESET_ALL, RESET_BG, RESET_FG
 from .termformatconstants import seq
 
+PY3 = sys.version_info[0] >= 3
+
+if PY3:
+    unicode = str
+
 xforms = {
-    'fg' : lambda x, v: seq(v)+x+seq(RESET_FG),
+    'fg' : lambda x, v: '%s%s%s' % (seq(v), x, seq(RESET_FG)),
     'bg' : lambda x, v: seq(v)+x+seq(RESET_BG),
     'bold' : lambda x: seq(STYLES['bold'])+x+seq(RESET_ALL),
     'underline' : lambda x: seq(STYLES['underline'])+x+seq(RESET_ALL),
@@ -37,16 +45,18 @@ class BaseFmtStr(object):
     """Formatting annotations on a string"""
     def __init__(self, string, atts=None):
         self._s = string
-        self.atts = {k:v for k,v in list(atts.items())} if atts else {}
+        self.atts = dict((k,v) for k,v in atts.items()) if atts else {}
 
     s = property(lambda self: self._s) #makes self.s immutable
 
     def __len__(self):
         return len(self.s)
 
-    def __str__(self):
+    #TODO cache this if immutable
+    @property
+    def color_str(self):
         s = self.s
-        for k, v in list(self.atts.items()):
+        for k, v in sorted(self.atts.items()):
             if k not in xforms: continue
             if v is True:
                 s = xforms[k](s)
@@ -56,8 +66,23 @@ class BaseFmtStr(object):
                 s = xforms[k](s, v)
         return s
 
+    def __unicode__(self):
+        value = self.color_str
+        if isinstance(value, bytes):
+            return value.decode('utf8')
+        return value
+
+    def __eq__(self, other):
+        return self.s == other.s and self.atts == other.atts
+
+    if PY3:
+        __str__ = __unicode__
+    else:
+        def __str__(self):
+            return unicode(self).encode('utf8')
+
     def __getitem__(self, index):
-        return fmtstr(str(self)[index])
+        return self.color_str[index]
 
     def __repr__(self):
         def pp_att(att):
@@ -71,8 +96,16 @@ class BaseFmtStr(object):
 
 class FmtStr(object):
     def __init__(self, *components):
-        assert all(isinstance(x, BaseFmtStr) for x in components), "use the constructor helper fmtstr instead for normal use"
-        self.basefmtstrs = [x for x in components if len(x) > 0]
+        # The assertions below could be useful for debugging, but slow things down considerably
+        #assert all([len(x) > 0 for x in components])
+        #self.basefmtstrs = [x for x in components if len(x) > 0]
+        self.basefmtstrs = list(components)
+
+        # caching these leads to a significant speedup
+        self._str = None
+        self._unicode = None
+        self._len = None
+        self._s = None
 
     @classmethod
     def from_str(cls, s):
@@ -82,21 +115,26 @@ class FmtStr(object):
         >>> fmtstr('|\x1b[31m\x1b[44mhey\x1b[49m\x1b[39m|')
         "|"+on_blue(red("hey"))+"|"
         """
-        tokens_and_strings = parse(s)
-        bases = []
-        cur_fmt = {}
-        for x in tokens_and_strings:
-            if isinstance(x, dict):
-                cur_fmt.update(x)
-            elif isinstance(x, str):
-                atts = parse_args('', {k:v for k,v in list(cur_fmt.items()) if v is not None})
-                bases.append(BaseFmtStr(x, atts=atts))
-            else:
-                raise Exception("logic error")
-        return FmtStr(*bases)
+        if '\x1b[' in s:
+            tokens_and_strings = parse(s)
+            bases = []
+            cur_fmt = {}
+            for x in tokens_and_strings:
+                if isinstance(x, dict):
+                    cur_fmt.update(x)
+                elif isinstance(x, (bytes, unicode)):
+                    atts = parse_args('', dict((k, v) for k,v in cur_fmt.items() if v is not None))
+                    bases.append(BaseFmtStr(x, atts=atts))
+                else:
+                    raise Exception("logic error")
+            return FmtStr(*bases)
+        else:
+            return FmtStr(BaseFmtStr(s))
 
     def set_attributes(self, **attributes):
-        for k, v in list(attributes.items()):
+        self._unicode = None
+        self._str = None
+        for k, v in attributes.items():
             for fs in self.basefmtstrs:
                 fs.atts[k] = v
 
@@ -106,19 +144,39 @@ class FmtStr(object):
         for i, s in enumerate(iterable):
             if isinstance(s, FmtStr):
                 basefmtstrs.extend(s.basefmtstrs)
-            elif isinstance(s, str):
+            elif isinstance(s, (bytes, unicode)):
                 basefmtstrs.extend(fmtstr(s).basefmtstrs) #TODO just make a basefmtstr directly
             else:
-                raise TypeError("expected basestring or FmtStr, %r found" % type(s))
+                raise TypeError("expected str or FmtStr, %r found" % type(s))
             if i < len(iterable) - 1:
                 basefmtstrs.extend(self.basefmtstrs)
         return FmtStr(*basefmtstrs)
 
+    #TODO make this split work like str.split
+    def split(self, on_char):
+        s = self.s
+        matches = list(re.finditer(on_char, s))
+        return [self[start:end] for start, end in zip(
+            [0] + [m.end() for m in matches],
+            [m.start() for m in matches] + [len(s)])]
+
+    def __unicode__(self):
+        if self._unicode is not None:
+            return self._unicode
+        self._unicode = ''.join(unicode(fs) for fs in self.basefmtstrs)
+        return self._unicode
+
     def __str__(self):
-        return ''.join(str(fs) for fs in self.basefmtstrs)
+        if self._str is not None:
+            return self._str
+        self._str = ''.join(str(fs) for fs in self.basefmtstrs)
+        return self._str
 
     def __len__(self):
-        return sum(len(fs) for fs in self.basefmtstrs)
+        if self._len is not None:
+            return self._len
+        self._len = sum(len(fs) for fs in self.basefmtstrs)
+        return self._len
 
     def __repr__(self):
         return '+'.join(repr(fs) for fs in self.basefmtstrs)
@@ -129,7 +187,7 @@ class FmtStr(object):
     def __add__(self, other):
         if isinstance(other, FmtStr):
             return FmtStr(*(self.basefmtstrs + other.basefmtstrs))
-        elif isinstance(other, str):
+        elif isinstance(other, (bytes, unicode)):
             return FmtStr(*(self.basefmtstrs + [BaseFmtStr(other)]))
         else:
             raise TypeError('Can\'t add %r and %r' % (self, other))
@@ -137,10 +195,16 @@ class FmtStr(object):
     def __radd__(self, other):
         if isinstance(other, FmtStr):
             return FmtStr(*(x for x in (other.basefmtstrs + self.basefmtstrs)))
-        elif isinstance(other, str):
+        elif isinstance(other, (bytes, unicode)):
             return FmtStr(*(x for x in ([BaseFmtStr(other)] + self.basefmtstrs)))
         else:
             raise TypeError('Can\'t add those')
+
+    def __mul__(self, other):
+        if isinstance(other, int):
+            return sum([FmtStr(*(x for x in self.basefmtstrs)) for _ in range(other)], FmtStr())
+        raise TypeError('Can\'t mulitply those')
+    #TODO ensure emtpy FmtStr isn't a problem
 
     @property
     def shared_atts(self):
@@ -148,7 +212,7 @@ class FmtStr(object):
         #TODO cache this, could get ugly for large FmtStrs
         atts = {}
         first = self.basefmtstrs[0]
-        for att in first.atts:
+        for att in sorted(first.atts):
             #TODO how to write this without the '???'?
             if all(fs.atts.get(att, '???') == first.atts[att] for fs in self.basefmtstrs if len(fs) > 0):
                 atts[att] = first.atts[att]
@@ -158,7 +222,7 @@ class FmtStr(object):
         # thanks to @aerenchyma/@jczetta
         def func_help(*args, **kwargs):
              result = getattr(self.s, att)(*args, **kwargs)
-             if isinstance(result, str):
+             if isinstance(result, (bytes, unicode)):
                  return fmtstr(result, **self.shared_atts)
              elif isinstance(result, list):
                  return [fmtstr(x, **self.shared_atts) for x in result]
@@ -168,16 +232,38 @@ class FmtStr(object):
 
     @property
     def s(self):
-        return "".join(fs.s for fs in self.basefmtstrs)
+        if self._s is not None:
+            return self._s
+        self._s = "".join(fs.s for fs in self.basefmtstrs)
+        return self._s
 
     def __getitem__(self, index):
+        index = normalize_slice(len(self), index)
+        counter = 0
+        parts = []
+        for fs in self.basefmtstrs:
+            if index.start < counter + len(fs) and index.stop > counter:
+                start = max(0, index.start - counter)
+                end = index.stop - counter
+                if end - start == len(fs):
+                    parts.append(fs)
+                else:
+                    s_part = fs.s[max(0, index.start - counter):index.stop - counter]
+                    parts.append(BaseFmtStr(s_part, fs.atts))
+            counter += len(fs)
+            if index.stop < counter:
+                break
+        return FmtStr(*parts)
+
+    def _getitem_normalized(self, index):
+        """Builds the more compact fmtstrs by using fromstr( of the control sequences)"""
         index = normalize_slice(len(self), index)
         counter = 0
         output = ''
         for fs in self.basefmtstrs:
             if index.start < counter + len(fs) and index.stop > counter:
                 s_part = fs.s[max(0, index.start - counter):index.stop - counter]
-                piece = str(BaseFmtStr(s_part, fs.atts))
+                piece = BaseFmtStr(s_part, fs.atts).color_str
                 output += piece
             counter += len(fs)
             if index.stop < counter:
@@ -185,8 +271,11 @@ class FmtStr(object):
         return fmtstr(output)
 
     def __setitem__(self, index, value):
+        self._unicode = None
+        self._str = None
+        self._len = None
         index = normalize_slice(len(self), index)
-        if isinstance(value, str):
+        if isinstance(value, (bytes, unicode)):
             value = FmtStr(BaseFmtStr(value))
         elif not isinstance(value, FmtStr):
             raise ValueError('Should be str or FmtStr')
@@ -212,6 +301,9 @@ class FmtStr(object):
             else:
                 self.basefmtstrs.append(fs)
             counter += len(fs)
+
+    def copy(self):
+        return FmtStr(*self.basefmtstrs)
 
 def normalize_slice(length, index):
     is_int = False
@@ -239,7 +331,7 @@ def parse_args(args, kwargs):
         args += (kwargs['style'],)
         del kwargs['style']
     for arg in args:
-        if not isinstance(arg, str):
+        if not isinstance(arg, (bytes, unicode)):
             raise ValueError("args must be strings:" + repr(args))
         if arg.lower() in FG_COLORS:
             if 'fg' in kwargs: raise ValueError("fg specified twice")
@@ -277,7 +369,7 @@ def fmtstr(string, *args, **kwargs):
     if isinstance(string, FmtStr):
         string.set_attributes(**atts)
         return string
-    elif isinstance(string, str):
+    elif isinstance(string, (bytes, unicode)):
         string = FmtStr.from_str(string)
         string.set_attributes(**atts)
         return string

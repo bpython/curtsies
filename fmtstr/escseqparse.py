@@ -1,10 +1,12 @@
 r"""
 Parses ascii escape sequences into marked up strings
 
->>> peel_off_esc_code('Amore')
-('', {'csi': '\x1b', 'command': 'A', 'seq': '\x1bA'}, 'more')
->>> peel_off_esc_code('[2Astuff')
-('', {'csi': '\x1b[', 'seq': '\x1b[2A', 'intermed': '', 'private': '', 'command': 'A', 'numbers': [2]}, 'stuff')
+>>> r = peel_off_esc_code('Amore')
+>>> r == ('', {'csi': '\x1b', 'command': 'A', 'seq': '\x1bA'}, 'more')
+True
+>>> r = peel_off_esc_code('[2Astuff')
+>>> r == ('', {'csi': '\x1b[', 'seq': '\x1b[2A', 'intermed': '', 'private': '', 'command': 'A', 'numbers': [2]}, 'stuff')
+True
 """
 
 from .termformatconstants import *
@@ -15,9 +17,8 @@ def parse(s):
     r"""
     >>> parse(">>> []")
     ['>>> []']
-    >>> parse("\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39")
+    >>> #parse("\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m")
     """
-    assert isinstance(s, str)
     stuff = []
     rest = s
     while True:
@@ -77,7 +78,7 @@ def token_type(info):
         if value in FG_NUMBER_TO_COLOR: return {'fg':FG_NUMBER_TO_COLOR[value]}
         if value in BG_NUMBER_TO_COLOR: return {'bg':BG_NUMBER_TO_COLOR[value]}
         if value in NUMBER_TO_STYLE: return {NUMBER_TO_STYLE[value]:True}
-        if value == RESET_ALL: return dict({k:None for k in STYLES}, **{'fg':None, 'bg':None})
+        if value == RESET_ALL: return dict(dict((k, None) for k in STYLES), **{'fg':None, 'bg':None})
         if value == RESET_FG: return {'fg':None}
         if value == RESET_BG: return {'bg':None}
     raise ValueError("Can't parse escape seq %r" % info)

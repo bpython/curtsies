@@ -1,6 +1,6 @@
 from bpython import formatter
 from .termformatconstants import FG_COLORS, BG_COLORS, colors
-from .fmtstr import fmtstr
+from .fmtstr import fmtstr, FmtStr
 
 from functools import partial
 
@@ -12,17 +12,19 @@ cnames = dict(list(zip('krgybmcwd', colors + ('default',))))
 def func_for_letter(l, default='k'):
     if l == 'd':
         l = default
-    return partial(fmtstr, fg=cnames[l], bold=(l.lower() != l))
+    return partial(fmtstr, fg=cnames[l.lower()], bold=(l.lower() != l))
 
 def color_for_letter(l, default='k'):
     if l == 'd':
         l = default
-    return cnames[l]
+    return cnames[l.lower()]
 
 def parse(s):
     r"""
-    >>> parse(u'\x01y\x03print\x04\x01C\x03 \x04\x01G\x031\x04\x01C\x03 \x04\x01Y\x03+\x04\x01C\x03 \x04\x01G\x032\x04')
-    yellow("print")+cyan(" ")+green("1")+cyan(" ")+yellow("+")+cyan(" ")+green("2")
+    >>> parse('\x01y\x03print\x04')
+    yellow("print")
+    >>> parse(u'\x01y\x03print\x04\x01c\x03 \x04\x01g\x031\x04\x01c\x03 \x04\x01Y\x03+\x04\x01c\x03 \x04\x01g\x032\x04')
+    yellow("print")+cyan(" ")+green("1")+cyan(" ")+bold(yellow("+"))+cyan(" ")+green("2")
     """
     rest = s
     stuff = []
@@ -31,7 +33,9 @@ def parse(s):
             break
         d, rest = peel_off_string(rest)
         stuff.append(d)
-    return sum([fs_from_match(d) for d in stuff], fmtstr(""))
+    return (sum([fs_from_match(d) for d in stuff[1:]], fs_from_match(stuff[0]))
+            if len(stuff) > 0
+            else FmtStr())
 
 def fs_from_match(d):
     atts = {}
@@ -58,8 +62,9 @@ def fs_from_match(d):
 
 def peel_off_string(s):
     r"""
-    >>> peel_off_string('\x01RI\x03]\x04asdf')
-    ({'bg': 'I', 'string': ']', 'fg': 'R', 'colormarker': '\x01RI', 'bold': ''}, 'asdf')
+    >>> r = peel_off_string('\x01RI\x03]\x04asdf')
+    >>> r == ({'bg': 'I', 'string': ']', 'fg': 'R', 'colormarker': '\x01RI', 'bold': ''}, 'asdf')
+    True
     """
     p = r"""(?P<colormarker>\x01
                 (?P<fg>[krgybmcwdKRGYBMCWD]?)

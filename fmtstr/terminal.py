@@ -9,15 +9,13 @@ from .fsarray import FSArray
 
 from . import events
 
-logging.basicConfig(filename='terminal.log',level=logging.DEBUG, format='%(asctime)s %(message)s')
-
 
 class Terminal(object):
     """ Renders 2D arrays of characters and cursor position """
     #TODO: when less than whole screen owned, deal with that:
     #    -render the top of the screen at the first clear row
     #    -scroll down before rendering as necessary
-    def __init__(self, tc):
+    def __init__(self, tc, keep_last_line=False, hide_cursor=True):
         """
         tc expected to have must have methods:
             get_cursor_position()
@@ -31,21 +29,27 @@ class Terminal(object):
         """
         logging.debug('-------initializing Terminal object %r------' % self)
         self.tc = tc
+        self.keep_last_line = keep_last_line
+        self.hide_cursor = hide_cursor
+        self._current_lines_by_row = {}
 
     def __enter__(self):
+        if self.hide_cursor:
+            self.tc.hide_cursor()
         self.top_usable_row, _ = self.tc.get_cursor_position()
         logging.debug('initial top_usable_row: %d' % self.top_usable_row)
         return self
 
     def __exit__(self, type, value, traceback):
         logging.debug("running Terminal.__exit__")
-        self.tc.scroll_down()
+        if self.keep_last_line:
+            self.tc.scroll_down()
         row, _ = self.tc.get_cursor_position()
-        for i in range(1000):
-            self.tc.erase_line()
-            self.tc.down()
+        self.tc.erase_rest_of_screen()
         self.tc.set_cursor_position((row, 1))
         self.tc.erase_rest_of_line()
+        if self.hide_cursor:
+            self.tc.show_cursor()
 
     def render_to_terminal(self, array, cursor_pos=(0,0)):
         """Renders array to terminal, returns the number of lines
@@ -59,22 +63,26 @@ class Terminal(object):
         if array received is of height too large, render it, scroll down,
             and render the rest of it, then return how much we scrolled down
         """
-        #TODO add cool render-on-change caching
-        #TODO take a formatting array with same dimensions as array
-
+        # caching of write and tc (avoiding the self. lookups etc) made
+        # no significant performance difference here
         height, width = self.tc.get_screen_size()
         rows_for_use = list(range(self.top_usable_row, height + 1))
         shared = min(len(array), len(rows_for_use))
         for row, line in zip(rows_for_use[:shared], array[:shared]):
+            if line == self._current_lines_by_row.get(row, None):
+                continue
             self.tc.set_cursor_position((row, 1))
             self.tc.write(str(line))
+            self._current_lines_by_row[row] = line
             if len(line) < width:
                 self.tc.erase_rest_of_line()
         rest_of_lines = array[shared:]
         rest_of_rows = rows_for_use[shared:]
         for row in rest_of_rows: # if array too small
+            if row not in self._current_lines_by_row: continue
             self.tc.set_cursor_position((row, 1))
             self.tc.erase_line()
+            self._current_lines_by_row[row] = None
         offscreen_scrolls = 0
         for line in rest_of_lines: # if array too big
             logging.debug('sending scroll down message')
@@ -83,6 +91,7 @@ class Terminal(object):
                 self.top_usable_row -= 1
             else:
                 offscreen_scrolls += 1
+            self._current_lines_by_row = {}
             logging.debug('new top_usable_row: %d' % self.top_usable_row)
             self.tc.set_cursor_position((height, 1)) # since scrolling moves the cursor
             self.tc.write(str(line))
@@ -92,6 +101,20 @@ class Terminal(object):
 
     def array_from_text(self, msg):
         rows, columns = self.tc.get_screen_size()
+        arr = FSArray(0, columns)
+        i = 0
+        for c in msg:
+            if i >= rows * columns:
+                return arr
+            elif c in '\r\n':
+                i = ((i // columns) + 1) * columns
+            else:
+                arr[i // arr.columns, i % arr.columns] = [fmtstr(c)]
+            i += 1
+        return arr
+
+    @classmethod
+    def array_from_text_rc(cls, msg, rows, columns):
         arr = FSArray(0, columns)
         i = 0
         for c in msg:
