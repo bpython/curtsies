@@ -104,7 +104,9 @@ class BaseFmtStr(object):
                         pp_att(att)+'('
                         for att in sorted(self.atts)) +
                ('"%s"' % self.s) + ')'*len(self.atts))
-
+# TODO
+# Copy with atts
+# Splice, insert as a special case thereof?
 class FmtStr(object):
     def __init__(self, *components):
         # The assertions below could be useful for debugging, but slow things down considerably
@@ -118,6 +120,14 @@ class FmtStr(object):
         self._len = None
         self._s = None
 
+    def splice(self, start, end, string):
+        """
+        """
+        pass
+
+    def insert():
+        pass
+
     @classmethod
     def from_str(cls, s):
         r"""
@@ -126,6 +136,7 @@ class FmtStr(object):
         >>> fmtstr('|\x1b[31m\x1b[44mhey\x1b[49m\x1b[39m|')
         "|"+on_blue(red("hey"))+"|"
         """
+
         if '\x1b[' in s:
             tokens_and_strings = parse(s)
             bases = []
@@ -142,15 +153,18 @@ class FmtStr(object):
         else:
             return FmtStr(BaseFmtStr(s))
 
-    def set_attributes(self, **attributes):
+    def copy_with_new_atts(self, **attributes):
         self._unicode = None
         self._str = None
+
+        # Copy original basefmtstrs, but with new attributes
         new_basefmtstrs = []
-        for fs in self.basefmtstrs:
-            new_atts = fs.atts
+        for bfs in self.basefmtstrs:
+            new_atts = bfs.atts
             new_atts.update(attributes)
-            new_basefmtstrs.append(BaseFmtStr(fs.s, new_atts)) 
-        self.basefmtstrs = new_basefmtstrs
+            new_basefmtstrs.append(BaseFmtStr(bfs.s, new_atts)) 
+        # self.basefmtstrs = new_basefmtstrs
+        return FmtStr(*new_basefmtstrs)
 
     def join(self, iterable):
         iterable = list(iterable)
@@ -285,6 +299,7 @@ class FmtStr(object):
         return fmtstr(output)
 
     def __setitem__(self, index, value):
+        raise Exception("No!")
         self._unicode = None
         self._str = None
         self._len = None
@@ -381,12 +396,12 @@ def fmtstr(string, *args, **kwargs):
     """
     atts = parse_args(args, kwargs)
     if isinstance(string, FmtStr):
-        string.set_attributes(**atts)
-        return string
+        new_str = string.copy_with_new_atts(**atts)
+        return new_str
     elif isinstance(string, (bytes, unicode)):
         string = FmtStr.from_str(string)
-        string.set_attributes(**atts)
-        return string
+        new_str = string.copy_with_new_atts(**atts)
+        return new_str
     else:
         raise ValueError("Bad Args: %r (of type %s), %r, %r" % (string, type(string), args, kwargs))
 
