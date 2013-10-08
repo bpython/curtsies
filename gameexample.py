@@ -12,7 +12,7 @@ class Entity(object):
         self.x, self.y = x, y
         self.speed = speed
 
-    def move_towards(self, entity):
+    def towards(self, entity):
         dx = entity.x - self.x
         dy = entity.y - self.y
         desired_x = dx/abs(dx) * self.speed if dx else 0
@@ -47,7 +47,7 @@ class World(object):
 
     def tick(self):
         for npc in self.npcs:
-            self.move_entity(npc, *npc.move_towards(self.player))
+            self.move_entity(npc, *npc.towards(self.player))
         for entity1 in self.entities:
             for entity2 in self.entities:
                 if entity1 is entity2: continue
