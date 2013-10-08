@@ -25,7 +25,7 @@ class TestFmtStrInitialization(unittest.TestCase):
     def test_actual_init(self):
         FmtStr()
 
-class TestImMutability(unittest.TestCase):
+class TestImmutability(unittest.TestCase):
 
     def test_fmt_strings_remain_unchanged_when_used_to_construct_other_ones(self):
         a = fmtstr('hi', 'blue')
@@ -35,9 +35,9 @@ class TestImMutability(unittest.TestCase):
         self.assertEqual(a.shared_atts['fg'], FG_COLORS['blue'])
         self.assertEqual(b.shared_atts['fg'], FG_COLORS['red'])
 
-    def test_immutability_of_BaseFmtStr(self):
-        a = BaseFmtStr('hi', {'fg':32})
-        self.assertRaises()
+    # def test_immutability_of_BaseFmtStr(self):
+    #     a = BaseFmtStr('hi', {'fg':32})
+    #     self.assertRaises()
 
     def test_immutibility_of_FmtStr(self):
         a = fmtstr('hi', 'blue')
@@ -47,10 +47,14 @@ class TestImMutability(unittest.TestCase):
 
 class TestFmtStr(unittest.TestCase):
 
-    def test_set_atts(self):
+    def test_copy_with_new_atts(self):
         a = fmtstr('hello')
-        a.set_attributes(bold = True)
-        self.assertEqual(a.basefmtstrs[0].atts, {'bold': True})
+        b = a.copy_with_new_atts(bold = True)
+        self.assertEqual(a.shared_atts, {})
+        self.assertEqual(b.shared_atts, {'bold': True})
+
+    def test_copy_with_new_string(self):
+        pass
 
     def test_shared_atts(self):
         a = fmtstr('hi', 'blue')
@@ -120,16 +124,6 @@ class TestSlicing(unittest.TestCase):
         self.assertEqual(fmtstr('Hi!', 'blue')[1:], fmtstr('i!', 'blue'))
         # considering changing behavior so that this doens't work
         # self.assertEqual(fmtstr('Hi!', 'blue')[15:18], fmtstr('', 'blue'))
-
-    def AWLKJAS_set_index(self):
-        f = fmtstr('Hi!', 'blue')
-        self.assertRaises(IndexError, f.__setitem__, 12, 'a')
-        f = fmtstr('Hi!', 'blue')
-        f[1] = fmtstr('o')
-        changed = blue('H') + plain('o') + blue('!')
-        self.assertEqual(str(f), str(changed))
-        self.assertEqual(f, changed)
-
 
 class TestComposition(unittest.TestCase):
 
