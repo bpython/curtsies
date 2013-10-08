@@ -41,12 +41,23 @@ xforms = {
     'invert' : lambda x: seq(STYLES['invert'])+x+seq(RESET_ALL),
 }
 
+class FrozenDict(dict):
+    """Immutable dictionary class"""
+    def __setitem__(self, key, value):
+        raise Exception("Cannot change value.")
+
 class BaseFmtStr(object):
     """Formatting annotations on a string"""
     def __init__(self, string, atts=None):
         self._s = string
-        self.atts = dict((k,v) for k,v in atts.items()) if atts else {}
+        self._atts = tuple(atts.items()) if atts else tuple()
 
+    def _get_atts(self):
+        return FrozenDict(self._atts)
+
+    atts = property(_get_atts, None, None, 
+                    'A copy of the current attributes dictionary')
+                     
     s = property(lambda self: self._s) #makes self.s immutable
 
     def __len__(self):
@@ -134,9 +145,12 @@ class FmtStr(object):
     def set_attributes(self, **attributes):
         self._unicode = None
         self._str = None
-        for k, v in attributes.items():
-            for fs in self.basefmtstrs:
-                fs.atts[k] = v
+        new_basefmtstrs = []
+        for fs in self.basefmtstrs:
+            new_atts = fs.atts
+            new_atts.update(attributes)
+            new_basefmtstrs.append(BaseFmtStr(fs.s, new_atts)) 
+        self.basefmtstrs = new_basefmtstrs
 
     def join(self, iterable):
         iterable = list(iterable)
