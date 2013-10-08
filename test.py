@@ -53,8 +53,18 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(a.shared_atts, {})
         self.assertEqual(b.shared_atts, {'bold': True})
 
-    def test_copy_with_new_string(self):
-        pass
+    def test_copy_with_new_str(self):
+        # Change string but not attributes
+        a = fmtstr('hello')
+        b = a.copy_with_new_str('bye')
+        self.assertEqual(a.s, 'hello')
+        self.assertEqual(b.s, 'bye')
+
+    def test_insert(self):
+        a = fmtstr('notion')
+        b = a.insert(2, 4, 'ta')
+        self.assertEqual(a.str, "notion")
+        self.assertEqual(b.str, "notation")
 
     def test_shared_atts(self):
         a = fmtstr('hi', 'blue')
