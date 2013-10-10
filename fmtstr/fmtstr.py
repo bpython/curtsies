@@ -121,12 +121,31 @@ class FmtStr(object):
         self._s = None
 
     def splice(self, start, end, string):
-        """
+        """Replaces the characters at self.s[start:end] with the input string.
         """
         pass
 
-    def insert():
-        pass
+    def insert(self, index, string):
+        """Inserts the input string at the given index of the fmtstr by creating 
+        a new list of basefmtstrs. If the insertion occurs within an existing
+        basefmtstr, said basefmtstr is divided into two new basefmtstrs. 
+        """
+        new_components = []
+
+        for bfs in self.basefmtstrs:
+            # TODO: don't want to iterate through new_components every time
+            new_str = ''.join(new_components)
+            cur_len = len(new_str)
+            
+            if cur_len >= index or len(''.join((new_str, bfs.s))) <= index:
+                # Done inserting; append remaining components to new list
+                new_components.append(bfs.s)
+            else:
+                divide = index - cur_len
+                new_components.extend([bfs.s[:divide], string, bfs.s[divide:]])
+
+        # should be a fmtstr, not a regular string
+        return ''.join(new_components)
 
     @classmethod
     def from_str(cls, s):
