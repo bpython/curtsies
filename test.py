@@ -61,10 +61,11 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(b.s, 'bye')
 
     def test_insert(self):
+        # Need to test with fmtstr consisting of multiple basefmtstrs
         a = fmtstr('notion')
-        b = a.insert(2, 4, 'ta')
-        self.assertEqual(a.str, "notion")
-        self.assertEqual(b.str, "notation")
+        b = a.insert(2, 'ta')
+        self.assertEqual(str(a), "notion")
+        self.assertEqual(str(b), "notation")
 
     def test_shared_atts(self):
         a = fmtstr('hi', 'blue')
