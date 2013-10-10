@@ -1,4 +1,4 @@
-r"""Colored strings that behave mostly like strings
+"""Colored strings that behave mostly like strings
 
 >>> s = fmtstr("Hey there!", 'red')
 >>> s
@@ -134,24 +134,25 @@ class FmtStr(object):
 
         for bfs in self.basefmtstrs:
             # TODO: don't want to iterate through new_components every time
-            new_str = ''.join(new_components)
-            cur_len = len(new_str)
+            str_so_far = ''.join(new_components)
+            cur_len = len(str_so_far)
             
-            if cur_len >= start or len(''.join((new_str, bfs.s))) <= start:
+            if cur_len >= start or len(''.join((str_so_far, bfs.s))) <= start:
                 # Either done inserting or have not yet reached the starting index
-                new_components.append(bfs.s)
+                new_components.append(bfs)
             else:
                 divide = start - cur_len
-                head = bfs.s[:divide]
-                tail = bfs.s[end:] if end else bfs.s[divide:]
-                new_components.extend([head, string, tail])
+                head = BaseFmtStr(bfs.s[:divide], atts=bfs.atts)
+                tail = BaseFmtStr(bfs.s[end:] if end else bfs.s[divide:],
+                                  atts=bfs.atts) 
+                new_components.extend([head, BaseFmtStr(string), tail])
 
         # should be a fmtstr, not a regular string
-        return ''.join(new_components)
+        return FmtStr(*new_components)
 
     @classmethod
     def from_str(cls, s):
-        r"""
+        """
         >>> fmtstr("|"+fmtstr("hey", fg='red', bg='blue')+"|")
         "|"+on_blue(red("hey"))+"|"
         >>> fmtstr('|\x1b[31m\x1b[44mhey\x1b[49m\x1b[39m|')

@@ -63,16 +63,16 @@ class TestFmtStr(unittest.TestCase):
     def test_insert_with_end(self):
         # Need to test with fmtstr consisting of multiple basefmtstrs
         a = fmtstr('notion')
-        b = a.insert('ta', 2, 6)
-        self.assertEqual(str(a), "notion")
-        self.assertEqual(str(b), "nota")
+        b = a.insert('te', 2, 6)
+        self.assertEqual(a.s, "notion")
+        self.assertEqual(b.s, "note")
 
     def test_insert_without_end(self):
         # Need to test with fmtstr consisting of multiple basefmtstrs
         a = fmtstr('notion')
         b = a.insert('ta', 2)
-        self.assertEqual(str(a), "notion")
-        self.assertEqual(str(b), "notation")
+        self.assertEqual(a.s, "notion")
+        self.assertEqual(b.s, "notation")
 
     def test_shared_atts(self):
         a = fmtstr('hi', 'blue')
