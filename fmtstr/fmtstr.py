@@ -1,4 +1,4 @@
-"""Colored strings that behave mostly like strings
+r"""Colored strings that behave mostly like strings
 
 >>> s = fmtstr("Hey there!", 'red')
 >>> s
@@ -137,20 +137,17 @@ class FmtStr(object):
 
         for bfs in self.basefmtstrs:
             # TODO: don't want to iterate through new_components every time
-            str_so_far = ''.join([cmpnt.s for cmpnt in new_components])
+            str_so_far = ''.join(cmpnt.s for cmpnt in new_components)
             cur_len = len(str_so_far)
-
-            if bfs.s == '':
-                continue
 
             # Convert input string or FmtStr to BaseFmtStr
             if isinstance(string, FmtStr):
                 new_bfs = string.basefmtstrs[0]
-                string = BaseFmtStr(new_bfs.s, atts=new_bfs.atts)
+                new_string = BaseFmtStr(new_bfs.s, atts=new_bfs.atts)
             else:
-                string = BaseFmtStr(string)
+                new_string = BaseFmtStr(string)
 
-            if cur_len >= start or len(''.join((str_so_far, bfs.s))) <= start:
+            if cur_len > start or len(''.join((str_so_far, bfs.s))) <= start:
                 # Either done inserting or haven't reached 
                 # the point where we need to.
                 new_components.append(bfs)
@@ -159,7 +156,8 @@ class FmtStr(object):
                 head = BaseFmtStr(bfs.s[:divide], atts=bfs.atts)
                 tail = BaseFmtStr(bfs.s[end:] if end else bfs.s[divide:],
                                   atts=bfs.atts) 
-                new_components.extend([head, string, tail])
+                new_components.extend(part for part in [head, new_string, tail]
+                                      if part.s != '')
 
         return FmtStr(*new_components)
 
@@ -168,7 +166,7 @@ class FmtStr(object):
 
     @classmethod
     def from_str(cls, s):
-        """
+        r"""
         >>> fmtstr("|"+fmtstr("hey", fg='red', bg='blue')+"|")
         "|"+on_blue(red("hey"))+"|"
         >>> fmtstr('|\x1b[31m\x1b[44mhey\x1b[49m\x1b[39m|')
