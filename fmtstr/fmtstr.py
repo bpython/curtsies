@@ -20,6 +20,7 @@ on_blue(red("hello"))+" "+on_red(blue("there"))+green("!")
 
 import sys
 import re
+from functools import partial
 
 from .escseqparse import parse
 from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
@@ -126,29 +127,44 @@ class FmtStr(object):
     #     pass
 
     def insert(self, string, start, end=None):
-        """Inserts the input string at the given index of the fmtstr by creating 
-        a new list of basefmtstrs. If the insertion occurs within an existing
-        basefmtstr, said basefmtstr is divided into two new basefmtstrs. 
+        """Inserts the input string at the given index of the fmtstr by 
+        creating a new list of basefmtstrs. If the insertion occurs within an 
+        existing basefmtstr, said basefmtstr is divided into two new ones. 
+        Empty basefmtstrs are discarded. 
         """
+        # TODO: Enable insertion of a FmtStr (currently only allows regular strings).
         new_components = []
 
         for bfs in self.basefmtstrs:
             # TODO: don't want to iterate through new_components every time
-            str_so_far = ''.join(new_components)
+            str_so_far = ''.join([cmpnt.s for cmpnt in new_components])
             cur_len = len(str_so_far)
-            
+
+            if bfs.s == '':
+                continue
+
+            # Convert input string or FmtStr to BaseFmtStr
+            if isinstance(string, FmtStr):
+                new_bfs = string.basefmtstrs[0]
+                string = BaseFmtStr(new_bfs.s, atts=new_bfs.atts)
+            else:
+                string = BaseFmtStr(string)
+
             if cur_len >= start or len(''.join((str_so_far, bfs.s))) <= start:
-                # Either done inserting or have not yet reached the starting index
+                # Either done inserting or haven't reached 
+                # the point where we need to.
                 new_components.append(bfs)
             else:
                 divide = start - cur_len
                 head = BaseFmtStr(bfs.s[:divide], atts=bfs.atts)
                 tail = BaseFmtStr(bfs.s[end:] if end else bfs.s[divide:],
                                   atts=bfs.atts) 
-                new_components.extend([head, BaseFmtStr(string), tail])
+                new_components.extend([head, string, tail])
 
-        # should be a fmtstr, not a regular string
         return FmtStr(*new_components)
+
+    def append(self, string):
+        return self.insert(string, len(self))
 
     @classmethod
     def from_str(cls, s):
@@ -269,7 +285,7 @@ class FmtStr(object):
         return atts
 
     def __getattr__(self, att):
-        # thanks to @aerenchyma/@jczetta
+        # thanks to @aerenchyma/@jczett
         def func_help(*args, **kwargs):
              result = getattr(self.s, att)(*args, **kwargs)
              if isinstance(result, (bytes, unicode)):
