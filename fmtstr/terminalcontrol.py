@@ -115,10 +115,16 @@ class TerminalController(object):
             #TODO properly detect escape key! Probably via a timer, or nonblocking read?
 
             if ((chars and chars[0] != '\x1b') or
-            (len(chars) == 2 and chars[1] not in ['[', 'O', '\x1b']) or
-            (len(chars) == 4 and chars[1] == '\x1b' and chars[2] == '[') or
-            (len(chars) > 2 and chars[1] in ['[', 'O'] and chars[-1] not in tuple('1234567890;'))):
-                return ''.join(chars) if not use_curses_aliases else CURSES_TABLE.get(''.join(chars), ''.join(chars))
+                    (len(chars) == 2 and chars[1] not in ['[', 'O', '\x1b']) or
+                    (len(chars) == 4 and chars[1] == '\x1b' and chars[2] == '[') or
+                    (len(chars) > 2 and chars[1] in ['[', 'O'] and chars[-1] not in tuple('1234567890;'))):
+                try:
+                    if isinstance(chars[0], bytes): #if python2, grab a whole UTF8 character
+                        return ''.join(chars).decode('utf8') if not use_curses_aliases else CURSES_TABLE.get(''.join(chars).decode('utf8'), ''.join(chars).decode('utf8'))
+                    else:
+                        return ''.join(chars) if not use_curses_aliases else CURSES_TABLE.get(''.join(chars), ''.join(chars))
+                except UnicodeDecodeError:
+                    pass
             if fake_input:
                 self.in_buffer.extend(list(fake_input))
             if self.in_buffer:

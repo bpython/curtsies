@@ -35,16 +35,6 @@ class TestImMutability(unittest.TestCase):
         self.assertEqual(a.shared_atts['fg'], FG_COLORS['blue'])
         self.assertEqual(b.shared_atts['fg'], FG_COLORS['red'])
 
-    def test_immutability_of_BaseFmtStr(self):
-        a = BaseFmtStr('hi', {'fg':32})
-        self.assertRaises()
-
-    def test_immutibility_of_FmtStr(self):
-        a = fmtstr('hi', 'blue')
-        b = green(a)
-        self.assertEqual(a.shared_atts['fg'], FG_COLORS['blue'])
-        self.assertEqual(b.shared_atts['fg'], FG_COLORS['green'])
-
 class TestFmtStr(unittest.TestCase):
 
     def test_set_atts(self):
@@ -217,6 +207,9 @@ class TestUnicode(unittest.TestCase):
         self.assertEqual(type(fmtstr(u'┌adfs', 'blue')[:2].s), type(fmtstr(u'┌a', 'blue').s))
         self.assertEqual(len(fmtstr(u'┌adfs', 'blue')[:2]), 2)
 
+    def test_unicode_repr(self):
+        repr(BaseFmtStr(u'–'))
+        self.assertEqual(repr(fmtstr(u'–')), repr(u'–'))
 
 class TestRemovalOfBlanks(unittest.TestCase):
     def test_parse_empties(self):
