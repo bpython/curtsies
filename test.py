@@ -55,24 +55,58 @@ class TestFmtStr(unittest.TestCase):
 
     def test_copy_with_new_str(self):
         # Change string but not attributes
-        a = fmtstr('hello')
+        a = fmtstr('hello', 'blue')
         b = a.copy_with_new_str('bye')
         self.assertEqual(a.s, 'hello')
         self.assertEqual(b.s, 'bye')
+        self.assertEqual(a.basefmtstrs[0].atts, b.basefmtstrs[0].atts)
 
-    def test_insert_with_end(self):
-        # Need to test with fmtstr consisting of multiple basefmtstrs
+    def test_insert_with_multiple_basefmtstrs(self):
         a = fmtstr('notion')
         b = a.insert('te', 2, 6)
+        c = b.insert('de', 0)
+
         self.assertEqual(a.s, "notion")
         self.assertEqual(b.s, "note")
+        self.assertEqual(c.s, "denote")
+        self.assertEqual(len(c.basefmtstrs), 3)
 
-    def test_insert_without_end(self):
-        # Need to test with fmtstr consisting of multiple basefmtstrs
+    def test_insert_fmtstr_with_end_without_atts(self):
         a = fmtstr('notion')
-        b = a.insert('ta', 2)
+        b = a.insert('te', 2, 6)
+
         self.assertEqual(a.s, "notion")
-        self.assertEqual(b.s, "notation")
+        self.assertEqual(b.s, "note")
+        self.assertEqual(len(b.basefmtstrs), 2)
+
+    def test_insert_fmtstr_with_end_with_atts(self):
+        # Need to test with fmtstr consisting of multiple basefmtstrs
+        # and with attributes
+        a = fmtstr('notion', 'blue')
+        b = a.insert('te', 2, 6)
+
+        self.assertEqual(a.s, "notion")
+        self.assertEqual(a.basefmtstrs[0].atts, {'fg': 34})
+        self.assertEqual(len(a.basefmtstrs), 1)
+        
+        self.assertEqual(b.s, 'note')
+        self.assertEqual(b.basefmtstrs[0].atts, {'fg': 34})
+        self.assertEqual(b.basefmtstrs[1].atts, {})
+        self.assertEqual(len(b.basefmtstrs), 2)
+
+    def test_insert_fmtstr_without_end(self):
+        a = fmtstr('notion')
+        b = a.insert(fmtstr('ta'), 2)
+        self.assertEqual(a.s, 'notion')
+        self.assertEqual(b.s, 'notation')
+        self.assertEqual(len(b.basefmtstrs), 3)
+
+    def test_insert_string_without_end(self):
+        a = fmtstr('notion')
+        b = a.insert('ta', 2)        
+        self.assertEqual(a.s, 'notion')
+        self.assertEqual(b.s, 'notation')
+        self.assertEqual(len(b.basefmtstrs), 3)
 
     def test_shared_atts(self):
         a = fmtstr('hi', 'blue')
