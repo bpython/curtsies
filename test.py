@@ -211,10 +211,6 @@ class TestUnicode(unittest.TestCase):
         repr(BaseFmtStr(u'–'))
         self.assertEqual(repr(fmtstr(u'–')), repr(u'–'))
 
-class TestRemovalOfBlanks(unittest.TestCase):
-    def test_parse_empties(self):
-        pass
-
 if __name__ == '__main__':
     import fmtstr.fmtstr
     unittest.main()

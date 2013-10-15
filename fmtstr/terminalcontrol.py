@@ -29,25 +29,6 @@ HIDE_CURSOR = "[?25l"
 SHOW_CURSOR = "[?25h"
 ERASE_REST_OF_SCREEN = "[0J"
 
-CURSES_TABLE = {}
-CURSES_TABLE['\x1b[15~'] = 'KEY_F(5)'
-CURSES_TABLE['\x1b[17~'] = 'KEY_F(6)'
-CURSES_TABLE['\x1b[18~'] = 'KEY_F(7)'
-CURSES_TABLE['\x1b[19~'] = 'KEY_F(8)'
-CURSES_TABLE['\x1b[20~'] = 'KEY_F(9)'
-CURSES_TABLE['\x1b[21~'] = 'KEY_F(10)'
-CURSES_TABLE['\x1b[23~'] = 'KEY_F(11)'
-CURSES_TABLE['\x1b[24~'] = 'KEY_F(12)'
-CURSES_TABLE['\x1b[A'] = 'KEY_UP'
-CURSES_TABLE['\x1b[B'] = 'KEY_DOWN'
-CURSES_TABLE['\x1b[C'] = 'KEY_RIGHT'
-CURSES_TABLE['\x1b[D'] = 'KEY_LEFT'
-CURSES_TABLE['\x08'] = 'KEY_BACKSPACE'
-CURSES_TABLE['\x1b[3~'] = 'KEY_DC'
-CURSES_TABLE['\x1b[5~'] = 'KEY_PPAGE'
-CURSES_TABLE['\x1b[6~'] = 'KEY_NPAGE'
-#TODO add home and end? and everything else
-
 def produce_simple_sequence(seq):
     def func(ts):
         ts.write(seq)
@@ -98,15 +79,15 @@ class TerminalController(object):
     def get_event_curses(self):
         """get event, with keypress events translated to their curses equivalent"""
         e = self.get_event()
-        if e in CURSES_TABLE:
-            return CURSES_TABLE[e]
-        return e
+        return e.curses()
 
     def get_event(self, use_curses_aliases=True, fake_input=None):
         """Blocks and returns the next event"""
         #TODO make this cooler - generator? Trie?
         chars = []
         while True:
+            if len(chars) > 10:
+                raise ValueError("Key sequence not detected at some point: %r" % ''.join(chars))
             #logging.debug('checking if instance counter (%d) is less than global (%d) ' % (self.sigwinch_counter, _SIGWINCH_COUNTER))
             if self.sigwinch_counter < _SIGWINCH_COUNTER:
                 self.sigwinch_counter = _SIGWINCH_COUNTER
@@ -114,17 +95,9 @@ class TerminalController(object):
                 return events.WindowChangeEvent(*self.get_screen_size())
             #TODO properly detect escape key! Probably via a timer, or nonblocking read?
 
-            if ((chars and chars[0] != '\x1b') or
-                    (len(chars) == 2 and chars[1] not in ['[', 'O', '\x1b']) or
-                    (len(chars) == 4 and chars[1] == '\x1b' and chars[2] == '[') or
-                    (len(chars) > 2 and chars[1] in ['[', 'O'] and chars[-1] not in tuple('1234567890;'))):
-                try:
-                    if isinstance(chars[0], bytes): #if python2, grab a whole UTF8 character
-                        return ''.join(chars).decode('utf8') if not use_curses_aliases else CURSES_TABLE.get(''.join(chars).decode('utf8'), ''.join(chars).decode('utf8'))
-                    else:
-                        return ''.join(chars) if not use_curses_aliases else CURSES_TABLE.get(''.join(chars), ''.join(chars))
-                except UnicodeDecodeError:
-                    pass
+            c = events.get_key(chars, use_curses_name=use_curses_aliases)
+            if c:
+                return c
             if fake_input:
                 self.in_buffer.extend(list(fake_input))
             if self.in_buffer:
@@ -189,9 +162,10 @@ def test():
         tc.back(4)
         while True:
             e = tc.get_event()
-            tc.write(repr(e))
+            data = "%r : %s" % (e, events.pp_event(e))
+            tc.write(data)
             tc.scroll_down()
-            tc.back(len(repr(e)))
+            tc.back(len(data))
             if e == '':
                 sys.exit()
 
