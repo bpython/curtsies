@@ -95,7 +95,7 @@ class FSArray(object):
         self.rows.extend([fmtstr(' '*self.columns, *self.saved_args, **self.saved_kwargs)
                           for _ in range(additional_rows)])
         colslice = normalize_slice(self.columns, colslice)
-        assert slicesize(rowslice) == len(value)
+        assert slicesize(rowslice) == len(value), repr(rowslice)
         for fs, v in zip(self.rows[rowslice], value):
             fs[colslice] = v
 
