@@ -10,7 +10,7 @@ def timeit(n):
     t0 = time.time()
     add_things(n)
     t1 = time.time()
-    print n, ':', t1 - t0
+    print(n, ':', t1 - t0)
     return (t1 - t0)
 
 ns = range(100, 2000, 100)

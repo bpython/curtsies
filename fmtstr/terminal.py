@@ -32,6 +32,8 @@ class Terminal(object):
         self.keep_last_line = keep_last_line
         self.hide_cursor = hide_cursor
         self._current_lines_by_row = {}
+        self._last_rendered_width = 0
+        self._last_rendered_height = 0
 
     def __enter__(self):
         if self.hide_cursor:
@@ -66,6 +68,10 @@ class Terminal(object):
         # caching of write and tc (avoiding the self. lookups etc) made
         # no significant performance difference here
         height, width = self.tc.get_screen_size()
+        if height != self._last_rendered_height or width != self._last_rendered_width:
+            self._current_lines_by_row = {}
+        self._last_rendered_width = width
+        self._last_rendered_height = height
         rows_for_use = list(range(self.top_usable_row, height + 1))
         shared = min(len(array), len(rows_for_use))
         for row, line in zip(rows_for_use[:shared], array[:shared]):

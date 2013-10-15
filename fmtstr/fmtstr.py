@@ -2,19 +2,19 @@ r"""Colored strings that behave mostly like strings
 
 >>> s = fmtstr("Hey there!", 'red')
 >>> s
-red("Hey there!")
+red('Hey there!')
 >>> s[4:7]
-red("the")
+red('the')
 >>> red_on_blue = fmtstr('hello', 'red', 'on_blue')
 >>> blue_on_red = fmtstr('there', fg='blue', bg='red')
 >>> green = fmtstr('!', 'green')
 >>> full = red_on_blue + ' ' + blue_on_red + green
 >>> full
-on_blue(red("hello"))+" "+on_red(blue("there"))+green("!")
+on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 >>> str(full)
 '\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m'
 >>> fmtstr(', ').join(['a', fmtstr('b'), fmtstr('c', 'blue')])
-"a"+", "+"b"+", "+blue("c")
+'a'+', '+'b'+', '+blue('c')
 """
 #TODO add a way to composite text without losing original formatting information
 
@@ -103,10 +103,8 @@ class BaseFmtStr(object):
         return (''.join(
                         pp_att(att)+'('
                         for att in sorted(self.atts)) +
-               ('"%s"' % self.s) + ')'*len(self.atts))
-# TODO
-# Copy with atts
-# Splice, insert as a special case thereof?
+               ('%r' % self.s) + ')'*len(self.atts))
+
 class FmtStr(object):
     def __init__(self, *components):
         # The assertions below could be useful for debugging, but slow things down considerably
@@ -132,9 +130,9 @@ class FmtStr(object):
     def from_str(cls, s):
         r"""
         >>> fmtstr("|"+fmtstr("hey", fg='red', bg='blue')+"|")
-        "|"+on_blue(red("hey"))+"|"
+        '|'+on_blue(red('hey'))+'|'
         >>> fmtstr('|\x1b[31m\x1b[44mhey\x1b[49m\x1b[39m|')
-        "|"+on_blue(red("hey"))+"|"
+        '|'+on_blue(red('hey'))+'|'
         """
 
         if '\x1b[' in s:
@@ -392,7 +390,7 @@ def fmtstr(string, *args, **kwargs):
     Convenience function for creating a FmtStr
 
     >>> fmtstr('asdf', 'blue', 'on_red')
-    on_red(blue("asdf"))
+    on_red(blue('asdf'))
     """
     atts = parse_args(args, kwargs)
     if isinstance(string, FmtStr):
