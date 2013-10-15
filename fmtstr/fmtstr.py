@@ -121,10 +121,9 @@ class FmtStr(object):
         self._len = None
         self._s = None
 
-    # def splice(self, start, end, string):
-    #     """Replaces the characters at self.s[start:end] with the input string.
-    #     """
-    #     pass
+    def copy_with_new_str(self, string):
+        """Copies the current FmtStr's attributes while changing its string."""
+        pass
 
     def insert(self, string, start, end=None):
         """Inserts the input string at the given index of the fmtstr by 
@@ -132,37 +131,40 @@ class FmtStr(object):
         existing basefmtstr, said basefmtstr is divided into two new ones. 
         Empty basefmtstrs are discarded. 
         """
-        # TODO: Enable insertion of a FmtStr (currently only allows regular strings).
+        # Convert input FmtStr or string to a BaseFmtStr
+        if isinstance(string, FmtStr):
+            new_bfs = string.basefmtstrs[0]
+        else:
+            new_bfs = BaseFmtStr(string)
+            
         new_components = []
+        inserted = False
+        cur_len = 0
 
         for bfs in self.basefmtstrs:
-            # TODO: don't want to iterate through new_components every time
-            str_so_far = ''.join(cmpnt.s for cmpnt in new_components)
-            cur_len = len(str_so_far)
-
-            # Convert input string or FmtStr to BaseFmtStr
-            if isinstance(string, FmtStr):
-                new_bfs = string.basefmtstrs[0]
-                new_string = BaseFmtStr(new_bfs.s, atts=new_bfs.atts)
-            else:
-                new_string = BaseFmtStr(string)
-
-            if cur_len > start or len(''.join((str_so_far, bfs.s))) <= start:
-                # Either done inserting or haven't reached 
-                # the point where we need to.
-                new_components.append(bfs)
-            else:
+            if cur_len <= start and cur_len + len(bfs.s) > start:
+                # Figure out how to split the existing BaseFmtStrs (if 
+                # necessary) and insert the new one.
                 divide = start - cur_len
                 head = BaseFmtStr(bfs.s[:divide], atts=bfs.atts)
                 tail = BaseFmtStr(bfs.s[end:] if end else bfs.s[divide:],
                                   atts=bfs.atts) 
-                new_components.extend(part for part in [head, new_string, tail]
+                new_components.extend(part for part in [head, new_bfs, tail]
                                       if part.s != '')
+                cur_len += len(''.join((head.s, new_bfs.s, tail.s)))
+                inserted = True
+            else:
+                # Either done inserting or don't need to yet.
+                new_components.append(bfs)
+                cur_len += len(bfs.s)
+
+        if not inserted:
+            new_components.append(new_bfs)
 
         return FmtStr(*new_components)
 
     def append(self, string):
-        return self.insert(string, len(self))
+        return self.insert(string, len(self.s))
 
     @classmethod
     def from_str(cls, s):
