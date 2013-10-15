@@ -108,6 +108,13 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(b.s, 'notation')
         self.assertEqual(len(b.basefmtstrs), 3)
 
+    def test_append_without_atts(self):
+        a = fmtstr('no')
+        b = a.append('te')
+        self.assertEqual(a.s, 'no')
+        self.assertEqual(b.s, 'note')
+        self.assertEqual(len(b.basefmtstrs), 2)
+
     def test_shared_atts(self):
         a = fmtstr('hi', 'blue')
         b = fmtstr('there', 'blue')
