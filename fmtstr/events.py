@@ -61,6 +61,9 @@ def curses_name(seq):
 SEQUENCE_NAMES = dict([
   (' ',        '<SPACE>'),
   ('\x1b ',    '<Meta-SPACE>'),
+  ('\t',       '<TAB>'),
+  ('\x1b[Z',   '<Shift-TAB>'),
+  ('\r',       '<RETURN>'),
   ('\x1b[A',   '<UP>'),
   ('\x1b[B',   '<DOWN>'),
   ('\x1b[C',   '<RIGHT>'),
