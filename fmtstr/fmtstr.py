@@ -119,11 +119,6 @@ class FmtStr(object):
         self._len = None
         self._s = None
 
-    # def splice(self, start, end, string):
-    #     """Replaces the characters at self.s[start:end] with the input string.
-    #     """
-    #     pass
-
     def insert(self, string, start, end=None):
         """Inserts the input string at the given index of the fmtstr by 
         creating a new list of basefmtstrs. If the insertion occurs within an 
