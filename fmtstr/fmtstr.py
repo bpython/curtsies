@@ -105,9 +105,7 @@ class BaseFmtStr(object):
                         pp_att(att)+'('
                         for att in sorted(self.atts)) +
                ('"%s"' % self.s) + ')'*len(self.atts))
-# TODO
-# Copy with atts
-# Splice, insert as a special case thereof?
+
 class FmtStr(object):
     def __init__(self, *components):
         # The assertions below could be useful for debugging, but slow things down considerably
@@ -115,28 +113,28 @@ class FmtStr(object):
         #self.basefmtstrs = [x for x in components if len(x) > 0]
         self.basefmtstrs = list(components)
 
-        # caching these leads to a significant speedup
+        # caching these leads tom a significant speedup
         self._str = None
         self._unicode = None
         self._len = None
         self._s = None
 
-    def copy_with_new_str(self, string):
+    def copy_with_new_str(self, new_str):
         """Copies the current FmtStr's attributes while changing its string."""
-        pass
+        # What to do when there are multiple BaseFmtStrs with conflicting atts?
+        old_atts = {att: value for bfs in self.basefmtstrs 
+                    for (att, value) in bfs.atts.items()}
+        return FmtStr(BaseFmtStr(new_str, old_atts))
 
-    def insert(self, string, start, end=None):
+    def insert(self, new_str, start, end=None):
         """Inserts the input string at the given index of the fmtstr by 
         creating a new list of basefmtstrs. If the insertion occurs within an 
         existing basefmtstr, said basefmtstr is divided into two new ones. 
         Empty basefmtstrs are discarded. 
         """
         # Convert input FmtStr or string to a BaseFmtStr
-        if isinstance(string, FmtStr):
-            new_bfs = string.basefmtstrs[0]
-        else:
-            new_bfs = BaseFmtStr(string)
-            
+        new_bfs = new_str.basefmtstrs[0] if isinstance(new_str, 
+                  FmtStr) else BaseFmtStr(new_str)
         new_components = []
         inserted = False
         cur_len = 0
