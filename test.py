@@ -57,6 +57,17 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(b.s, 'bye')
         self.assertEqual(a.basefmtstrs[0].atts, b.basefmtstrs[0].atts)
 
+    def test_various_inserts(self):
+        a = blue('hi')
+        b = a + green('bye')
+        c = b + red('!')
+        self.assertEqual(c.insert('asdfg', 1), 
+                         blue('h')+'asdfg'+blue('i')+green('bye')+red('!'))
+        self.assertEqual(c.insert('asdfg', 1, 4),
+                         blue('h')+'asdfg'+green('e')+red('!')) 
+        self.assertEqual(c.insert('asdfg', 1, 5), 
+                         blue('h')+'asdfg'+red('!'))
+
     def test_insert_with_multiple_basefmtstrs(self):
         a = fmtstr('notion')
         b = a.insert('te', 2, 6)

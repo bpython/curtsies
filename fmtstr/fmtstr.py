@@ -150,41 +150,45 @@ class FmtStr(object):
         old_atts = {att: value for bfs in self.basefmtstrs 
                     for (att, value) in bfs.atts.items()}
         return FmtStr(BaseFmtStr(new_str, old_atts))
-
+    
     def insert(self, new_str, start, end=None):
         """Inserts the input string at the given index of the fmtstr by 
-        creating a new list of basefmtstrs. If the insertion occurs within an 
-        existing basefmtstr, said basefmtstr is divided into two new ones. 
-        Empty basefmtstrs are discarded. 
+        creating a new list of basefmtstrs. If end is provided, new_str will
+        replace the substring self.s[start:end-1].
         """
         # Convert input FmtStr or string to a BaseFmtStr
         new_bfs = new_str.basefmtstrs[0] if isinstance(new_str, 
                   FmtStr) else BaseFmtStr(new_str)
         new_components = []
         inserted = False
-        cur_len = 0
+        if end is None:
+            end = start
 
-        for bfs in self.basefmtstrs:
-            if cur_len <= start and cur_len + len(bfs.s) > start:
+        for bfs, bfs_start, bfs_end in zip(self.basefmtstrs, 
+                                           self.divides[:-1],
+                                           self.divides[1:]):
+            if bfs_start <= start < bfs_end:
                 # Figure out how to split the existing BaseFmtStrs (if 
-                # necessary) and insert the new one.
-                divide = start - cur_len
+                # necessary) and insert the new one. Empty strings are discarded.
+                divide = start - bfs_start
                 head = BaseFmtStr(bfs.s[:divide], atts=bfs.atts)
-                tail = BaseFmtStr(bfs.s[end:] if end else bfs.s[divide:],
-                                  atts=bfs.atts) 
-                new_components.extend(part for part in [head, new_bfs, tail]
-                                      if part.s != '')
-                cur_len += len(''.join((head.s, new_bfs.s, tail.s)))
+                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts) 
+                new_components.extend([head, new_bfs, tail]) # TODO: remove empty strings
                 inserted = True
-            else:
-                # Either done inserting or don't need to yet.
+
+            elif bfs_start < end < bfs_end:
+                divide = start - bfs_start
+                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts) 
+                new_components.append(tail)
+
+            elif bfs_start >= end or bfs_end <= start:
                 new_components.append(bfs)
-                cur_len += len(bfs.s)
+                bfs_start += len(bfs.s)
 
         if not inserted:
             new_components.append(new_bfs)
 
-        return FmtStr(*new_components)
+        return FmtStr(*[s for s in new_components if s.s])
 
     def append(self, string):
         return self.insert(string, len(self.s))
@@ -293,6 +297,16 @@ class FmtStr(object):
              else:
                  return result
         return func_help
+
+    @property
+    def divides(self):
+        """List of indices of divisions between the constituent basefmtstrs"""
+        def add_indices(acc, elem):
+            acc.append(acc[-1] + elem)
+            return acc
+
+        bfs_lens = [len(s) for s in self.basefmtstrs]
+        return reduce(add_indices, bfs_lens, [0])
 
     @property
     def s(self):
