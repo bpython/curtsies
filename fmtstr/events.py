@@ -64,6 +64,7 @@ SEQUENCE_NAMES = dict([
   ('\t',       '<TAB>'),
   ('\x1b[Z',   '<Shift-TAB>'),
   ('\r',       '<RETURN>'),
+  ('\n',       '<RETURN>'),
   ('\x1b[A',   '<UP>'),
   ('\x1b[B',   '<DOWN>'),
   ('\x1b[C',   '<RIGHT>'),

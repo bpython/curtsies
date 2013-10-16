@@ -95,11 +95,14 @@ class TerminalController(object):
                 return events.WindowChangeEvent(*self.get_screen_size())
             #TODO properly detect escape key! Probably via a timer, or nonblocking read?
 
+            logging.debug('getting key for %r', chars)
+            logging.debug('self.in_buffer %r', self.in_buffer)
             c = events.get_key(chars, use_curses_name=use_curses_aliases)
             if c:
                 return c
             if fake_input:
                 self.in_buffer.extend(list(fake_input))
+                fake_input = None
             if self.in_buffer:
                 chars.append(self.in_buffer.pop(0))
                 continue
