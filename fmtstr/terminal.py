@@ -91,6 +91,7 @@ class Terminal(object):
             self.tc.erase_line()
             current_lines_by_row[row] = None
         offscreen_scrolls = 0
+        self.tc.set_cursor_position((height, 1)) # since scroll-down only moves the screen if cursor is at bottom
         for line in rest_of_lines: # if array too big
             logging.debug('sending scroll down message')
             self.tc.scroll_down()

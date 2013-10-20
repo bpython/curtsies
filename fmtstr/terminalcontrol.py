@@ -165,8 +165,9 @@ def test():
         tc.back(4)
         while True:
             e = tc.get_event()
-            data = "%r : %s" % (e, events.pp_event(e))
-            tc.write(data)
+            if e != 's':
+                data = "%r : %s" % (e, events.pp_event(e))
+                tc.write(data)
             tc.scroll_down()
             tc.back(len(data))
             if e == '':
