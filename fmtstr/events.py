@@ -1,5 +1,9 @@
 """Language for describing events that in terminal"""
+import sys
 import threading
+
+PY3 = sys.version_info[0] >= 3
+
 class Event(object):
     pass
 
@@ -28,7 +32,10 @@ def get_key(chars, use_curses_name=True):
             (len(chars) > 2 and chars[1] in ['[', 'O'] and chars[-1] not in tuple('1234567890;'))):
         return None
     try:
-        u = ''.join(chars).decode('utf8')
+        if PY3:
+            u = ''.join(chars)
+        else:
+            u = ''.join(chars).decode('utf8')
     except UnicodeDecodeError:
         return None
     return curses_name(u)
