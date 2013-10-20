@@ -31,7 +31,7 @@ class Terminal(object):
         self.tc = tc
         self.keep_last_line = keep_last_line
         self.hide_cursor = hide_cursor
-        self._current_lines_by_row = {}
+        self._last_lines_by_row = {}
         self._last_rendered_width = 0
         self._last_rendered_height = 0
 
@@ -69,26 +69,27 @@ class Terminal(object):
         # no significant performance difference here
         height, width = self.tc.get_screen_size()
         if height != self._last_rendered_height or width != self._last_rendered_width:
-            self._current_lines_by_row = {}
+            self._last_lines_by_row = {}
         self._last_rendered_width = width
         self._last_rendered_height = height
+        current_lines_by_row = {}
         rows_for_use = list(range(self.top_usable_row, height + 1))
         shared = min(len(array), len(rows_for_use))
         for row, line in zip(rows_for_use[:shared], array[:shared]):
-            if line == self._current_lines_by_row.get(row, None):
+            current_lines_by_row[row] = line
+            if line == self._last_lines_by_row.get(row, None):
                 continue
             self.tc.set_cursor_position((row, 1))
             self.tc.write(str(line))
-            self._current_lines_by_row[row] = line
             if len(line) < width:
                 self.tc.erase_rest_of_line()
         rest_of_lines = array[shared:]
         rest_of_rows = rows_for_use[shared:]
         for row in rest_of_rows: # if array too small
-            if row not in self._current_lines_by_row: continue
+            if self._last_lines_by_row and row not in self._last_lines_by_row: continue
             self.tc.set_cursor_position((row, 1))
             self.tc.erase_line()
-            self._current_lines_by_row[row] = None
+            current_lines_by_row[row] = None
         offscreen_scrolls = 0
         for line in rest_of_lines: # if array too big
             logging.debug('sending scroll down message')
@@ -97,12 +98,16 @@ class Terminal(object):
                 self.top_usable_row -= 1
             else:
                 offscreen_scrolls += 1
-            self._current_lines_by_row = {}
+            current_lines_by_row = dict((k-1, v) for k, v in current_lines_by_row.items())
             logging.debug('new top_usable_row: %d' % self.top_usable_row)
             self.tc.set_cursor_position((height, 1)) # since scrolling moves the cursor
             self.tc.write(str(line))
+            current_lines_by_row[height] = line
 
+        logging.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())
+        logging.debug('lines in current lines by row: %r' % current_lines_by_row.keys())
         self.tc.set_cursor_position((cursor_pos[0]-offscreen_scrolls+self.top_usable_row, cursor_pos[1]+1))
+        self._last_lines_by_row = current_lines_by_row
         return offscreen_scrolls
 
     def array_from_text(self, msg):
