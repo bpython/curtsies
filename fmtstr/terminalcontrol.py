@@ -43,12 +43,17 @@ def produce_cursor_sequence(char):
 class TerminalController(object):
     """Returns terminal control functions partialed for stream returned by
     stream_getter on att lookup"""
-    def __init__(self, in_stream=sys.stdin, out_stream=sys.stdout):
+    def __init__(self, in_stream=sys.stdin, out_stream=sys.stdout, input_mode='cbreak'):
         self.in_stream = in_stream
         self.out_stream = out_stream
         self.in_buffer = []
         self.sigwinch_counter = _SIGWINCH_COUNTER - 1
         self.last_screen_size = None
+        self.queued_sigint = False
+        self.queued_refresh_request = False
+        if not input_mode in ['raw', 'cbreak']:
+            raise ValueError("input_mode must be raw or cbreak")
+        self.input_mode = input_mode
 
     def __enter__(self):
         def signal_handler(signum, frame):
@@ -58,7 +63,17 @@ class TerminalController(object):
         signal.signal(signal.SIGWINCH, signal_handler)
 
         self.original_stty = termios.tcgetattr(self.out_stream)
-        tty.setraw(self.in_stream)
+        if self.input_mode == 'raw':
+            tty.setraw(self.in_stream)
+        else:
+            assert self.input_mode == 'cbreak'
+            tty.setcbreak(self.in_stream)
+
+            def sigint_handler(signum, frame):
+                self.queued_sigint = True
+
+            signal.signal(signal.SIGINT, sigint_handler)
+
         return self
 
     def __exit__(self, type, value, traceback):
@@ -76,6 +91,9 @@ class TerminalController(object):
     show_cursor = produce_simple_sequence(SHOW_CURSOR)
     erase_rest_of_screen = produce_simple_sequence(ERASE_REST_OF_SCREEN)
 
+    def stuff_a_refresh_request(self):
+        self.queued_refresh_request = True
+
     def get_event_curses(self):
         """get event, with keypress events translated to their curses equivalent"""
         e = self.get_event()
@@ -86,6 +104,12 @@ class TerminalController(object):
         #TODO make this cooler - generator? Trie?
         chars = []
         while True:
+            if self.queued_sigint:
+                self.queued_sigint = False
+                return events.SigIntEvent()
+            if self.queued_refresh_request:
+                self.queued_refresh_request = False
+                return events.RefreshRequestEvent('terminal control')
             if len(chars) > 10:
                 raise ValueError("Key sequence not detected at some point: %r" % ''.join(chars))
             #logging.debug('checking if instance counter (%d) is less than global (%d) ' % (self.sigwinch_counter, _SIGWINCH_COUNTER))

@@ -8,8 +8,8 @@ class Event(object):
     pass
 
 class RefreshRequestEvent(Event):
-    def __init__(self):
-        self.who = threading.currentThread()
+    def __init__(self, who='?'):
+        self.who = who
     def __repr__(self):
         return "<RefreshRequestEvent from %r>" % (self.who)
 
@@ -24,6 +24,13 @@ class WindowChangeEvent(Event):
     @property
     def name(self):
         return '<WindowChangeEvent>'
+
+class SigIntEvent(Event):
+    def __repr__(self):
+        return "<SigInt Event>"
+    @property
+    def name(self):
+        return repr(self)
 
 def get_key(chars, use_curses_name=True):
     if not ((chars and chars[0] != '\x1b') or
