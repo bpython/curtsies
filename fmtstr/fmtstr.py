@@ -20,7 +20,6 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 
 import sys
 import re
-from functools import partial
 
 from .escseqparse import parse
 from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
@@ -56,9 +55,9 @@ class BaseFmtStr(object):
     def _get_atts(self):
         return FrozenDict(self._atts)
 
-    atts = property(_get_atts, None, None, 
+    atts = property(_get_atts, None, None,
                     'A copy of the current attributes dictionary')
-                     
+
     s = property(lambda self: self._s) #makes self.s immutable
 
     def __len__(self):
@@ -147,24 +146,24 @@ class FmtStr(object):
     def copy_with_new_str(self, new_str):
         """Copies the current FmtStr's attributes while changing its string."""
         # What to do when there are multiple BaseFmtStrs with conflicting atts?
-        old_atts = {att: value for bfs in self.basefmtstrs 
+        old_atts = {att: value for bfs in self.basefmtstrs
                     for (att, value) in bfs.atts.items()}
         return FmtStr(BaseFmtStr(new_str, old_atts))
-    
+
     def insert(self, new_str, start, end=None):
-        """Inserts the input string at the given index of the fmtstr by 
+        """Inserts the input string at the given index of the fmtstr by
         creating a new list of basefmtstrs. If end is provided, new_str will
         replace the substring self.s[start:end-1].
         """
         # Convert input FmtStr or string to a BaseFmtStr
-        new_bfs = new_str.basefmtstrs[0] if isinstance(new_str, 
+        new_bfs = new_str.basefmtstrs[0] if isinstance(new_str,
                   FmtStr) else BaseFmtStr(new_str)
         new_components = []
         inserted = False
         if end is None:
             end = start
 
-        for bfs, bfs_start, bfs_end in zip(self.basefmtstrs, 
+        for bfs, bfs_start, bfs_end in zip(self.basefmtstrs,
                                            self.divides[:-1],
                                            self.divides[1:]):
             if bfs_start <= start < bfs_end:
@@ -172,13 +171,13 @@ class FmtStr(object):
                 # necessary) and insert the new one. Empty strings are discarded.
                 divide = start - bfs_start
                 head = BaseFmtStr(bfs.s[:divide], atts=bfs.atts)
-                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts) 
+                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts)
                 new_components.extend([head, new_bfs, tail]) # TODO: remove empty strings
                 inserted = True
 
             elif bfs_start < end < bfs_end:
                 divide = start - bfs_start
-                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts) 
+                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts)
                 new_components.append(tail)
 
             elif bfs_start >= end or bfs_end <= start:
@@ -202,7 +201,7 @@ class FmtStr(object):
         for bfs in self.basefmtstrs:
             new_atts = bfs.atts
             new_atts.update(attributes)
-            new_basefmtstrs.append(BaseFmtStr(bfs.s, new_atts)) 
+            new_basefmtstrs.append(BaseFmtStr(bfs.s, new_atts))
         # self.basefmtstrs = new_basefmtstrs
         return FmtStr(*new_basefmtstrs)
 

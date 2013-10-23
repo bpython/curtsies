@@ -3,7 +3,6 @@ import unittest
 from fmtstr.fmtstr import FmtStr, fmtstr, BaseFmtStr
 from fmtstr.fmtfuncs import *
 from fmtstr.termformatconstants import FG_COLORS
-from fmtstr.escseqparse import parse
 from fmtstr.fsarray import fsarray, FSArray
 
 try:
@@ -34,7 +33,7 @@ class TestImmutability(unittest.TestCase):
         d = green(c)
         self.assertEqual(a.shared_atts['fg'], FG_COLORS['blue'])
         self.assertEqual(b.shared_atts['fg'], FG_COLORS['red'])
-        
+
     def test_immutibility_of_FmtStr(self):
         a = fmtstr('hi', 'blue')
         b = green(a)
@@ -61,11 +60,11 @@ class TestFmtStr(unittest.TestCase):
         a = blue('hi')
         b = a + green('bye')
         c = b + red('!')
-        self.assertEqual(c.insert('asdfg', 1), 
+        self.assertEqual(c.insert('asdfg', 1),
                          blue('h')+'asdfg'+blue('i')+green('bye')+red('!'))
         self.assertEqual(c.insert('asdfg', 1, 4),
-                         blue('h')+'asdfg'+green('e')+red('!')) 
-        self.assertEqual(c.insert('asdfg', 1, 5), 
+                         blue('h')+'asdfg'+green('e')+red('!'))
+        self.assertEqual(c.insert('asdfg', 1, 5),
                          blue('h')+'asdfg'+red('!'))
 
     def test_insert_with_multiple_basefmtstrs(self):
@@ -95,7 +94,7 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(a.s, "notion")
         self.assertEqual(a.basefmtstrs[0].atts, {'fg': 34})
         self.assertEqual(len(a.basefmtstrs), 1)
-        
+
         self.assertEqual(b.s, 'note')
         self.assertEqual(b.basefmtstrs[0].atts, {'fg': 34})
         self.assertEqual(b.basefmtstrs[1].atts, {})
@@ -110,7 +109,7 @@ class TestFmtStr(unittest.TestCase):
 
     def test_insert_string_without_end(self):
         a = fmtstr('notion')
-        b = a.insert('ta', 2)        
+        b = a.insert('ta', 2)
         self.assertEqual(a.s, 'notion')
         self.assertEqual(b.s, 'notation')
         self.assertEqual(len(b.basefmtstrs), 3)
