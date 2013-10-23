@@ -37,8 +37,8 @@ def slicesize(s):
 def fsarray(strings, *args, **kwargs):
     fstrings = [s if isinstance(s, FmtStr) else fmtstr(s, *args, **kwargs) for s in strings]
     arr = FSArray(len(fstrings), max(len(s) for s in fstrings) if fstrings else 0, *args, **kwargs)
-    for fs, s in zip(arr.rows, fstrings):
-        fs[0:len(s)] = s
+    rows = [fs.setslice(0, len(s), s) for fs, s in zip(arr.rows, fstrings)]
+    arr.rows = rows
     return arr
 
 class FSArray(object):
@@ -96,8 +96,9 @@ class FSArray(object):
                           for _ in range(additional_rows)])
         colslice = normalize_slice(self.columns, colslice)
         assert slicesize(rowslice) == len(value), repr(rowslice)
-        for fs, v in zip(self.rows[rowslice], value):
-            fs[colslice] = v
+        self.rows = (self.rows[:rowslice.start] +
+                     [fs.setslice(colslice.start, colslice.stop, v) for fs, v in zip(self.rows[rowslice], value)] +
+                     self.rows[rowslice.stop:])
 
     def dumb_display(self):
         for line in self.rows:
