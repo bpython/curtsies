@@ -67,12 +67,6 @@ def opp(c):
     """
     return 'x' if c == 'o' else 'o'
 
-def base_case(board, who):
-    w = board.winner()
-    if w == who: return 1
-    if w == opp(who): return -1
-    if board.turn == 9: return 0
-
 def value(board, who='x'):
     """Returns the value of a board
     >>> b = Board(); b._rows = [['x', 'x', 'x'], ['x', 'x', 'x'], ['x', 'x', 'x']]
