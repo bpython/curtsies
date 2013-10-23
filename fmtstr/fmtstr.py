@@ -20,6 +20,7 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 
 import sys
 import re
+from functools import partial
 
 from .escseqparse import parse
 from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
@@ -112,7 +113,7 @@ class FmtStr(object):
         #self.basefmtstrs = [x for x in components if len(x) > 0]
         self.basefmtstrs = list(components)
 
-        # caching these leads to a significant speedup
+        # caching these leads tom a significant speedup
         self._str = None
         self._unicode = None
         self._len = None
@@ -126,6 +127,7 @@ class FmtStr(object):
         >>> fmtstr('|\x1b[31m\x1b[44mhey\x1b[49m\x1b[39m|')
         '|'+on_blue(red('hey'))+'|'
         """
+
         if '\x1b[' in s:
             tokens_and_strings = parse(s)
             bases = []
@@ -142,15 +144,67 @@ class FmtStr(object):
         else:
             return FmtStr(BaseFmtStr(s))
 
-    def set_attributes(self, **attributes):
+    def copy_with_new_str(self, new_str):
+        """Copies the current FmtStr's attributes while changing its string."""
+        # What to do when there are multiple BaseFmtStrs with conflicting atts?
+        old_atts = {att: value for bfs in self.basefmtstrs 
+                    for (att, value) in bfs.atts.items()}
+        return FmtStr(BaseFmtStr(new_str, old_atts))
+    
+    def insert(self, new_str, start, end=None):
+        """Inserts the input string at the given index of the fmtstr by 
+        creating a new list of basefmtstrs. If end is provided, new_str will
+        replace the substring self.s[start:end-1].
+        """
+        # Convert input FmtStr or string to a BaseFmtStr
+        new_bfs = new_str.basefmtstrs[0] if isinstance(new_str, 
+                  FmtStr) else BaseFmtStr(new_str)
+        new_components = []
+        inserted = False
+        if end is None:
+            end = start
+
+        for bfs, bfs_start, bfs_end in zip(self.basefmtstrs, 
+                                           self.divides[:-1],
+                                           self.divides[1:]):
+            if bfs_start <= start < bfs_end:
+                # Figure out how to split the existing BaseFmtStrs (if 
+                # necessary) and insert the new one. Empty strings are discarded.
+                divide = start - bfs_start
+                head = BaseFmtStr(bfs.s[:divide], atts=bfs.atts)
+                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts) 
+                new_components.extend([head, new_bfs, tail]) # TODO: remove empty strings
+                inserted = True
+
+            elif bfs_start < end < bfs_end:
+                divide = start - bfs_start
+                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts) 
+                new_components.append(tail)
+
+            elif bfs_start >= end or bfs_end <= start:
+                new_components.append(bfs)
+                bfs_start += len(bfs.s)
+
+        if not inserted:
+            new_components.append(new_bfs)
+
+        return FmtStr(*[s for s in new_components if s.s])
+
+    def append(self, string):
+        return self.insert(string, len(self.s))
+
+    def copy_with_new_atts(self, **attributes):
         self._unicode = None
         self._str = None
+
+        # Copy original basefmtstrs, but with new attributes
         new_basefmtstrs = []
-        for fs in self.basefmtstrs:
-            new_atts = fs.atts
+        for bfs in self.basefmtstrs:
+            new_atts = bfs.atts
             new_atts.update(attributes)
-            new_basefmtstrs.append(BaseFmtStr(fs.s, new_atts)) 
-        self.basefmtstrs = new_basefmtstrs
+            new_basefmtstrs.append(BaseFmtStr(bfs.s, new_atts)) 
+        # self.basefmtstrs = new_basefmtstrs
+        return FmtStr(*new_basefmtstrs)
 
     def join(self, iterable):
         iterable = list(iterable)
@@ -233,7 +287,7 @@ class FmtStr(object):
         return atts
 
     def __getattr__(self, att):
-        # thanks to @aerenchyma/@jczetta
+        # thanks to @aerenchyma/@jczett
         def func_help(*args, **kwargs):
              result = getattr(self.s, att)(*args, **kwargs)
              if isinstance(result, (bytes, unicode)):
@@ -243,6 +297,16 @@ class FmtStr(object):
              else:
                  return result
         return func_help
+
+    @property
+    def divides(self):
+        """List of indices of divisions between the constituent basefmtstrs"""
+        def add_indices(acc, elem):
+            acc.append(acc[-1] + elem)
+            return acc
+
+        bfs_lens = [len(s) for s in self.basefmtstrs]
+        return reduce(add_indices, bfs_lens, [0])
 
     @property
     def s(self):
@@ -285,6 +349,7 @@ class FmtStr(object):
         return fmtstr(output)
 
     def __setitem__(self, index, value):
+        raise Exception("No!")
         self._unicode = None
         self._str = None
         self._len = None
@@ -381,12 +446,12 @@ def fmtstr(string, *args, **kwargs):
     """
     atts = parse_args(args, kwargs)
     if isinstance(string, FmtStr):
-        string.set_attributes(**atts)
-        return string
+        new_str = string.copy_with_new_atts(**atts)
+        return new_str
     elif isinstance(string, (bytes, unicode)):
         string = FmtStr.from_str(string)
-        string.set_attributes(**atts)
-        return string
+        new_str = string.copy_with_new_atts(**atts)
+        return new_str
     else:
         raise ValueError("Bad Args: %r (of type %s), %r, %r" % (string, type(string), args, kwargs))
 

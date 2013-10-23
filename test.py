@@ -25,7 +25,7 @@ class TestFmtStrInitialization(unittest.TestCase):
     def test_actual_init(self):
         FmtStr()
 
-class TestImMutability(unittest.TestCase):
+class TestImmutability(unittest.TestCase):
 
     def test_fmt_strings_remain_unchanged_when_used_to_construct_other_ones(self):
         a = fmtstr('hi', 'blue')
@@ -34,13 +34,93 @@ class TestImMutability(unittest.TestCase):
         d = green(c)
         self.assertEqual(a.shared_atts['fg'], FG_COLORS['blue'])
         self.assertEqual(b.shared_atts['fg'], FG_COLORS['red'])
+        
+    def test_immutibility_of_FmtStr(self):
+        a = fmtstr('hi', 'blue')
+        b = green(a)
+        self.assertEqual(a.shared_atts['fg'], FG_COLORS['blue'])
+        self.assertEqual(b.shared_atts['fg'], FG_COLORS['green'])
 
 class TestFmtStr(unittest.TestCase):
 
-    def test_set_atts(self):
+    def test_copy_with_new_atts(self):
         a = fmtstr('hello')
-        a.set_attributes(bold = True)
-        self.assertEqual(a.basefmtstrs[0].atts, {'bold': True})
+        b = a.copy_with_new_atts(bold = True)
+        self.assertEqual(a.shared_atts, {})
+        self.assertEqual(b.shared_atts, {'bold': True})
+
+    def test_copy_with_new_str(self):
+        # Change string but not attributes
+        a = fmtstr('hello', 'blue')
+        b = a.copy_with_new_str('bye')
+        self.assertEqual(a.s, 'hello')
+        self.assertEqual(b.s, 'bye')
+        self.assertEqual(a.basefmtstrs[0].atts, b.basefmtstrs[0].atts)
+
+    def test_various_inserts(self):
+        a = blue('hi')
+        b = a + green('bye')
+        c = b + red('!')
+        self.assertEqual(c.insert('asdfg', 1), 
+                         blue('h')+'asdfg'+blue('i')+green('bye')+red('!'))
+        self.assertEqual(c.insert('asdfg', 1, 4),
+                         blue('h')+'asdfg'+green('e')+red('!')) 
+        self.assertEqual(c.insert('asdfg', 1, 5), 
+                         blue('h')+'asdfg'+red('!'))
+
+    def test_insert_with_multiple_basefmtstrs(self):
+        a = fmtstr('notion')
+        b = a.insert('te', 2, 6)
+        c = b.insert('de', 0)
+
+        self.assertEqual(a.s, "notion")
+        self.assertEqual(b.s, "note")
+        self.assertEqual(c.s, "denote")
+        self.assertEqual(len(c.basefmtstrs), 3)
+
+    def test_insert_fmtstr_with_end_without_atts(self):
+        a = fmtstr('notion')
+        b = a.insert('te', 2, 6)
+
+        self.assertEqual(a.s, "notion")
+        self.assertEqual(b.s, "note")
+        self.assertEqual(len(b.basefmtstrs), 2)
+
+    def test_insert_fmtstr_with_end_with_atts(self):
+        # Need to test with fmtstr consisting of multiple basefmtstrs
+        # and with attributes
+        a = fmtstr('notion', 'blue')
+        b = a.insert('te', 2, 6)
+
+        self.assertEqual(a.s, "notion")
+        self.assertEqual(a.basefmtstrs[0].atts, {'fg': 34})
+        self.assertEqual(len(a.basefmtstrs), 1)
+        
+        self.assertEqual(b.s, 'note')
+        self.assertEqual(b.basefmtstrs[0].atts, {'fg': 34})
+        self.assertEqual(b.basefmtstrs[1].atts, {})
+        self.assertEqual(len(b.basefmtstrs), 2)
+
+    def test_insert_fmtstr_without_end(self):
+        a = fmtstr('notion')
+        b = a.insert(fmtstr('ta'), 2)
+        self.assertEqual(a.s, 'notion')
+        self.assertEqual(b.s, 'notation')
+        self.assertEqual(len(b.basefmtstrs), 3)
+
+    def test_insert_string_without_end(self):
+        a = fmtstr('notion')
+        b = a.insert('ta', 2)        
+        self.assertEqual(a.s, 'notion')
+        self.assertEqual(b.s, 'notation')
+        self.assertEqual(len(b.basefmtstrs), 3)
+
+    def test_append_without_atts(self):
+        a = fmtstr('no')
+        b = a.append('te')
+        self.assertEqual(a.s, 'no')
+        self.assertEqual(b.s, 'note')
+        self.assertEqual(len(b.basefmtstrs), 2)
 
     def test_shared_atts(self):
         a = fmtstr('hi', 'blue')
@@ -110,16 +190,6 @@ class TestSlicing(unittest.TestCase):
         self.assertEqual(fmtstr('Hi!', 'blue')[1:], fmtstr('i!', 'blue'))
         # considering changing behavior so that this doens't work
         # self.assertEqual(fmtstr('Hi!', 'blue')[15:18], fmtstr('', 'blue'))
-
-    def AWLKJAS_set_index(self):
-        f = fmtstr('Hi!', 'blue')
-        self.assertRaises(IndexError, f.__setitem__, 12, 'a')
-        f = fmtstr('Hi!', 'blue')
-        f[1] = fmtstr('o')
-        changed = blue('H') + plain('o') + blue('!')
-        self.assertEqual(str(f), str(changed))
-        self.assertEqual(f, changed)
-
 
 class TestComposition(unittest.TestCase):
 
