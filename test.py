@@ -153,6 +153,16 @@ class TestFmtStr(unittest.TestCase):
         a = blue(red('hello'))
         self.assertEqual(a, blue('hello'))
 
+    def test_combine(self):
+        self.assertEqual(on_red('yo') + on_blue('   '),
+                         on_blue(' '*5).insert(on_red('yo'), 0, 2))
+        self.assertEqual(' ' + on_red('yo') + on_blue('   '),
+                         on_blue(' '*6).insert(' ' + on_red('yo'), 0, 3))
+        self.assertEqual(on_blue("hey") + ' ' + on_red('yo') + on_blue('   '),
+                         on_blue(' '*9).insert(on_blue("hey") + ' ' + on_red('yo'), 0, 6))
+        self.assertEqual(on_blue(' '*5) + on_blue("hey") + ' ' + on_red('yo') + on_blue('   '),
+                         on_blue(' '*14).insert(on_blue("hey") + ' ' + on_red('yo'), 5, 11))
+
 class TestBaseFmtStr(unittest.TestCase):
     def test_getitem(self):
         self.assertEqual(BaseFmtStr('hi', {'fg':37})[5], 'h')
