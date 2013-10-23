@@ -150,6 +150,15 @@ class FmtStr(object):
                     for (att, value) in bfs.atts.items()}
         return FmtStr(BaseFmtStr(new_str, old_atts))
 
+    def setitem(self, startindex, fs):
+        """Shim for easily converting old __setitem__ calls"""
+        return self.setslice(startindex, startindex+1, fs)
+
+    def setslice(self, startindex, endindex, fs):
+        """Shim for easily converting old __setitem__ calls"""
+        assert len(fs) == endindex - startindex
+        return self.insert(fs, startindex, endindex)
+
     def insert(self, new_str, start, end=None):
         """Inserts the input string at the given index of the fmtstr by
         creating a new list of basefmtstrs. If end is provided, new_str will
