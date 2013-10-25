@@ -165,10 +165,8 @@ class FmtStr(object):
         creating a new list of basefmtstrs. If end is provided, new_str will
         replace the substring self.s[start:end-1].
         """
-        # Convert input FmtStr or string to a BaseFmtStr
-        if len(new_str) == 0: #TODO is this possible?
-            return FmtStr(*[s for s in self.basefmtstrs if s.s])
         new_fs = new_str if isinstance(new_str, FmtStr) else fmtstr(new_str)
+        assert len(new_fs.basefmtstrs) > 0
         new_components = []
         inserted = False
         if end is None:
@@ -178,69 +176,29 @@ class FmtStr(object):
         for bfs, bfs_start, bfs_end in zip(self.basefmtstrs,
                                            self.divides[:-1],
                                            self.divides[1:]):
-
-            """Diagram:
-
-                ab-c d-ef-g hi-jk-l
-                    |      |
-                  start   end
-                    |      |
-                     insert
-                  mn-opq-rs-tu
-
-                results in
-                ab-c-mn-opq-rs-tu-hi-jk-l"""
-
-            if bfs_start >= end and end != 0:
-                """in ab-cd-ef-ghi:          in   ab-cd-ef:
-                           |  |    ab, cd       ||         cd, ef
-                          insert              insert             """
+            if end == bfs_start == 0:
+                new_components.extend(new_fs.basefmtstrs)
                 new_components.append(bfs)
-            elif end == 0 and bfs_start == end:
-                """in    ab-cd-ef:
-                       || 
-                     insert"""
-                if not inserted:
-                    inserted = True
-                    new_components.extend(new_fs.basefmtstrs)
-                new_components.append(bfs)
-            elif bfs_end <= start:
-                """in ab-cd-ef-ghi:
-                           |  |    ghi
-                          insert               """
-                new_components.append(bfs)
-            elif bfs_start >= start and bfs_end <= end:
-                """in ab-c d-ef-g hi:
-                          |      |   ef
-                           insert               """
-                pass
-            else:
-                if bfs_start <= start < bfs_end:
-                    """in ab-cd-e f-ghi:     in ab-c d-ef-g hi:
-                            |    |      cd          |      |   cd
-                            insert                   insert
+                inserted = True
 
-                    * get partial old basefmtstr if necessary ("head")
-                    * add all basefmtstrs
-
-                    this only gets triggered if start <= len(orig_fmtstr);
-                    otherwise, tack all new basefmtstrs onto end
-                    """
-
-                    assert len(new_fs.basefmtstrs) > 0
-                    divide = start - bfs_start
-                    head = BaseFmtStr(bfs.s[:divide], atts=bfs.atts)
-
-                    new_components.append(head)
-                    new_components.extend(new_fs.basefmtstrs)
-                    inserted = True
+            elif bfs_start <= start < bfs_end:
+                divide = start - bfs_start
+                head = BaseFmtStr(bfs.s[:divide], atts=bfs.atts)
+                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts)
+                new_components.extend([head] + new_fs.basefmtstrs)
+                inserted = True
 
                 if bfs_start < end < bfs_end:
-                    """
-                    * add partial end basefmtstr if necessary ("tail")
-                    """
                     tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts)
                     new_components.append(tail)
+
+            elif bfs_start < end < bfs_end:
+                divide = start - bfs_start
+                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts)
+                new_components.append(tail)
+
+            elif bfs_start >= end or bfs_end <= start:
+                new_components.append(bfs)
 
         if not inserted:
             new_components.extend(new_fs.basefmtstrs)
