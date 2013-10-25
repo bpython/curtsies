@@ -20,6 +20,7 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 
 import sys
 import re
+import itertools
 
 from .escseqparse import parse
 from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
@@ -165,36 +166,85 @@ class FmtStr(object):
         replace the substring self.s[start:end-1].
         """
         # Convert input FmtStr or string to a BaseFmtStr
-        new_bfs = new_str.basefmtstrs[0] if isinstance(new_str,
-                  FmtStr) else BaseFmtStr(new_str)
+        if len(new_str) == 0: #TODO is this possible?
+            return FmtStr(*[s for s in self.basefmtstrs if s.s])
+        new_fs = new_str if isinstance(new_str, FmtStr) else fmtstr(new_str)
         new_components = []
         inserted = False
         if end is None:
             end = start
+        tail = None
 
         for bfs, bfs_start, bfs_end in zip(self.basefmtstrs,
                                            self.divides[:-1],
                                            self.divides[1:]):
-            if bfs_start <= start < bfs_end:
-                # Figure out how to split the existing BaseFmtStrs (if 
-                # necessary) and insert the new one. Empty strings are discarded.
-                divide = start - bfs_start
-                head = BaseFmtStr(bfs.s[:divide], atts=bfs.atts)
-                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts)
-                new_components.extend([head, new_bfs, tail]) # TODO: remove empty strings
-                inserted = True
 
-            elif bfs_start < end < bfs_end:
-                divide = start - bfs_start
-                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts)
-                new_components.append(tail)
+            """Diagram:
 
-            elif bfs_start >= end or bfs_end <= start:
+                ab-c d-ef-g hi-jk-l
+                    |      |
+                  start   end
+                    |      |
+                     insert
+                  mn-opq-rs-tu
+
+                results in
+                ab-c-mn-opq-rs-tu-hi-jk-l"""
+
+            if bfs_start >= end and end != 0:
+                """in ab-cd-ef-ghi:          in   ab-cd-ef:
+                           |  |    ab, cd       ||         cd, ef
+                          insert              insert             """
                 new_components.append(bfs)
-                bfs_start += len(bfs.s)
+            elif end == 0 and bfs_start == end:
+                """in    ab-cd-ef:
+                       || 
+                     insert"""
+                if not inserted:
+                    inserted = True
+                    new_components.extend(new_fs.basefmtstrs)
+                new_components.append(bfs)
+            elif bfs_end <= start:
+                """in ab-cd-ef-ghi:
+                           |  |    ghi
+                          insert               """
+                new_components.append(bfs)
+            elif bfs_start >= start and bfs_end <= end:
+                """in ab-c d-ef-g hi:
+                          |      |   ef
+                           insert               """
+                pass
+            else:
+                if bfs_start <= start < bfs_end:
+                    """in ab-cd-e f-ghi:     in ab-c d-ef-g hi:
+                            |    |      cd          |      |   cd
+                            insert                   insert
+
+                    * get partial old basefmtstr if necessary ("head")
+                    * add all basefmtstrs
+
+                    this only gets triggered if start <= len(orig_fmtstr);
+                    otherwise, tack all new basefmtstrs onto end
+                    """
+
+                    assert len(new_fs.basefmtstrs) > 0
+                    divide = start - bfs_start
+                    head = BaseFmtStr(bfs.s[:divide], atts=bfs.atts)
+
+                    new_components.append(head)
+                    new_components.extend(new_fs.basefmtstrs)
+                    inserted = True
+
+                if bfs_start < end < bfs_end:
+                    """
+                    * add partial end basefmtstr if necessary ("tail")
+                    """
+                    tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts)
+                    new_components.append(tail)
 
         if not inserted:
-            new_components.append(new_bfs)
+            new_components.extend(new_fs.basefmtstrs)
+            inserted = True
 
         return FmtStr(*[s for s in new_components if s.s])
 

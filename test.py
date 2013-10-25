@@ -40,21 +40,12 @@ class TestImmutability(unittest.TestCase):
         self.assertEqual(a.shared_atts['fg'], FG_COLORS['blue'])
         self.assertEqual(b.shared_atts['fg'], FG_COLORS['green'])
 
-class TestFmtStr(unittest.TestCase):
 
-    def test_copy_with_new_atts(self):
-        a = fmtstr('hello')
-        b = a.copy_with_new_atts(bold = True)
-        self.assertEqual(a.shared_atts, {})
-        self.assertEqual(b.shared_atts, {'bold': True})
+class TestFmtStrInsert(unittest.TestCase):
 
-    def test_copy_with_new_str(self):
-        # Change string but not attributes
-        a = fmtstr('hello', 'blue')
-        b = a.copy_with_new_str('bye')
-        self.assertEqual(a.s, 'hello')
-        self.assertEqual(b.s, 'bye')
-        self.assertEqual(a.basefmtstrs[0].atts, b.basefmtstrs[0].atts)
+    def test_simple_beginning_insert(self):
+        self.assertEqual(fmtstr('abc').insert('d', 0), fmtstr('dabc'))
+        self.assertEqual(fmtstr('abc').insert('d', 0), 'd'+fmtstr('abc'))
 
     def test_various_inserts(self):
         a = blue('hi')
@@ -66,6 +57,9 @@ class TestFmtStr(unittest.TestCase):
                          blue('h')+'asdfg'+green('e')+red('!'))
         self.assertEqual(c.insert('asdfg', 1, 5),
                          blue('h')+'asdfg'+red('!'))
+
+    def test_insert_of_empty_fmtstr(self):
+        self.assertEqual(fmtstr('ab').insert('', 1), fmtstr('ab'))
 
     def test_insert_with_multiple_basefmtstrs(self):
         a = fmtstr('notion')
@@ -114,6 +108,34 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(b.s, 'notation')
         self.assertEqual(len(b.basefmtstrs), 3)
 
+    def test_multiple_bfs_insert(self):
+        self.assertEqual(fmtstr('a') + blue('b'),
+                         on_blue(' '*2).insert(fmtstr('a')+blue('b'), 0, 2))
+        self.assertEqual(on_red('yo') + on_blue('   '),
+                         on_blue(' '*5).insert(on_red('yo'), 0, 2))
+        self.assertEqual(' ' + on_red('yo') + on_blue('   '),
+                         on_blue(' '*6).insert(' ' + on_red('yo'), 0, 3))
+        self.assertEqual(on_blue("hey") + ' ' + on_red('yo') + on_blue('   '),
+                         on_blue(' '*9).insert(on_blue("hey") + ' ' + on_red('yo'), 0, 6))
+        self.assertEqual(on_blue(' '*5) + on_blue("hey") + ' ' + on_red('yo') + on_blue('   '),
+                         on_blue(' '*14).insert(on_blue("hey") + ' ' + on_red('yo'), 5, 11))
+
+class TestFmtStr(unittest.TestCase):
+
+    def test_copy_with_new_atts(self):
+        a = fmtstr('hello')
+        b = a.copy_with_new_atts(bold = True)
+        self.assertEqual(a.shared_atts, {})
+        self.assertEqual(b.shared_atts, {'bold': True})
+
+    def test_copy_with_new_str(self):
+        # Change string but not attributes
+        a = fmtstr('hello', 'blue')
+        b = a.copy_with_new_str('bye')
+        self.assertEqual(a.s, 'hello')
+        self.assertEqual(b.s, 'bye')
+        self.assertEqual(a.basefmtstrs[0].atts, b.basefmtstrs[0].atts)
+
     def test_append_without_atts(self):
         a = fmtstr('no')
         b = a.append('te')
@@ -153,15 +175,6 @@ class TestFmtStr(unittest.TestCase):
         a = blue(red('hello'))
         self.assertEqual(a, blue('hello'))
 
-    def test_combine(self):
-        self.assertEqual(on_red('yo') + on_blue('   '),
-                         on_blue(' '*5).insert(on_red('yo'), 0, 2))
-        self.assertEqual(' ' + on_red('yo') + on_blue('   '),
-                         on_blue(' '*6).insert(' ' + on_red('yo'), 0, 3))
-        self.assertEqual(on_blue("hey") + ' ' + on_red('yo') + on_blue('   '),
-                         on_blue(' '*9).insert(on_blue("hey") + ' ' + on_red('yo'), 0, 6))
-        self.assertEqual(on_blue(' '*5) + on_blue("hey") + ' ' + on_red('yo') + on_blue('   '),
-                         on_blue(' '*14).insert(on_blue("hey") + ' ' + on_red('yo'), 5, 11))
 
 class TestBaseFmtStr(unittest.TestCase):
     def test_getitem(self):
@@ -259,9 +272,9 @@ class TestUnicode(unittest.TestCase):
     def test_len_of_unicode_in_fsarray(self):
 
         fsa = FSArray(3, 2)
-        fsa.rows[0][0:2] = u'┌─'
+        fsa.rows[0] = fsa.rows[0].setslice(0, 2, u'┌─')
         self.assertEqual(fsa.shape, (3, 2))
-        fsa.rows[0][0:2] = fmtstr(u'┌─', 'blue')
+        fsa.rows[0] = fsa.rows[0].setslice(0, 2, fmtstr(u'┌─', 'blue'))
         self.assertEqual(fsa.shape, (3, 2))
 
 
