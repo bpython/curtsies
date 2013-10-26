@@ -30,7 +30,7 @@ if __name__ == '__main__':
             a = [blue(on_red('q'*columns)) for _ in range(rows)]
             arrays = []
             for i in range(n):
-                a[i // columns][i % columns] = 'x'
+                a[i // columns] = a[i // columns].setitem(i % columns, 'x')
                 arrays.append([fs.copy() for fs in a])
             for i in range(n):
                 t.render_to_terminal(arrays[i])

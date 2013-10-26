@@ -6,7 +6,7 @@ Colored/Styled Strings for the Terminal
 (http://en.wikipedia.org/wiki/ANSI_escape_code)
 specifying color and other formatting to a terminal.
 
-`FmtStr`s
+`FmtStr`
 =========
 
 ![fmtstr example screenshot](http://i.imgur.com/7lFaxsz.png)
@@ -41,19 +41,20 @@ They allow slicing, which returns a new FmtStr object:
     >>> (blue('asdf') + on_red('adsf'))[3:7]
     blue("f")+on_red("ads")
 
-FmtStrs are *mutable* - you can change them via slice assignment:
+FmtStrs are *immutable* - but you can create new ones with `insert`:
 
     >>> from fmtstr.fmtfuncs import *
     >>> f = blue('hey there') + on_red(' Tom!')
-    >>> f[1:3] = 'ot'
-    >>> f
+    >>> g.insert('ot', 1, 3)
+    >>> g
     blue("h")+"ot"+blue(" there")+on_red(" Tom!")
 
-You can even change their length:
+which can even change their length:
 
-    >>> f[1:3] = 'something longer'
+    >>> f.insert('something longer', 2)
+    blue("h")+"something longer"+blue("ot")+blue(" there")+on_red(" Tom!")
 
-though this will be fixed and FmtStrs won't be mutable at all due to efforts of @OufeiDong
+Thanks to @OufeiDong for fixing this!
 
 FmtStrs greedily absorb strings, but no formatting is applied
 
@@ -162,3 +163,12 @@ writing command line interfaces like the REPL
 No Windows support currently - hoping to use [colorama](https://pypi.python.org/pypi/colorama)
 for this, but currently Colorama doesn't implement many of the ANSI terminal control sequences
 used by the terminal controller.
+
+
+Authors
+-------
+* Thomas Ballinger
+* Fei Dong - work on making FmtStr and BaseFmtStr immutable
+* Julia Evans - help with Python 3 Conversion:
+* Zach Allaun, Mary Rose Cook, Alex Clemmer - Code Review of terminal.py
+* inspired by a conversation with Scott Feeney
