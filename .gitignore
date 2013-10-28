@@ -5,6 +5,8 @@ venv*
 *.egg-info
 *.log
 .tox
+.coverage
+cover
 
 build
 dist
