@@ -41,6 +41,7 @@ class Board(object):
     def whose_turn(self):
         return 'xo'[self.turn % 2]
     def winner(self):
+        """Returns either x or o if one of them won, otherwise None"""
         for c in 'xo':
             for comb in [(0,3,6), (1,4,7), (2,5,8), (0,1,2), (3,4,5), (6,7,8), (0,4,8), (2,4,6)]:
                 if all(self.spots[p] == c for p in comb):
@@ -83,11 +84,17 @@ def value(board, who='x'):
     -1
     """
     w = board.winner()
-    if w == who: return 1
-    if w == opp(who): return -1
-    if board.turn == 9: return 0
-    if who == board.whose_turn: return max([value(b, who) for b in board.possible()])
-    else: return min([value(b, who) for b in board.possible()])
+    if w == who:
+        return 1
+    if w == opp(who):
+        return -1
+    if board.turn == 9:
+        return 0
+
+    if who == board.whose_turn:
+        return max([value(b, who) for b in board.possible()])
+    else:
+        return min([value(b, who) for b in board.possible()])
 
 def ai(board, who='x'):
     """
