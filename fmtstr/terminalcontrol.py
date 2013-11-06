@@ -60,6 +60,7 @@ class TerminalController(object):
             global _SIGWINCH_COUNTER
             _SIGWINCH_COUNTER += 1
             self.last_screen_size = None
+        self.orig_sigwinch_handler = signal.getsignal(signal.SIGWINCH)
         signal.signal(signal.SIGWINCH, signal_handler)
 
         self.original_stty = termios.tcgetattr(self.out_stream)
@@ -68,6 +69,7 @@ class TerminalController(object):
         else:
             assert self.input_mode == 'cbreak'
             tty.setcbreak(self.in_stream)
+            self.orig_sigint_handler = signal.getsignal(signal.SIGINT)
 
             def sigint_handler(signum, frame):
                 self.queued_sigint = True
@@ -77,7 +79,10 @@ class TerminalController(object):
         return self
 
     def __exit__(self, type, value, traceback):
-        signal.signal(signal.SIGWINCH, lambda: None)
+        if self.orig_sigwinch_handler:
+            signal.signal(signal.SIGWINCH, self.orig_sigwinch_handler)
+        if self.orig_sigint_handler:
+            signal.signal(signal.SIGINT, self.orig_sigint_handler)
         termios.tcsetattr(self.out_stream, termios.TCSANOW, self.original_stty)
         #os.system('stty '+self.original_stty)
 
@@ -130,10 +135,18 @@ class TerminalController(object):
             if self.in_buffer:
                 chars.append(self.in_buffer.pop(0))
                 continue
+
+            prev_sigint_handler = signal.getsignal(signal.SIGINT)
+            signal.signal(signal.SIGINT, signal.default_int_handler)
             try:
                 chars.append(self.in_stream.read(1))
             except IOError:
                 continue
+            except KeyboardInterrupt:
+                return events.SigIntEvent()
+            finally:
+                if prev_sigint_handler:
+                    signal.signal(signal.SIGINT, prev_sigint_handler)
 
     def retrying_read(self):
         while True:
