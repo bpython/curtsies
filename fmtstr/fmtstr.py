@@ -21,6 +21,7 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 import sys
 import re
 import itertools
+import functools
 
 from .escseqparse import parse
 from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
@@ -147,8 +148,8 @@ class FmtStr(object):
     def copy_with_new_str(self, new_str):
         """Copies the current FmtStr's attributes while changing its string."""
         # What to do when there are multiple BaseFmtStrs with conflicting atts?
-        old_atts = {att: value for bfs in self.basefmtstrs
-                    for (att, value) in bfs.atts.items()}
+        old_atts = dict((att, value) for bfs in self.basefmtstrs
+                    for (att, value) in bfs.atts.items())
         return FmtStr(BaseFmtStr(new_str, old_atts))
 
     def setitem(self, startindex, fs):
@@ -322,7 +323,7 @@ class FmtStr(object):
             return acc
 
         bfs_lens = [len(s) for s in self.basefmtstrs]
-        return reduce(add_indices, bfs_lens, [0])
+        return functools.reduce(add_indices, bfs_lens, [0])
 
     @property
     def s(self):
