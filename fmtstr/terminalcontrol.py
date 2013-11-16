@@ -196,9 +196,9 @@ def test():
         tc.write('asdf')
         tc.back(4)
         while True:
-            e = tc.get_event()
+            e = tc.get_event(use_curses_aliases=False)
             if e in events.CURSES_TABLE:
-                data = "%r : %s, called %s for curses compatibility" % (e, events.pp_event(e), events.CURSES_TABLE[e])
+                data = "%r : %s, but called %s for curses compatibility" % (e, events.pp_event(e), events.CURSES_TABLE[e])
             else:
                 data = "%r : %s" % (e, events.pp_event(e))
             tc.write(data)

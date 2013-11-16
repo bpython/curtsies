@@ -51,7 +51,10 @@ def get_key(chars, use_curses_name=True):
             u = chars.decode('utf8')
         except UnicodeDecodeError:
             return None
-    return curses_name(u)
+    if use_curses_name:
+        return curses_name(u)
+    else:
+        return u
 
 def pp_event(seq):
     """Returns pretty represenation of an Event or keypress"""

@@ -167,6 +167,21 @@ compositing.
 
 Interact with the Terminal object by passing .render_to_terminal()
 fsarrays, 2D numpy arrays of characters, or arrays of strings or FmtStr objects.
+
+
+TerminalController
+------------------
+
+`TerminalController.get_event()` waits for a keypress or other event, such
+as window change or interrupt signal. To see what a keypress is called, try
+`python -m fmtstr.terminalcontroller` and play around.
+
+The `get_event` method takes an optional argument, on by default, to use
+the curses names of keys that curses has names for.
+
+All together now
+----------------
+
 Terminal objects typically to be initialized with a TerminalController object
 which sets up the terminal
 window and catches input in raw mode. Context managers make it so fatal
