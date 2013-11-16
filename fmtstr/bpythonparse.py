@@ -1,4 +1,4 @@
-from bpython import formatter
+from bpython import formatter # just to check at import time that it's there
 from .termformatconstants import FG_COLORS, BG_COLORS, colors
 from .fmtstr import fmtstr, FmtStr
 

@@ -20,7 +20,6 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 
 import sys
 import re
-import itertools
 import functools
 
 from .escseqparse import parse

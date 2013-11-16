@@ -7,7 +7,6 @@ inspired by
 https://github.com/gwk/gloss/blob/master/python/gloss/io/cs.py
 """
 
-import os
 import sys
 import tty
 import signal
@@ -84,7 +83,7 @@ class TerminalController(object):
         if self.orig_sigint_handler:
             signal.signal(signal.SIGINT, self.orig_sigint_handler)
         termios.tcsetattr(self.out_stream, termios.TCSANOW, self.original_stty)
-        #os.system('stty '+self.original_stty)
+        #import os; os.system('stty '+self.original_stty)
 
     up, down, forward, back = [produce_cursor_sequence(c) for c in 'ABCD']
     fwd = forward

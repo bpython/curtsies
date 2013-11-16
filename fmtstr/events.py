@@ -1,6 +1,5 @@
 """Language for describing events that in terminal"""
 import sys
-import threading
 
 PY3 = sys.version_info[0] >= 3
 
@@ -156,6 +155,7 @@ CURSES_TABLE['\x08'] = 'KEY_BACKSPACE'
 CURSES_TABLE['\x1b[3~'] = 'KEY_DC'
 CURSES_TABLE['\x1b[5~'] = 'KEY_PPAGE'
 CURSES_TABLE['\x1b[6~'] = 'KEY_NPAGE'
+CURSES_TABLE['\x1b[Z'] = 'KEY_BTAB'
 #TODO add home and end? and everything else
 
 REVERSE_CURSES = dict((v, k) for k, v in CURSES_TABLE.items())
