@@ -79,7 +79,7 @@ def pp_event(seq):
 def curses_name(seq):
     return CURSES_TABLE.get(seq, seq)
 
-# the first one is the canonical name, the rest are used for equivalence
+# the first one is the canonical name, the second is the pretty str
 SEQUENCE_NAMES = dict([
   (' ',        '<SPACE>'),
   ('\x1b ',    '<Meta-SPACE>'),
@@ -113,6 +113,7 @@ SEQUENCE_NAMES = dict([
   ('\x1f', '<Ctrl-/>'),
   ('\x7f', '<DELETE>'),
   ('\x1b\x7f', '<Meta-DELETE>'),
+  ('\xff', '<Option-DELETE>'),
   ])
 
 CURSES_TABLE = {}

@@ -99,13 +99,8 @@ class TerminalController(object):
     def stuff_a_refresh_request(self):
         self.queued_refresh_request = True
 
-    def get_event_curses(self):
-        """get event, with keypress events translated to their curses equivalent"""
-        e = self.get_event()
-        return e.curses()
-
     def get_event(self, use_curses_aliases=True, fake_input=None):
-        """Blocks and returns the next event"""
+        """Blocks and returns the next event, using curses names by default"""
         #TODO make this cooler - generator? Trie?
         chars = []
         while True:
@@ -202,9 +197,11 @@ def test():
         tc.back(4)
         while True:
             e = tc.get_event()
-            if e != 's':
+            if e in events.CURSES_TABLE:
+                data = "%r : %s, called %s for curses compatibility" % (e, events.pp_event(e), events.CURSES_TABLE[e])
+            else:
                 data = "%r : %s" % (e, events.pp_event(e))
-                tc.write(data)
+            tc.write(data)
             tc.scroll_down()
             tc.back(len(data))
             if e == '':

@@ -158,7 +158,7 @@ class FmtStr(object):
 
     def setslice(self, startindex, endindex, fs):
         """Shim for easily converting old __setitem__ calls"""
-        assert len(fs) == endindex - startindex
+        assert len(fs) == endindex - startindex, (len(fs), startindex, endindex)
         return self.insert(fs, startindex, endindex)
 
     def insert(self, new_str, start, end=None):
@@ -418,7 +418,7 @@ def normalize_slice(length, index):
         raise NotImplementedError("You can't use steps with slicing yet")
     if is_int:
         if index.start < 0 or index.start > length:
-            raise IndexError("index out of bounds")
+            raise IndexError("index out of bounds: %r for length %s" % (index, length))
     return index
 
 def parse_args(args, kwargs):
