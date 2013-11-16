@@ -169,7 +169,6 @@ compositing.
 Interact with the Terminal object by passing .render_to_terminal()
 fsarrays, 2D numpy arrays of characters, or arrays of strings or FmtStr objects.
 
-
 TerminalController
 ------------------
 
@@ -184,6 +183,10 @@ names for many key combinations, so you'll be putting thing like '\xe1' for
 option-j and '\x86' for ctrl-option-f. If you don't need curses compatibility,
 you can pass 'fmtstr' for this argument to receive events like "<Ctrl-Meta-J>"
 and <Option-l>. Pass None for this parameter to do no rewriting of keypresses.
+
+A TerminalController object can also be used to issue commands to the terminal,
+such as "Put the cursor at row 17, column 50" and "Clear the screen." See
+source of terminalcontrol.py for details.
 
 All together now
 ----------------
