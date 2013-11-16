@@ -32,7 +32,7 @@ class SigIntEvent(Event):
     def name(self):
         return repr(self)
 
-def get_key(chars, use_curses_name=True):
+def get_key(chars, keynames='curses'):
     if not ((chars and chars[0] != '\x1b') or
             (len(chars) == 2 and chars[1] not in ['[', 'O', '\x1b']) or
             (len(chars) == 4 and chars[1] == '\x1b' and chars[2] == '[') or
@@ -46,18 +46,22 @@ def get_key(chars, use_curses_name=True):
     else:
         chars = ''.join(chars)
         if len(chars) == 1 and 0x80 <= ord(chars) <= 0xff:
-            return chars # option-key
+            return unicode(chars, 'latin') # option-key
         try:
             u = chars.decode('utf8')
         except UnicodeDecodeError:
             return None
-    if use_curses_name:
+    if keynames == 'curses':
         return curses_name(u)
-    else:
+    elif keynames == 'fmtstr':
+        return fmtstr_name(u)
+    elif keynames is None or keynames == 'plain':
         return u
+    else:
+        raise ValueError('keyname must but one of "fmtstr", "curses"')
 
 def pp_event(seq):
-    """Returns pretty represenation of an Event or keypress"""
+    """Returns pretty representation of an Event or keypress"""
 
     if isinstance(seq, Event):
         return str(seq)
@@ -65,19 +69,31 @@ def pp_event(seq):
     if seq in REVERSE_CURSES:
         seq = REVERSE_CURSES[seq]
 
+    fsname = fmtstr_name(seq)
+    if fsname != seq:
+        return fsname
+    return repr(seq)[2:-1]
+
+def fmtstr_name(seq):
+    if isinstance(seq, Event):
+        return seq
+
     if seq in SEQUENCE_NAMES:
         return SEQUENCE_NAMES[seq]
     if len(seq) == 1 and '\x00' < seq < '\x1a':
         return '<Ctrl-%s>' % chr(ord(seq) + 0x60)
     if len(seq) == 1 and 0x80 <= ord(seq) <= 0xff:
-        return '<Option-%s>' % repr(chr(ord(seq) - 0x80))[1:-1]
+        c = chr(ord(seq) - 0x80)
+        if '\x00' < c < '\x1a':
+            return '<Ctrl-Option-%s>' % chr(ord(c) + 0x60)
+        return '<Option-%s>' % repr(c)[1:-1]
+        #TODO decide between Option-\\ vs Option-\
+        # (currently Option-\\, caused by repl calr)
     if len(seq) == 2 and seq[0] == '\x1b':
         if '\x00' < seq[1] < '\x1a':
             return '<Ctrl-Meta-%s>' % chr(ord(seq[1]) + 0x60)
         return '<Meta-%s>' % seq[1]
-    if seq[0] == '':
-        pass
-    return repr(seq)[2:-1]
+    return seq
 
 def curses_name(seq):
     return CURSES_TABLE.get(seq, seq)
@@ -117,6 +133,10 @@ SEQUENCE_NAMES = dict([
   ('\x7f', '<DELETE>'),
   ('\x1b\x7f', '<Meta-DELETE>'),
   ('\xff', '<Option-DELETE>'),
+  ('\x1b\x1b[A',   '<Option-UP>'),
+  ('\x1b\x1b[B',   '<Option-DOWN>'),
+  ('\x1b\x1b[C',   '<Option-RIGHT>'),
+  ('\x1b\x1b[D',   '<Option-LEFT>'),
   ])
 
 CURSES_TABLE = {}

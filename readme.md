@@ -5,7 +5,8 @@ Annotate portions of strings with terminal colors and formatting!
 
 Most terminals will display text in color if you use [ANSI escape codes]
 (http://en.wikipedia.org/wiki/ANSI_escape_code) - fmtstr makes rendering such
-text to the terminal easy.
+text to the terminal easy. FmtStr assumes use of an VT-100 compatible terminal:
+unlike curses, it has no compatibility layer for other types of terminals.
 
 The three objects in fmtstr you probably want to use:
 
@@ -174,10 +175,15 @@ TerminalController
 
 `TerminalController.get_event()` waits for a keypress or other event, such
 as window change or interrupt signal. To see what a keypress is called, try
-`python -m fmtstr.terminalcontroller` and play around.
+`python -m fmtstr.terminalcontroller` and play around. Key events are unicode
+strings, other events inherit from events.Event.
 
-The `get_event` method takes an optional argument, on by default, to use
-the curses names of keys that curses has names for.
+The `get_event` method takes an optional argument for how to name
+keypresses, which is 'curses' by default. Note that curses doesn't have nice
+names for many key combinations, so you'll be putting thing like '\xe1' for
+option-j and '\x86' for ctrl-option-f. If you don't need curses compatibility,
+you can pass 'fmtstr' for this argument to receive events like "<Ctrl-Meta-J>"
+and <Option-l>. Pass None for this parameter to do no rewriting of keypresses.
 
 All together now
 ----------------

@@ -99,7 +99,7 @@ class TerminalController(object):
     def stuff_a_refresh_request(self):
         self.queued_refresh_request = True
 
-    def get_event(self, use_curses_aliases=True, fake_input=None):
+    def get_event(self, keynames='curses', fake_input=None):
         """Blocks and returns the next event, using curses names by default"""
         #TODO make this cooler - generator? Trie?
         chars = []
@@ -121,7 +121,7 @@ class TerminalController(object):
 
             logging.debug('getting key for %r', chars)
             logging.debug('self.in_buffer %r', self.in_buffer)
-            c = events.get_key(chars, use_curses_name=use_curses_aliases)
+            c = events.get_key(chars, keynames=keynames)
             if c:
                 return c
             if fake_input:
@@ -190,13 +190,13 @@ def test():
         tc.write(pos)
         tc.back(len(pos))
         tc.scroll_down()
-        tc.write('asdf')
-        tc.back(4)
+        tc.write('Control-D to exit')
+        tc.back(len('Control-D to exit'))
         tc.scroll_down()
-        tc.write('asdf')
+        tc.write('....')
         tc.back(4)
         while True:
-            e = tc.get_event(use_curses_aliases=False)
+            e = tc.get_event(keynames=None)
             if e in events.CURSES_TABLE:
                 data = "%r : %s, but called %s for curses compatibility" % (e, events.pp_event(e), events.CURSES_TABLE[e])
             else:
