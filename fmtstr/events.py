@@ -38,17 +38,23 @@ def get_key(chars, use_curses_name=True):
             (len(chars) == 4 and chars[1] == '\x1b' and chars[2] == '[') or
             (len(chars) > 2 and chars[1] in ['[', 'O'] and chars[-1] not in tuple('1234567890;'))):
         return None
-    try:
-        if PY3:
+    if PY3:
+        try:
             u = ''.join(chars)
-        else:
-            u = ''.join(chars).decode('utf8')
-    except UnicodeDecodeError:
-        return None
+        except UnicodeDecodeError:
+            return None
+    else:
+        chars = ''.join(chars)
+        if len(chars) == 1 and 0x80 <= ord(chars) <= 0xff:
+            return chars # option-key
+        try:
+            u = chars.decode('utf8')
+        except UnicodeDecodeError:
+            return None
     return curses_name(u)
 
 def pp_event(seq):
-    """Returns pretty version of an Event or keypress"""
+    """Returns pretty represenation of an Event or keypress"""
 
     if isinstance(seq, Event):
         return str(seq)
@@ -60,6 +66,8 @@ def pp_event(seq):
         return SEQUENCE_NAMES[seq]
     if len(seq) == 1 and '\x00' < seq < '\x1a':
         return '<Ctrl-%s>' % chr(ord(seq) + 0x60)
+    if len(seq) == 1 and 0x80 <= ord(seq) <= 0xff:
+        return '<Option-%s>' % repr(chr(ord(seq) - 0x80))[1:-1]
     if len(seq) == 2 and seq[0] == '\x1b':
         if '\x00' < seq[1] < '\x1a':
             return '<Ctrl-Meta-%s>' % chr(ord(seq[1]) + 0x60)
