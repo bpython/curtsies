@@ -237,9 +237,13 @@ class FmtStr(object):
         return FmtStr(*basefmtstrs)
 
     #TODO make this split work like str.split
-    def split(self, on_char):
+    def split(self, sep=None):
         s = self.s
-        matches = list(re.finditer(on_char, s))
+        if sep is None:
+            sep = r'\s+'
+        else:
+            sep = re.escape(sep)
+        matches = list(re.finditer(sep, s))
         return [self[start:end] for start, end in zip(
             [0] + [m.end() for m in matches],
             [m.start() for m in matches] + [len(s)])]

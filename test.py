@@ -160,6 +160,7 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(blue('hello there').split(' '), [blue('hello'), blue('there')])
         s = blue('hello there')
         self.assertEqual(s.split(' '), [s[:5], s[6:]])
+        self.assertEqual(blue('hello   \t\n\nthere').split(), [blue('hello'), blue('there')])
 
     def test_mul(self):
         self.assertEqual(fmtstr('heyhey'), fmtstr('hey')*2)
@@ -174,7 +175,6 @@ class TestFmtStr(unittest.TestCase):
     def test_change_color(self):
         a = blue(red('hello'))
         self.assertEqual(a, blue('hello'))
-
 
 class TestBaseFmtStr(unittest.TestCase):
     def test_getitem(self):
