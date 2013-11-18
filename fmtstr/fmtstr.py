@@ -237,11 +237,13 @@ class FmtStr(object):
         return FmtStr(*basefmtstrs)
 
     #TODO make this split work like str.split
-    def split(self, sep=None):
+    def split(self, sep=None, maxsplit=None, regex=False):
+        if maxsplit is not None:
+            raise NotImplementedError('no maxsplit yet')
         s = self.s
         if sep is None:
             sep = r'\s+'
-        else:
+        elif not regex:
             sep = re.escape(sep)
         matches = list(re.finditer(sep, s))
         return [self[start:end] for start, end in zip(
@@ -403,6 +405,38 @@ class FmtStr(object):
 
     def copy(self):
         return FmtStr(*self.basefmtstrs)
+
+def linesplit(string, columns):
+    """Returns a list of lines, split on the last possible space of each line.
+
+    Split spaces will be removed. Whitespaces will be normalized to one space.
+    Spaces will be the color of the first whitespace character of the
+    normalized whitespace.
+    If a word extends beyond the line, wrap it anyway.
+
+    >>> linesplit(fmtstr(" home    is where the heart-eating mummy is", 'blue'), 10)
+    [blue('home')+blue(' ')+blue('is'), blue('where')+blue(' ')+blue('the'), blue('heart-eati'), blue('ng')+blue(' ')+blue('mummy'), blue('is')]
+    """
+    if isinstance(string, FmtStr):
+        string = fmtstr(string)
+
+    string_s = string.s
+    matches = list(re.finditer(r'\s+', string_s))
+    spaces = [string[m.start():m.end()] for m in matches if m.start() != 0 and m.end() != len(string_s)]
+    words = [string[start:end] for start, end in zip(
+            [0] + [m.end() for m in matches],
+            [m.start() for m in matches] + [len(string_s)]) if start != end]
+
+    word_to_lines = lambda word: [word[columns*i:columns*(i+1)] for i in range((len(word) - 1) // columns + 1)]
+
+    lines = word_to_lines(words[0])
+    for word, space in zip(words[1:], spaces):
+        if len(lines[-1]) + len(word) < columns:
+            lines[-1] += fmtstr(' ', **space.shared_atts)
+            lines[-1] += word
+        else:
+            lines.extend(word_to_lines(word))
+    return lines
 
 def normalize_slice(length, index):
     is_int = False

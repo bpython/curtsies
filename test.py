@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from fmtstr.fmtstr import FmtStr, fmtstr, BaseFmtStr
+from fmtstr.fmtstr import FmtStr, fmtstr, BaseFmtStr, linesplit
 from fmtstr.fmtfuncs import *
 from fmtstr.termformatconstants import FG_COLORS
 from fmtstr.fsarray import fsarray, FSArray
@@ -161,6 +161,17 @@ class TestFmtStr(unittest.TestCase):
         s = blue('hello there')
         self.assertEqual(s.split(' '), [s[:5], s[6:]])
         self.assertEqual(blue('hello   \t\n\nthere').split(), [blue('hello'), blue('there')])
+
+    def test_linessplit(self):
+        text = blue('the sum of the squares of the sideways')
+        result = [blue('the')+blue(' ')+blue('sum'),
+                  blue('of')+blue(' ')+blue('the'),
+                  blue('squares'),
+                  blue('of')+blue(' ')+blue('the'),
+                  blue('sideway'),
+                  blue('s')
+                  ]
+        self.assertEqual(linesplit(text, 7), result)
 
     def test_mul(self):
         self.assertEqual(fmtstr('heyhey'), fmtstr('hey')*2)
