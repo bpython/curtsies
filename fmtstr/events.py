@@ -44,8 +44,6 @@ def get_key(chars, keynames='curses'):
             return None
     else:
         chars = ''.join(chars)
-        if len(chars) == 1 and 0x80 <= ord(chars) <= 0xff:
-            return unicode(chars, 'latin') # option-key
         try:
             u = chars.decode('utf8')
         except UnicodeDecodeError:
@@ -81,13 +79,6 @@ def fmtstr_name(seq):
         return SEQUENCE_NAMES[seq]
     if len(seq) == 1 and '\x00' < seq < '\x1a':
         return '<Ctrl-%s>' % chr(ord(seq) + 0x60)
-    if len(seq) == 1 and 0x80 <= ord(seq) <= 0xff:
-        c = chr(ord(seq) - 0x80)
-        if '\x00' < c < '\x1a':
-            return '<Ctrl-Option-%s>' % chr(ord(c) + 0x60)
-        return '<Option-%s>' % repr(c)[1:-1]
-        #TODO decide between Option-\\ vs Option-\
-        # (currently Option-\\, caused by repl calr)
     if len(seq) == 2 and seq[0] == '\x1b':
         if '\x00' < seq[1] < '\x1a':
             return '<Ctrl-Meta-%s>' % chr(ord(seq[1]) + 0x60)
@@ -124,6 +115,7 @@ SEQUENCE_NAMES = dict([
   ('\x1b\x7f', '<Meta-DELETE>'),
 # Until I understand how universal these are, I'm putting in the keys from
 # my American macbook air with macos with US Qwerty layout
+# Mac terminal binds option left and right keys to meta - b & f 
   ('\x00', '<Ctrl-SPACE>'),
   ('\x1c', r'<Ctrl-\>'),
   ('\x1d', '<Ctrl-]>'),
@@ -131,11 +123,11 @@ SEQUENCE_NAMES = dict([
   ('\x1f', '<Ctrl-/>'),
   ('\x7f', '<DELETE>'),
   ('\x1b\x7f', '<Meta-DELETE>'),
-  ('\xff', '<Option-DELETE>'),
-  ('\x1b\x1b[A',   '<Option-UP>'),
-  ('\x1b\x1b[B',   '<Option-DOWN>'),
-  ('\x1b\x1b[C',   '<Option-RIGHT>'),
-  ('\x1b\x1b[D',   '<Option-LEFT>'),
+  ('\xff', '<Meta-DELETE>'),
+  ('\x1b\x1b[A',   '<Meta-UP>'),
+  ('\x1b\x1b[B',   '<Meta-DOWN>'),
+  ('\x1b\x1b[C',   '<Meta-RIGHT>'),
+  ('\x1b\x1b[D',   '<Meta-LEFT>'),
   ])
 
 CURSES_TABLE = {}
