@@ -16,9 +16,6 @@ import logging
 
 from . import events
 
-
-_SIGWINCH_COUNTER = 0
-
 QUERY_CURSOR_POSITION = "\x1b[6n"
 SCROLL_DOWN = "D"
 CURSOR_UP, CURSOR_DOWN, CURSOR_FORWARD, CURSOR_BACK = ["[%s" for char in 'ABCD']
@@ -27,6 +24,9 @@ ERASE_LINE = "[2K"
 HIDE_CURSOR = "[?25l"
 SHOW_CURSOR = "[?25h"
 ERASE_REST_OF_SCREEN = "[0J"
+
+
+_SIGWINCH_COUNTER = 0
 
 def produce_simple_sequence(seq):
     def func(ts):
@@ -40,16 +40,20 @@ def produce_cursor_sequence(char):
     return func
 
 class TerminalController(object):
-    """Returns terminal control functions partialed for stream returned by
-    stream_getter on att lookup"""
+    """Communicates with an ANSI-compatible terminal through in and out streams
+
+    In the context of a TerminalController, in_stream is placed in cbreak or
+    raw mode, and window size change (SIGWINCH) and interrupt (SIGINT) signals
+    are handled, stored for reporting by TerminalController.get_event().
+    """
     def __init__(self, in_stream=sys.stdin, out_stream=sys.stdout, input_mode='cbreak'):
         self.in_stream = in_stream
         self.out_stream = out_stream
         self.in_buffer = []
         self.sigwinch_counter = _SIGWINCH_COUNTER - 1
         self.last_screen_size = None
-        self.queued_sigint = False
-        self.queued_refresh_request = False
+        self.sigint_queued = False
+        self.refresh_queued = False
         if not input_mode in ['raw', 'cbreak']:
             raise ValueError("input_mode must be raw or cbreak")
         self.input_mode = input_mode
@@ -71,7 +75,7 @@ class TerminalController(object):
             self.orig_sigint_handler = signal.getsignal(signal.SIGINT)
 
             def sigint_handler(signum, frame):
-                self.queued_sigint = True
+                self.sigint_queued = True
 
             signal.signal(signal.SIGINT, sigint_handler)
 
@@ -95,23 +99,30 @@ class TerminalController(object):
     show_cursor = produce_simple_sequence(SHOW_CURSOR)
     erase_rest_of_screen = produce_simple_sequence(ERASE_REST_OF_SCREEN)
 
-    def stuff_a_refresh_request(self):
-        self.queued_refresh_request = True
+    def request_refresh(self):
+        self.refresh_queued = True
+    stuff_a_refresh_request = request_refresh # for compatibility atm
 
     def get_event(self, keynames='curses', fake_input=None):
-        """Blocks and returns the next event, using curses names by default"""
-        #TODO make this cooler - generator? Trie?
+        """Blocks and returns the next event, using curses names by default
+
+        If several keypresses have occurred, they are queued and returned one
+        by one. Other events have higher priority than keypresses, and can
+        pass keypresses in this queue. These event are, in descending priority:
+            -a SIGINT has occurred
+            -a refresh has been requested (TerminalController.request_refresh)
+            -a SIGWINCH has occurred
+        """
         chars = []
         while True:
-            if self.queued_sigint:
-                self.queued_sigint = False
+            if self.sigint_queued:
+                self.sigint_queued = False
                 return events.SigIntEvent()
-            if self.queued_refresh_request:
-                self.queued_refresh_request = False
+            if self.refresh_queued:
+                self.refresh_queued = False
                 return events.RefreshRequestEvent('terminal control')
-            if len(chars) > 10:
+            if len(chars) > 10: #debugging tool - eventually detect all key sequences!
                 raise ValueError("Key sequence not detected at some point: %r" % ''.join(chars))
-            #logging.debug('checking if instance counter (%d) is less than global (%d) ' % (self.sigwinch_counter, _SIGWINCH_COUNTER))
             if self.sigwinch_counter < _SIGWINCH_COUNTER:
                 self.sigwinch_counter = _SIGWINCH_COUNTER
                 self.in_buffer = chars + self.in_buffer
@@ -173,6 +184,7 @@ class TerminalController(object):
 
     def get_screen_size(self, break_cache=False):
         #TODO generalize get_cursor_position code and use it here instead
+        #TODO use real get terminal size query
         if self.last_screen_size and not break_cache:
             return self.last_screen_size
         orig = self.get_cursor_position()
