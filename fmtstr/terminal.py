@@ -121,7 +121,7 @@ class Terminal(object):
             elif c in '\r\n':
                 i = ((i // columns) + 1) * columns
             else:
-                arr[i // arr.columns, i % arr.columns] = [fmtstr(c)]
+                arr[i // arr.width, i % arr.width] = [fmtstr(c)]
             i += 1
         return arr
 
@@ -135,7 +135,7 @@ class Terminal(object):
             elif c in '\r\n':
                 i = ((i // columns) + 1) * columns
             else:
-                arr[i // arr.columns, i % arr.columns] = [fmtstr(c)]
+                arr[i // arr.width, i % arr.width] = [fmtstr(c)]
             i += 1
         return arr
 

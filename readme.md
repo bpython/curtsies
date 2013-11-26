@@ -172,6 +172,15 @@ fsarrays, 2D numpy arrays of characters, or arrays of strings or FmtStr objects.
 TerminalController
 ------------------
 
+A TerminalController object can also be used to issue commands to the terminal,
+such as "Put the cursor at row 17, column 50" and "Clear the screen." See
+source of terminalcontrol.py for details.
+
+Within the (context-manager) context of a TerminalController, an in-stream
+is put in raw mode or cbreak mode, and keypresses are stored to be reported
+later. SIGINT and SIGWINCH events are caught and reported the same way. An
+out-stream is used to send messages to the terminal.
+
 `TerminalController.get_event()` waits for a keypress or other event, such
 as window change or interrupt signal. To see what a keypress is called, try
 `python -m fmtstr.terminalcontroller` and play around. Key events are unicode
@@ -183,10 +192,6 @@ names for many key combinations, so you'll be putting thing like '\xe1' for
 option-j and '\x86' for ctrl-option-f. If you don't need curses compatibility,
 you can pass 'fmtstr' for this argument to receive events like "<Ctrl-Meta-J>"
 and <Option-l>. Pass None for this parameter to do no rewriting of keypresses.
-
-A TerminalController object can also be used to issue commands to the terminal,
-such as "Put the cursor at row 17, column 50" and "Clear the screen." See
-source of terminalcontrol.py for details.
 
 All together now
 ----------------
