@@ -8,21 +8,17 @@ Format String 2D array
 -caching behavior eventually
 
 
-#>>> a = FSArray(10, 14)
-#>>> a.shape
-#(10, 14)
-#>>> a[1] = 'i'
-#>>> a[3:4, :] = 'i' * 14
-#>>> a[16:17, :] = 'j' * 14
-#>>> a.shape, a[16, 0]
-#((17, 14), 'j')
-#>>> a[200, 1] = 'i'
-#>>> a[200, 1]
-#'i'
-#>>> a[3:4, 3:5] = 'ii'
-
->>> a = FSArray(5, 10)
->>> a.rows[0] = []
+>>> a = FSArray(10, 14)
+>>> a.shape
+(10, 14)
+>>> a[1] = 'i'
+>>> a[3:4, :] = ['i' * 14]
+>>> a[16:17, :] = ['j' * 14]
+>>> a.shape, a[16, 0]
+((17, 14), ['j'])
+>>> a[200, 1] = ['i']
+>>> a[200, 1]
+['i']
 """
 
 import sys
@@ -35,6 +31,13 @@ def slicesize(s):
     return int((s.stop - s.start) / (s.step if s.step else 1))
 
 def fsarray(strings, *args, **kwargs):
+    """fsarray(list_of_FmtStrs_or_strings, width=None) -> FSArray
+
+    Returns a new FSArray of width of the maximum size of the provided
+    strings, or width provided, and height of the number of strings provided.
+    If a width is provided, raises a ValueError if any of the strings
+    are of length greater than this width"""
+
     if 'width' in kwargs:
         width = kwargs['width']
         del kwargs['width']
@@ -50,11 +53,15 @@ def fsarray(strings, *args, **kwargs):
     return arr
 
 class FSArray(object):
+    """A 2D array of colored text.
+
+    Internally represented by a list of FmtStrs of identical size."""
+
     #TODO add constructor that takes fmtstrs instead of dims
-    def __init__(self, rows, columns, *args, **kwargs):
+    def __init__(self, num_rows, num_columns, *args, **kwargs):
         self.saved_args, self.saved_kwargs = args, kwargs
-        self.rows = [fmtstr(' '*columns, *args, **kwargs) for _ in range(rows)]
-        self.columns = columns
+        self.rows = [fmtstr(' '*num_columns, *args, **kwargs) for _ in range(num_rows)]
+        self.num_columns = num_columns
 
     def __getitem__(self, slicetuple):
         if isinstance(slicetuple, int):
@@ -68,7 +75,7 @@ class FSArray(object):
             return self.rows[rowslice]
         rowslice, colslice = slicetuple
         rowslice = normalize_slice(len(self.rows), rowslice)
-        colslice = normalize_slice(self.columns, colslice)
+        colslice = normalize_slice(self.num_columns, colslice)
         #TODO clean up slices
         return [fs[colslice] for fs in self.rows[rowslice]]
 
@@ -77,40 +84,43 @@ class FSArray(object):
 
     @property
     def shape(self):
-        """shape, for imitating numpy arrays"""
-        return len(self.rows), self.columns
+        """tuple of (len(rows, len(num_columns)) numpy-style shape"""
+        return len(self.rows), self.num_columns
 
     height = property(lambda self: len(self.rows))
-    width = property(lambda self: self.columns)
+    width = property(lambda self: self.num_columns)
 
     def __setitem__(self, slicetuple, value):
         if isinstance(slicetuple, slice):
             rowslice, colslice = slicetuple, slice(None)
+            if isinstance(value, (bytes, unicode)):
+                raise ValueError('if slice is 2D, value must be 2D')
         elif isinstance(slicetuple, int):
-            #TODO incorporate normalize_slice here
             normalize_slice(self.height, slicetuple)
             self.rows[slicetuple] = value
             return
         else:
             rowslice, colslice = slicetuple
 
-        # temp shim
+        # temp shim to allow numpy arrays as values
         if value.__class__.__name__ == 'ndarray':
             value = [fmtstr(''.join(line)) for line in value]
 
         rowslice = normalize_slice(sys.maxsize, rowslice)
         additional_rows = max(0, rowslice.stop - len(self.rows))
-        self.rows.extend([fmtstr(' '*self.columns, *self.saved_args, **self.saved_kwargs)
+        self.rows.extend([fmtstr(' '*self.num_columns, *self.saved_args, **self.saved_kwargs)
                           for _ in range(additional_rows)])
-        colslice = normalize_slice(self.columns, colslice)
+        colslice = normalize_slice(self.num_columns, colslice)
         if slicesize(colslice) == 0 or slicesize(rowslice) == 0:
             return
-        assert slicesize(rowslice) == len(value), (repr(rowslice), len(value))
+        if slicesize(rowslice) != len(value):
+            raise ValueError('row dimensions do not match: %r, %r' % (len(value), rowslice))
         self.rows = (self.rows[:rowslice.start] +
                      [fs.setslice(colslice.start, colslice.stop, v) for fs, v in zip(self.rows[rowslice], value)] +
                      self.rows[rowslice.stop:])
 
     def dumb_display(self):
+        """Prints rows, one per line"""
         for line in self.rows:
             print(line)
 
