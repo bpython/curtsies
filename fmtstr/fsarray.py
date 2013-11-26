@@ -38,9 +38,12 @@ def fsarray(strings, *args, **kwargs):
     if 'width' in kwargs:
         width = kwargs['width']
         del kwargs['width']
+        if strings and max(len(s) for s in strings) > width:
+            raise ValueError("Those strings won't fit for width %d" % width)
     else:
         width = max(len(s) for s in strings) if strings else 0
     fstrings = [s if isinstance(s, FmtStr) else fmtstr(s, *args, **kwargs) for s in strings]
+    fstrings = [fs + ' '*(width - len(fs)) if len(fs) < width else fs for fs in fstrings]
     arr = FSArray(len(fstrings), width, *args, **kwargs)
     rows = [fs.setslice(0, len(s), s) for fs, s in zip(arr.rows, fstrings)]
     arr.rows = rows
