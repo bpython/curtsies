@@ -86,7 +86,7 @@ def fmtstr_name(seq):
     return seq
 
 def curses_name(seq):
-    return CURSES_TABLE.get(seq, seq)
+    return CURSES_NAMES.get(seq, seq)
 
 # the first one is the canonical name, the second is the pretty str
 SEQUENCE_NAMES = dict([
@@ -130,24 +130,24 @@ SEQUENCE_NAMES = dict([
   ('\x1b\x1b[D',   '<Meta-LEFT>'),
   ])
 
-CURSES_TABLE = {}
-CURSES_TABLE['\x1b[15~'] = 'KEY_F(5)'
-CURSES_TABLE['\x1b[17~'] = 'KEY_F(6)'
-CURSES_TABLE['\x1b[18~'] = 'KEY_F(7)'
-CURSES_TABLE['\x1b[19~'] = 'KEY_F(8)'
-CURSES_TABLE['\x1b[20~'] = 'KEY_F(9)'
-CURSES_TABLE['\x1b[21~'] = 'KEY_F(10)'
-CURSES_TABLE['\x1b[23~'] = 'KEY_F(11)'
-CURSES_TABLE['\x1b[24~'] = 'KEY_F(12)'
-CURSES_TABLE['\x1b[A'] = 'KEY_UP'
-CURSES_TABLE['\x1b[B'] = 'KEY_DOWN'
-CURSES_TABLE['\x1b[C'] = 'KEY_RIGHT'
-CURSES_TABLE['\x1b[D'] = 'KEY_LEFT'
-CURSES_TABLE['\x08'] = 'KEY_BACKSPACE'
-CURSES_TABLE['\x1b[3~'] = 'KEY_DC'
-CURSES_TABLE['\x1b[5~'] = 'KEY_PPAGE'
-CURSES_TABLE['\x1b[6~'] = 'KEY_NPAGE'
-CURSES_TABLE['\x1b[Z'] = 'KEY_BTAB'
+CURSES_NAMES = {}
+CURSES_NAMES['\x1b[15~'] = 'KEY_F(5)'
+CURSES_NAMES['\x1b[17~'] = 'KEY_F(6)'
+CURSES_NAMES['\x1b[18~'] = 'KEY_F(7)'
+CURSES_NAMES['\x1b[19~'] = 'KEY_F(8)'
+CURSES_NAMES['\x1b[20~'] = 'KEY_F(9)'
+CURSES_NAMES['\x1b[21~'] = 'KEY_F(10)'
+CURSES_NAMES['\x1b[23~'] = 'KEY_F(11)'
+CURSES_NAMES['\x1b[24~'] = 'KEY_F(12)'
+CURSES_NAMES['\x1b[A'] = 'KEY_UP'
+CURSES_NAMES['\x1b[B'] = 'KEY_DOWN'
+CURSES_NAMES['\x1b[C'] = 'KEY_RIGHT'
+CURSES_NAMES['\x1b[D'] = 'KEY_LEFT'
+CURSES_NAMES['\x08'] = 'KEY_BACKSPACE'
+CURSES_NAMES['\x1b[3~'] = 'KEY_DC'
+CURSES_NAMES['\x1b[5~'] = 'KEY_PPAGE'
+CURSES_NAMES['\x1b[6~'] = 'KEY_NPAGE'
+CURSES_NAMES['\x1b[Z'] = 'KEY_BTAB'
 #TODO add home and end? and everything else
 
-REVERSE_CURSES = dict((v, k) for k, v in CURSES_TABLE.items())
+REVERSE_CURSES = dict((v, k) for k, v in CURSES_NAMES.items())

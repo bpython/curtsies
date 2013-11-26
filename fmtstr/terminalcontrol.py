@@ -208,8 +208,8 @@ def test():
         tc.back(4)
         while True:
             e = tc.get_event(keynames=None)
-            if e in events.CURSES_TABLE:
-                data = "%r : %s, but called %s for curses compatibility" % (e, events.pp_event(e), events.CURSES_TABLE[e])
+            if e in events.CURSES_NAMES:
+                data = "%r : %s, but called %s for curses compatibility" % (e, events.pp_event(e), events.CURSES_NAMES[e])
             else:
                 data = "%r : %s" % (e, events.pp_event(e))
             tc.write(data)
