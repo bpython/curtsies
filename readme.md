@@ -169,21 +169,21 @@ compositing.
 Interact with the Canvas object by passing .render_to_terminal()
 fsarrays, 2D numpy arrays of characters, or arrays of strings or FmtStr objects.
 
-TerminalController
-------------------
+Terminal
+--------
 
-A TerminalController object can also be used to issue commands to the terminal,
+A Terminal object can also be used to issue commands to the terminal,
 such as "Put the cursor at row 17, column 50" and "Clear the screen." See
-source of terminalcontrol.py for details.
+source of terminal.py for details.
 
-Within the (context-manager) context of a TerminalController, an in-stream
+Within the (context-manager) context of a Terminal, an in-stream
 is put in raw mode or cbreak mode, and keypresses are stored to be reported
 later. SIGINT and SIGWINCH events are caught and reported the same way. An
 out-stream is used to send messages to the terminal.
 
-`TerminalController.get_event()` waits for a keypress or other event, such
+`Terminal.get_event()` waits for a keypress or other event, such
 as window change or interrupt signal. To see what a keypress is called, try
-`python -m fmtstr.terminalcontroller` and play around. Key events are unicode
+`python -m fmtstr.terminal` and play around. Key events are unicode
 strings, other events inherit from events.Event.
 
 The `get_event` method takes an optional argument for how to name
@@ -196,7 +196,7 @@ and <Option-l>. Pass None for this parameter to do no rewriting of keypresses.
 All together now
 ----------------
 
-Canvas objects typically to be initialized with a TerminalController object
+Canvas objects typically to be initialized with a Terminal object
 which sets up the terminal
 window and catches input in raw mode. Context managers make it so fatal
 exceptions won't prevent necessary cleanup to make the terminal usable again.
@@ -206,9 +206,9 @@ Putting all that together:
     import sys
     from fmtstr.fmtfuncs import *
     from fmtstr.canvas import Canvas
-    from fmtstr.terminalcontrol import TerminalController
+    from fmtstr.terminal import Terminal
 
-    with TerminalController(sys.stdin, sys.stdout) as tc:
+    with Terminal(sys.stdin, sys.stdout) as tc:
         with Canvas(tc) as t:
             rows, columns = t.tc.get_screen_size()
             while True:

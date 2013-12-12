@@ -2,8 +2,8 @@ import sys
 
 from fmtstr.fmtfuncs import red, bold, green, on_blue, yellow, on_red
 
-from fmtstr.terminal import Canvas
-from fmtstr.terminalcontrol import TerminalController
+from fmtstr.canvas import Canvas
+from fmtstr.terminal import Terminal
 from fmtstr.fsarray import FSArray
 
 class Entity(object):
@@ -74,7 +74,7 @@ class World(object):
         return a
 
 def main():
-    with TerminalController(sys.stdin, sys.stdout) as tc:
+    with Terminal(sys.stdin, sys.stdout) as tc:
         with Canvas(tc) as t:
             rows, columns = t.tc.get_screen_size()
             world = World(width=columns, height=rows) # note the row/column x/y swap!

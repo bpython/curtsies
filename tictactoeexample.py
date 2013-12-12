@@ -2,8 +2,8 @@ import sys
 
 from fmtstr.fmtfuncs import *
 
-from fmtstr.terminal import Canvas
-from fmtstr.terminalcontrol import TerminalController
+from fmtstr.canvas import Canvas
+from fmtstr.terminal import Terminal
 from fmtstr.fsarray import fsarray
 
 class Board(object):
@@ -107,7 +107,7 @@ def ai(board, who='x'):
     return sorted(board.possible(), key=lambda b: value(b, who))[-1]
 
 def main():
-    with TerminalController(sys.stdin, sys.stdout) as tc:
+    with Terminal(sys.stdin, sys.stdout) as tc:
         with Canvas(tc) as t:
             b = Board()
             window_change_event = t.tc.get_event() # always the first event get_event() returns

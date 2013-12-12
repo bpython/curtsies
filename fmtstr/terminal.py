@@ -39,12 +39,12 @@ def produce_cursor_sequence(char):
         if n: ts.write("[%d%s" % (n, char))
     return func
 
-class TerminalController(object):
+class Terminal(object):
     """Communicates with an ANSI-compatible terminal through in and out streams
 
-    In the context of a TerminalController, in_stream is placed in cbreak or
+    In the context of a Terminal, in_stream is placed in cbreak or
     raw mode, and window size change (SIGWINCH) and interrupt (SIGINT) signals
-    are handled, stored for reporting by TerminalController.get_event().
+    are handled, stored for reporting by Terminal.get_event().
     """
     def __init__(self, in_stream=sys.stdin, out_stream=sys.stdout, input_mode='cbreak'):
         self.in_stream = in_stream
@@ -110,7 +110,7 @@ class TerminalController(object):
         by one. Other events have higher priority than keypresses, and can
         pass keypresses in this queue. These event are, in descending priority:
             -a SIGINT has occurred
-            -a refresh has been requested (TerminalController.request_refresh)
+            -a refresh has been requested (Terminal.request_refresh)
             -a SIGWINCH has occurred
         """
         chars = []
@@ -196,7 +196,7 @@ class TerminalController(object):
         return size
 
 def test():
-    with TerminalController() as tc:
+    with Terminal() as tc:
         pos = str(tc.get_cursor_position())
         tc.write(pos)
         tc.back(len(pos))
@@ -219,7 +219,7 @@ def test():
                 sys.exit()
 
 def test_cursor():
-    with TerminalController() as tc:
+    with Terminal() as tc:
         pos = tc.get_cursor_position()
     print(pos)
 

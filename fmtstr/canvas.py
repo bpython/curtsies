@@ -140,8 +140,8 @@ class Canvas(object):
         return arr
 
 def test():
-    from . import terminalcontrol
-    with terminalcontrol.TerminalController(sys.stdin, sys.stdout) as tc:
+    from . import terminal
+    with terminal.Terminal(sys.stdin, sys.stdout) as tc:
         with Canvas(tc) as t:
             rows, columns = t.tc.get_screen_size()
             while True:
@@ -194,7 +194,7 @@ def test_array_from_text():
     os.system('reset')
     for line in a:
         print(str(line))
-    input()
+    raw_input()
 
 if __name__ == '__main__':
     test_array_from_text()
