@@ -38,7 +38,7 @@ class Terminal(object):
     def __enter__(self):
         if self.hide_cursor:
             self.tc.hide_cursor()
-        self.top_usable_row, _ = self.tc.get_cursor_position()
+        self.top_usable_row, _ = self.tc.get_cursor_position() #TODO why?
         logging.debug('initial top_usable_row: %d' % self.top_usable_row)
         return self
 
