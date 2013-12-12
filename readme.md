@@ -12,7 +12,7 @@ The three objects in fmtstr you probably want to use:
 
 * [FmtStr](readme.md#fmtstr) objects are colored strings
 * [FSArray](readme.md#fsarray) objects are 2D arrays of colored text
-* [Terminal](readme.md#terminal) is a terminal wrapper (like curses) for rendering text to the terminal
+* [Canvas](readme.md#terminal) is a terminal wrapper (like curses) for rendering text to the terminal
 and handling user input
 
 `FmtStr`
@@ -36,7 +36,7 @@ Other Libraries
 If all you need are colored strings, you've got some other great options:
 
 * https://github.com/erikrose/blessings (`pip install blessings`) Blessings
-  also does a lot of what `Terminal` objects do, with a really nice api.
+  also does a lot of what `Canvas` objects do, with a really nice api.
 * https://github.com/verigak/colors/ (`pip install colors`)
 * https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py (`pip install clint`)
 
@@ -163,10 +163,10 @@ compositing.
     ---hey!---
     ----------
 
-`Terminal`
+`Canvas`
 ==========
 
-Interact with the Terminal object by passing .render_to_terminal()
+Interact with the Canvas object by passing .render_to_terminal()
 fsarrays, 2D numpy arrays of characters, or arrays of strings or FmtStr objects.
 
 TerminalController
@@ -196,7 +196,7 @@ and <Option-l>. Pass None for this parameter to do no rewriting of keypresses.
 All together now
 ----------------
 
-Terminal objects typically to be initialized with a TerminalController object
+Canvas objects typically to be initialized with a TerminalController object
 which sets up the terminal
 window and catches input in raw mode. Context managers make it so fatal
 exceptions won't prevent necessary cleanup to make the terminal usable again.
@@ -205,11 +205,11 @@ Putting all that together:
 
     import sys
     from fmtstr.fmtfuncs import *
-    from fmtstr.terminal import Terminal
+    from fmtstr.canvas import Canvas
     from fmtstr.terminalcontrol import TerminalController
 
     with TerminalController(sys.stdin, sys.stdout) as tc:
-        with Terminal(tc) as t:
+        with Canvas(tc) as t:
             rows, columns = t.tc.get_screen_size()
             while True:
                 c = t.tc.get_event()
@@ -225,7 +225,7 @@ Putting all that together:
                     a = t.array_from_text("try a, b, or ctrl-D")
                 t.render_to_terminal(a)
 
-When a Terminal object is passed an array with more rows than it's height, it writes
+When a Canvas object is passed an array with more rows than it's height, it writes
 the entire array to the terminal, scrolling down so that the extra rows at the
 top of the 2D array end up out of view. This behavior is particularly useful for
 writing command line interfaces.
@@ -248,7 +248,7 @@ Examples
 Notes
 =====
 
-No Windows support currently for Terminal objects- I'm hoping
+No Windows support currently for Canvas objects- I'm hoping
 [colorama](https://pypi.python.org/pypi/colorama)
 will eventually make Windows support possible, but it currently doesn't implement many of
 the ANSI terminal control sequences used by the terminal controller.

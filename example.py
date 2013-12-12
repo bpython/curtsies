@@ -2,7 +2,7 @@ import sys
 
 from fmtstr.fmtfuncs import blue, red, bold, on_red
 
-from fmtstr.terminal import Terminal
+from fmtstr.terminal import Canvas
 from fmtstr.terminalcontrol import TerminalController
 
 if __name__ == '__main__':
@@ -10,7 +10,7 @@ if __name__ == '__main__':
     print(blue('hey') + ' ' + red('there') + ' ' + red(bold('you')))
 
     with TerminalController(sys.stdin, sys.stdout) as tc:
-        with Terminal(tc) as t:
+        with Canvas(tc) as t:
             rows, columns = t.tc.get_screen_size()
             while True:
                 c = t.tc.get_event()
