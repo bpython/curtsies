@@ -2,7 +2,7 @@ import sys
 
 from fmtstr.fmtfuncs import *
 
-from fmtstr.canvas import Canvas
+from fmtstr.window import Window
 from fmtstr.terminal import Terminal
 from fmtstr.fsarray import fsarray
 
@@ -108,7 +108,7 @@ def ai(board, who='x'):
 
 def main():
     with Terminal(sys.stdin, sys.stdout) as tc:
-        with Canvas(tc) as t:
+        with Window(tc) as t:
             b = Board()
             window_change_event = t.tc.get_event() # always the first event get_event() returns
             while True:

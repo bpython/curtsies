@@ -10,7 +10,7 @@ from .fsarray import FSArray
 from . import events
 
 
-class Canvas(object):
+class Window(object):
     """ Renders 2D arrays of characters and cursor position """
     #TODO: when less than whole screen owned, deal with that:
     #    -render the top of the screen at the first clear row
@@ -27,7 +27,7 @@ class Canvas(object):
             down, up, left, back()
             get_event() -> 'c' | events.WindowChangeEvent(rows, columns)
         """
-        logging.debug('-------initializing Canvas object %r------' % self)
+        logging.debug('-------initializing Window object %r------' % self)
         self.tc = tc
         self.keep_last_line = keep_last_line
         self.hide_cursor = hide_cursor
@@ -43,7 +43,7 @@ class Canvas(object):
         return self
 
     def __exit__(self, type, value, traceback):
-        logging.debug("running Canvas.__exit__")
+        logging.debug("running Window.__exit__")
         if self.keep_last_line:
             self.tc.scroll_down()
         row, _ = self.tc.get_cursor_position()
@@ -142,7 +142,7 @@ class Canvas(object):
 def test():
     from . import terminal
     with terminal.Terminal(sys.stdin, sys.stdout) as tc:
-        with Canvas(tc) as t:
+        with Window(tc) as t:
             rows, columns = t.tc.get_screen_size()
             while True:
                 c = t.tc.get_event()
@@ -174,7 +174,7 @@ def test():
                 t.render_to_terminal(a)
 
 def main():
-    t = Canvas(sys.stdin, sys.stdout)
+    t = Window(sys.stdin, sys.stdout)
     rows, columns = t.tc.get_screen_size()
     import random
     goop = lambda l: [random.choice('aaabcddeeeefghiiijklmnooprssttuv        ') for _ in range(l)]
@@ -189,7 +189,7 @@ def main():
 
 def test_array_from_text():
     class FakeTC(object): get_screen_size = lambda self: (30, 50)
-    t = Canvas(FakeTC())
+    t = Window(FakeTC())
     a = t.array_from_text('\n\nhey there\nyo')
     os.system('reset')
     for line in a:

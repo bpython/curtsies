@@ -3,7 +3,7 @@ import os
 
 from fmtstr.fmtfuncs import blue, red, bold, on_red
 
-from fmtstr.canvas import Canvas
+from fmtstr.window import Window
 from fmtstr.terminal import Terminal
 
 import time
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     n = int(sys.argv[1]) if len(sys.argv) > 1 else 100
 
     with Terminal(sys.stdin, sys.stdout) as tc:
-        with Canvas(tc) as t:
+        with Window(tc) as t:
             rows, columns = t.tc.get_screen_size()
             t0 = time.time()
             for i in range(n):

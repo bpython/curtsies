@@ -2,7 +2,7 @@ import sys
 
 from fmtstr.fmtfuncs import red, bold, green, on_blue, yellow, on_red
 
-from fmtstr.canvas import Canvas
+from fmtstr.window import Window
 from fmtstr.terminal import Terminal
 from fmtstr.fsarray import FSArray
 
@@ -43,7 +43,7 @@ class World(object):
                                             'KEY_DOWN':(0,-self.player.speed),
                                             'KEY_RIGHT':(self.player.speed, 0)}[c])
         else:
-            self.msg = Canvas.array_from_text_rc("try w, a, s, d, or ctrl-D", self.height, self.width)
+            self.msg = Window.array_from_text_rc("try w, a, s, d, or ctrl-D", self.height, self.width)
         return self.tick()
 
     def tick(self):
@@ -75,7 +75,7 @@ class World(object):
 
 def main():
     with Terminal(sys.stdin, sys.stdout) as tc:
-        with Canvas(tc) as t:
+        with Window(tc) as t:
             rows, columns = t.tc.get_screen_size()
             world = World(width=columns, height=rows) # note the row/column x/y swap!
             while True:
