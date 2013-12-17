@@ -1,10 +1,10 @@
 import sys
 
-from fmtstr.fmtfuncs import red, bold, green, on_blue, yellow, on_red
+from curtsies.fmtfuncs import red, bold, green, on_blue, yellow, on_red
 
-from fmtstr.window import Window
-from fmtstr.terminal import Terminal
-from fmtstr.fsarray import FSArray
+from curtsies.window import Window
+from curtsies.terminal import Terminal
+from curtsies.fsarray import FSArray
 
 class Entity(object):
     def __init__(self, display, x, y, speed=1):

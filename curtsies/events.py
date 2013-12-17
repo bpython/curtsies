@@ -50,12 +50,12 @@ def get_key(chars, keynames='curses'):
             return None
     if keynames == 'curses':
         return curses_name(u)
-    elif keynames == 'fmtstr':
-        return fmtstr_name(u)
+    elif keynames == 'curtsies':
+        return curtsies_name(u)
     elif keynames is None or keynames == 'plain':
         return u
     else:
-        raise ValueError('keyname must but one of "fmtstr", "curses"')
+        raise ValueError('keyname must but one of "curtsies", "curses"')
 
 def pp_event(seq):
     """Returns pretty representation of an Event or keypress"""
@@ -66,12 +66,12 @@ def pp_event(seq):
     if seq in REVERSE_CURSES:
         seq = REVERSE_CURSES[seq]
 
-    fsname = fmtstr_name(seq)
+    fsname = curtsies_name(seq)
     if fsname != seq:
         return fsname
     return repr(seq)[2:-1]
 
-def fmtstr_name(seq):
+def curtsies_name(seq):
     if isinstance(seq, Event):
         return seq
 

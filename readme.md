@@ -1,14 +1,14 @@
-Colored/Styled Strings for the Terminal
-=======================================
+Curses-like Terminal Wrapper
+============================
 
 Annotate portions of strings with terminal colors and formatting!
 
 Most terminals will display text in color if you use [ANSI escape codes]
-(http://en.wikipedia.org/wiki/ANSI_escape_code) - fmtstr makes rendering such
-text to the terminal easy. FmtStr assumes use of an VT-100 compatible terminal:
+(http://en.wikipedia.org/wiki/ANSI_escape_code) - curtsies makes rendering such
+text to the terminal easy. Curtsies assumes use of an VT-100 compatible terminal:
 unlike curses, it has no compatibility layer for other types of terminals.
 
-The three objects in fmtstr you probably want to use:
+The three objects in curtsies you probably want to use:
 
 * [FmtStr](readme.md#fmtstr) objects are colored strings
 * [FSArray](readme.md#fsarray) objects are 2D arrays of colored text
@@ -57,19 +57,19 @@ Details
 
 One FmtStr can have several kinds of formatting applied to different parts of it.
 
-    >>> from fmtstr.fmtfuncs import *
+    >>> from curtsies.fmtfuncs import *
     >>> blue('asdf') + on_red('adsf')
     blue("asdf")+on_red("adsf")
 
 They allow slicing, which returns a new FmtStr object:
 
-    >>> from fmtstr.fmtfuncs import *
+    >>> from curtsies.fmtfuncs import *
     >>> (blue('asdf') + on_red('adsf'))[3:7]
     blue("f")+on_red("ads")
 
 FmtStrs are *immutable* - but you can create new ones with `insert`:
 
-    >>> from fmtstr.fmtfuncs import *
+    >>> from curtsies.fmtfuncs import *
     >>> f = blue('hey there') + on_red(' Tom!')
     >>> g.insert('ot', 1, 3)
     >>> g
@@ -84,17 +84,17 @@ Thanks to @OufeiDong for fixing this!
 
 FmtStrs greedily absorb strings, but no formatting is applied
 
-    >>> from fmtstr.fmtfuncs import *
+    >>> from curtsies.fmtfuncs import *
     >>> f = blue("The story so far:") + "In the beginning..."
     >>> type(f)
-    <class fmtstr.fmtstr.FmtStr>
+    <class curtsies.fmtstr.FmtStr>
     >>> f
     blue("The story so far:")+"In the beginning..."
 
 It's easy to turn ANSI terminal formatted strings into FmtStrs:
 
-    >>> from fmtstr.fmtfuncs import *
-    >>> from fmtstr.fmtstr import FmtStr
+    >>> from curtsies.fmtfuncs import *
+    >>> from curtsies.fmtstr import FmtStr
     >>> s = str(blue('tom'))
     >>> s
     '\x1b[34mtom\x1b[39m'
@@ -107,7 +107,7 @@ Using str methods on FmtStr objects
 All sorts of string methods can be used on a FmtStr, so you can often
 use FmtStr objects where you had strings in your program before:
 
-    >>> from fmtstr.fmtstr import *
+    >>> from curtsies.fmtstr import *
     >>> f = blue(underline('As you like it'))
     >>> len(f)
     14 
@@ -119,7 +119,7 @@ use FmtStr objects where you had strings in your program before:
 If FmtStr doesn't implement a method, it tries its best to use the string
 method, which often works pretty well:
 
-    >>> from fmtstr.fmtstr import *
+    >>> from curtsies.fmtstr import *
     >>> f = blue(underline('As you like it'))
     >>> f.center(20)
     blue(underline("   As you like it   "))
@@ -134,7 +134,7 @@ method, which often works pretty well:
 
 But formatting information will be lost for attributes which are not the same through the whole string
 
-    >>> from fmtstr.fmtstr import *
+    >>> from curtsies.fmtstr import *
     >>> f = bold(red('hi')+' '+on_blue('there'))
     >>> f
     bold(red('hi'))+bold(' ')+bold(on_blue('there'))
@@ -152,8 +152,8 @@ Slicing works like it does with FmtStrs, but in two dimensions.
 FSArrays are *mutable*, so array assignment syntax can be used for natural
 compositing.
 
-    >>> from fmtstr.fsarray import FSArray
-    >>> from fmtstr.fmtstr import FSArray
+    >>> from curtsies.fsarray import FSArray
+    >>> from curtsies.fmtstr import FSArray
     >>> a = fsarray('-'*10 for _ in range(4))
     >>> a[1:3, 3:7] = fsarray([green('msg:'),
     ...                blue(on_green('hey!'))])
@@ -183,14 +183,14 @@ out-stream is used to send messages to the terminal.
 
 `Terminal.get_event()` waits for a keypress or other event, such
 as window change or interrupt signal. To see what a keypress is called, try
-`python -m fmtstr.terminal` and play around. Key events are unicode
+`python -m curtsies.terminal` and play around. Key events are unicode
 strings, other events inherit from events.Event.
 
 The `get_event` method takes an optional argument for how to name
 keypresses, which is 'curses' by default. Note that curses doesn't have nice
 names for many key combinations, so you'll be putting thing like '\xe1' for
 option-j and '\x86' for ctrl-option-f. If you don't need curses compatibility,
-you can pass 'fmtstr' for this argument to receive events like "<Ctrl-Meta-J>"
+you can pass 'curtsies' for this argument to receive events like "<Ctrl-Meta-J>"
 and <Option-l>. Pass None for this parameter to do no rewriting of keypresses.
 
 All together now
@@ -204,9 +204,9 @@ exceptions won't prevent necessary cleanup to make the terminal usable again.
 Putting all that together:
 
     import sys
-    from fmtstr.fmtfuncs import *
-    from fmtstr.canvas import Canvas
-    from fmtstr.terminal import Terminal
+    from curtsies.fmtfuncs import *
+    from curtsies.canvas import Canvas
+    from curtsies.terminal import Terminal
 
     with Terminal(sys.stdin, sys.stdout) as tc:
         with Canvas(tc) as t:

@@ -1,13 +1,13 @@
 from setuptools import setup
 
-setup(name='fmtstr',
-      version='0.0.24',
-      description='string-like objects marked up with terminal formatting',
-      url='https://github.com/thomasballinger/fmtstr',
+setup(name='curtsies',
+      version='0.0.25',
+      description='Curses-like terminal wrapper, with colored strings!',
+      url='https://github.com/thomasballinger/curtsies',
       author='Thomas Ballinger',
       author_email='thomasballinger@gmail.com',
       license='MIT',
-      packages=['fmtstr'],
+      packages=['curtsies'],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
