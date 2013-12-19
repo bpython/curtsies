@@ -1,4 +1,4 @@
-from fmtstr.fmtstr import FmtStr, BaseFmtStr
+from curtsies.fmtstr import FmtStr, BaseFmtStr
 import time
 
 def add_things(n):

@@ -1,10 +1,10 @@
 import sys
 
-from fmtstr.fmtfuncs import *
+from curtsies.fmtfuncs import *
 
-from fmtstr.window import Window
-from fmtstr.terminal import Terminal
-from fmtstr.fsarray import fsarray
+from curtsies.window import Window
+from curtsies.terminal import Terminal
+from curtsies.fsarray import fsarray
 
 class Board(object):
     """

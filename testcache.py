@@ -1,10 +1,10 @@
 import sys
 import os
 
-from fmtstr.fmtfuncs import blue, red, bold, on_red
+from curtsies.fmtfuncs import blue, red, bold, on_red
 
-from fmtstr.window import Window
-from fmtstr.terminal import Terminal
+from curtsies.window import Window
+from curtsies.terminal import Terminal
 
 import time
 
