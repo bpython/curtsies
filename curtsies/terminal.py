@@ -135,8 +135,11 @@ class Terminal(object):
             if c:
                 return c
             if fake_input:
-                self.in_buffer.extend(list(fake_input))
-                fake_input = None
+                try:
+                    self.in_buffer.extend(fake_input.next())
+                    fake_input = None
+                except StopIteration:
+                    raise SystemExit()
             if self.in_buffer:
                 chars.append(self.in_buffer.pop(0))
                 continue
