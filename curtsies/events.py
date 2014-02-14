@@ -31,6 +31,15 @@ class SigIntEvent(Event):
     def name(self):
         return repr(self)
 
+class PasteEvent(Event):
+    def __init__(self):
+        self.events = []
+    def __repr__(self):
+        return "<Paste Event with data: %r>" % self.events
+    @property
+    def name(self):
+        return repr(self)
+
 def get_key(chars, keynames='curses'):
     if not ((chars and chars[0] != '\x1b') or
             (len(chars) == 2 and chars[1] not in ['[', 'O', '\x1b']) or

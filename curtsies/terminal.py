@@ -13,6 +13,8 @@ import signal
 import re
 import termios
 import logging
+import fcntl
+import os
 
 from . import events
 
@@ -39,6 +41,16 @@ def produce_cursor_sequence(char):
         if n: ts.write("[%d%s" % (n, char))
     return func
 
+class nonblocking(object):
+    def __init__(self, stream):
+        self.stream = stream
+        self.fd = self.stream.fileno()
+    def __enter__(self):
+        self.orig_fl = fcntl.fcntl(self.fd, fcntl.F_GETFL)
+        fcntl.fcntl(self.fd, fcntl.F_SETFL, self.orig_fl | os.O_NONBLOCK)
+    def __exit__(self, *args):
+        fcntl.fcntl(self.fd, fcntl.F_SETFL, self.orig_fl)
+
 class Terminal(object):
     """Communicates with an ANSI-compatible terminal through in and out streams
 
@@ -46,7 +58,7 @@ class Terminal(object):
     raw mode, and window size change (SIGWINCH) and interrupt (SIGINT) signals
     are handled, stored for reporting by Terminal.get_event().
     """
-    def __init__(self, in_stream=sys.stdin, out_stream=sys.stdout, input_mode='cbreak'):
+    def __init__(self, in_stream=sys.stdin, out_stream=sys.stdout, input_mode='cbreak', paste_mode=False):
         self.in_stream = in_stream
         self.out_stream = out_stream
         self.in_buffer = []
@@ -57,6 +69,7 @@ class Terminal(object):
         if not input_mode in ['raw', 'cbreak']:
             raise ValueError("input_mode must be raw or cbreak")
         self.input_mode = input_mode
+        self.paste_mode_enabled = paste_mode
 
     def __enter__(self):
         def signal_handler(signum, frame):
@@ -114,6 +127,7 @@ class Terminal(object):
             -a SIGWINCH has occurred
         """
         chars = []
+        paste_event = None
         while True:
             if self.sigint_queued:
                 self.sigint_queued = False
@@ -133,7 +147,25 @@ class Terminal(object):
             logging.debug('self.in_buffer %r', self.in_buffer)
             c = events.get_key(chars, keynames=keynames)
             if c:
-                return c
+                if self.paste_mode_enabled:
+                    # This needs to be disabled if we ever want to work with Windows
+                    with nonblocking(self.in_stream):
+                        try:
+                            self.in_buffer.append(self.in_stream.read(1))
+                        except IOError:
+                            if paste_event:
+                                paste_event.events.append(c)
+                                return paste_event
+                            else:
+                                return c
+                        else:
+                            #already another character lined up!
+                            if not paste_event:
+                                paste_event = events.PasteEvent()
+                            paste_event.events.append(c)
+                            chars = []
+                else:
+                    return c
             if fake_input:
                 try:
                     self.in_buffer.extend(fake_input.next())
