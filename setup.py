@@ -1,7 +1,8 @@
 from setuptools import setup
+import curtsies
 
 setup(name='curtsies',
-      version='0.0.26',
+      version=curtsies.__version__,
       description='Curses-like terminal wrapper, with colored strings!',
       url='https://github.com/thomasballinger/curtsies',
       author='Thomas Ballinger',

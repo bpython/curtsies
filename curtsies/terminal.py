@@ -18,6 +18,8 @@ import os
 
 from . import events
 
+PY3 = sys.version_info[0] >= 3
+
 QUERY_CURSOR_POSITION = "\x1b[6n"
 SCROLL_DOWN = "D"
 CURSOR_UP, CURSOR_DOWN, CURSOR_FORWARD, CURSOR_BACK = ["[%s" for char in 'ABCD']
@@ -147,23 +149,39 @@ class Terminal(object):
             logging.debug('self.in_buffer %r', self.in_buffer)
             c = events.get_key(chars, keynames=keynames)
             if c:
+                #TODO simplify this! Python 2 and 3 aren't really so different. Or at least stuff it in a function
                 if self.paste_mode_enabled:
                     # This needs to be disabled if we ever want to work with Windows
                     with nonblocking(self.in_stream):
-                        try:
-                            self.in_buffer.append(self.in_stream.read(1))
-                        except IOError:
-                            if paste_event:
+                        if PY3:
+                            next_c = self.in_stream.read(1)
+                            if next_c:
+                                self.in_buffer.append(next_c)
+                                if not paste_event:
+                                    paste_event = events.PasteEvent()
                                 paste_event.events.append(c)
-                                return paste_event
+                                chars = []
                             else:
-                                return c
+                                if paste_event:
+                                    paste_event.events.append(c)
+                                    return paste_event
+                                else:
+                                    return c
                         else:
-                            #already another character lined up!
-                            if not paste_event:
-                                paste_event = events.PasteEvent()
-                            paste_event.events.append(c)
-                            chars = []
+                            try:
+                                self.in_buffer.append(self.in_stream.read(1))
+                            except IOError:
+                                if paste_event:
+                                    paste_event.events.append(c)
+                                    return paste_event
+                                else:
+                                    return c
+                            else:
+                                #already another character lined up!
+                                if not paste_event:
+                                    paste_event = events.PasteEvent()
+                                paste_event.events.append(c)
+                                chars = []
                 else:
                     return c
             if fake_input:
