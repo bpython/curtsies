@@ -130,6 +130,7 @@ class Terminal(object):
         """
         chars = []
         paste_event = None
+
         while True:
             if self.sigint_queued:
                 self.sigint_queued = False
@@ -143,45 +144,33 @@ class Terminal(object):
                 self.sigwinch_counter = _SIGWINCH_COUNTER
                 self.in_buffer = chars + self.in_buffer
                 return events.WindowChangeEvent(*self.get_screen_size())
-            #TODO properly detect escape key! Probably via a timer, or nonblocking read?
 
             logging.debug('getting key for %r', chars)
             logging.debug('self.in_buffer %r', self.in_buffer)
-            c = events.get_key(chars, keynames=keynames)
+            if chars == ["\x1b"]:
+                # This also won't work on Windows I think
+                next_c = nonblocking_read(self.in_stream)
+                if not next_c:
+                    c = '\x1b'
+                    chars = []
+            else:
+                c = events.get_key(chars, keynames=keynames)
             if c:
-                #TODO simplify this! Python 2 and 3 aren't really so different. Or at least stuff it in a function
                 if self.paste_mode_enabled:
                     # This needs to be disabled if we ever want to work with Windows
-                    with nonblocking(self.in_stream):
-                        if PY3:
-                            next_c = self.in_stream.read(1)
-                            if next_c:
-                                self.in_buffer.append(next_c)
-                                if not paste_event:
-                                    paste_event = events.PasteEvent()
-                                paste_event.events.append(c)
-                                chars = []
-                            else:
-                                if paste_event:
-                                    paste_event.events.append(c)
-                                    return paste_event
-                                else:
-                                    return c
+                    next_c = nonblocking_read(self.in_stream)
+                    if next_c:
+                        self.in_buffer.append(next_c)
+                        if not paste_event:
+                            paste_event = events.PasteEvent()
+                        paste_event.events.append(c)
+                        chars = []
+                    else:
+                        if paste_event:
+                            paste_event.events.append(c)
+                            return paste_event
                         else:
-                            try:
-                                self.in_buffer.append(self.in_stream.read(1))
-                            except IOError:
-                                if paste_event:
-                                    paste_event.events.append(c)
-                                    return paste_event
-                                else:
-                                    return c
-                            else:
-                                #already another character lined up!
-                                if not paste_event:
-                                    paste_event = events.PasteEvent()
-                                paste_event.events.append(c)
-                                chars = []
+                            return c
                 else:
                     return c
             if fake_input:
@@ -247,6 +236,24 @@ class Terminal(object):
         self.set_cursor_position(orig)
         self.last_screen_size = size
         return size
+
+def nonblocking_read(stream):
+    """returns the waiting character, or None if nothing is there"""
+    with nonblocking(stream):
+        if PY3:
+            next_c = stream.read(1)
+            if next_c:
+                return next_c
+            else:
+                return False
+        else:
+            try:
+                next_c = stream.read(1)
+            except IOError:
+                return False
+            else:
+                return next_c
+
 
 def test():
     with Terminal() as tc:

@@ -4,6 +4,7 @@ from curtsies.fmtstr import FmtStr, fmtstr, BaseFmtStr, linesplit
 from curtsies.fmtfuncs import *
 from curtsies.termformatconstants import FG_COLORS
 from curtsies.fsarray import fsarray, FSArray
+from curtsies.terminal import Terminal
 
 try:
     unicode = unicode
@@ -313,6 +314,11 @@ class TestUnicode(unittest.TestCase):
     def test_unicode_repr(self):
         repr(BaseFmtStr(u'–'))
         self.assertEqual(repr(fmtstr(u'–')), repr(u'–'))
+
+class TestTerminal(unittest.TestCase):
+
+    def test_instantiation(self):
+        t = Terminal()
 
 if __name__ == '__main__':
     import fmtstr.fmtstr
