@@ -152,6 +152,7 @@ class Terminal(object):
                 next_c = nonblocking_read(self.in_stream)
                 if next_c:
                     chars.append(next_c)
+                    continue
                 else:
                     c = '\x1b'
                     chars = []
