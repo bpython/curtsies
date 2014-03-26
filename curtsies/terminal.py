@@ -150,7 +150,9 @@ class Terminal(object):
             if chars == ["\x1b"]:
                 # This also won't work on Windows I think
                 next_c = nonblocking_read(self.in_stream)
-                if not next_c:
+                if next_c:
+                    chars.append(next_c)
+                else:
                     c = '\x1b'
                     chars = []
             else:
