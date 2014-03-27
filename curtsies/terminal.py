@@ -137,7 +137,7 @@ class Terminal(object):
                     self.in_buffer.append(next_c)
                     return True
 
-    def get_event(self, keynames='curses', fake_input=None, idle=None):
+    def get_event(self, keynames='curses', fake_input=None, idle=()):
         """Blocks and returns the next event, using curses names by default
 
         idle is a generator which will be iterated over until an event occurs
@@ -207,7 +207,7 @@ class Terminal(object):
                 chars.append(self.in_buffer.pop(0))
                 continue
 
-            for _ in (idle if idle is not None else []):
+            for _ in idle:
                 if self.nonblocking_read():
                     break
             else:
