@@ -118,8 +118,29 @@ class Terminal(object):
         self.refresh_queued = True
     stuff_a_refresh_request = request_refresh # for compatibility atm
 
-    def get_event(self, keynames='curses', fake_input=None):
+    def nonblocking_read(self):
+        """returns False if no waiting character, else True and adds it to in_buffer"""
+        with nonblocking(self.in_stream):
+            if PY3:
+                next_c = self.in_stream.read(1)
+                if next_c:
+                    self.in_buffer.append(next_c)
+                    return True
+                else:
+                    return False
+            else:
+                try:
+                    next_c = self.in_stream.read(1)
+                except IOError:
+                    return False
+                else:
+                    self.in_buffer.append(next_c)
+                    return True
+
+    def get_event(self, keynames='curses', fake_input=None, idle=None):
         """Blocks and returns the next event, using curses names by default
+
+        idle is a generator which will be iterated over until an event occurs
 
         If several keypresses have occurred, they are queued and returned one
         by one. Other events have higher priority than keypresses, and can
@@ -149,21 +170,20 @@ class Terminal(object):
             logging.debug('self.in_buffer %r', self.in_buffer)
             if chars == ["\x1b"]:
                 # This also won't work on Windows I think
-                next_c = nonblocking_read(self.in_stream)
-                if next_c:
-                    chars.append(next_c)
+                if self.in_buffer or self.nonblocking_read():
+                    chars.append(self.in_buffer.pop())
                     continue
                 else:
                     c = '\x1b'
                     chars = []
             else:
                 c = events.get_key(chars, keynames=keynames)
+
             if c:
                 if self.paste_mode_enabled:
                     # This needs to be disabled if we ever want to work with Windows
-                    next_c = nonblocking_read(self.in_stream)
-                    if next_c:
-                        self.in_buffer.append(next_c)
+                    #TODO take the in_buffer into account here!
+                    if self.in_buffer or self.nonblocking_read():
                         if not paste_event:
                             paste_event = events.PasteEvent()
                         paste_event.events.append(c)
@@ -182,21 +202,26 @@ class Terminal(object):
                     fake_input = None
                 except StopIteration:
                     raise SystemExit()
+
             if self.in_buffer:
                 chars.append(self.in_buffer.pop(0))
                 continue
 
-            prev_sigint_handler = signal.getsignal(signal.SIGINT)
-            signal.signal(signal.SIGINT, signal.default_int_handler)
-            try:
-                chars.append(self.in_stream.read(1))
-            except IOError:
-                continue
-            except KeyboardInterrupt:
-                return events.SigIntEvent()
-            finally:
-                if prev_sigint_handler:
-                    signal.signal(signal.SIGINT, prev_sigint_handler)
+            for _ in (idle if idle is not None else []):
+                if self.nonblocking_read():
+                    break
+            else:
+                prev_sigint_handler = signal.getsignal(signal.SIGINT)
+                signal.signal(signal.SIGINT, signal.default_int_handler)
+                try:
+                    chars.append(self.in_stream.read(1))
+                except IOError:
+                    continue
+                except KeyboardInterrupt:
+                    return events.SigIntEvent()
+                finally:
+                    if prev_sigint_handler:
+                        signal.signal(signal.SIGINT, prev_sigint_handler)
 
     def retrying_read(self):
         while True:
@@ -239,23 +264,6 @@ class Terminal(object):
         self.set_cursor_position(orig)
         self.last_screen_size = size
         return size
-
-def nonblocking_read(stream):
-    """returns the waiting character, or None if nothing is there"""
-    with nonblocking(stream):
-        if PY3:
-            next_c = stream.read(1)
-            if next_c:
-                return next_c
-            else:
-                return False
-        else:
-            try:
-                next_c = stream.read(1)
-            except IOError:
-                return False
-            else:
-                return next_c
 
 
 def test():
