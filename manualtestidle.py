@@ -8,7 +8,7 @@ import time
 def idle():
     i = 0
     while True:
-        print i
+        print(i)
         time.sleep(.1)
         i += 1
         yield

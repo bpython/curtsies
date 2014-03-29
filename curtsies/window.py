@@ -61,14 +61,16 @@ class Window(object):
         e = self.tc.get_event()
         if isinstance(e, events.WindowChangeEvent):
             row, col = self.tc.get_cursor_position()
-            #print 'row, col:', row, col
-            #print 'last row, col:', self._last_cursor_row, self._last_cursor_column
             if self._last_cursor_row is None:
                 e.cursor_dy = 0
             else:
                 e.cursor_dy = row - self._last_cursor_row
-                self.top_usable_row = max(0, self._orig_top_usable_row + e.cursor_dy)
-            #print repr(e)
+                while self.top_usable_row > 1 and e.cursor_dy > 0:
+                    self.top_usable_row += 1
+                    e.cursor_dy -= 1
+                while self.top_usable_row > 1 and e.cursor_dy < 0:
+                    self.top_usable_row -= 1
+                    e.cursor_dy += 1
         return e
 
     def render_to_terminal(self, array, cursor_pos=(0,0)):
