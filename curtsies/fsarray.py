@@ -60,7 +60,7 @@ class FSArray(object):
     #TODO add constructor that takes fmtstrs instead of dims
     def __init__(self, num_rows, num_columns, *args, **kwargs):
         self.saved_args, self.saved_kwargs = args, kwargs
-        self.rows = [fmtstr(' '*num_columns, *args, **kwargs) for _ in range(num_rows)]
+        self.rows = [fmtstr('', *args, **kwargs) for _ in range(num_rows)]
         self.num_columns = num_columns
 
     def __getitem__(self, slicetuple):

@@ -315,6 +315,12 @@ class TestUnicode(unittest.TestCase):
         repr(BaseFmtStr(u'–'))
         self.assertEqual(repr(fmtstr(u'–')), repr(u'–'))
 
+class TestFSArray(unittest.TestCase):
+    def test_no_hanging_space(self):
+        a = FSArray(4, 2)
+        self.assertEqual(len(a.rows[0]), 0)
+
+
 class TestTerminal(unittest.TestCase):
 
     def test_instantiation(self):

@@ -267,7 +267,7 @@ class Terminal(object):
         return size
 
 
-def test():
+def demo():
     with Terminal() as tc:
         pos = str(tc.get_cursor_position())
         tc.write(pos)
@@ -296,5 +296,5 @@ def test_cursor():
     print(pos)
 
 if __name__ == '__main__':
-    test()
+    demo()
 

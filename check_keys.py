@@ -1,2 +1,2 @@
 from curtsies import terminal
-terminal.test()
+terminal.demo()
