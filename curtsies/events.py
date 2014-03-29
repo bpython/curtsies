@@ -13,13 +13,15 @@ class RefreshRequestEvent(Event):
         return "<RefreshRequestEvent from %r>" % (self.who)
 
 class WindowChangeEvent(Event):
-    def __init__(self, rows, columns):
+    def __init__(self, rows, columns, cursor_dy=None):
         self.rows = rows
         self.columns = columns
+        self.cursor_dy = cursor_dy
     x = width = property(lambda self: self.columns)
     y = height = property(lambda self: self.rows)
     def __repr__(self):
-        return "<WindowChangeEvent (%d, %d)>" % (self.rows, self.columns)
+        return "<WindowChangeEvent (%d, %d)%s>" % (self.rows, self.columns,
+                '' if self.cursor_dy is None else " cursor_dy: %d" % self.cursor_dy)
     @property
     def name(self):
         return '<WindowChangeEvent>'

@@ -32,13 +32,16 @@ class Window(object):
         self.keep_last_line = keep_last_line
         self.hide_cursor = hide_cursor
         self._last_lines_by_row = {}
-        self._last_rendered_width = 0
-        self._last_rendered_height = 0
+        self._last_rendered_width = None
+        self._last_rendered_height = None
+        self._last_cursor_column = None
+        self._last_cursor_row = None
 
     def __enter__(self):
         if self.hide_cursor:
             self.tc.hide_cursor()
-        self.top_usable_row, _ = self.tc.get_cursor_position() #TODO why?
+        self.top_usable_row, _ = self.tc.get_cursor_position()
+        self._orig_top_usable_row = self.top_usable_row
         logging.debug('initial top_usable_row: %d' % self.top_usable_row)
         return self
 
@@ -52,6 +55,21 @@ class Window(object):
         self.tc.erase_rest_of_line()
         if self.hide_cursor:
             self.tc.show_cursor()
+
+    def get_annotated_event(self, keynames='curses', fake_input=None, idle=()):
+        """get_event from self.tc, but add cursor_dy to window change events"""
+        e = self.tc.get_event()
+        if isinstance(e, events.WindowChangeEvent):
+            row, col = self.tc.get_cursor_position()
+            #print 'row, col:', row, col
+            #print 'last row, col:', self._last_cursor_row, self._last_cursor_column
+            if self._last_cursor_row is None:
+                e.cursor_dy = 0
+            else:
+                e.cursor_dy = row - self._last_cursor_row
+                self.top_usable_row = max(0, self._orig_top_usable_row + e.cursor_dy)
+            #print repr(e)
+        return e
 
     def render_to_terminal(self, array, cursor_pos=(0,0)):
         """Renders array to terminal, returns the number of lines
@@ -108,6 +126,8 @@ class Window(object):
         logging.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())
         logging.debug('lines in current lines by row: %r' % current_lines_by_row.keys())
         self.tc.set_cursor_position((cursor_pos[0]-offscreen_scrolls+self.top_usable_row, cursor_pos[1]+1))
+        self._last_cursor_row, self._last_cursor_column = (
+                                    (cursor_pos[0]-offscreen_scrolls+self.top_usable_row, cursor_pos[1]+1))
         self._last_lines_by_row = current_lines_by_row
         return offscreen_scrolls
 

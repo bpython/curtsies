@@ -7,14 +7,14 @@ inspired by
 https://github.com/gwk/gloss/blob/master/python/gloss/io/cs.py
 """
 
-import sys
-import tty
-import signal
-import re
-import termios
-import logging
 import fcntl
+import logging
 import os
+import re
+import signal
+import sys
+import termios
+import tty
 
 from . import events
 
@@ -28,7 +28,7 @@ ERASE_LINE = "[2K"
 HIDE_CURSOR = "[?25l"
 SHOW_CURSOR = "[?25h"
 ERASE_REST_OF_SCREEN = "[0J"
-
+TURN_OFF_AUTO_WRAP = "[?7l"
 
 _SIGWINCH_COUNTER = 0
 
@@ -82,6 +82,7 @@ class Terminal(object):
         signal.signal(signal.SIGWINCH, signal_handler)
 
         self.original_stty = termios.tcgetattr(self.out_stream)
+        self.turn_off_line_wrapping()
         if self.input_mode == 'raw':
             tty.setraw(self.in_stream)
         else:
@@ -113,6 +114,7 @@ class Terminal(object):
     hide_cursor = produce_simple_sequence(HIDE_CURSOR)
     show_cursor = produce_simple_sequence(SHOW_CURSOR)
     erase_rest_of_screen = produce_simple_sequence(ERASE_REST_OF_SCREEN)
+    turn_off_line_wrapping = produce_simple_sequence(TURN_OFF_AUTO_WRAP)
 
     def request_refresh(self):
         self.refresh_queued = True
@@ -253,7 +255,6 @@ class Terminal(object):
         self.write("[%d;%dH" % (row, col))
 
     def get_screen_size(self, break_cache=False):
-        #TODO generalize get_cursor_position code and use it here instead
         #TODO use real get terminal size query
         if self.last_screen_size and not break_cache:
             return self.last_screen_size
