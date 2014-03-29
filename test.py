@@ -284,9 +284,9 @@ class TestUnicode(unittest.TestCase):
     def test_len_of_unicode_in_fsarray(self):
 
         fsa = FSArray(3, 2)
-        fsa.rows[0] = fsa.rows[0].setslice(0, 2, u'┌─')
+        fsa.rows[0] = fsa.rows[0].setslice_with_length(0, 2, u'┌─', 2)
         self.assertEqual(fsa.shape, (3, 2))
-        fsa.rows[0] = fsa.rows[0].setslice(0, 2, fmtstr(u'┌─', 'blue'))
+        fsa.rows[0] = fsa.rows[0].setslice_with_length(0, 2, fmtstr(u'┌─', 'blue'), 2)
         self.assertEqual(fsa.shape, (3, 2))
 
 
@@ -320,10 +320,14 @@ class TestFSArray(unittest.TestCase):
         a = FSArray(4, 2)
         self.assertEqual(len(a.rows[0]), 0)
 
+    def test_assignment_working(self):
+        t = FSArray(10, 10)
+        t[2,2] = 'a'
+        t[2,2] == 'a'
 
 class TestTerminal(unittest.TestCase):
 
-    def test_instantiation(self):
+    def test_instantiation_is_blank(self):
         t = Terminal()
 
 if __name__ == '__main__':

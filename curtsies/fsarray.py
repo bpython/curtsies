@@ -46,9 +46,8 @@ def fsarray(strings, *args, **kwargs):
     else:
         width = max(len(s) for s in strings) if strings else 0
     fstrings = [s if isinstance(s, FmtStr) else fmtstr(s, *args, **kwargs) for s in strings]
-    fstrings = [fs + ' '*(width - len(fs)) if len(fs) < width else fs for fs in fstrings]
     arr = FSArray(len(fstrings), width, *args, **kwargs)
-    rows = [fs.setslice(0, len(s), s) for fs, s in zip(arr.rows, fstrings)]
+    rows = [fs.setslice_with_length(0, len(s), s, width) for fs, s in zip(arr.rows, fstrings)]
     arr.rows = rows
     return arr
 
@@ -108,7 +107,7 @@ class FSArray(object):
 
         rowslice = normalize_slice(sys.maxsize, rowslice)
         additional_rows = max(0, rowslice.stop - len(self.rows))
-        self.rows.extend([fmtstr(' '*self.num_columns, *self.saved_args, **self.saved_kwargs)
+        self.rows.extend([fmtstr('', *self.saved_args, **self.saved_kwargs)
                           for _ in range(additional_rows)])
         colslice = normalize_slice(self.num_columns, colslice)
         if slicesize(colslice) == 0 or slicesize(rowslice) == 0:
@@ -116,7 +115,7 @@ class FSArray(object):
         if slicesize(rowslice) != len(value):
             raise ValueError('row dimensions do not match: %r, %r' % (len(value), rowslice))
         self.rows = (self.rows[:rowslice.start] +
-                     [fs.setslice(colslice.start, colslice.stop, v) for fs, v in zip(self.rows[rowslice], value)] +
+                     [fs.setslice_with_length(colslice.start, colslice.stop, v, self.num_columns) for fs, v in zip(self.rows[rowslice], value)] +
                      self.rows[rowslice.stop:])
 
     def dumb_display(self):

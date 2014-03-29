@@ -155,18 +155,26 @@ class FmtStr(object):
         """Shim for easily converting old __setitem__ calls"""
         return self.setslice(startindex, startindex+1, fs)
 
-    def setslice(self, startindex, endindex, fs):
+    def setslice_with_length(self, startindex, endindex, fs, length):
         """Shim for easily converting old __setitem__ calls"""
-        assert len(fs) == endindex - startindex, (len(fs), startindex, endindex)
-        return self.insert(fs, startindex, endindex)
+        if len(self) < startindex:
+            fs = ' '*(startindex - len(self)) + fs
+        if len(self) > endindex:
+            fs = fs + ' '*(endindex - startindex - len(fs))
+            assert len(fs) == endindex - startindex, (len(fs), startindex, endindex)
+        result = self.insert(fs, startindex, endindex)
+        assert len(result) <= length
+        return result
 
     def insert(self, new_str, start, end=None):
         """Inserts the input string at the given index of the fmtstr by
         creating a new list of basefmtstrs. If end is provided, new_str will
         replace the substring self.s[start:end-1].
         """
+        if len(new_str) == 0:
+            return self
         new_fs = new_str if isinstance(new_str, FmtStr) else fmtstr(new_str)
-        assert len(new_fs.basefmtstrs) > 0
+        assert len(new_fs.basefmtstrs) > 0, (new_fs.basefmtstrs, new_fs)
         new_components = []
         inserted = False
         if end is None:
