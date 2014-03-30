@@ -32,6 +32,9 @@ TURN_OFF_AUTO_WRAP = "[?7l"
 
 _SIGWINCH_COUNTER = 0
 
+class SigwinchException(Exception):
+    pass
+
 def produce_simple_sequence(seq):
     def func(ts):
         ts.write(seq)
@@ -74,12 +77,12 @@ class Terminal(object):
         self.paste_mode_enabled = paste_mode
 
     def __enter__(self):
-        def signal_handler(signum, frame):
+        def sigwinch_handler(signum, frame):
             global _SIGWINCH_COUNTER
             _SIGWINCH_COUNTER += 1
             self.last_screen_size = None
         self.orig_sigwinch_handler = signal.getsignal(signal.SIGWINCH)
-        signal.signal(signal.SIGWINCH, signal_handler)
+        signal.signal(signal.SIGWINCH, sigwinch_handler)
 
         self.original_stty = termios.tcgetattr(self.out_stream)
         self.turn_off_line_wrapping()
@@ -214,15 +217,23 @@ class Terminal(object):
             else:
                 prev_sigint_handler = signal.getsignal(signal.SIGINT)
                 signal.signal(signal.SIGINT, signal.default_int_handler)
+                prev_sigwinch_handler = signal.getsignal(signal.SIGWINCH)
+                def loud_sigwinch_handler(signum, frame):
+                    prev_sigwinch_handler(signum, frame)
+                    raise SigwinchException('Stop blocking on read so we can deliver a window change!')
+                signal.signal(signal.SIGWINCH, loud_sigwinch_handler)
                 try:
                     chars.append(self.in_stream.read(1))
                 except IOError:
                     continue
                 except KeyboardInterrupt:
                     return events.SigIntEvent()
+                except SigwinchException:
+                    continue
                 finally:
                     if prev_sigint_handler:
                         signal.signal(signal.SIGINT, prev_sigint_handler)
+                    signal.signal(signal.SIGWINCH, prev_sigwinch_handler)
 
     def retrying_read(self):
         while True:
