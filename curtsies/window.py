@@ -87,6 +87,8 @@ class Window(object):
         """
         # caching of write and tc (avoiding the self. lookups etc) made
         # no significant performance difference here
+        if not self.hide_cursor:
+            self.tc.hide_cursor()
         height, width = self.tc.get_screen_size()
         if height != self._last_rendered_height or width != self._last_rendered_width:
             self._last_lines_by_row = {}
@@ -131,6 +133,8 @@ class Window(object):
         self._last_cursor_row, self._last_cursor_column = (
                                     (cursor_pos[0]-offscreen_scrolls+self.top_usable_row, cursor_pos[1]+1))
         self._last_lines_by_row = current_lines_by_row
+        if not self.hide_cursor:
+            self.tc.show_cursor()
         return offscreen_scrolls
 
     def array_from_text(self, msg):
