@@ -173,7 +173,7 @@ class Terminal(object):
             if chars == ["\x1b"]:
                 # This also won't work on Windows I think
                 if self.in_buffer or self.nonblocking_read():
-                    chars.append(self.in_buffer.pop())
+                    chars.append(self.in_buffer.pop(0))
                     continue
                 else:
                     c = '\x1b'
