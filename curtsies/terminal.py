@@ -155,6 +155,10 @@ class Terminal(object):
         paste_event = None
 
         while True:
+            if self.sigwinch_counter < _SIGWINCH_COUNTER:
+                self.sigwinch_counter = _SIGWINCH_COUNTER
+                self.in_buffer = chars + self.in_buffer
+                return events.WindowChangeEvent(*self.get_screen_size())
             if self.sigint_queued:
                 self.sigint_queued = False
                 return events.SigIntEvent()
@@ -163,11 +167,6 @@ class Terminal(object):
                 return events.RefreshRequestEvent('terminal control')
             if len(chars) > 10: #debugging tool - eventually detect all key sequences!
                 raise ValueError("Key sequence not detected at some point: %r" % ''.join(chars))
-            if self.sigwinch_counter < _SIGWINCH_COUNTER:
-                self.sigwinch_counter = _SIGWINCH_COUNTER
-                self.in_buffer = chars + self.in_buffer
-                return events.WindowChangeEvent(*self.get_screen_size())
-
             logging.debug('getting key for %r', chars)
             logging.debug('self.in_buffer %r', self.in_buffer)
             if chars == ["\x1b"]:
