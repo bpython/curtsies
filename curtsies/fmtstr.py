@@ -30,6 +30,10 @@ from .termformatconstants import seq
 
 PY3 = sys.version_info[0] >= 3
 
+try:
+    bytes
+except NameError:
+    bytes = str
 if PY3:
     unicode = str
 

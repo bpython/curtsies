@@ -27,6 +27,9 @@ from .fmtstr import fmtstr
 from .fmtstr import normalize_slice
 from .fmtstr import FmtStr
 
+if sys.version_info[0] == 2 and sys.version_info[1] < 6:
+    sys.maxsize = sys.maxint
+
 def slicesize(s):
     return int((s.stop - s.start) / (s.step if s.step else 1))
 

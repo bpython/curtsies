@@ -331,5 +331,4 @@ class TestTerminal(unittest.TestCase):
         t = Terminal()
 
 if __name__ == '__main__':
-    import fmtstr.fmtstr
     unittest.main()

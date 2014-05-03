@@ -7,6 +7,8 @@ inspired by
 https://github.com/gwk/gloss/blob/master/python/gloss/io/cs.py
 """
 
+from __future__ import with_statement
+
 import fcntl
 import logging
 import os

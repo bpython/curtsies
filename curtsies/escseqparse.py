@@ -8,8 +8,10 @@ True
 >>> r == ('', {'csi': '\x1b[', 'seq': '\x1b[2A', 'intermed': '', 'private': '', 'command': 'A', 'numbers': [2]}, 'stuff')
 True
 """
+from __future__ import with_statement
+from __future__ import absolute_import
 
-from .termformatconstants import *
+from .termformatconstants import STYLES, FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR, NUMBER_TO_STYLE, RESET_ALL, RESET_FG, RESET_BG
 import re
 
 
@@ -28,7 +30,7 @@ def parse(s):
         if token:
             try:
                 stuff.append(token_type(token))
-            except ValueError as e:
+            except ValueError:
                 raise ValueError("Can't parse escape sequence: %r %r %r %r" % (s, repr(front), token, repr(rest)))
         if not rest:
             break

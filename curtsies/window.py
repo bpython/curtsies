@@ -1,4 +1,5 @@
 """Renders 2D arrays of characters to the visible area of a terminal"""
+from __future__ import with_statement
 
 import sys
 import os
