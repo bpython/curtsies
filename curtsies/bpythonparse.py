@@ -75,7 +75,7 @@ def peel_off_string(s):
             \x04
             (?P<rest>.*)
             """
-    m = re.match(p, s, re.X | re.DOTALL)
+    m = re.match(p, s, re.VERBOSE | re.DOTALL)
     assert m, repr(s)
     d = m.groupdict()
     rest = d['rest']
