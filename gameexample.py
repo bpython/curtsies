@@ -18,6 +18,10 @@ class Entity(object):
         dy = entity.y - self.y
         return sign(dx) * self.speed, sign(dy) * self.speed
 
+    def die(self):
+        self.speed = 0
+        self.display = on_red(bold(yellow('o')))
+
 def sign(n):
     return -1 if n < 0 else 0 if n == 0 else 1
 
@@ -53,12 +57,10 @@ class World(object):
             self.move_entity(npc, *npc.towards(self.player))
         for entity1, entity2 in itertools.combinations(self.entities, 2):
             if (entity1.x, entity1.y) == (entity2.x, entity2.y):
-                if entity1 is self.player:
+                if self.player in (entity1, entity2):
                     return 'you lost on turn %d' % self.turn
-                entity1.speed = 0
-                entity2.speed = 0
-                entity1.display = on_red(bold(yellow('o')))
-                entity2.display = on_red(bold(yellow('o')))
+                entity1.die()
+                entity2.die()
 
         if all(npc.speed == 0 for npc in self.npcs):
             return 'you won on turn %d' % self.turn
