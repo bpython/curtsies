@@ -22,7 +22,7 @@ PY3 = sys.version_info[0] >= 3
 
 QUERY_CURSOR_POSITION = "\x1b[6n"
 SCROLL_DOWN = "D"
-CURSOR_UP, CURSOR_DOWN, CURSOR_FORWARD, CURSOR_BACK = ["[%s" for char in 'ABCD']
+CURSOR_UP, CURSOR_DOWN, CURSOR_FORWARD, CURSOR_BACK = ["["+char for char in 'ABCD']
 ERASE_REST_OF_LINE = "[K"
 ERASE_LINE = "[2K"
 HIDE_CURSOR = "[?25l"
