@@ -16,7 +16,7 @@ class Entity(object):
     def towards(self, entity):
         dx = entity.x - self.x
         dy = entity.y - self.y
-        return sign(dx) * self.speed, sign(dy) * self.speed
+        return vscale(self.speed, (sign(dx), sign(dy)))
 
     def die(self):
         self.speed = 0
@@ -24,6 +24,9 @@ class Entity(object):
 
 def sign(n):
     return -1 if n < 0 else 0 if n == 0 else 1
+
+def vscale(c, v):
+    return tuple(c*x for x in v)
 
 class World(object):
     def __init__(self, width, height):
@@ -45,11 +48,8 @@ class World(object):
     def process_event(self, c):
         if c == "":
             sys.exit()
-        elif c in ('KEY_UP', 'KEY_LEFT', 'KEY_DOWN', 'KEY_RIGHT'):
-            self.move_entity(self.player, *{'KEY_UP':(0,self.player.speed),
-                                            'KEY_LEFT':(-self.player.speed, 0),
-                                            'KEY_DOWN':(0,-self.player.speed),
-                                            'KEY_RIGHT':(self.player.speed, 0)}[c])
+        elif c in key_directions:
+            self.move_entity(self.player, *vscale(self.player.speed, key_directions[c]))
         else:
             self.msg = Window.array_from_text_rc("try w, a, s, d, or ctrl-D", self.height, self.width)
         return self.tick()
@@ -76,6 +76,11 @@ class World(object):
         for entity in self.entities:
             a[self.height - 1 - entity.y, entity.x] = entity.display
         return a
+
+key_directions = {'KEY_UP':    (0, 1),
+                  'KEY_LEFT': (-1, 0),
+                  'KEY_DOWN':  (0,-1),
+                  'KEY_RIGHT': (1, 0)}
 
 def main():
     with Terminal(sys.stdin, sys.stdout) as tc:
