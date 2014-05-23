@@ -15,9 +15,10 @@ class Entity(object):
     def towards(self, entity):
         dx = entity.x - self.x
         dy = entity.y - self.y
-        desired_x = dx/abs(dx) * self.speed if dx else 0
-        desired_y = dy/abs(dy) * self.speed if dy else 0
-        return desired_x, desired_y
+        return sign(dx) * self.speed, sign(dy) * self.speed
+
+def sign(n):
+    return -1 if n < 0 else 0 if n == 0 else 1
 
 class World(object):
     def __init__(self, width, height):
