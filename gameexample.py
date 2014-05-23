@@ -1,3 +1,4 @@
+import itertools
 import sys
 
 from curtsies.fmtfuncs import red, bold, green, on_blue, yellow, on_red
@@ -50,16 +51,14 @@ class World(object):
     def tick(self):
         for npc in self.npcs:
             self.move_entity(npc, *npc.towards(self.player))
-        for entity1 in self.entities:
-            for entity2 in self.entities:
-                if entity1 is entity2: continue
-                if (entity1.x, entity1.y) == (entity2.x, entity2.y):
-                    if entity1 is self.player:
-                        return 'you lost on turn %d' % self.turn
-                    entity1.speed = 0
-                    entity2.speed = 0
-                    entity1.display = on_red(bold(yellow('o')))
-                    entity2.display = on_red(bold(yellow('o')))
+        for entity1, entity2 in itertools.combinations(self.entities, 2):
+            if (entity1.x, entity1.y) == (entity2.x, entity2.y):
+                if entity1 is self.player:
+                    return 'you lost on turn %d' % self.turn
+                entity1.speed = 0
+                entity2.speed = 0
+                entity1.display = on_red(bold(yellow('o')))
+                entity2.display = on_red(bold(yellow('o')))
 
         if all(npc.speed == 0 for npc in self.npcs):
             return 'you won on turn %d' % self.turn
