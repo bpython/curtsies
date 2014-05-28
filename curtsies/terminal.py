@@ -66,7 +66,7 @@ class Terminal(object):
     def __init__(self, in_stream=sys.stdin, out_stream=sys.stdout, input_mode='cbreak', paste_mode=False):
         self.in_stream = in_stream
         self.out_stream = out_stream
-        self.in_buffer = []
+        self.in_buffer = []     # Chars from the input, not yet consumed by an event.
         self.sigwinch_counter = _SIGWINCH_COUNTER - 1
         self.last_screen_size = None
         self.sigint_queued = False
@@ -123,7 +123,7 @@ class Terminal(object):
         self.refresh_queued = True
     stuff_a_refresh_request = request_refresh # for compatibility atm
 
-    def nonblocking_read(self):
+    def nonblocking_read(self): # XXX rename?
         """returns False if no waiting character, else True and adds it to in_buffer"""
         with nonblocking(self.in_stream):
             if PY3:
@@ -142,7 +142,7 @@ class Terminal(object):
                     self.in_buffer.append(next_c)
                     return True
 
-    def get_event(self, keynames='curses', fake_input=None, idle=()):
+    def get_event(self, keynames='curses', idle=()):
         """Blocks and returns the next event, using curses names by default
 
         idle is a generator which will be iterated over until an event occurs
@@ -150,10 +150,13 @@ class Terminal(object):
         If several keypresses have occurred, they are queued and returned one
         by one. Other events have higher priority than keypresses, and can
         pass keypresses in this queue. These event are, in descending priority:
+            -a SIGWINCH has occurred
             -a SIGINT has occurred
             -a refresh has been requested (Terminal.request_refresh)
-            -a SIGWINCH has occurred
         """
+        # Within this method, the pending input is chars + self.in_buffer.
+        # chars is a prefix of a mapped-key's char-sequence (which might be the whole thing);
+        # e.g. an arrow key is an escape sequence.
         chars = []
         paste_event = None
 
@@ -183,6 +186,11 @@ class Terminal(object):
             else:
                 c = events.get_key(chars, keynames=keynames)
 
+            # c is a keyname or None for an incomplete prefix.
+            # Here the pending input has two cases: either
+            #   * c is None: pending is chars + self.in_buffer.
+            #   * c is not None: pending is self.in_buffer.
+
             if c:
                 if self.paste_mode_enabled:
                     # This needs to be disabled if we ever want to work with Windows
@@ -200,12 +208,6 @@ class Terminal(object):
                             return c
                 else:
                     return c
-            if fake_input:
-                try:
-                    self.in_buffer.extend(fake_input.next())
-                    fake_input = None
-                except StopIteration:
-                    raise SystemExit()
 
             if self.in_buffer:
                 chars.append(self.in_buffer.pop(0))
