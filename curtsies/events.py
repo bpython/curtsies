@@ -45,7 +45,7 @@ class PasteEvent(Event):
 def get_key(chars, keynames='curses'):
     if not ((chars and chars[0] != '\x1b') or
             (len(chars) == 2 and chars[1] not in ['[', 'O', '\x1b']) or
-            (len(chars) == 4 and chars[1] == '\x1b' and chars[2] == '[') or
+            (len(chars) == 4 and chars[1] == '\x1b' and chars[2] in '[O') or
             (len(chars) > 2 and chars[1] in ['[', 'O'] and chars[-1] not in tuple('1234567890;'))):
         return None
     if PY3:
@@ -111,6 +111,10 @@ SEQUENCE_NAMES = dict([
   ('\x1b[B',   '<DOWN>'),
   ('\x1b[C',   '<RIGHT>'),
   ('\x1b[D',   '<LEFT>'),
+  ('\x1bOA',   '<UP>'),
+  ('\x1bOB',   '<DOWN>'),
+  ('\x1bOC',   '<RIGHT>'),
+  ('\x1bOD',   '<LEFT>'),
   ('\x1bOP',   '<F1>'),
   ('\x1bOQ',   '<F2>'),
   ('\x1bOR',   '<F3>'),

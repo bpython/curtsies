@@ -34,12 +34,12 @@ if PY3:
     unicode = str
 
 xforms = {
-    'fg' : lambda x, v: '%s%s%s' % (seq(v), x, seq(RESET_FG)),
-    'bg' : lambda x, v: seq(v)+x+seq(RESET_BG),
-    'bold' : lambda x: seq(STYLES['bold'])+x+seq(RESET_ALL),
-    'underline' : lambda x: seq(STYLES['underline'])+x+seq(RESET_ALL),
-    'blink' : lambda x: seq(STYLES['blink'])+x+seq(RESET_ALL),
-    'invert' : lambda x: seq(STYLES['invert'])+x+seq(RESET_ALL),
+    'fg' :        lambda s, v: '%s%s%s' % (seq(v), s, seq(RESET_FG)),
+    'bg' :        lambda s, v: seq(v)+s+seq(RESET_BG),
+    'bold' :      lambda s: seq(STYLES['bold'])     +s+seq(RESET_ALL),
+    'underline' : lambda s: seq(STYLES['underline'])+s+seq(RESET_ALL),
+    'blink' :     lambda s: seq(STYLES['blink'])    +s+seq(RESET_ALL),
+    'invert' :    lambda s: seq(STYLES['invert'])   +s+seq(RESET_ALL),
 }
 
 class FrozenDict(dict):
@@ -47,8 +47,10 @@ class FrozenDict(dict):
     def __setitem__(self, key, value):
         raise Exception("Cannot change value.")
 
-class BaseFmtStr(object):
-    """Formatting annotations on a string"""
+class BaseFmtStr(object):       # TODO: rename? e.g. FmtChunk
+    """
+    A string carrying attributes (which are the same all the way through).
+    """
     def __init__(self, string, atts=None):
         self._s = string
         self._atts = tuple(atts.items()) if atts else tuple()
@@ -57,19 +59,21 @@ class BaseFmtStr(object):
         return FrozenDict(self._atts)
 
     atts = property(_get_atts, None, None,
-                    'A copy of the current attributes dictionary')
+                    "Attributes, e.g. {'fg': 34, 'bold': True} where 34 is the escape code for ...")
 
     s = property(lambda self: self._s) #makes self.s immutable
 
     def __len__(self):
         return len(self.s)
 
-    #TODO cache this if immutable
+    #TODO cache this
     @property
     def color_str(self):
+        "Return an escape-coded string to write to the terminal."
         s = self.s
         for k, v in sorted(self.atts.items()):
-            if k not in xforms: continue
+            # (self.atts sorted for the sake of always acting the same.)
+            assert k in xforms, "XXX Do we actually get cases like this?"
             if v is True:
                 s = xforms[k](s)
             elif v is False:
@@ -86,6 +90,7 @@ class BaseFmtStr(object):
 
     def __eq__(self, other):
         return self.s == other.s and self.atts == other.atts
+    # TODO: corresponding hash method
 
     if PY3:
         __str__ = __unicode__
@@ -94,6 +99,8 @@ class BaseFmtStr(object):
             return unicode(self).encode('utf8')
 
     def __getitem__(self, index):
+        assert False, "XXX does actual code use this?"
+        #XXX not sure what this is for
         return self.color_str[index]
 
     def __repr__(self):
@@ -101,12 +108,13 @@ class BaseFmtStr(object):
             if att == 'fg': return FG_NUMBER_TO_COLOR[self.atts[att]]
             elif att == 'bg': return 'on_' + BG_NUMBER_TO_COLOR[self.atts[att]]
             else: return att
-        return (''.join(
-                        pp_att(att)+'('
-                        for att in sorted(self.atts)) +
-               ('%r' % self.s) + ')'*len(self.atts))
+        return (''.join(pp_att(att)+'(' for att in sorted(self.atts))
+                + repr(self.s) + ')'*len(self.atts))
 
 class FmtStr(object):
+    """
+    A string whose substrings carry attributes (which may be different from one to the next).
+    """
     def __init__(self, *components):
         # The assertions below could be useful for debugging, but slow things down considerably
         #assert all([len(x) > 0 for x in components])
@@ -447,6 +455,7 @@ def linesplit(string, columns):
     return lines
 
 def normalize_slice(length, index):
+    "Fill in the Nones in a slice."
     is_int = False
     if isinstance(index, int):
         is_int = True
@@ -455,9 +464,9 @@ def normalize_slice(length, index):
         index = slice(0, index.stop, index.step)
     if index.stop is None:
         index = slice(index.start, length, index.step)
-    if index.start < -1:
+    if index.start < 0:         # XXX right?
         index = slice(length - index.start, index.stop, index.step)
-    if index.stop < -1:
+    if index.stop < 0:          # XXX right?
         index = slice(index.start, length - index.stop, index.step)
     if index.step is not None:
         raise NotImplementedError("You can't use steps with slicing yet")
