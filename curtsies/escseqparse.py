@@ -49,7 +49,7 @@ def peel_off_esc_code(s):
                 (?P<intermed>""" + '[\x20-\x2f]*)' + r"""
                 (?P<command>""" + '[\x40-\x7e]))' + r"""
             (?P<rest>.*)"""
-    m1 = re.match(p, s, re.X) #multibyte esc seq
+    m1 = re.match(p, s, re.VERBOSE) #multibyte esc seq
     m2 = re.match('(?P<front>.*?)(?P<seq>(?P<csi>)(?P<command>[\x40-\x5f]))(?P<rest>.*)', s) # 2 byte escape sequence
     if m1 and m2:
         m = m1 if len(m1.groupdict()['front']) <= len(m2.groupdict()['front']) else m2
