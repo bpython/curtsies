@@ -18,15 +18,15 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 """
 #TODO add a way to composite text without losing original formatting information
 
-import sys
-import re
 import functools
+import re
+import sys
 
 from .escseqparse import parse
-from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
-from .termformatconstants import FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR
-from .termformatconstants import RESET_ALL, RESET_BG, RESET_FG
-from .termformatconstants import seq
+from .termformatconstants import (FG_COLORS, BG_COLORS, STYLES,
+                                  FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR,
+                                  RESET_ALL, RESET_BG, RESET_FG,
+                                  seq)
 
 PY3 = sys.version_info[0] >= 3
 
