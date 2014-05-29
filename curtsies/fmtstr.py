@@ -303,7 +303,7 @@ class FmtStr(object):
 
     def __mul__(self, other):
         if isinstance(other, int):
-            return sum([FmtStr(*(x for x in self.basefmtstrs)) for _ in range(other)], FmtStr())
+            return sum([self for _ in range(other)], FmtStr())
         raise TypeError('Can\'t mulitply those')
     #TODO ensure emtpy FmtStr isn't a problem
 
