@@ -233,17 +233,17 @@ class FmtStr(object):
                         for bfs in self.basefmtstrs])
 
     def join(self, iterable):
-        iterable = list(iterable)
+        before = []
         basefmtstrs = []
         for i, s in enumerate(iterable):
+            basefmtstrs.extend(before)
+            before = self.basefmtstrs
             if isinstance(s, FmtStr):
                 basefmtstrs.extend(s.basefmtstrs)
             elif isinstance(s, (bytes, unicode)):
                 basefmtstrs.extend(fmtstr(s).basefmtstrs) #TODO just make a basefmtstr directly
             else:
                 raise TypeError("expected str or FmtStr, %r found" % type(s))
-            if i < len(iterable) - 1:
-                basefmtstrs.extend(self.basefmtstrs)
         return FmtStr(*basefmtstrs)
 
     #TODO make this split work like str.split
