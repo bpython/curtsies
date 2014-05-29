@@ -427,7 +427,7 @@ def linesplit(string, columns):
     [blue('home')+blue(' ')+blue('is'), blue('where')+blue(' ')+blue('the'), blue('heart-eati'), blue('ng')+blue(' ')+blue('mummy'), blue('is')]
     """
     if isinstance(string, FmtStr):
-        string = fmtstr(string)
+        string = fmtstr(string) # XXX isn't this redundant? should the previous line have a 'not'?
 
     string_s = string.s
     matches = list(re.finditer(r'\s+', string_s))
