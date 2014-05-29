@@ -334,12 +334,10 @@ class FmtStr(object):
     @property
     def divides(self):
         """List of indices of divisions between the constituent basefmtstrs"""
-        def add_indices(acc, elem):
-            acc.append(acc[-1] + elem)
-            return acc
-
-        bfs_lens = [len(s) for s in self.basefmtstrs]
-        return functools.reduce(add_indices, bfs_lens, [0])
+        acc = [0]
+        for s in self.basefmtstrs:
+            acc.append(acc[-1] + len(s))
+        return acc
 
     @property
     def s(self):
