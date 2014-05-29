@@ -52,7 +52,7 @@ class FrozenDict(dict):
     def extend(self, dictlike):
         return FrozenDict(itertools.chain(self.items(), dictlike.items()))
 
-class BaseFmtStr(object):       # TODO: rename? e.g. FmtChunk
+class BaseFmtStr(object):       # TODO: rename? e.g. Chunk
     """
     A string carrying attributes (which are the same all the way through).
     """
