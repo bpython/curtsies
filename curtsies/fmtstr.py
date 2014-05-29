@@ -19,6 +19,7 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 #TODO add a way to composite text without losing original formatting information
 
 import functools
+import itertools
 import re
 import sys
 
@@ -46,17 +47,21 @@ class FrozenDict(dict):
     """Immutable dictionary class"""
     def __setitem__(self, key, value):
         raise Exception("Cannot change value.")
+    def update(self, dictlike):
+        raise Exception("Cannot change value.")
+    def extend(self, dictlike):
+        return FrozenDict(itertools.chain(self.items(), dictlike.items()))
 
 class BaseFmtStr(object):       # TODO: rename? e.g. FmtChunk
     """
     A string carrying attributes (which are the same all the way through).
     """
-    def __init__(self, string, atts=None):
+    def __init__(self, string, atts=()):
         self._s = string
-        self._atts = tuple(atts.items()) if atts else tuple()
+        self._atts = FrozenDict(atts)
 
     def _get_atts(self):
-        return FrozenDict(self._atts)
+        return self._atts
 
     atts = property(_get_atts, None, None,
                     "Attributes, e.g. {'fg': 34, 'bold': True} where 34 is the escape code for ...")
@@ -232,9 +237,7 @@ class FmtStr(object):
         # Copy original basefmtstrs, but with new attributes
         new_basefmtstrs = []
         for bfs in self.basefmtstrs:
-            new_atts = bfs.atts
-            new_atts.update(attributes)
-            new_basefmtstrs.append(BaseFmtStr(bfs.s, new_atts))
+            new_basefmtstrs.append(BaseFmtStr(bfs.s, bfs.atts.extend(attributes)))
         # self.basefmtstrs = new_basefmtstrs
         return FmtStr(*new_basefmtstrs)
 
