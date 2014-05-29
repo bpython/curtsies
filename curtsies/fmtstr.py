@@ -229,15 +229,8 @@ class FmtStr(object):
         return self.insert(string, len(self.s))
 
     def copy_with_new_atts(self, **attributes):
-        self._unicode = None
-        self._str = None
-
-        # Copy original basefmtstrs, but with new attributes
-        new_basefmtstrs = []
-        for bfs in self.basefmtstrs:
-            new_basefmtstrs.append(BaseFmtStr(bfs.s, bfs.atts.extend(attributes)))
-        # self.basefmtstrs = new_basefmtstrs
-        return FmtStr(*new_basefmtstrs)
+        return FmtStr(*[BaseFmtStr(bfs.s, bfs.atts.extend(attributes))
+                        for bfs in self.basefmtstrs])
 
     def join(self, iterable):
         iterable = list(iterable)
