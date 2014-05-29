@@ -79,10 +79,10 @@ class BaseFmtStr(object):       # TODO: rename? e.g. FmtChunk
         for k, v in sorted(self.atts.items()):
             # (self.atts sorted for the sake of always acting the same.)
             assert k in xforms, "XXX Do we actually get cases like this?"
-            if v is True:
-                s = xforms[k](s)
-            elif v is False:
+            if v is False:
                 continue
+            elif v is True:
+                s = xforms[k](s)
             else:
                 s = xforms[k](s, v)
         return s
