@@ -60,13 +60,11 @@ class BaseFmtStr(object):       # TODO: rename? e.g. FmtChunk
         self._s = string
         self._atts = FrozenDict(atts)
 
-    def _get_atts(self):
-        return self._atts
-
-    atts = property(_get_atts, None, None,
-                    "Attributes, e.g. {'fg': 34, 'bold': True} where 34 is the escape code for ...")
-
     s = property(lambda self: self._s) #makes self.s immutable
+
+    atts = property(lambda self: self._atts,
+                    None, None,
+                    "Attributes, e.g. {'fg': 34, 'bold': True} where 34 is the escape code for ...")
 
     def __len__(self):
         return len(self.s)
