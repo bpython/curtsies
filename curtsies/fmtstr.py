@@ -510,14 +510,12 @@ def fmtstr(string, *args, **kwargs):
     """
     atts = parse_args(args, kwargs)
     if isinstance(string, FmtStr):
-        new_str = string.copy_with_new_atts(**atts)
-        return new_str
+        pass
     elif isinstance(string, (bytes, unicode)):
         string = FmtStr.from_str(string)
-        new_str = string.copy_with_new_atts(**atts)
-        return new_str
     else:
         raise ValueError("Bad Args: %r (of type %s), %r, %r" % (string, type(string), args, kwargs))
+    return string.copy_with_new_atts(**atts)
 
 if __name__ == '__main__':
     import doctest
