@@ -283,6 +283,7 @@ class FmtStr(object):
 
     def __eq__(self, other):
         return str(self) == str(other)
+    # TODO corresponding hash method
 
     def __add__(self, other):
         if isinstance(other, FmtStr):
