@@ -161,6 +161,7 @@ class Terminal(object):
         paste_event = None
 
         while True:
+            # XXX shouldn't these return-cases first put anything in chars back into self.in_buffer?
             if self.sigwinch_counter < _SIGWINCH_COUNTER:
                 self.sigwinch_counter = _SIGWINCH_COUNTER
                 self.in_buffer = chars + self.in_buffer
