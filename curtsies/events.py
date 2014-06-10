@@ -47,27 +47,19 @@ def get_key(chars, keynames='curses'):
     chars.
     Return a key name (possibly just a plain one like 'a') or None
     meaning it's an incomplete sequence."""
-    if ''.join(chars) in keymap_prefixes:
+    print 'getkeycalled'
+    seq = ''.join(chars)
+    if seq in keymap_prefixes:
+        print repr(seq), 'in prefix:'
         return None
-    if PY3:
-        try:
-            u = ''.join(chars)
-        except UnicodeDecodeError:
-            return None
-    else:
-        chars = ''.join(chars)
-        try:
-            u = chars.decode('utf8')
-        except UnicodeDecodeError:
-            return None
-    if keynames == 'curses':
-        return curses_name(u)
-    elif keynames == 'curtsies':
-        return curtsies_name(u)
-    elif keynames is None or keynames == 'plain':
-        return u
-    else:
-        raise ValueError('keyname must but one of "curtsies", "curses"')
+    if seq in CURTSIES_NAMES or seq in CURSES_NAMES:
+        if keynames == 'curses':
+            return CURSES_NAMES.get(seq)
+        elif keynames == 'curtsies':
+            return CURTSIES_NAMES[seq]
+        else:
+            return seq
+    return seq
 
 def pp_event(seq):
     """Returns pretty representation of an Event or keypress"""
@@ -84,24 +76,13 @@ def pp_event(seq):
     return repr(seq)[2:-1]
 
 def curtsies_name(seq):
-    if isinstance(seq, Event):
-        return seq
-
-    if seq in SEQUENCE_NAMES:
-        return SEQUENCE_NAMES[seq]
-    if len(seq) == 1 and '\x00' < seq < '\x1a':
-        return '<Ctrl-%s>' % chr(ord(seq) + 0x60)
-    if len(seq) == 2 and seq[0] == '\x1b':
-        if '\x00' < seq[1] < '\x1a':
-            return '<Ctrl-Meta-%s>' % chr(ord(seq[1]) + 0x60)
-        return '<Meta-%s>' % seq[1]
-    return seq
+    return CURTSIES_NAMES.get(seq, seq)
 
 def curses_name(seq):
     return CURSES_NAMES.get(seq, seq)
 
 # the first one is the canonical name, the second is the pretty str
-SEQUENCE_NAMES = dict([
+CURTSIES_NAMES = dict([
   (' ',        '<SPACE>'),
   ('\x1b ',    '<Meta-SPACE>'),
   ('\t',       '<TAB>'),
@@ -142,6 +123,21 @@ SEQUENCE_NAMES = dict([
   ('\x1b\x1b[D',   '<Meta-LEFT>'),
   ])
 
+control_chars = dict((bytes([i]), '<Ctrl-%s' % chr(i + 0x60)) for i in range(0x00, 0x1b))
+CURTSIES_NAMES.update(control_chars)
+
+
+for i in range(0x00, 0x80):
+    CURTSIES_NAMES[b'\x1b'+bytes([i])] = '<Esc+%s>' % chr(i)
+for i in range(0x00, 0x1b): # Overwrite the control keys with better labels
+    CURTSIES_NAMES[b'\x1b'+bytes([i])] = '<Esc+Ctrl-%s>' % chr(i + 0x40)
+for i in range(0x00, 0x80):
+    CURTSIES_NAMES[bytes([i + 0x80])] = '<Meta-%s>' % chr(i)
+for i in range(0x00, 0x1b): # Overwrite the control keys with better labels
+    CURTSIES_NAMES[bytes([i + 0x80])] = '<Meta-Ctrl-%s>' % chr(i + 0x40)
+
+print CURTSIES_NAMES
+
 CURSES_NAMES = {}
 CURSES_NAMES['\x1b[15~'] = 'KEY_F(5)'
 CURSES_NAMES['\x1b[17~'] = 'KEY_F(6)'
@@ -163,10 +159,10 @@ CURSES_NAMES['\x1b[Z'] = 'KEY_BTAB'
 #TODO add home and end? and everything else
 
 keymap_prefixes = set()
-for table in (CURSES_NAMES, SEQUENCE_NAMES):
+for table in (CURSES_NAMES, CURTSIES_NAMES):
     for k in table:
         if k.startswith('\x1b'):
-            for i in range(len(k)):
+            for i in range(1, len(k)):
                 keymap_prefixes.add(k[:i])
 
 REVERSE_CURSES = dict((v, k) for k, v in CURSES_NAMES.items())

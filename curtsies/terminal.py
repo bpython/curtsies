@@ -172,7 +172,7 @@ class Terminal(object):
             if self.refresh_queued:
                 self.refresh_queued = False
                 return events.RefreshRequestEvent('terminal control')
-            if len(chars) > 10: #debugging tool - eventually detect all key sequences!
+            if len(chars) > 6: #debugging tool - eventually detect all key sequences!
                 raise ValueError("Key sequence not detected at some point: %r" % ''.join(chars))
             logging.debug('getting key for %r', chars)
             logging.debug('self.in_buffer %r', self.in_buffer)
