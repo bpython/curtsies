@@ -56,9 +56,9 @@ class Window(object):
         if self.hide_cursor:
             self.tc.show_cursor()
 
-    def get_annotated_event(self, keynames='curses', fake_input=None, idle=()):
+    def get_annotated_event(self, keynames='curses', idle=()):
         """get_event from self.tc, but add cursor_dy to window change events"""
-        e = self.tc.get_event(keynames=keynames, fake_input=fake_input, idle=idle)
+        e = self.tc.get_event(keynames=keynames, idle=idle)
         if isinstance(e, events.WindowChangeEvent):
             row, col = self.tc.get_cursor_position()
             if self._last_cursor_row is None:

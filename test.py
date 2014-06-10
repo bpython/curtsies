@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from curtsies.fmtstr import FmtStr, fmtstr, BaseFmtStr, linesplit
+from curtsies.fmtstr import FmtStr, fmtstr, Chunk, linesplit
 from curtsies.fmtfuncs import *
 from curtsies.termformatconstants import FG_COLORS
 from curtsies.fsarray import fsarray, FSArray
@@ -188,10 +188,6 @@ class TestFmtStr(unittest.TestCase):
         a = blue(red('hello'))
         self.assertEqual(a, blue('hello'))
 
-class TestBaseFmtStr(unittest.TestCase):
-    def test_getitem(self):
-        self.assertEqual(BaseFmtStr('hi', {'fg':37})[5], 'h')
-
 class TestDoubleUnders(unittest.TestCase):
     def test_equality(self):
         x = fmtstr("adfs")
@@ -312,7 +308,7 @@ class TestUnicode(unittest.TestCase):
         self.assertEqual(len(fmtstr(u'┌adfs', 'blue')[:2]), 2)
 
     def test_unicode_repr(self):
-        repr(BaseFmtStr(u'–'))
+        repr(Chunk(u'–'))
         self.assertEqual(repr(fmtstr(u'–')), repr(u'–'))
 
 class TestFSArray(unittest.TestCase):

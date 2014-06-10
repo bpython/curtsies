@@ -258,7 +258,7 @@ Using colorama, Fmtstr and FSArray should work find in Windows, but I haven't tr
 Authors
 -------
 * Thomas Ballinger
-* Fei Dong - work on making FmtStr and BaseFmtStr immutable
+* Fei Dong - work on making FmtStr and Chunk immutable
 * Julia Evans - help with Python 3 Conversion
 * Zach Allaun, Mary Rose Cook, Alex Clemmer - early code review of terminal.py
 * inspired by a conversation with Scott Feeney

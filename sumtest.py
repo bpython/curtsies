@@ -1,8 +1,8 @@
-from curtsies.fmtstr import FmtStr, BaseFmtStr
+from curtsies.fmtstr import FmtStr, Chunk
 import time
 
 def add_things(n):
-    part = BaseFmtStr('hi', {'fg':36})
+    part = Chunk('hi', {'fg':36})
     whole = FmtStr(part)
     return sum([whole for _ in range(n)], FmtStr())
 

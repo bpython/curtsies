@@ -18,7 +18,6 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 """
 #TODO add a way to composite text without losing original formatting information
 
-import functools
 import itertools
 import re
 import sys
@@ -52,7 +51,7 @@ class FrozenDict(dict):
     def extend(self, dictlike):
         return FrozenDict(itertools.chain(self.items(), dictlike.items()))
 
-class BaseFmtStr(object):       # TODO: rename? e.g. Chunk
+class Chunk(object):
     """
     A string carrying attributes (which are the same all the way through).
     """
@@ -101,11 +100,6 @@ class BaseFmtStr(object):       # TODO: rename? e.g. Chunk
         def __str__(self):
             return unicode(self).encode('utf8')
 
-    def __getitem__(self, index):
-        assert False, "XXX does actual code use this?"
-        #XXX not sure what this is for
-        return self.color_str[index]
-
     def __repr__(self):
         def pp_att(att):
             if att == 'fg': return FG_NUMBER_TO_COLOR[self.atts[att]]
@@ -148,19 +142,19 @@ class FmtStr(object):
                     cur_fmt.update(x)
                 elif isinstance(x, (bytes, unicode)):
                     atts = parse_args('', dict((k, v) for k,v in cur_fmt.items() if v is not None))
-                    bases.append(BaseFmtStr(x, atts=atts))
+                    bases.append(Chunk(x, atts=atts))
                 else:
                     raise Exception("logic error")
             return FmtStr(*bases)
         else:
-            return FmtStr(BaseFmtStr(s))
+            return FmtStr(Chunk(s))
 
     def copy_with_new_str(self, new_str):
         """Copies the current FmtStr's attributes while changing its string."""
-        # What to do when there are multiple BaseFmtStrs with conflicting atts?
+        # What to do when there are multiple Chunks with conflicting atts?
         old_atts = dict((att, value) for bfs in self.basefmtstrs
                     for (att, value) in bfs.atts.items())
-        return FmtStr(BaseFmtStr(new_str, old_atts))
+        return FmtStr(Chunk(new_str, old_atts))
 
     def setitem(self, startindex, fs):
         """Shim for easily converting old __setitem__ calls"""
@@ -202,18 +196,18 @@ class FmtStr(object):
 
             elif bfs_start <= start < bfs_end:
                 divide = start - bfs_start
-                head = BaseFmtStr(bfs.s[:divide], atts=bfs.atts)
-                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts)
+                head = Chunk(bfs.s[:divide], atts=bfs.atts)
+                tail = Chunk(bfs.s[end - bfs_start:], atts=bfs.atts)
                 new_components.extend([head] + new_fs.basefmtstrs)
                 inserted = True
 
                 if bfs_start < end < bfs_end:
-                    tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts)
+                    tail = Chunk(bfs.s[end - bfs_start:], atts=bfs.atts)
                     new_components.append(tail)
 
             elif bfs_start < end < bfs_end:
                 divide = start - bfs_start
-                tail = BaseFmtStr(bfs.s[end - bfs_start:], atts=bfs.atts)
+                tail = Chunk(bfs.s[end - bfs_start:], atts=bfs.atts)
                 new_components.append(tail)
 
             elif bfs_start >= end or bfs_end <= start:
@@ -229,7 +223,7 @@ class FmtStr(object):
         return self.insert(string, len(self.s))
 
     def copy_with_new_atts(self, **attributes):
-        return FmtStr(*[BaseFmtStr(bfs.s, bfs.atts.extend(attributes))
+        return FmtStr(*[Chunk(bfs.s, bfs.atts.extend(attributes))
                         for bfs in self.basefmtstrs])
 
     def join(self, iterable):
@@ -289,7 +283,7 @@ class FmtStr(object):
         if isinstance(other, FmtStr):
             return FmtStr(*(self.basefmtstrs + other.basefmtstrs))
         elif isinstance(other, (bytes, unicode)):
-            return FmtStr(*(self.basefmtstrs + [BaseFmtStr(other)]))
+            return FmtStr(*(self.basefmtstrs + [Chunk(other)]))
         else:
             raise TypeError('Can\'t add %r and %r' % (self, other))
 
@@ -297,7 +291,7 @@ class FmtStr(object):
         if isinstance(other, FmtStr):
             return FmtStr(*(x for x in (other.basefmtstrs + self.basefmtstrs)))
         elif isinstance(other, (bytes, unicode)):
-            return FmtStr(*(x for x in ([BaseFmtStr(other)] + self.basefmtstrs)))
+            return FmtStr(*(x for x in ([Chunk(other)] + self.basefmtstrs)))
         else:
             raise TypeError('Can\'t add those')
 
@@ -309,7 +303,7 @@ class FmtStr(object):
 
     @property
     def shared_atts(self):
-        """Gets atts shared among all nonzero length component BaseFmtStrs"""
+        """Gets atts shared among all nonzero length component Chunk"""
         #TODO cache this, could get ugly for large FmtStrs
         atts = {}
         first = self.basefmtstrs[0]
@@ -358,7 +352,7 @@ class FmtStr(object):
                     parts.append(fs)
                 else:
                     s_part = fs.s[max(0, index.start - counter):index.stop - counter]
-                    parts.append(BaseFmtStr(s_part, fs.atts))
+                    parts.append(Chunk(s_part, fs.atts))
             counter += len(fs)
             if index.stop < counter:
                 break
@@ -372,7 +366,7 @@ class FmtStr(object):
         for fs in self.basefmtstrs:
             if index.start < counter + len(fs) and index.stop > counter:
                 s_part = fs.s[max(0, index.start - counter):index.stop - counter]
-                piece = BaseFmtStr(s_part, fs.atts).color_str
+                piece = Chunk(s_part, fs.atts).color_str
                 output += piece
             counter += len(fs)
             if index.stop < counter:
@@ -386,7 +380,7 @@ class FmtStr(object):
         self._len = None
         index = normalize_slice(len(self), index)
         if isinstance(value, (bytes, unicode)):
-            value = FmtStr(BaseFmtStr(value))
+            value = FmtStr(Chunk(value))
         elif not isinstance(value, FmtStr):
             raise ValueError('Should be str or FmtStr')
         counter = 0
@@ -397,10 +391,10 @@ class FmtStr(object):
             if index.start < counter + len(fs) and index.stop > counter:
                 start = max(0, index.start - counter)
                 end = index.stop - counter
-                front = BaseFmtStr(fs.s[:start], fs.atts)
+                front = Chunk(fs.s[:start], fs.atts)
                 # stuff
                 new = value
-                back = BaseFmtStr(fs.s[end:], fs.atts)
+                back = Chunk(fs.s[end:], fs.atts)
                 if len(front) > 0:
                     self.basefmtstrs.append(front)
                 if len(new) > 0 and not inserted:
