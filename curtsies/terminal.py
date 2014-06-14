@@ -256,7 +256,7 @@ class Terminal(object):
         while True:
             c = self.retrying_read()
             resp += c
-            m = re.search('(?P<extra>.*)\x1b\[(?P<row>\\d+);(?P<column>\\d+)R', resp)
+            m = re.search(r'(?P<extra>.*)\x1b\[(?P<row>\\d+);(?P<column>\\d+)R', resp)
             if m:
                 row = int(m.groupdict()['row'])
                 col = int(m.groupdict()['column'])
