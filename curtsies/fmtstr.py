@@ -18,15 +18,16 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 """
 #TODO add a way to composite text without losing original formatting information
 
-import sys
-import re
 import functools
+import itertools
+import re
+import sys
 
 from .escseqparse import parse
-from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
-from .termformatconstants import FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR
-from .termformatconstants import RESET_ALL, RESET_BG, RESET_FG
-from .termformatconstants import seq
+from .termformatconstants import (FG_COLORS, BG_COLORS, STYLES,
+                                  FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR,
+                                  RESET_ALL, RESET_BG, RESET_FG,
+                                  seq)
 
 PY3 = sys.version_info[0] >= 3
 
@@ -34,46 +35,52 @@ if PY3:
     unicode = str
 
 xforms = {
-    'fg' : lambda x, v: '%s%s%s' % (seq(v), x, seq(RESET_FG)),
-    'bg' : lambda x, v: seq(v)+x+seq(RESET_BG),
-    'bold' : lambda x: seq(STYLES['bold'])+x+seq(RESET_ALL),
-    'underline' : lambda x: seq(STYLES['underline'])+x+seq(RESET_ALL),
-    'blink' : lambda x: seq(STYLES['blink'])+x+seq(RESET_ALL),
-    'invert' : lambda x: seq(STYLES['invert'])+x+seq(RESET_ALL),
+    'fg' :        lambda s, v: '%s%s%s' % (seq(v), s, seq(RESET_FG)),
+    'bg' :        lambda s, v: seq(v)+s+seq(RESET_BG),
+    'bold' :      lambda s: seq(STYLES['bold'])     +s+seq(RESET_ALL),
+    'underline' : lambda s: seq(STYLES['underline'])+s+seq(RESET_ALL),
+    'blink' :     lambda s: seq(STYLES['blink'])    +s+seq(RESET_ALL),
+    'invert' :    lambda s: seq(STYLES['invert'])   +s+seq(RESET_ALL),
 }
 
 class FrozenDict(dict):
     """Immutable dictionary class"""
     def __setitem__(self, key, value):
         raise Exception("Cannot change value.")
+    def update(self, dictlike):
+        raise Exception("Cannot change value.")
+    def extend(self, dictlike):
+        return FrozenDict(itertools.chain(self.items(), dictlike.items()))
 
-class BaseFmtStr(object):
-    """Formatting annotations on a string"""
-    def __init__(self, string, atts=None):
+class BaseFmtStr(object):       # TODO: rename? e.g. Chunk
+    """
+    A string carrying attributes (which are the same all the way through).
+    """
+    def __init__(self, string, atts=()):
         self._s = string
-        self._atts = tuple(atts.items()) if atts else tuple()
-
-    def _get_atts(self):
-        return FrozenDict(self._atts)
-
-    atts = property(_get_atts, None, None,
-                    'A copy of the current attributes dictionary')
+        self._atts = FrozenDict(atts)
 
     s = property(lambda self: self._s) #makes self.s immutable
+
+    atts = property(lambda self: self._atts,
+                    None, None,
+                    "Attributes, e.g. {'fg': 34, 'bold': True} where 34 is the escape code for ...")
 
     def __len__(self):
         return len(self.s)
 
-    #TODO cache this if immutable
+    #TODO cache this
     @property
     def color_str(self):
+        "Return an escape-coded string to write to the terminal."
         s = self.s
         for k, v in sorted(self.atts.items()):
-            if k not in xforms: continue
-            if v is True:
-                s = xforms[k](s)
-            elif v is False:
+            # (self.atts sorted for the sake of always acting the same.)
+            assert k in xforms, "XXX Do we actually get cases like this?"
+            if v is False:
                 continue
+            elif v is True:
+                s = xforms[k](s)
             else:
                 s = xforms[k](s, v)
         return s
@@ -86,6 +93,7 @@ class BaseFmtStr(object):
 
     def __eq__(self, other):
         return self.s == other.s and self.atts == other.atts
+    # TODO: corresponding hash method
 
     if PY3:
         __str__ = __unicode__
@@ -94,6 +102,8 @@ class BaseFmtStr(object):
             return unicode(self).encode('utf8')
 
     def __getitem__(self, index):
+        assert False, "XXX does actual code use this?"
+        #XXX not sure what this is for
         return self.color_str[index]
 
     def __repr__(self):
@@ -101,12 +111,13 @@ class BaseFmtStr(object):
             if att == 'fg': return FG_NUMBER_TO_COLOR[self.atts[att]]
             elif att == 'bg': return 'on_' + BG_NUMBER_TO_COLOR[self.atts[att]]
             else: return att
-        return (''.join(
-                        pp_att(att)+'('
-                        for att in sorted(self.atts)) +
-               ('%r' % self.s) + ')'*len(self.atts))
+        return (''.join(pp_att(att)+'(' for att in sorted(self.atts))
+                + repr(self.s) + ')'*len(self.atts))
 
 class FmtStr(object):
+    """
+    A string whose substrings carry attributes (which may be different from one to the next).
+    """
     def __init__(self, *components):
         # The assertions below could be useful for debugging, but slow things down considerably
         #assert all([len(x) > 0 for x in components])
@@ -218,30 +229,21 @@ class FmtStr(object):
         return self.insert(string, len(self.s))
 
     def copy_with_new_atts(self, **attributes):
-        self._unicode = None
-        self._str = None
-
-        # Copy original basefmtstrs, but with new attributes
-        new_basefmtstrs = []
-        for bfs in self.basefmtstrs:
-            new_atts = bfs.atts
-            new_atts.update(attributes)
-            new_basefmtstrs.append(BaseFmtStr(bfs.s, new_atts))
-        # self.basefmtstrs = new_basefmtstrs
-        return FmtStr(*new_basefmtstrs)
+        return FmtStr(*[BaseFmtStr(bfs.s, bfs.atts.extend(attributes))
+                        for bfs in self.basefmtstrs])
 
     def join(self, iterable):
-        iterable = list(iterable)
+        before = []
         basefmtstrs = []
         for i, s in enumerate(iterable):
+            basefmtstrs.extend(before)
+            before = self.basefmtstrs
             if isinstance(s, FmtStr):
                 basefmtstrs.extend(s.basefmtstrs)
             elif isinstance(s, (bytes, unicode)):
                 basefmtstrs.extend(fmtstr(s).basefmtstrs) #TODO just make a basefmtstr directly
             else:
                 raise TypeError("expected str or FmtStr, %r found" % type(s))
-            if i < len(iterable) - 1:
-                basefmtstrs.extend(self.basefmtstrs)
         return FmtStr(*basefmtstrs)
 
     #TODO make this split work like str.split
@@ -281,6 +283,7 @@ class FmtStr(object):
 
     def __eq__(self, other):
         return str(self) == str(other)
+    # TODO corresponding hash method
 
     def __add__(self, other):
         if isinstance(other, FmtStr):
@@ -300,7 +303,7 @@ class FmtStr(object):
 
     def __mul__(self, other):
         if isinstance(other, int):
-            return sum([FmtStr(*(x for x in self.basefmtstrs)) for _ in range(other)], FmtStr())
+            return sum([self for _ in range(other)], FmtStr())
         raise TypeError('Can\'t mulitply those')
     #TODO ensure emtpy FmtStr isn't a problem
 
@@ -331,12 +334,10 @@ class FmtStr(object):
     @property
     def divides(self):
         """List of indices of divisions between the constituent basefmtstrs"""
-        def add_indices(acc, elem):
-            acc.append(acc[-1] + elem)
-            return acc
-
-        bfs_lens = [len(s) for s in self.basefmtstrs]
-        return functools.reduce(add_indices, bfs_lens, [0])
+        acc = [0]
+        for s in self.basefmtstrs:
+            acc.append(acc[-1] + len(s))
+        return acc
 
     @property
     def s(self):
@@ -426,7 +427,7 @@ def linesplit(string, columns):
     [blue('home')+blue(' ')+blue('is'), blue('where')+blue(' ')+blue('the'), blue('heart-eati'), blue('ng')+blue(' ')+blue('mummy'), blue('is')]
     """
     if isinstance(string, FmtStr):
-        string = fmtstr(string)
+        string = fmtstr(string) # XXX isn't this redundant? should the previous line have a 'not'?
 
     string_s = string.s
     matches = list(re.finditer(r'\s+', string_s))
@@ -447,6 +448,7 @@ def linesplit(string, columns):
     return lines
 
 def normalize_slice(length, index):
+    "Fill in the Nones in a slice."
     is_int = False
     if isinstance(index, int):
         is_int = True
@@ -455,9 +457,9 @@ def normalize_slice(length, index):
         index = slice(0, index.stop, index.step)
     if index.stop is None:
         index = slice(index.start, length, index.step)
-    if index.start < -1:
+    if index.start < 0:         # XXX right?
         index = slice(length - index.start, index.stop, index.step)
-    if index.stop < -1:
+    if index.stop < 0:          # XXX right?
         index = slice(index.start, length - index.stop, index.step)
     if index.step is not None:
         raise NotImplementedError("You can't use steps with slicing yet")
@@ -508,14 +510,12 @@ def fmtstr(string, *args, **kwargs):
     """
     atts = parse_args(args, kwargs)
     if isinstance(string, FmtStr):
-        new_str = string.copy_with_new_atts(**atts)
-        return new_str
+        pass
     elif isinstance(string, (bytes, unicode)):
         string = FmtStr.from_str(string)
-        new_str = string.copy_with_new_atts(**atts)
-        return new_str
     else:
         raise ValueError("Bad Args: %r (of type %s), %r, %r" % (string, type(string), args, kwargs))
+    return string.copy_with_new_atts(**atts)
 
 if __name__ == '__main__':
     import doctest

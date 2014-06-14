@@ -43,10 +43,11 @@ class PasteEvent(Event):
         return repr(self)
 
 def get_key(chars, keynames='curses'):
-    if not ((chars and chars[0] != '\x1b') or
-            (len(chars) == 2 and chars[1] not in ['[', 'O', '\x1b']) or
-            (len(chars) == 4 and chars[1] == '\x1b' and chars[2] == '[') or
-            (len(chars) > 2 and chars[1] in ['[', 'O'] and chars[-1] not in tuple('1234567890;'))):
+    """Pre: get_key(prefix, keynames) is None for all proper prefixes of
+    chars.
+    Return a key name (possibly just a plain one like 'a') or None
+    meaning it's an incomplete sequence."""
+    if ''.join(chars) in keymap_prefixes:
         return None
     if PY3:
         try:
@@ -160,5 +161,12 @@ CURSES_NAMES['\x1b[5~'] = 'KEY_PPAGE'
 CURSES_NAMES['\x1b[6~'] = 'KEY_NPAGE'
 CURSES_NAMES['\x1b[Z'] = 'KEY_BTAB'
 #TODO add home and end? and everything else
+
+keymap_prefixes = set()
+for table in (CURSES_NAMES, SEQUENCE_NAMES):
+    for k in table:
+        if k.startswith('\x1b'):
+            for i in range(len(k)):
+                keymap_prefixes.add(k[:i])
 
 REVERSE_CURSES = dict((v, k) for k, v in CURSES_NAMES.items())
