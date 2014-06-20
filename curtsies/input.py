@@ -15,6 +15,10 @@ from .events import get_key
 
 PY3 = sys.version_info[0] >= 3
 
+#TODO option for paste events?
+#TODO option for sigint events?
+#TODO option for sigwinch events?
+
 class nonblocking(object):
     def __init__(self, stream):
         self.stream = stream
@@ -45,10 +49,15 @@ class timeout(object):
         termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.orig_term)
 
 class Input(object):
+    """Coroutine-interface respecting keypress generator"""
     def __init__(self, in_stream=sys.stdin, keynames='curtsies'):
         self.in_stream = in_stream
         self.unprocessed_bytes = [] # leftover from stdin, unprocessed yet
         self.keynames = keynames
+
+    #prospective: this could be useful for an external select loop
+    def fileno(self):
+        return self.in_stream.fileno()
 
     def __enter__(self):
         self.original_stty = termios.tcgetattr(self.in_stream)
@@ -84,15 +93,9 @@ class Input(object):
         if e is not None:
             return e
 
-        #if self.nonblocking_read():
-        #    e = find_key()
-        #    assert e is not None
-        #    return e
-        # I've prev seen some problems with select - would checking the above first help?
+        #note: if this doesn't work out, try a stdin read with a timeout instead?: http://stackoverflow.com/a/2918103/398212
 
-        #TODO use a stdin read with a timeout instead?: http://stackoverflow.com/a/2918103/398212
-
-        def wait_for_timout():
+        def wait_for_read_ready_or_timeout():
             remaining_timeout = timeout
             t0 = time.time()
             while True:
@@ -103,7 +106,7 @@ class Input(object):
                     if remaining_timeout is not None:
                         remaining_timeout = max(timeout - (time.time() - t0), 0)
 
-        rs = wait_for_timout()
+        rs = wait_for_read_ready_or_timeout()
         if not rs:
             return None
         assert self.nonblocking_read()
@@ -148,19 +151,20 @@ def testfunc():
 
 def sigwinch():
     import signal
-    def winch_handler(signum, frame):
+    def sigwinch_handler(signum, frame):
         print 'sigwinch received'
-    signal.signal(signal.SIGWINCH, winch_handler)
-    with Input() as input_generator:
-        print repr(input_generator.send(2))
-        print repr(input_generator.send(1))
-        print repr(input_generator.send(.5))
-        print repr(input_generator.send(.2))
-        for e in input_generator:
-            print repr(e)
+    signal.signal(signal.SIGWINCH, sigwinch_handler)
+    main()
 
+def sigint():
+    import signal
+    def sigint_handler(signum, frame):
+        print 'sigint received'
+    signal.signal(signal.SIGINT, sigint_handler)
+    main()
 
 if __name__ == '__main__':
     #main()
     #testfunc()
-    sigwinch()
+    #sigwinch()
+    sigint()
