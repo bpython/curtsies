@@ -14,6 +14,7 @@ for i in range(0x00, 0x80):
     CURTSIES_NAMES[chr(i + 0x80)] = '<Meta-%s>' % chr(i)
 for i in range(0x00, 0x1b): # Overwrite the control keys with better labels
     CURTSIES_NAMES[chr(i + 0x80)] = '<Meta-Ctrl-%s>' % chr(i + 0x40)
+
 from curtsieskeys import CURTSIES_NAMES as special_curtsies_names
 CURTSIES_NAMES.update(special_curtsies_names)
 
@@ -43,6 +44,8 @@ for table in (CURSES_NAMES, CURTSIES_NAMES):
         if k.startswith('\x1b'):
             for i in range(1, len(k)):
                 KEYMAP_PREFIXES.add(k[:i])
+
+MAX_KEYPRESS_SIZE = max(len(seq) for seq in CURSES_NAMES.keys() + CURTSIES_NAMES.keys())
 
 class Event(object):
     pass

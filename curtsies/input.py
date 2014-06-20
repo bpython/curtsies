@@ -11,13 +11,14 @@ import termios
 import time
 import tty
 
-from .events import get_key
+from . import events
 
 PY3 = sys.version_info[0] >= 3
 
-#TODO option for paste events?
-#TODO option for sigint events?
-#TODO option for sigwinch events?
+READ_SIZE = 1024
+assert READ_SIZE >= events.MAX_KEYPRESS_SIZE
+# if a keypress could require more bytes than we read at a time to be identified,
+# the paste logic that reads more data as needed might not work.
 
 class nonblocking(object):
     def __init__(self, stream):
@@ -29,31 +30,18 @@ class nonblocking(object):
     def __exit__(self, *args):
         fcntl.fcntl(self.fd, fcntl.F_SETFL, self.orig_fl)
 
-class timeout(object):
-    def __init__(self, stream, timeout):
-        """Set stream to timeout after timeout tenths of a second"""
-        self.stream = stream
-        self.fd = self.stream.fileno()
-        if timeout < 0 or timeout > 255:
-            raise ValueError("Timeout must be from 0 to 255 inclusive")
-        self.timeout = timeout
-
-    def __enter__(self):
-        self.orig_term = termios.tcgetattr(self.fd)
-        new_term = self.orig_term[:]
-        new_term[3] &= ~termios.ICANON
-        new_term[6][termios.VTIME] = self.timeout
-        termios.tcsetattr(self.fd, termios.TCSAFLUSH, new_term)
-
-    def __exit__(self, *args):
-        termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.orig_term)
-
 class Input(object):
     """Coroutine-interface respecting keypress generator"""
-    def __init__(self, in_stream=sys.stdin, keynames='curtsies'):
+    def __init__(self, in_stream=sys.stdin, keynames='curtsies', paste_threshold=events.MAX_KEYPRESS_SIZE+1):
+        """in_stream should be standard input
+        keynames are how keypresses should be named - one of 'curtsies', 'curses', or 'plain'
+        paste_threshold is how many bytes must be read in a single read for
+          the keypresses they represent to be combined into a single paste event
+        """
         self.in_stream = in_stream
         self.unprocessed_bytes = [] # leftover from stdin, unprocessed yet
         self.keynames = keynames
+        self.paste_threshold = paste_threshold
 
     #prospective: this could be useful for an external select loop
     def fileno(self):
@@ -81,7 +69,7 @@ class Input(object):
             current_bytes = []
             while self.unprocessed_bytes:
                 current_bytes.append(self.unprocessed_bytes.pop(0))
-                e = get_key(current_bytes, keynames=self.keynames, full=len(self.unprocessed_bytes)==0)
+                e = events.get_key(current_bytes, keynames=self.keynames, full=len(self.unprocessed_bytes)==0)
                 if e is not None:
                     self.current_bytes = []
                     return e
@@ -109,30 +97,42 @@ class Input(object):
         rs = wait_for_read_ready_or_timeout()
         if not rs:
             return None
-        assert self.nonblocking_read()
-        e = find_key()
-        assert e is not None
-        return e
+        num_bytes = self.nonblocking_read()
+        assert num_bytes > 0
+        if self.paste_threshold is not None and num_bytes > self.paste_threshold:
+            paste = events.PasteEvent()
+            while True:
+                if len(self.unprocessed_bytes) < events.MAX_KEYPRESS_SIZE:
+                    self.nonblocking_read() # may need to read to get the rest of a keypress
+                e = find_key()
+                if e is None:
+                    return paste
+                else:
+                    paste.events.append(e)
+        else:
+            e = find_key()
+            assert e is not None
+            return e
 
     def nonblocking_read(self):
-        """returns False if no waiting character, else True and adds it to self.unprocessed_bytes"""
+        """Returns the number of characters read and adds them to self.unprocessed_bytes"""
         with nonblocking(self.in_stream):
             if PY3:
-                data = os.read(self.in_stream.fileno(), 1024)
+                data = os.read(self.in_stream.fileno(), READ_SIZE)
                 if data:
                     self.unprocessed_bytes.extend(data)
-                    return True
+                    return len(data)
                 else:
-                    return False
+                    return 0
             else:
                 try:
-                    data = os.read(self.in_stream.fileno(), 1024)
+                    data = os.read(self.in_stream.fileno(), READ_SIZE)
                 except OSError:
-                    return False
+                    return 0
                 else:
                     print 'received bytes: %r' % data
                     self.unprocessed_bytes.extend(data)
-                    return True
+                    return len(data)
 
 def main():
     #import blessings
@@ -144,10 +144,6 @@ def main():
         print repr(input_generator.send(.2))
         for e in input_generator:
             print repr(e)
-
-def testfunc():
-    with timeout(sys.stdin, 10):
-        print repr(os.read(sys.stdin.fileno(), 1024))
 
 def sigwinch():
     import signal
@@ -163,8 +159,15 @@ def sigint():
     signal.signal(signal.SIGINT, sigint_handler)
     main()
 
+def paste():
+    with Input() as input_generator:
+        for e in input_generator:
+            print repr(e)
+            time.sleep(1)
+
 if __name__ == '__main__':
     #main()
     #testfunc()
     #sigwinch()
-    sigint()
+    #sigint()
+    paste()
