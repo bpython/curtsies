@@ -45,9 +45,10 @@ class timeout(object):
         termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.orig_term)
 
 class Input(object):
-    def __init__(self, in_stream=sys.stdin):
+    def __init__(self, in_stream=sys.stdin, keynames='curtsies'):
         self.in_stream = in_stream
         self.unprocessed_bytes = [] # leftover from stdin, unprocessed yet
+        self.keynames = keynames
 
     def __enter__(self):
         self.original_stty = termios.tcgetattr(self.in_stream)
@@ -71,7 +72,7 @@ class Input(object):
             current_bytes = []
             while self.unprocessed_bytes:
                 current_bytes.append(self.unprocessed_bytes.pop(0))
-                e = get_key(current_bytes, full=len(self.unprocessed_bytes)==0)
+                e = get_key(current_bytes, keynames=self.keynames, full=len(self.unprocessed_bytes)==0)
                 if e is not None:
                     self.current_bytes = []
                     return e
@@ -90,7 +91,19 @@ class Input(object):
         # I've prev seen some problems with select - would checking the above first help?
 
         #TODO use a stdin read with a timeout instead?: http://stackoverflow.com/a/2918103/398212
-        (rs, _, _) = select.select([self.in_stream.fileno()], [], [], timeout)
+
+        def wait_for_timout():
+            remaining_timeout = timeout
+            t0 = time.time()
+            while True:
+                try:
+                    (rs, _, _) = select.select([self.in_stream.fileno()], [], [], remaining_timeout)
+                    return rs
+                except select.error:
+                    if remaining_timeout is not None:
+                        remaining_timeout = max(timeout - (time.time() - t0), 0)
+
+        rs = wait_for_timout()
         if not rs:
             return None
         assert self.nonblocking_read()
@@ -118,7 +131,6 @@ class Input(object):
                     self.unprocessed_bytes.extend(data)
                     return True
 
-
 def main():
     #import blessings
     #t = blessings.Terminal()
@@ -134,7 +146,21 @@ def testfunc():
     with timeout(sys.stdin, 10):
         print repr(os.read(sys.stdin.fileno(), 1024))
 
+def sigwinch():
+    import signal
+    def winch_handler(signum, frame):
+        print 'sigwinch received'
+    signal.signal(signal.SIGWINCH, winch_handler)
+    with Input() as input_generator:
+        print repr(input_generator.send(2))
+        print repr(input_generator.send(1))
+        print repr(input_generator.send(.5))
+        print repr(input_generator.send(.2))
+        for e in input_generator:
+            print repr(e)
+
 
 if __name__ == '__main__':
-    main()
+    #main()
     #testfunc()
+    sigwinch()
