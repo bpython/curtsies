@@ -124,7 +124,6 @@ class Input(object):
                 except OSError:
                     return 0
                 else:
-                    print 'received bytes: %r' % data
                     self.unprocessed_bytes.extend(data)
                     return len(data)
 

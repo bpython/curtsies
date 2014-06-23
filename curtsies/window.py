@@ -94,6 +94,8 @@ class BaseWindow(object):
         self._last_rendered_width = None
         self._last_rendered_height = None
 
+    #TODO allow nice external access of width and height
+
     def scroll_down():
         SCROLL_DOWN = "D"
         self.write(SCROLL_DOWN) #TODO will blessings do this?
@@ -348,7 +350,7 @@ class CursorAwareWindow(BaseWindow):
 
 
 def test():
-    from . import input
+    import input
     with FullscreenWindow(sys.stdout) as w:
         with input.Input(sys.stdin) as input_generator:
             rows, columns = w.t.height, w.t.width

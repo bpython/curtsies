@@ -1,0 +1,11 @@
+* get window changes working with FullscreenWindow
+* get gameexample.py working with FullscreenWindow
+* save a demo function to prove things are working
+* move demos to top level or their own folder next to tests
+
+* CursorAwareWindow
+* find a better name for this class
+* implement a sigwinch handler for normal use
+
+
+* once things are working, refactoring of the three Window classes

@@ -1,0 +1,195 @@
+insert should prob. be "splice" - is it an exposed api? check bpython, if not then change this.
+
+fmtstr is kind of like racket graphics primitives - change the world, use immutable building blocks 
+    look into "racket worlds"
+
+* look at "how to design programs!!!" Maybe try to get a beginner that's super interested to do this?
+
+read this: http://www.cs.utexas.edu/~wcook/Drafts/2009/essay.pdf
+
+* play with smalltalk: make a bouncing ball etc, changing the code while it's bouncing, 
+  stop it etc.
+
+  (erlang was also cool like that, maybe look at it again)
+
+played at all with sounds fairly diff, cool in that syate very explicty very cool
+
+ i assume you've seen how objc- does it?
+
+sum-of a and b paramname arg paramname arg 
+
+I was guessing it would use font, but I was wrong 
+
+or font or something
+
+check out Darius's halp - for editor <-> repl interaction without the repl
+
+I going to get some food
+
+re you saying the emssages would be things like "do A"
+
+
+this could also be pass this message
+
+right now it's not realtime it blocks on getting an event, and has no timer events or  - butit'd be nice to change
+
+I thoguht the simpler model was perfect for a repl - wait until user does somethign - but code can do anything
+which way?
+
+I guess I don't wan tto deal with threads unless each thread is an event driven loop <- I just don't hvae this yet
+
+right now it's a single thread of execution
+
+UI
+UI
+UI
+UI
+block on input
+got input
+it was a return key - so run code
+run code
+run code
+oh code wants to read on stdin - so this is a greenet, suspend execution and
+
+the realization I had was that in bptuhon-curtiess I 'm also emulating the terminal - I'm responsible for colelcting that the user hit a key at *any* time, not jsut during input
+
+so it really feels like an evented system? - at least queues and messaging and things
+
+My problem was I was trying to be like vanilla python - but it was a terminal to collect input in the meantime
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MOre thoughts on Curtsies on May 28
+
+
+
+
+
+
+I dont' know why, but it's nice for right consuming other input i guess - though I don't do a good enough job
+
+the structure is the BaseFmtStrs that are immutable strings with properties like blue, and then FmtStrs are lists of those
+
+frozen dict - add hash 
+
+originally fmtstr and basefmtstrs were mutable and to keep myself honest I wasnted
+
+could you only have i
+
+deeplly immutable - E
+not obvious what this does
+then it's a boolean thing, so presence is enought
+shoudl be documentation of that
+
+self.atts is a dictionary of {fg:blue, bg:red, bold:Trueo
+
+I've not been working on this much for ahwile, but I could get excited about it - it's messy now
+
+I'm actually paying lea A. (hs'er) to make a logo! So if I ha
+
+Also if bpython starts to use this as ath main thing, I'lll need to work on cleanign it up.
+
+I guess so I don't have release things set up - I could give you github comit access for this and just put it on another brnach for now?
+
+git pull upstream
+
+
+the readme is the only docs right now
+
+mostly tests
+
+I wrote the whole thing tried to do it clearly, then had performnace problems and went 
+
+just python slice bookkeeping
+
+it's poorly named, it doens't accomplish that - it's just 
+
+asdf[1:] 
+normalize_slice(4, slice(1, None, None)) -> slice(1, 4, 1)
+
+It shouldn't be called normalize, all it does is get rid of the None's in a slice object
+and replace them with the real numbers based on the length of the things we're slicing
+
+
+right we read from in_buffer to chars
+
+
+chars          in_buffer
+
+                ESC [ \ 1 2 
+
+
+
+
+
+you're not worrying about paste that's fine, i just had speed concerns
+
+it's a hack - you have no 
+
+"we can't keep up - so speed up, user program!"
+
+
+paste_mode means to things probably 
+init(paste_mode=True) means allow pastes to be detected, not that w'eer ecurrently in a
+
+
+meaning that sequence isn't recognizd or isn't valid
+
+this depends on every input having 
+
+if ab is passed it assumes it must have alrady been called with a
+
+
+    ther'e no speed concertn, we could assert that too
+
+char is always exactly what we pass to get_key(
+
+so we have the event for that
+
+we maybe should, but we don't clear chars
+
+
+C and chars + self.in_buffer, but one of C and chars is empty / None
+
+tha'ts not used and just getting in the way
+
+fake_input
+
+just for a demo or something
+
+t's not used for anything
+
+
+better code
+
+it's used to crawl the fs for importable python modules in bpython
+
+cleaner probably is what you've got with a timeout, where you just get_event(timeout=0), then do your stuff, then 
+
+keys_in_buffer?
+
+(in_buffer or non_blocking_read)
+
+chars_available
+
+
+sigints that happen in this curtsies cdoe to generate the events, but if we not in that, they dont' have to - specifically for bpython
+
+
+in cbreak ctrl-c still causes a handler to happen, so maybe I don't need custon ones at all, just let bpython do thatk
+
+take sigwinch out of bit loop?
+
+

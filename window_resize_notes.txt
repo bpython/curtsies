@@ -1,0 +1,56 @@
+
+New approach: observe how the where the cursor went.
+calculate vertical the cursor and window diffs
+
+One line taller:
+    if cursor moves down a line:
+        move everything down a line
+	scroll_offset -= 1
+	top_usable_line += 1
+    if cursor stays:
+	everything stays
+
+One line shorter:
+    if cursor moves up a line:
+	move everything up a line
+	scroll_offset += 1
+	top_usable_line -= 1 if top_usable_line > 0
+    if cursor stays:
+	everything stays
+
+
+
+
+To make terminal one line taller:
+  if there is another line of history to show, show that and move everything down a li.
+  Top usable line goes visually down by one (+=1). Scroll offset -= 1
+  CURSOR MOVES DOWN
+
+  if there are no more lines of history
+    if there is junk space at the bottom, absorb it.
+    Top usable line, scroll offset remain the same
+
+    if cursor is on bottom line, move everything up a line
+    Top usable line goes up one. Scroll offset goes up one
+
+To make terminal one line shorter:
+   if there is at least one line of history offscreen, 
+   move everything up one line. Top usable line moves up (-= 1) (while > 0)
+   Scroll offset += 1
+
+   if there is no history offscreen 
+     if there is empty space at the bottom,
+     remove empty space at bottom. Top usable line, scroll offset are the same
+
+     if there is no empty space (cursor is at bottom), move up one line.
+     Top usable line moves up by one, -= 1
+     scroll offset += 1, 
+
+  if cursor is on top line? (seems to depend on terminal emulator)
+ 
+Note: We should probably kill the completion box during resizes, because real terminal
+is based on where the cursor is
+Note: How does terminal wrapping work? It doesn't change the height
+when a line wraps around, so how does addressing even work?
+How to make a terminal one 
+Note: Terminal.app adds a line and puts cursor at bottom when scroll up.

@@ -1,0 +1,106 @@
+8e33411ee0cc445a824bdd12104c74f870fb676f tests to see how much caching helps all different: 1.625590 all identical: 1.649268 change on character 1.411043
+
+8f9eee416c14e6cf8ee97a6dd5373bf1b765fe1e tests to see how much caching helps all different: 1.878875 all identical: 1.656729 change on character 1.398562
+8f9eee416c14e6cf8ee97a6dd5373bf1b765fe1e tests to see how much caching helps all different: 1.682236 all identical: 1.664310 change on character 1.367798
+8f9eee416c14e6cf8ee97a6dd5373bf1b765fe1e tests to see how much caching helps all different: 1.710502 all identical: 1.710483 change on character 1.407537
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 1.439735 all identical: 1.748351 change on character 1.436759
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 1.981818 all identical: 2.087447 change on character 1.571476
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 1.921736 all identical: 2.006229 change on character 1.677850
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 1.870383 all identical: 1.858255 change on character 1.599287
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 1.847712 all identical: 1.841467 change on character 1.531510
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 1.840335 all identical: 1.883184 change on character 1.585457
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 2.002953 all identical: 1.975734 change on character 1.647171
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 1.958960 all identical: 2.012173 change on character 1.685208
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 0.268727 all identical: 0.279508 change on character 0.284110
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 0.203193 all identical: 0.197643 change on character 0.227434
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 1.980664 all identical: 1.945468 change on character 1.643484
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 1.957233 all identical: 1.943264 change on character 1.526690
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 0.916180 all identical: 1.054886 change on character 0.808155
+569f84f26426c797a0c3b8d3ba54db370010e13b try caching get_screen_size all different: 0.746193 all identical: 0.730286 change on character 0.658638
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 2.223458 all identical: 0.526373 change on character 0.282711
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 2.203008 all identical: 0.540094 change on character 0.283893
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 2.238573 all identical: 0.530879 change on character 0.274237
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 2.177017 all identical: 0.538144 change on character 0.273496
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 0.864714 all identical: 0.741300 change on character 0.709705
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 0.861675 all identical: 0.351219 change on character 0.314511
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 0.952924 all identical: 0.368065 change on character 0.327376
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 0.983035 all identical: 0.466110 change on character 0.443605
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 0.920128 all identical: 0.502160 change on character 0.442898
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 0.021146 all identical: 0.014483 change on character 0.010643
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 0.021103 all identical: 0.012973 change on character 0.010117
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 0.022635 all identical: 0.014474 change on character 0.008849
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 0.017631 all identical: 0.011486 change on character 0.008497
+c524f44b1e001ef023491390dceaf084e6b74b37 try caching get_screen_size all different: 0.021772 all identical: 0.015976 change on character 0.012457
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.904684 all identical: 0.510898 change on character 0.455876
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 1.841702 all identical: 0.973074 change on character 1.017422
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.020376 all identical: 0.020576 change on character 0.023823
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.021026 all identical: 0.020473 change on character 0.022148
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.019962 all identical: 0.022255 change on character 0.024908
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.021238 all identical: 0.025029 change on character 0.025422
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.018624 all identical: 0.023692 change on character 0.021297
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.021028 all identical: 0.023651 change on character 0.025613
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.019773 all identical: 0.020170 change on character 0.017761
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.908325 all identical: 0.864533 change on character 0.888718
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.020804 all identical: 0.016721 change on character 0.016471
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.007987 all identical: 0.005182 change on character 0.004572
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 2.687275 all identical: 2.057270 change on character 1.764162
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 2.606727 all identical: 2.064461 change on character 1.838361
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.007182 all identical: 0.005979 change on character 0.005100
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.007331 all identical: 0.006139 change on character 0.005410
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.290081 all identical: 0.250935 change on character 0.329102
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 2.583948 all identical: 2.000323 change on character 1.876476
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 2.582680 all identical: 2.085972 change on character 1.853386
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.054683 all identical: 0.051489 change on character 0.048440
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 2.676974 all identical: 2.039433 change on character 1.841679
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.007206 all identical: 0.005246 change on character 0.004589
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 0.007386 all identical: 0.006255 change on character 0.006057
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 2.665138 all identical: 2.065224 change on character 1.954099
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 2.627256 all identical: 0.539883 change on character 0.401972
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 1.118074 all identical: 0.548804 change on character 0.332903
+a6ad5f4ea712db3611670d0174770a95fd254df7 clear rest of screen instead of each line on exit all different: 1.073360 all identical: 0.582251 change on character 0.327300 100 iterations
+6baa5f29cde58192c689c39682e8c47bc385e5d2 whoops, old code won't work - initialize screen size cache all different: 0.003076 all identical: 0.001767 change on character 0.001477 2 iterations
+6baa5f29cde58192c689c39682e8c47bc385e5d2 whoops, old code won't work - initialize screen size cache all different: 0.003463 all identical: 0.001651 change on character 0.001198 2 iterations
+6baa5f29cde58192c689c39682e8c47bc385e5d2 whoops, old code won't work - initialize screen size cache all different: 0.942191 all identical: 0.227228 change on character 0.276204 100 iterations
+6baa5f29cde58192c689c39682e8c47bc385e5d2 whoops, old code won't work - initialize screen size cache all different: 0.008651 all identical: 0.003795 change on character 0.001814 2 iterations
+92193efda8eba94efec10e05b5557eaa9f562df8 before removing flush calls all different: 0.008086 all identical: 0.004218 change on character 0.001805 2 iterations
+92193efda8eba94efec10e05b5557eaa9f562df8 before removing flush calls all different: 0.324139 all identical: 0.088432 change on character 0.164924 100 iterations
+92193efda8eba94efec10e05b5557eaa9f562df8 before removing flush calls all different: 0.331778 all identical: 0.086347 change on character 0.200402 100 iterations
+92193efda8eba94efec10e05b5557eaa9f562df8 before removing flush calls all different: 0.333796 all identical: 0.087336 change on character 0.205480 100 iterations
+92193efda8eba94efec10e05b5557eaa9f562df8 before removing flush calls all different: 0.315395 all identical: 0.102232 change on character 0.210871 100 iterations
+92193efda8eba94efec10e05b5557eaa9f562df8 before removing flush calls all different: 0.308381 all identical: 0.107333 change on character 0.212972 100 iterations
+92193efda8eba94efec10e05b5557eaa9f562df8 before removing flush calls all different: 0.315011 all identical: 0.104631 change on character 0.254346 100 iterations
+64e37774dce0a972df8291a8a22168c61da5c168 flush again all different: 2.602082 all identical: 0.567743 change on character 0.400804 100 iterations
+64e37774dce0a972df8291a8a22168c61da5c168 flush again all different: 2.666586 all identical: 0.572555 change on character 0.416363 100 iterations
+64e37774dce0a972df8291a8a22168c61da5c168 flush again all different: 2.755818 all identical: 0.707914 change on character 0.491291 100 iterations
+92193efda8eba94efec10e05b5557eaa9f562df8 before removing flush calls all different: 2.632077 all identical: 0.562071 change on character 0.395895 100 iterations
+92193efda8eba94efec10e05b5557eaa9f562df8 before removing flush calls all different: 2.634115 all identical: 0.546124 change on character 0.395817 100 iterations
+92193efda8eba94efec10e05b5557eaa9f562df8 before removing flush calls all different: 2.539856 all identical: 0.547582 change on character 0.394494 100 iterations
+64e37774dce0a972df8291a8a22168c61da5c168 flush again all different: 0.349940 all identical: 0.100921 change on character 0.209342 100 iterations
+248015e9f31b3616482bd536eb27823432f9e962 flushing everywhere all different: 0.330961 all identical: 0.096942 change on character 0.186504 100 iterations
+034605334e0ad1f403df4e38f5357e7f6109a1bf only flushing where needed all different: 2.701542 all identical: 0.557407 change on character 0.415503 100 iterations
+034605334e0ad1f403df4e38f5357e7f6109a1bf only flushing where needed all different: 2.660051 all identical: 0.551227 change on character 0.394907 100 iterations
+034605334e0ad1f403df4e38f5357e7f6109a1bf only flushing where needed all different: 2.750592 all identical: 0.548124 change on character 0.395680 100 iterations
+248015e9f31b3616482bd536eb27823432f9e962 flushing everywhere all different: 2.701950 all identical: 0.573121 change on character 0.425301 100 iterations
+248015e9f31b3616482bd536eb27823432f9e962 flushing everywhere all different: 2.696477 all identical: 0.559002 change on character 0.420224 100 iterations
+248015e9f31b3616482bd536eb27823432f9e962 flushing everywhere all different: 2.695898 all identical: 0.545268 change on character 0.424670 100 iterations
+1f7453f96ae3da83c36575a11defe2d67aa423e4 method caching all different: 1.049013 all identical: 0.508882 change on character 0.332846 100 iterations
+1f7453f96ae3da83c36575a11defe2d67aa423e4 method caching all different: 1.088131 all identical: 0.573858 change on character 0.327659 100 iterations
+1f7453f96ae3da83c36575a11defe2d67aa423e4 method caching all different: 1.064643 all identical: 0.585102 change on character 0.366175 100 iterations
+18d43d75ba76c76b14269422caa833cfa2ef5cbd no more explicit flushing all different: 1.046730 all identical: 0.519314 change on character 0.337216 100 iterations
+18d43d75ba76c76b14269422caa833cfa2ef5cbd no more explicit flushing all different: 1.003866 all identical: 0.511051 change on character 0.342465 100 iterations
+18d43d75ba76c76b14269422caa833cfa2ef5cbd no more explicit flushing all different: 1.081845 all identical: 0.519810 change on character 0.336984 100 iterations
+18d43d75ba76c76b14269422caa833cfa2ef5cbd no more explicit flushing all different: 0.836908 all identical: 0.436834 change on character 0.196962 100 iterations
+01b05f512660aada932f1e55a067c09b841ac84d cache FmtStr str, unicode and len all different: 0.810095 all identical: 0.434903 change on character 0.206507 100 iterations
+01b05f512660aada932f1e55a067c09b841ac84d cache FmtStr str, unicode and len all different: 0.850995 all identical: 0.432538 change on character 0.198943 100 iterations
+01b05f512660aada932f1e55a067c09b841ac84d cache FmtStr str, unicode and len all different: 1.000880 all identical: 0.503596 change on character 0.195741 100 iterations
+18d43d75ba76c76b14269422caa833cfa2ef5cbd no more explicit flushing all different: 1.058322 all identical: 0.514851 change on character 0.342618 100 iterations
+18d43d75ba76c76b14269422caa833cfa2ef5cbd no more explicit flushing all different: 1.127929 all identical: 0.530752 change on character 0.352122 100 iterations
+18d43d75ba76c76b14269422caa833cfa2ef5cbd no more explicit flushing all different: 1.104730 all identical: 0.547647 change on character 0.437919 100 iterations
+f40155d3a489099521db6e1c46429448aa8e3d8c readme updates all different: 0.164275 all identical: 0.097352 change on character 0.113621 100 iterations
+ac73a90706dad14a6bf79afaa9eca2ed3f67fee2 simplify ttt minimax all different: 0.669714 all identical: 0.369769 change on character 0.238638 100 iterations
+ac73a90706dad14a6bf79afaa9eca2ed3f67fee2 simplify ttt minimax all different: 0.661206 all identical: 0.333483 change on character 0.225145 100 iterations
+ac73a90706dad14a6bf79afaa9eca2ed3f67fee2 simplify ttt minimax all different: 0.704584 all identical: 0.397618 change on character 0.344718 100 iterations
+ac73a90706dad14a6bf79afaa9eca2ed3f67fee2 simplify ttt minimax all different: 0.664291 all identical: 0.323051 change on character 0.334581 100 iterations
+ac73a90706dad14a6bf79afaa9eca2ed3f67fee2 simplify ttt minimax all different: 0.659989 all identical: 0.351799 change on character 0.325075 100 iterations
+792cc83165b9e36ff016970eae1329dd6e1c54cf nicer layout of insert algorithm all different: 0.687161 all identical: 0.357314 change on character 0.232278 100 iterations
+792cc83165b9e36ff016970eae1329dd6e1c54cf nicer layout of insert algorithm all different: 0.685077 all identical: 0.353010 change on character 0.237500 100 iterations

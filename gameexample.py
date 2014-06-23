@@ -4,7 +4,7 @@ import sys
 import blessings
 
 from curtsies.fmtfuncs import red, bold, green, on_blue, yellow, on_red
-from curtsies.window import Window
+from curtsies.window import FullscreenWindow
 from curtsies.input import Input
 from curtsies.fsarray import FSArray
 
@@ -47,15 +47,17 @@ class World(object):
         entity.y = max(0, min(self.height-1, entity.y + dy))
 
     def process_event(self, c):
+        """Returns a message from tick() to be displayed if game is over"""
         if c == "":
             sys.exit()
         elif c in key_directions:
             self.move_entity(self.player, *vscale(self.player.speed, key_directions[c]))
         else:
-            self.msg = Window.array_from_text_rc("try w, a, s, d, or ctrl-D", self.height, self.width)
+            return "try arrow keys, w, a, s, d, or ctrl-D (you pressed %r)" % c
         return self.tick()
 
     def tick(self):
+        """Returns a message to be displayed if game is over, else None"""
         for npc in self.npcs:
             self.move_entity(npc, *npc.towards(self.player))
         for entity1, entity2 in itertools.combinations(self.entities, 2):
@@ -78,19 +80,23 @@ class World(object):
             a[self.height - 1 - entity.y, entity.x] = entity.display
         return a
 
-key_directions = {'KEY_UP':    (0, 1),
-                  'KEY_LEFT': (-1, 0),
-                  'KEY_DOWN':  (0,-1),
-                  'KEY_RIGHT': (1, 0)}
+key_directions = {'<UP>':    (0, 1),
+                  '<LEFT>': (-1, 0),
+                  '<DOWN>':  (0,-1),
+                  '<RIGHT>': (1, 0),
+                  'w':       (0, 1),
+                  'a':       (-1, 0),
+                  's':       (0,-1),
+                  'd':       (1, 0)}
 
 def main():
-    t = blessings.Terminal()
-        with Window(tc) as t:
-            rows, columns = t.tc.get_screen_size()
+    with FullscreenWindow(sys.stdout) as w:
+        with Input(sys.stdin) as input_generator:
+            rows, columns = w.t.height, w.t.width
             world = World(width=columns, height=rows) # note the row/column x/y swap!
             while True:
-                t.render_to_terminal(world.get_array())
-                c = t.tc.get_event()
+                w.render_to_terminal(world.get_array())
+                c = input_generator.next()
                 msg = world.process_event(c)
                 if msg:
                     break
