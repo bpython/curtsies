@@ -33,7 +33,7 @@ class World(object):
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        n = 10
+        n = 5
         self.player = Entity(on_blue(green(bold('5'))), width // 2, height // 2 - 2, speed=5)
         self.npcs = [Entity(on_blue(red('X')), i * width // (n * 2), j * height // (n * 2))
                      for i in range(1, 2*n, 2)
@@ -71,7 +71,7 @@ class World(object):
             return 'you won on turn %d' % self.turn
         self.turn += 1
         if self.turn % 20 == 0:
-            self.player.speed = max(0, self.player.speed - 1)
+            self.player.speed = max(1, self.player.speed - 1)
             self.player.display = on_blue(green(bold(str(self.player.speed))))
 
     def get_array(self):
