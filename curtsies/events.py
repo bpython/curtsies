@@ -158,6 +158,7 @@ def try_keys():
     import termios
     import fcntl
     import os
+    from termhelpers import Cbreak
 
     def ask_what_they_pressed(seq, Normal):
         print 'Unidentified character sequence!'
@@ -178,23 +179,6 @@ def try_keys():
             f.write("%r is called %s\n" % (seq, name))
             f.close()
             print 'Thanks! Sent thomasballinger@gmail.com an email with that, or submit a pull request'
-
-    class Cbreak(object):
-        def __init__(self, stream):
-            self.stream = stream
-        def __enter__(self):
-            self.original_stty = termios.tcgetattr(self.stream)
-            tty.setcbreak(self.stream)
-            class NoCbreak(object):
-                def __enter__(inner_self):
-                    inner_self.original_stty = termios.tcgetattr(self.stream)
-                    termios.tcsetattr(self.stream, termios.TCSANOW, self.original_stty)
-                    print
-                def __exit__(inner_self, *args):
-                    termios.tcsetattr(self.stream, termios.TCSANOW, inner_self.original_stty)
-            return NoCbreak
-        def __exit__(self, *args):
-            termios.tcsetattr(self.stream, termios.TCSANOW, self.original_stty)
 
     with Cbreak(sys.stdin) as NoCbreak:
         while True:

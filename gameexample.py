@@ -1,10 +1,11 @@
 import itertools
 import sys
 
-from curtsies.fmtfuncs import red, bold, green, on_blue, yellow, on_red
+import blessings
 
+from curtsies.fmtfuncs import red, bold, green, on_blue, yellow, on_red
 from curtsies.window import Window
-from curtsies.terminal import Terminal
+from curtsies.input import Input
 from curtsies.fsarray import FSArray
 
 class Entity(object):
@@ -83,7 +84,7 @@ key_directions = {'KEY_UP':    (0, 1),
                   'KEY_RIGHT': (1, 0)}
 
 def main():
-    with Terminal(sys.stdin, sys.stdout) as tc:
+    t = blessings.Terminal()
         with Window(tc) as t:
             rows, columns = t.tc.get_screen_size()
             world = World(width=columns, height=rows) # note the row/column x/y swap!

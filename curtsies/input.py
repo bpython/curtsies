@@ -11,7 +11,12 @@ import termios
 import time
 import tty
 
+
+from .termhelpers import nonblocking
 from . import events
+
+# note: if select doesn't work out for reading input with a timeout,
+# try a stdin read with a timeout instead?: http://stackoverflow.com/a/2918103/398212
 
 PY3 = sys.version_info[0] >= 3
 
@@ -19,16 +24,6 @@ READ_SIZE = 1024
 assert READ_SIZE >= events.MAX_KEYPRESS_SIZE
 # if a keypress could require more bytes than we read at a time to be identified,
 # the paste logic that reads more data as needed might not work.
-
-class nonblocking(object):
-    def __init__(self, stream):
-        self.stream = stream
-        self.fd = self.stream.fileno()
-    def __enter__(self):
-        self.orig_fl = fcntl.fcntl(self.fd, fcntl.F_GETFL)
-        fcntl.fcntl(self.fd, fcntl.F_SETFL, self.orig_fl | os.O_NONBLOCK)
-    def __exit__(self, *args):
-        fcntl.fcntl(self.fd, fcntl.F_SETFL, self.orig_fl)
 
 class Input(object):
     """Coroutine-interface respecting keypress generator"""
@@ -81,7 +76,6 @@ class Input(object):
         if e is not None:
             return e
 
-        #note: if this doesn't work out, try a stdin read with a timeout instead?: http://stackoverflow.com/a/2918103/398212
 
         def wait_for_read_ready_or_timeout():
             remaining_timeout = timeout
@@ -135,8 +129,6 @@ class Input(object):
                     return len(data)
 
 def main():
-    #import blessings
-    #t = blessings.Terminal()
     with Input() as input_generator:
         print repr(input_generator.send(2))
         print repr(input_generator.send(1))
