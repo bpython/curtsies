@@ -261,4 +261,6 @@ Authors
 * Fei Dong - work on making FmtStr and Chunk immutable
 * Julia Evans - help with Python 3 Conversion
 * Zach Allaun, Mary Rose Cook, Alex Clemmer - early code review of terminal.py
+* Rachel King - several bugfixes on blessings use
+* Darius Bacon - lots of great code review
 * inspired by a conversation with Scott Feeney
