@@ -114,7 +114,7 @@ class BaseWindow(object):
     def __exit__(self, type, value, traceback):
         logging.debug("running BaseWindow.__exit__")
         if self.hide_cursor:
-            self.write(self.t.show_cursor)
+            self.write(self.t.normal_cursor)
 
     def on_terminal_size_change(self, height, width):
         self._last_lines_by_row = {}
@@ -167,6 +167,7 @@ class FullscreenWindow(BaseWindow):
 
     def __exit__(self, type, value, traceback):
         self.fullscreen_ctx.__exit__(type, value, traceback)
+        BaseWindow.__exit__(self, type, value, traceback)
 
     def render_to_terminal(self, array, cursor_pos=(0,0)):
         """Renders array to terminal and places (0-indexed) cursor
@@ -214,7 +215,7 @@ class FullscreenWindow(BaseWindow):
         self.write(self.t.move(*cursor_pos))
         self._last_lines_by_row = current_lines_by_row
         if not self.hide_cursor:
-            self.write(self.t.show_cursor)
+            self.write(self.t.normal_cursor)
 
 class CursorAwareWindow(BaseWindow):
     def __init__(self, out_stream=sys.stdout, keep_last_line=False, hide_cursor=True):
@@ -345,7 +346,7 @@ class CursorAwareWindow(BaseWindow):
                                     (cursor_pos[0]-offscreen_scrolls+self.top_usable_row, cursor_pos[1]+1))
         self._last_lines_by_row = current_lines_by_row
         if not self.hide_cursor:
-            self.write(self.t.show_cursor)
+            self.write(self.t.normal_cursor)
         return offscreen_scrolls
 
 
