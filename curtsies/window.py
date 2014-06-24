@@ -20,11 +20,13 @@ at the beginning of the its current line.
 import sys
 import os
 import logging
+import re
 
 import blessings
 
 from .fmtstr import fmtstr
 from .fsarray import FSArray
+from .termhelpers import Cbreak
 
 from . import events
 
@@ -96,7 +98,7 @@ class BaseWindow(object):
 
     #TODO allow nice external access of width and height
 
-    def scroll_down():
+    def scroll_down(self):
         SCROLL_DOWN = "D"
         self.write(SCROLL_DOWN) #TODO will blessings do this?
 
@@ -218,25 +220,36 @@ class FullscreenWindow(BaseWindow):
             self.write(self.t.normal_cursor)
 
 class CursorAwareWindow(BaseWindow):
-    def __init__(self, out_stream=sys.stdout, keep_last_line=False, hide_cursor=True):
+    def __init__(self, out_stream=sys.stdout, in_stream=sys.stdin, keep_last_line=False, hide_cursor=True):
         BaseWindow.__init__(self, out_stream=out_stream, hide_cursor=hide_cursor)
+        self.in_stream = in_stream
         self._last_cursor_column = None
         self._last_cursor_row = None
         self.keep_last_line = keep_last_line
+        self.cbreak = Cbreak(self.in_stream)
 
     def __enter__(self):
+        self.cbreak.__enter__()
         self.top_usable_row, _ = self.get_cursor_position()
+        print 'top usable row:', self.top_usable_row
         self._orig_top_usable_row = self.top_usable_row
         logging.debug('initial top_usable_row: %d' % self.top_usable_row)
+        return BaseWindow.__enter__(self)
 
     def __exit__(self, type, value, traceback):
         row, _ = self.get_cursor_position()
         self.write(self.t.clear_eos)
         self.write(self.t.move(row, 0))
         self.write(self.t.clear_eol)
+        self.cbreak.__exit__(type, value, traceback)
+        BaseWindow.__exit__(self, type, value, traceback)
 
-    def get_cursor_position(self, in_stream):
-        """Returns the terminal (row, column) of the cursor"""
+    def get_cursor_position(self):
+        """Returns the terminal (row, column) of the cursor
+
+        0-indexed, like blessings cursor positions"""
+        in_stream = self.in_stream # TODO would this be cleaner as a parameter?
+
         QUERY_CURSOR_POSITION = "\x1b[6n"
         self.write(QUERY_CURSOR_POSITION)
 
@@ -260,7 +273,7 @@ class CursorAwareWindow(BaseWindow):
                 extra = m.groupdict()['extra']
                 if extra:
                     raise ValueError("Whoops! chars preceding cursor pos query response thrown out! %r" % (extra,))
-                return (row, col)
+                return (row-1, col-1)
 
     def get_annotated_event(self, keynames='curses', idle=()):
         """get_event from self.tc, but add cursor_dy to window change events"""
@@ -295,12 +308,13 @@ class CursorAwareWindow(BaseWindow):
         # no significant performance difference here
         if not self.hide_cursor:
             self.write(self.t.hide_cursor)
-        height, width = self.t.height, self.t.width
+        height, width = self.t.height, self.t.width #TODO race condition here?
+                                                    #maybe ok as long as sigwinch handled?
         if height != self._last_rendered_height or width != self._last_rendered_width:
             self.on_terminal_size_change(height, width)
 
         current_lines_by_row = {}
-        rows_for_use = list(range(self.top_usable_row, height + 1))
+        rows_for_use = list(range(self.top_usable_row, height))
 
         # rows which we have content for and don't require scrolling
         shared = min(len(array), len(rows_for_use)) #TODO rename shared
@@ -308,7 +322,7 @@ class CursorAwareWindow(BaseWindow):
             current_lines_by_row[row] = line
             if line == self._last_lines_by_row.get(row, None):
                 continue
-            self.write(self.t.move(row, 1))
+            self.write(self.t.move(row, 0))
             self.write(str(line))
             if len(line) < width:
                 self.write(self.t.clear_eol)
@@ -318,32 +332,32 @@ class CursorAwareWindow(BaseWindow):
         rest_of_rows = rows_for_use[shared:]
         for row in rest_of_rows: # if array too small
             if self._last_lines_by_row and row not in self._last_lines_by_row: continue
-            self.write(self.t.move(row, 1))
+            self.write(self.t.move(row, 0))
             self.write(self.t.clear_eol)
-            self.write(self.t.clear_bol)
+            self.write(self.t.clear_bol) #TODO probably not necessary - is first char cleared?
             current_lines_by_row[row] = None
-        offscreen_scrolls = 0
-        self.t.move(height, 1) # since scroll-down only moves the screen if cursor is at bottom
 
         # lines for which we need to scroll down to render
+        offscreen_scrolls = 0
+        self.t.move(height, 0) # since scroll-down only moves the screen if cursor is at bottom
         for line in rest_of_lines: # if array too big
             logging.debug('sending scroll down message')
             self.scroll_down()
-            if self.top_usable_row > 1:
+            if self.top_usable_row > 0:
                 self.top_usable_row -= 1
             else:
                 offscreen_scrolls += 1
             current_lines_by_row = dict((k-1, v) for k, v in current_lines_by_row.items())
             logging.debug('new top_usable_row: %d' % self.top_usable_row)
-            self.t.move(height, 1) # since scrolling moves the cursor
-            self.t.write(str(line))
-            current_lines_by_row[height] = line
+            self.write(self.t.move(height-1, 0)) # since scrolling moves the cursor
+            self.write(str(line))
+            current_lines_by_row[height-1] = line
 
         logging.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())
         logging.debug('lines in current lines by row: %r' % current_lines_by_row.keys())
-        self.write(self.t.move(cursor_pos[0]-offscreen_scrolls+self.top_usable_row), cursor_pos[1] + 1)
-        self._last_cursor_row, self._last_cursor_column = (
-                                    (cursor_pos[0]-offscreen_scrolls+self.top_usable_row, cursor_pos[1]+1))
+        self._last_cursor_row = cursor_pos[0]-offscreen_scrolls+self.top_usable_row
+        self._last_cursor_column = cursor_pos[1]
+        self.write(self.t.move(self._last_cursor_row, self._last_cursor_column))
         self._last_lines_by_row = current_lines_by_row
         if not self.hide_cursor:
             self.write(self.t.normal_cursor)

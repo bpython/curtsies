@@ -1,6 +1,7 @@
 from . import input
 from .fmtstr import fmtstr
-from window import FullscreenWindow
+from . import events
+from window import FullscreenWindow, CursorAwareWindow
 import sys
 import signal
 import logging
@@ -15,9 +16,9 @@ def simple_fullscreen():
         a = [fmtstr((('.row%r.' % (row,)) * rows)[:columns]) for row in range(rows)]
         w.render_to_terminal(a)
 
-def array_size_test():
+def array_size_test(window):
     """Tests arrays one row to small or too large"""
-    with FullscreenWindow(sys.stdout) as w:
+    with window as w:
         with input.Input(sys.stdin) as input_generator:
             rows, columns = w.t.height, w.t.width
             while True:
@@ -40,6 +41,9 @@ def array_size_test():
                     a = [fmtstr(c*columns) for _ in range(1)]
                 elif c == "e":
                     a = [fmtstr(c*columns) for _ in range(1)]
+                elif c == "c":
+                    w.write(w.t.move(w.t.height-1, 0))
+                    w.scroll_down()
                 elif isinstance(c, events.WindowChangeEvent):
                     a = w.array_from_text("window just changed to %d rows and %d columns" % (c.rows, c.columns))
                 elif c == '\x0c': # ctrl-L
@@ -69,7 +73,7 @@ def fullscreen_winch_with_input():
     def sigwinch_handler(signum, frame):
         print 'sigwinch! Changed from %r to %r' % ((rows, columns), (w.t.height, w.t.width))
     with w:
-        for e in input.Input()
+        for e in input.Input():
             rows, columns = w.t.height, w.t.width
             a = [fmtstr((('.%sx%s.' % (rows, columns)) * rows)[:columns]) for row in range(rows)]
             w.render_to_terminal(a)
@@ -77,5 +81,7 @@ def fullscreen_winch_with_input():
 
 if __name__ == '__main__':
     #simple_fullscreen()
-    #array_size_test()
-    fullscreen_winch()
+    #array_size_test(FullscreenWindow(sys.stdout))
+    array_size_test(CursorAwareWindow(sys.stdout, sys.stdin, keep_last_line=True, hide_cursor=True))
+    #fullscreen_winch()
+
