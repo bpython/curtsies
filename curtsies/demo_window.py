@@ -72,8 +72,23 @@ def fullscreen_winch_with_input():
     w = FullscreenWindow(sys.stdout)
     def sigwinch_handler(signum, frame):
         print 'sigwinch! Changed from %r to %r' % ((rows, columns), (w.t.height, w.t.width))
+    signal.signal(signal.SIGWINCH, sigwinch_handler)
     with w:
         for e in input.Input():
+            rows, columns = w.t.height, w.t.width
+            a = [fmtstr((('.%sx%s.' % (rows, columns)) * rows)[:columns]) for row in range(rows)]
+            w.render_to_terminal(a)
+
+def cursor_winch():
+    logging.basicConfig(filename='display.log',level=logging.DEBUG)
+    print 'this should be just off-screen'
+    w = CursorAwareWindow(sys.stdout, sys.stdin, keep_last_line=True, hide_cursor=False)
+    def sigwinch_handler(signum, frame):
+        print 'sigwinch! Changed from %r to %r' % ((rows, columns), (w.t.height, w.t.width))
+        print 'cursor moved %d lines down' % w.get_cursor_vertical_diff()
+    signal.signal(signal.SIGWINCH, sigwinch_handler)
+    with w:
+        while True:
             rows, columns = w.t.height, w.t.width
             a = [fmtstr((('.%sx%s.' % (rows, columns)) * rows)[:columns]) for row in range(rows)]
             w.render_to_terminal(a)
@@ -82,6 +97,7 @@ def fullscreen_winch_with_input():
 if __name__ == '__main__':
     #simple_fullscreen()
     #array_size_test(FullscreenWindow(sys.stdout))
-    array_size_test(CursorAwareWindow(sys.stdout, sys.stdin, keep_last_line=True, hide_cursor=True))
+    #array_size_test(CursorAwareWindow(sys.stdout, sys.stdin, keep_last_line=True, hide_cursor=True))
     #fullscreen_winch()
+    cursor_winch()
 

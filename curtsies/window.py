@@ -190,6 +190,10 @@ class FullscreenWindow(BaseWindow):
             self.write(self.t.normal_cursor)
 
 class CursorAwareWindow(BaseWindow):
+    """
+
+    Cursor diff depends on cursor never being touched by the application
+    Only use the render_to_terminal interface for moving the cursor"""
     def __init__(self, out_stream=sys.stdout, in_stream=sys.stdin, keep_last_line=False, hide_cursor=True):
         BaseWindow.__init__(self, out_stream=out_stream, hide_cursor=hide_cursor)
         self.in_stream = in_stream
@@ -245,22 +249,23 @@ class CursorAwareWindow(BaseWindow):
                     raise ValueError("Whoops! chars preceding cursor pos query response thrown out! %r" % (extra,))
                 return (row-1, col-1)
 
-    def get_annotated_event(self, keynames='curses', idle=()):
-        """get_event from self.tc, but add cursor_dy to window change events"""
-        e = self.tc.get_event(keynames=keynames, idle=idle)
-        if isinstance(e, events.WindowChangeEvent):
-            row, col = self.get_cursor_position()
-            if self._last_cursor_row is None:
-                e.cursor_dy = 0
-            else:
-                e.cursor_dy = row - self._last_cursor_row
-                while self.top_usable_row > 1 and e.cursor_dy > 0:
-                    self.top_usable_row += 1
-                    e.cursor_dy -= 1
-                while self.top_usable_row > 1 and e.cursor_dy < 0:
-                    self.top_usable_row -= 1
-                    e.cursor_dy += 1
-        return e
+    def get_cursor_vertical_diff(self):
+        """Returns the how far down the cursor moved"""
+
+        row, col = self.get_cursor_position()
+        if self._last_cursor_row is None:
+            cursor_dy = 0
+        else:
+            cursor_dy = row - self._last_cursor_row
+            while self.top_usable_row > 1 and cursor_dy > 0:
+                self.top_usable_row += 1
+                cursor_dy -= 1
+            while self.top_usable_row > 1 and cursor_dy < 0:
+                self.top_usable_row -= 1
+                cursor_dy += 1
+        self._last_cursor_row = row
+        logging.debug('cursor dy: %d' % cursor_dy)
+        return cursor_dy
 
     def render_to_terminal(self, array, cursor_pos=(0,0)):
         """Renders array to terminal, returns the number of lines
