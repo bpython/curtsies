@@ -262,5 +262,6 @@ Authors
 * Julia Evans - help with Python 3 Conversion
 * Zach Allaun, Mary Rose Cook, Alex Clemmer - early code review of terminal.py
 * Rachel King - several bugfixes on blessings use
+* Amber Wilcox-O'Hearn - paired on a refactoring
 * Darius Bacon - lots of great code review
 * inspired by a conversation with Scott Feeney
