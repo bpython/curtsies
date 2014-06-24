@@ -66,8 +66,11 @@ class BaseWindow(object):
     #TODO allow nice external access of width and height
 
     def scroll_down(self):
-        SCROLL_DOWN = "D"
-        self.write(SCROLL_DOWN) #TODO will blessings do this?
+        #TODO Figure out how to make sure blesings context managers write to the right stream
+        logging.debug('sending scroll down message')
+        with self.t.location(x=0, y=1000000):# since scroll-down only moves the screen if cursor is at bottom
+            SCROLL_DOWN = "D"
+            self.write(SCROLL_DOWN) #TODO will blessings do this?
 
     def write(self, msg):
         logging.debug('writing %r' % msg)
@@ -306,9 +309,7 @@ class CursorAwareWindow(BaseWindow):
 
         # lines for which we need to scroll down to render
         offscreen_scrolls = 0
-        self.t.move(height, 0) # since scroll-down only moves the screen if cursor is at bottom
         for line in rest_of_lines: # if array too big
-            logging.debug('sending scroll down message')
             self.scroll_down()
             if self.top_usable_row > 0:
                 self.top_usable_row -= 1
