@@ -20,9 +20,9 @@ def array_size_test(window):
     """Tests arrays one row to small or too large"""
     with window as w:
         with input.Input(sys.stdin) as input_generator:
-            rows, columns = w.t.height, w.t.width
             while True:
                 c = input_generator.next()
+                rows, columns = w.t.height, w.t.width
                 if c == "":
                     sys.exit() # same as raise SystemExit()
                 elif c == "h":
