@@ -90,16 +90,16 @@ key_directions = {'<UP>':    (0, 1),
                   'd':       (1, 0)}
 
 def main():
-    with FullscreenWindow(sys.stdout) as w:
+    with FullscreenWindow(sys.stdout) as window:
         with Input(sys.stdin) as input_generator:
-            rows, columns = w.t.height, w.t.width
+            rows, columns = window.t.height, window.t.width
             world = World(width=columns, height=rows) # note the row/column x/y swap!
-            w.render_to_terminal(world.get_array())
+            window.render_to_terminal(world.get_array())
             for c in input_generator:
                 msg = world.process_event(c)
                 if msg:
                     break
-                w.render_to_terminal(world.get_array())
+                window.render_to_terminal(world.get_array())
     print(msg)
 
 if __name__ == '__main__':
