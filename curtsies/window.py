@@ -32,46 +32,13 @@ from . import events
 
 #BIG TODO!!! 
 #TODO How to get cursor position? It's a thing we need!
-# 
 #
 # Option 1: Window has a reference to the corresponding stdin
-#           Maybe an input generator is instantiated just for the Window?
-# Option 2: Window has a reference to an input generator -
-#           these are always created in pairs
-# Option 3: Input generator has a reference to Window instance
-#           to notify it whenever this a cursur request happens
-# 
-# I think there are less issues if this only happens at the very
-# beginning - but no, we need at all the time for nice sigwinch handling
-# We have to reliable deal with this.
+#           For now, going to HCF when we read input that isn't a reponse to a cursor query
+#           Later will figure out how to deal with this (ungetc, use the same input gen, etc.)
 #
-# If we use a context manager on sys.stdin that restores its original
-# state, doing a read ourselves won't be too dangerous - but what
-# if we read data that we weren't supposed to touch, buffered up before
-# the cursor response we needed?
-
-# Maybe you can't get a window without passing in an input generator
-# (similar to the old tc method) - but this stinks!
-
-# look at `ungetc` - we can push chars back onto the input stream
-# is this safe? For now going to try a hack where we just lose whatever
-# else we had to read before we find the response to the cursor query - 
-# if ungetc works, should be easy to add
-# It that ungetc would require compiling code to install - that's a bit of a barrier
+# Is seems ungetc would require compiling code to install - that's a bit of a barrier
 # for something you want to install all the time like bpython
-
-# get_annotated_event is also going to need to work differently -
-# since now we're just doing handlers, get_annotated_event should
-# be a utility function or something - it's not part of 
-# Window or input generator
-
-#
-# How about Window.get_cursor_position(input_generator)
-# (or Window.get_cursor_position(input_stream), in which case events might be lost)
-#
-
-# There should be two windows: one that is aware of the cursor position and scrolls,
-# and a simple one that isn't.
 
 
 class BaseWindow(object):
