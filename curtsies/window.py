@@ -268,7 +268,7 @@ class CursorAwareWindow(BaseWindow):
             while self.top_usable_row > 0 and cursor_dy > 0:
                 self.top_usable_row += 1
                 cursor_dy -= 1
-            while self.top_usable_row > 0 and cursor_dy < 0:
+            while self.top_usable_row > 1 and cursor_dy < 0:
                 self.top_usable_row -= 1
                 cursor_dy += 1
         logging.info('top usable row changed from %d to %d', old_top_usable_row, self.top_usable_row)
