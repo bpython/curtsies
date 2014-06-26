@@ -265,7 +265,7 @@ class CursorAwareWindow(BaseWindow):
         else:
             cursor_dy = row - self._last_cursor_row
             logging.info('cursor moved %d lines down' % cursor_dy)
-            while self.top_usable_row > 0 and cursor_dy > 0:
+            while self.top_usable_row > -1 and cursor_dy > 0:
                 self.top_usable_row += 1
                 cursor_dy -= 1
             while self.top_usable_row > 1 and cursor_dy < 0:
