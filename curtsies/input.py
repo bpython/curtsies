@@ -27,7 +27,7 @@ assert READ_SIZE >= events.MAX_KEYPRESS_SIZE
 
 class Input(object):
     """Coroutine-interface respecting keypress generator"""
-    def __init__(self, in_stream=sys.stdin, keynames='curtsies', paste_threshold=events.MAX_KEYPRESS_SIZE+1):
+    def __init__(self, in_stream=sys.stdin, keynames='curtsies', paste_threshold=events.MAX_KEYPRESS_SIZE+1, sigint_event=False):
         """in_stream should be standard input
         keynames are how keypresses should be named - one of 'curtsies', 'curses', or 'plain'
         paste_threshold is how many bytes must be read in a single read for
@@ -37,6 +37,8 @@ class Input(object):
         self.unprocessed_bytes = [] # leftover from stdin, unprocessed yet
         self.keynames = keynames
         self.paste_threshold = paste_threshold
+        self.sigint_event = sigint_event
+        self.sigints = []
 
     #prospective: this could be useful for an external select loop
     def fileno(self):
@@ -45,10 +47,18 @@ class Input(object):
     def __enter__(self):
         self.original_stty = termios.tcgetattr(self.in_stream)
         tty.setcbreak(self.in_stream)
+        if self.sigint_event:
+            self.orig_sigint_handler = signal.getsignal(signal.SIGINT)
+            signal.signal(signal.SIGINT, self.sigint_handler)
         return self
 
     def __exit__(self, type, value, traceback):
+        if self.sigint_event:
+            signal.signal(signal.SIGINT, self.orig_sigint_handler)
         termios.tcsetattr(self.in_stream, termios.TCSANOW, self.original_stty)
+
+    def sigint_handler(self, signum, frame):
+        self.sigints.append(events.SigIntEvent())
 
     def __iter__(self):
         return self
@@ -71,11 +81,13 @@ class Input(object):
             if current_bytes: # incomplete keys shouldn't happen
                 raise ValueError("Couldn't identify key sequence: %r" % self.current_bytes)
 
+        if self.sigints:
+            return self.sigints.pop()
+
         # try to find an already pressed key from prev input
         e = find_key()
         if e is not None:
             return e
-
 
         def wait_for_read_ready_or_timeout():
             remaining_timeout = timeout
@@ -83,12 +95,16 @@ class Input(object):
             while True:
                 try:
                     (rs, _, _) = select.select([self.in_stream.fileno()], [], [], remaining_timeout)
-                    return rs
+                    return rs, None
                 except select.error:
+                    if self.sigints:
+                        return [], self.sigints.pop()
                     if remaining_timeout is not None:
                         remaining_timeout = max(timeout - (time.time() - t0), 0)
 
-        rs = wait_for_read_ready_or_timeout()
+        rs, sigint = wait_for_read_ready_or_timeout()
+        if sigint:
+            return sigint
         if not rs:
             return None
         num_bytes = self.nonblocking_read()

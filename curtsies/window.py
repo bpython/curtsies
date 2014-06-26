@@ -217,10 +217,14 @@ class CursorAwareWindow(BaseWindow):
         return BaseWindow.__enter__(self)
 
     def __exit__(self, type, value, traceback):
-        row, _ = self.get_cursor_position()
         self.write(self.t.clear_eos)
-        self.write(self.t.move(row, 0))
-        self.write(self.t.clear_eol)
+        try:
+            row, _ = self.get_cursor_position()
+        except ValueError:
+            pass
+        else:
+            self.write(self.t.move(row, 0))
+            self.write(self.t.clear_eol)
         self.cbreak.__exit__(type, value, traceback)
         BaseWindow.__exit__(self, type, value, traceback)
 
