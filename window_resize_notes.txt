@@ -54,3 +54,6 @@ Note: How does terminal wrapping work? It doesn't change the height
 when a line wraps around, so how does addressing even work?
 How to make a terminal one 
 Note: Terminal.app adds a line and puts cursor at bottom when scroll up.
+
+
+Current bug: when window change brings pre-bpython history into visibility, problems

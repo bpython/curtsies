@@ -8,6 +8,8 @@ venv*
 .coverage
 cover
 
+keylog
+
 .DS_Store
 build
 dist

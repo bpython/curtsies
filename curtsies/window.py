@@ -209,7 +209,7 @@ class CursorAwareWindow(BaseWindow):
 
     def __enter__(self):
         self.cbreak.__enter__()
-        self.top_usable_row, _ = self.get_cursor_position()[0] - 1
+        self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
         logging.debug('initial top_usable_row: %d' % self.top_usable_row)
         return BaseWindow.__enter__(self)

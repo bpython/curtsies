@@ -1,0 +1,15 @@
+soon
+----
+
+* write example of using window change events
+* make api more beautiful!
+* example using select
+* release a new version (increment minor version number so 
+* bugfix release bpython to use 0.0.32 and not higher (figure out what 'curtsies>=0.0.32' means)
+* split out tests into multiple files
+
+eventually:
+-----------
+
+* real docs (not just a readme!) 
+* reconsider api for nonblocking version
