@@ -97,10 +97,12 @@ class BaseWindow(object):
         """Renders array to terminal"""
         raise NotImplemented
 
-    #TODO swap this, everything else is (rows, columns)
     def get_term_hw(self):
         """Returns current terminal width and height"""
         return self.t.height, self.t.width
+
+    width  = property(lambda self: return self.t.width)
+    height = property(lambda self: return self.t.height)
 
     def array_from_text(self, msg):
         rows, columns = self.t.height, self.t.width
@@ -291,7 +293,6 @@ class CursorAwareWindow(BaseWindow):
         if not self.hide_cursor:
             self.write(self.t.hide_cursor)
         height, width = self.t.height, self.t.width #TODO race condition here?
-                                                    #maybe ok as long as sigwinch handled?
         if height != self._last_rendered_height or width != self._last_rendered_width:
             self.on_terminal_size_change(height, width)
 

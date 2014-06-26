@@ -1,3 +1,5 @@
+temporary todos not yet in GitHub issues, the official place for this kind of thing
+
 soon
 ----
 
@@ -13,3 +15,4 @@ eventually:
 
 * real docs (not just a readme!) 
 * reconsider api for nonblocking version
+* fix escape sequence parsing / use a library so all kinds of escape sequences work in bpython

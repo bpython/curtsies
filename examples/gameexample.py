@@ -92,8 +92,7 @@ key_directions = {'<UP>':    (0, 1),
 def main():
     with FullscreenWindow(sys.stdout) as window:
         with Input(sys.stdin) as input_generator:
-            rows, columns = window.t.height, window.t.width
-            world = World(width=columns, height=rows) # note the row/column x/y swap!
+            world = World(width=window.width, height=window.height)
             window.render_to_terminal(world.get_array())
             for c in input_generator:
                 msg = world.process_event(c)
