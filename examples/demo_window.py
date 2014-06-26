@@ -1,16 +1,16 @@
-from . import input
-from .fmtstr import fmtstr
-from . import events
-from window import FullscreenWindow, CursorAwareWindow
+from curtsies import input
+from curtsies.fmtstr import fmtstr
+from curtsies import events
+from curtsies.window import FullscreenWindow, CursorAwareWindow
 import sys
 import signal
 import logging
-from termhelpers import Cbreak
+from curtsies.termhelpers import Cbreak
 
 def simple_fullscreen():
     print 'this should be just off-screen'
     w = FullscreenWindow(sys.stdout)
-    rows, columns = w.t.height, w.t.width
+    rows, columns = w.height, w.width
     with w:
         a = [fmtstr((('.row%r.' % (row,)) * rows)[:columns]) for row in range(rows)]
         w.render_to_terminal(a)
@@ -21,7 +21,7 @@ def array_size_test(window):
         with input.Input(sys.stdin) as input_generator:
             while True:
                 c = input_generator.next()
-                rows, columns = w.t.height, w.t.width
+                rows, columns = w.height, w.width
                 if c == "":
                     sys.exit() # same as raise SystemExit()
                 elif c == "h":
@@ -56,10 +56,10 @@ def fullscreen_winch():
     print 'this should be just off-screen'
     w = FullscreenWindow(sys.stdout)
     def sigwinch_handler(signum, frame):
-        print 'sigwinch! Changed from %r to %r' % ((rows, columns), (w.t.height, w.t.width))
+        print 'sigwinch! Changed from %r to %r' % ((rows, columns), (w.height, w.width))
     with w:
         while True:
-            rows, columns = w.t.height, w.t.width
+            rows, columns = w.height, w.width
             a = [fmtstr((('.%sx%s.' % (rows, columns)) * rows)[:columns]) for row in range(rows)]
             w.render_to_terminal(a)
             raw_input()
@@ -68,11 +68,11 @@ def fullscreen_winch_with_input():
     print 'this should be just off-screen'
     w = FullscreenWindow(sys.stdout)
     def sigwinch_handler(signum, frame):
-        print 'sigwinch! Changed from %r to %r' % ((rows, columns), (w.t.height, w.t.width))
+        print 'sigwinch! Changed from %r to %r' % ((rows, columns), (w.height, w.width))
     signal.signal(signal.SIGWINCH, sigwinch_handler)
     with w:
         for e in input.Input():
-            rows, columns = w.t.height, w.t.width
+            rows, columns = w.height, w.width
             a = [fmtstr((('.%sx%s.' % (rows, columns)) * rows)[:columns]) for row in range(rows)]
             w.render_to_terminal(a)
 
@@ -80,12 +80,14 @@ def cursor_winch():
     print 'this should be just off-screen'
     w = CursorAwareWindow(sys.stdout, sys.stdin, keep_last_line=True, hide_cursor=False)
     def sigwinch_handler(signum, frame):
-        print 'sigwinch! Changed from %r to %r' % ((rows, columns), (w.t.height, w.t.width))
+        print 'sigwinch! Changed from %r to %r' % ((rows, columns), (w.height, w.width))
         print 'cursor moved %d lines down' % w.get_cursor_vertical_diff()
+        w.write(w.t.move_up)
+        w.write(w.t.move_up)
     signal.signal(signal.SIGWINCH, sigwinch_handler)
     with w:
         for e in input.Input():
-            rows, columns = w.t.height, w.t.width
+            rows, columns = w.height, w.width
             a = [fmtstr((('.%sx%s.' % (rows, columns)) * rows)[:columns]) for row in range(rows)]
             w.render_to_terminal(a)
 

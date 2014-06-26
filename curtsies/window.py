@@ -101,8 +101,8 @@ class BaseWindow(object):
         """Returns current terminal width and height"""
         return self.t.height, self.t.width
 
-    width  = property(lambda self: return self.t.width)
-    height = property(lambda self: return self.t.height)
+    width  = property(lambda self: self.t.width)
+    height = property(lambda self: self.t.height)
 
     def array_from_text(self, msg):
         rows, columns = self.t.height, self.t.width
