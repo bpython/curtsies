@@ -6,7 +6,6 @@ import sys
 import signal
 import logging
 from termhelpers import Cbreak
-logging.basicConfig(filename='display.log',level=logging.DEBUG)
 
 def simple_fullscreen():
     print 'this should be just off-screen'
@@ -54,7 +53,6 @@ def array_size_test(window):
                 w.render_to_terminal(a)
 
 def fullscreen_winch():
-    logging.basicConfig(filename='display.log',level=logging.DEBUG)
     print 'this should be just off-screen'
     w = FullscreenWindow(sys.stdout)
     def sigwinch_handler(signum, frame):
@@ -67,7 +65,6 @@ def fullscreen_winch():
             raw_input()
 
 def fullscreen_winch_with_input():
-    logging.basicConfig(filename='display.log',level=logging.DEBUG)
     print 'this should be just off-screen'
     w = FullscreenWindow(sys.stdout)
     def sigwinch_handler(signum, frame):
@@ -80,7 +77,6 @@ def fullscreen_winch_with_input():
             w.render_to_terminal(a)
 
 def cursor_winch():
-    logging.basicConfig(filename='display.log',level=logging.DEBUG)
     print 'this should be just off-screen'
     w = CursorAwareWindow(sys.stdout, sys.stdin, keep_last_line=True, hide_cursor=False)
     def sigwinch_handler(signum, frame):
@@ -88,13 +84,13 @@ def cursor_winch():
         print 'cursor moved %d lines down' % w.get_cursor_vertical_diff()
     signal.signal(signal.SIGWINCH, sigwinch_handler)
     with w:
-        while True:
+        for e in input.Input():
             rows, columns = w.t.height, w.t.width
             a = [fmtstr((('.%sx%s.' % (rows, columns)) * rows)[:columns]) for row in range(rows)]
             w.render_to_terminal(a)
-            raw_input()
 
 if __name__ == '__main__':
+    logging.basicConfig(filename='display.log',level=logging.DEBUG)
     #simple_fullscreen()
     #array_size_test(FullscreenWindow(sys.stdout))
     #array_size_test(CursorAwareWindow(sys.stdout, sys.stdin, keep_last_line=True, hide_cursor=True))

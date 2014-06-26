@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from curtsies.fmtstr import FmtStr, fmtstr, Chunk, linesplit
+from curtsies.fmtstr import FmtStr, fmtstr, Chunk, linesplit, normalize_slice
 from curtsies.fmtfuncs import *
 from curtsies.termformatconstants import FG_COLORS
 from curtsies.fsarray import fsarray, FSArray
@@ -320,6 +320,15 @@ class TestFSArray(unittest.TestCase):
         t = FSArray(10, 10)
         t[2,2] = 'a'
         t[2,2] == 'a'
+
+    def test_normalize_slice(self):
+        class SliceBuilder(object):
+            def __getitem__(self, slice):
+                return slice
+        Slice = SliceBuilder()
+
+        self.assertEqual(normalize_slice(10, Slice[:3]), slice(0, 3, None))
+        self.assertEqual(normalize_slice(11, Slice[3:]), slice(3, 11, None))
 
 class TestTerminal(unittest.TestCase):
 

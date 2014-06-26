@@ -22,6 +22,7 @@ Format String 2D array
 """
 
 import sys
+import logging
 
 from .fmtstr import fmtstr
 from .fmtstr import normalize_slice
@@ -90,6 +91,8 @@ class FSArray(object):
     width = property(lambda self: self.num_columns)
 
     def __setitem__(self, slicetuple, value):
+        """Place a FSArray in a FSArray"""
+        logging.debug('slice: %r', slicetuple)
         if isinstance(slicetuple, slice):
             rowslice, colslice = slicetuple, slice(None)
             if isinstance(value, (bytes, unicode)):
@@ -109,6 +112,8 @@ class FSArray(object):
         additional_rows = max(0, rowslice.stop - len(self.rows))
         self.rows.extend([fmtstr('', *self.saved_args, **self.saved_kwargs)
                           for _ in range(additional_rows)])
+        logging.debug('num columns: %r', self.num_columns)
+        logging.debug('colslice: %r', colslice)
         colslice = normalize_slice(self.num_columns, colslice)
         if slicesize(colslice) == 0 or slicesize(rowslice) == 0:
             return

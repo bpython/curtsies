@@ -73,7 +73,7 @@ class BaseWindow(object):
             self.write(SCROLL_DOWN) #TODO will blessings do this?
 
     def write(self, msg):
-        logging.debug('writing %r' % msg)
+        #logging.debug('writing %r' % msg)
         self.out_stream.write(msg)
         self.out_stream.flush()
 
@@ -96,6 +96,11 @@ class BaseWindow(object):
     def render_to_terminal(self, array, cursor_pos=(0,0)):
         """Renders array to terminal"""
         raise NotImplemented
+
+    #TODO swap this, everything else is (rows, columns)
+    def get_term_hw(self):
+        """Returns current terminal width and height"""
+        return self.t.height, self.t.width
 
     def array_from_text(self, msg):
         rows, columns = self.t.height, self.t.width
@@ -204,8 +209,7 @@ class CursorAwareWindow(BaseWindow):
 
     def __enter__(self):
         self.cbreak.__enter__()
-        self.top_usable_row, _ = self.get_cursor_position()
-        print 'top usable row:', self.top_usable_row
+        self.top_usable_row, _ = self.get_cursor_position()[0] - 1
         self._orig_top_usable_row = self.top_usable_row
         logging.debug('initial top_usable_row: %d' % self.top_usable_row)
         return BaseWindow.__enter__(self)
@@ -252,19 +256,22 @@ class CursorAwareWindow(BaseWindow):
     def get_cursor_vertical_diff(self):
         """Returns the how far down the cursor moved"""
 
+        old_top_usable_row = self.top_usable_row
         row, col = self.get_cursor_position()
         if self._last_cursor_row is None:
             cursor_dy = 0
         else:
             cursor_dy = row - self._last_cursor_row
-            while self.top_usable_row > 1 and cursor_dy > 0:
+            logging.info('cursor moved %d lines down' % cursor_dy)
+            while self.top_usable_row > 0 and cursor_dy > 0:
                 self.top_usable_row += 1
                 cursor_dy -= 1
-            while self.top_usable_row > 1 and cursor_dy < 0:
+            while self.top_usable_row > 0 and cursor_dy < 0:
                 self.top_usable_row -= 1
                 cursor_dy += 1
+        logging.info('top usable row changed from %d to %d', old_top_usable_row, self.top_usable_row)
+        logging.info('returning cursor dy of %d from curtsies' % cursor_dy)
         self._last_cursor_row = row
-        logging.debug('cursor dy: %d' % cursor_dy)
         return cursor_dy
 
     def render_to_terminal(self, array, cursor_pos=(0,0)):

@@ -451,9 +451,9 @@ def normalize_slice(length, index):
         index = slice(0, index.stop, index.step)
     if index.stop is None:
         index = slice(index.start, length, index.step)
-    if index.start < 0:         # XXX right?
+    if index.start < -1:         # XXX why must this be -1?
         index = slice(length - index.start, index.stop, index.step)
-    if index.stop < 0:          # XXX right?
+    if index.stop < -1:          # XXX why must this be -1?
         index = slice(index.start, length - index.stop, index.step)
     if index.step is not None:
         raise NotImplementedError("You can't use steps with slicing yet")
