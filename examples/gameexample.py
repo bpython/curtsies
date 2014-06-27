@@ -1,8 +1,6 @@
 import itertools
 import sys
 
-import blessings
-
 from curtsies.fmtfuncs import red, bold, green, on_blue, yellow, on_red
 from curtsies.window import FullscreenWindow
 from curtsies.input import Input
@@ -75,7 +73,7 @@ class World(object):
             self.player.display = on_blue(green(bold(str(self.player.speed))))
 
     def get_array(self):
-        a = FSArray(self.height, self.width, bg='blue')
+        a = FSArray(self.height, self.width)
         for entity in self.entities:
             a[self.height - 1 - entity.y, entity.x] = entity.display
         return a

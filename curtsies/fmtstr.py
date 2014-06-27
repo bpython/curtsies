@@ -158,7 +158,7 @@ class FmtStr(object):
 
     def setitem(self, startindex, fs):
         """Shim for easily converting old __setitem__ calls"""
-        return self.setslice(startindex, startindex+1, fs)
+        return self.setslice_with_length(startindex, startindex+1, fs, len(self))
 
     def setslice_with_length(self, startindex, endindex, fs, length):
         """Shim for easily converting old __setitem__ calls"""
