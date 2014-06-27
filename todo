@@ -3,18 +3,14 @@ temporary todos not yet in GitHub issues, which is the official place for this k
 soon
 ----
 
-* fix cursor_winch example
-* split out examples to separate files
-* write example of using window change events
 * make api more beautiful!
 * example using select
-* release a new version (increment minor version number so 
+* release a new version
 * bugfix release bpython to use 0.0.32 and not higher (figure out what 'curtsies>=0.0.32' means)
 * split out tests into multiple files
 * add a bpython-style cursor offset demo - some kind of REPL-y thing that preserves history the same way.
 * add a realtime demo
-* investigate the global api, like https://github.com/darius/sturm/ (keep the objects behind the scenes)
-* reason about race conditions in checking terminal size
+* more tests! Even ones that just cover surface area! Everything py2/3 different that's testable
 
 eventually:
 -----------
@@ -22,4 +18,5 @@ eventually:
 * real docs (not just a readme!) 
 * reconsider api for nonblocking version
 * fix escape sequence parsing / use a library so all kinds of escape sequences work in bpython
-* add a 2048 demo
+* add more demos! (Sturm demos are awesome)
+* investigate the global api, like https://github.com/darius/sturm/ (keep the objects behind the scenes)

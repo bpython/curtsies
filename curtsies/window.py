@@ -56,14 +56,12 @@ class BaseWindow(object):
             get_event() -> 'c' | events.WindowChangeEvent(rows, columns)
         """
         logging.debug('-------initializing Window object %r------' % self)
-        self.t = blessings.Terminal()
-        self.out_stream = out_stream
+        self.t = blessings.Terminal(stream=out_stream) #TODO how does blessings choose where to write?
+        self.out_stream = out_stream  #     if it assumes stdout, we might as well too
         self.hide_cursor = hide_cursor
         self._last_lines_by_row = {}
         self._last_rendered_width = None
         self._last_rendered_height = None
-
-    #TODO allow nice external access of width and height
 
     def scroll_down(self):
         #TODO Figure out how to make sure blesings context managers write to the right stream

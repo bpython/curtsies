@@ -4,7 +4,6 @@ from curtsies.fmtstr import FmtStr, fmtstr, Chunk, linesplit, normalize_slice
 from curtsies.fmtfuncs import *
 from curtsies.termformatconstants import FG_COLORS
 from curtsies.fsarray import fsarray, FSArray
-from curtsies.terminal import Terminal
 
 try:
     unicode = unicode
@@ -329,11 +328,6 @@ class TestFSArray(unittest.TestCase):
 
         self.assertEqual(normalize_slice(10, Slice[:3]), slice(0, 3, None))
         self.assertEqual(normalize_slice(11, Slice[3:]), slice(3, 11, None))
-
-class TestTerminal(unittest.TestCase):
-
-    def test_instantiation_is_blank(self):
-        t = Terminal()
 
 if __name__ == '__main__':
     import fmtstr.fmtstr

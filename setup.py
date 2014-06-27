@@ -9,6 +9,9 @@ setup(name='curtsies',
       author_email='thomasballinger@gmail.com',
       license='MIT',
       packages=['curtsies'],
+      install_requires = [
+          'blessings==1.5.1'
+      ],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
