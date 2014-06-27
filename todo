@@ -4,18 +4,25 @@ soon
 ----
 
 * make api more beautiful!
-* example using select
+  * rename insert -> splice (and ensure semantics are the same)
+  * import some classes at Package level? (like flask imports)
+*
+bugfix release bpython to use 0.0.32 and not higher
+    * make a bugfix 0.0.* branch
+* Update readme (still talks about terminal objects)
+* example using select (use chat example https://github.com/thomasballinger/chat) 
 * release a new version
-* bugfix release bpython to use 0.0.32 and not higher (figure out what 'curtsies>=0.0.32' means)
 * split out tests into multiple files
 * add a bpython-style cursor offset demo - some kind of REPL-y thing that preserves history the same way.
-* add a realtime demo
+* add a realtime demo (and functionality))
 * more tests! Even ones that just cover surface area! Everything py2/3 different that's testable
 
 eventually:
 -----------
 
-* real docs (not just a readme!) 
+* real docs (not just a readme!) - after technical writing talk on Monday
+  * docs should have colored strings somehow!
+* example using Python 3.4 async stuff
 * reconsider api for nonblocking version
 * fix escape sequence parsing / use a library so all kinds of escape sequences work in bpython
 * add more demos! (Sturm demos are awesome)

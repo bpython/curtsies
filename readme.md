@@ -67,17 +67,17 @@ They allow slicing, which returns a new FmtStr object:
     >>> (blue('asdf') + on_red('adsf'))[3:7]
     blue("f")+on_red("ads")
 
-FmtStrs are *immutable* - but you can create new ones with `insert`:
+FmtStrs are *immutable* - but you can create new ones with `splice`:
 
     >>> from curtsies.fmtfuncs import *
     >>> f = blue('hey there') + on_red(' Tom!')
-    >>> g.insert('ot', 1, 3)
+    >>> g.splice('ot', 1, 3)
     >>> g
     blue("h")+"ot"+blue(" there")+on_red(" Tom!")
 
 which can even change their length:
 
-    >>> f.insert('something longer', 2)
+    >>> f.splice('something longer', 2)
     blue("h")+"something longer"+blue("ot")+blue(" there")+on_red(" Tom!")
 
 Thanks to @OufeiDong for fixing this!

@@ -167,12 +167,12 @@ class FmtStr(object):
         if len(self) > endindex:
             fs = fs + ' '*(endindex - startindex - len(fs))
             assert len(fs) == endindex - startindex, (len(fs), startindex, endindex)
-        result = self.insert(fs, startindex, endindex)
+        result = self.splice(fs, startindex, endindex)
         assert len(result) <= length
         return result
 
-    def insert(self, new_str, start, end=None):
-        """Inserts the input string at the given index of the fmtstr by
+    def splice(self, new_str, start, end=None):
+        """Splices the input string at the given index of the fmtstr by
         creating a new list of basefmtstrs. If end is provided, new_str will
         replace the substring self.s[start:end-1].
         """
@@ -220,7 +220,7 @@ class FmtStr(object):
         return FmtStr(*[s for s in new_components if s.s])
 
     def append(self, string):
-        return self.insert(string, len(self.s))
+        return self.splice(string, len(self.s))
 
     def copy_with_new_atts(self, **attributes):
         return FmtStr(*[Chunk(bfs.s, bfs.atts.extend(attributes))

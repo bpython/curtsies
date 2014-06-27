@@ -41,49 +41,49 @@ class TestImmutability(unittest.TestCase):
         self.assertEqual(b.shared_atts['fg'], FG_COLORS['green'])
 
 
-class TestFmtStrInsert(unittest.TestCase):
+class TestFmtStrSplice(unittest.TestCase):
 
-    def test_simple_beginning_insert(self):
-        self.assertEqual(fmtstr('abc').insert('d', 0), fmtstr('dabc'))
-        self.assertEqual(fmtstr('abc').insert('d', 0), 'd'+fmtstr('abc'))
+    def test_simple_beginning_splice(self):
+        self.assertEqual(fmtstr('abc').splice('d', 0), fmtstr('dabc'))
+        self.assertEqual(fmtstr('abc').splice('d', 0), 'd'+fmtstr('abc'))
 
-    def test_various_inserts(self):
+    def test_various_splices(self):
         a = blue('hi')
         b = a + green('bye')
         c = b + red('!')
-        self.assertEqual(c.insert('asdfg', 1),
+        self.assertEqual(c.splice('asdfg', 1),
                          blue('h')+'asdfg'+blue('i')+green('bye')+red('!'))
-        self.assertEqual(c.insert('asdfg', 1, 4),
+        self.assertEqual(c.splice('asdfg', 1, 4),
                          blue('h')+'asdfg'+green('e')+red('!'))
-        self.assertEqual(c.insert('asdfg', 1, 5),
+        self.assertEqual(c.splice('asdfg', 1, 5),
                          blue('h')+'asdfg'+red('!'))
 
-    def test_insert_of_empty_fmtstr(self):
-        self.assertEqual(fmtstr('ab').insert('', 1), fmtstr('ab'))
+    def test_splice_of_empty_fmtstr(self):
+        self.assertEqual(fmtstr('ab').splice('', 1), fmtstr('ab'))
 
-    def test_insert_with_multiple_basefmtstrs(self):
+    def test_splice_with_multiple_basefmtstrs(self):
         a = fmtstr('notion')
-        b = a.insert('te', 2, 6)
-        c = b.insert('de', 0)
+        b = a.splice('te', 2, 6)
+        c = b.splice('de', 0)
 
         self.assertEqual(a.s, "notion")
         self.assertEqual(b.s, "note")
         self.assertEqual(c.s, "denote")
         self.assertEqual(len(c.basefmtstrs), 3)
 
-    def test_insert_fmtstr_with_end_without_atts(self):
+    def test_splice_fmtstr_with_end_without_atts(self):
         a = fmtstr('notion')
-        b = a.insert('te', 2, 6)
+        b = a.splice('te', 2, 6)
 
         self.assertEqual(a.s, "notion")
         self.assertEqual(b.s, "note")
         self.assertEqual(len(b.basefmtstrs), 2)
 
-    def test_insert_fmtstr_with_end_with_atts(self):
+    def test_splice_fmtstr_with_end_with_atts(self):
         # Need to test with fmtstr consisting of multiple basefmtstrs
         # and with attributes
         a = fmtstr('notion', 'blue')
-        b = a.insert('te', 2, 6)
+        b = a.splice('te', 2, 6)
 
         self.assertEqual(a.s, "notion")
         self.assertEqual(a.basefmtstrs[0].atts, {'fg': 34})
@@ -94,31 +94,31 @@ class TestFmtStrInsert(unittest.TestCase):
         self.assertEqual(b.basefmtstrs[1].atts, {})
         self.assertEqual(len(b.basefmtstrs), 2)
 
-    def test_insert_fmtstr_without_end(self):
+    def test_splice_fmtstr_without_end(self):
         a = fmtstr('notion')
-        b = a.insert(fmtstr('ta'), 2)
+        b = a.splice(fmtstr('ta'), 2)
         self.assertEqual(a.s, 'notion')
         self.assertEqual(b.s, 'notation')
         self.assertEqual(len(b.basefmtstrs), 3)
 
-    def test_insert_string_without_end(self):
+    def test_splice_string_without_end(self):
         a = fmtstr('notion')
-        b = a.insert('ta', 2)
+        b = a.splice('ta', 2)
         self.assertEqual(a.s, 'notion')
         self.assertEqual(b.s, 'notation')
         self.assertEqual(len(b.basefmtstrs), 3)
 
-    def test_multiple_bfs_insert(self):
+    def test_multiple_bfs_splice(self):
         self.assertEqual(fmtstr('a') + blue('b'),
-                         on_blue(' '*2).insert(fmtstr('a')+blue('b'), 0, 2))
+                         on_blue(' '*2).splice(fmtstr('a')+blue('b'), 0, 2))
         self.assertEqual(on_red('yo') + on_blue('   '),
-                         on_blue(' '*5).insert(on_red('yo'), 0, 2))
+                         on_blue(' '*5).splice(on_red('yo'), 0, 2))
         self.assertEqual(' ' + on_red('yo') + on_blue('   '),
-                         on_blue(' '*6).insert(' ' + on_red('yo'), 0, 3))
+                         on_blue(' '*6).splice(' ' + on_red('yo'), 0, 3))
         self.assertEqual(on_blue("hey") + ' ' + on_red('yo') + on_blue('   '),
-                         on_blue(' '*9).insert(on_blue("hey") + ' ' + on_red('yo'), 0, 6))
+                         on_blue(' '*9).splice(on_blue("hey") + ' ' + on_red('yo'), 0, 6))
         self.assertEqual(on_blue(' '*5) + on_blue("hey") + ' ' + on_red('yo') + on_blue('   '),
-                         on_blue(' '*14).insert(on_blue("hey") + ' ' + on_red('yo'), 5, 11))
+                         on_blue(' '*14).splice(on_blue("hey") + ' ' + on_red('yo'), 5, 11))
 
 class TestFmtStr(unittest.TestCase):
 
