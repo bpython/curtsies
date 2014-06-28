@@ -1,10 +1,7 @@
 import sys
 import signal
 
-from curtsies import input
-from curtsies.termhelpers import Cbreak
-from curtsies.window import FullscreenWindow
-from curtsies.fmtstr import fmtstr
+from curtsies import input, Cbreak, FullscreenWindow, fmtstr
 
 def fullscreen_winch_with_input():
     print 'this should be just off-screen'

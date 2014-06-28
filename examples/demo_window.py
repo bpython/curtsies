@@ -1,10 +1,9 @@
-from curtsies import input
-from curtsies.fmtstr import fmtstr
-from curtsies import events
-from curtsies.window import FullscreenWindow, CursorAwareWindow
 import sys
 import signal
 import logging
+
+from curtsies import input, fmtstr, events, FullscreenWindow, CursorAwareWindow
+from curtsies import events
 
 def array_size_test(window):
     """Tests arrays one row to small or too large"""

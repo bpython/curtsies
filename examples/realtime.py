@@ -18,14 +18,12 @@ class FrameCounter(object):
         now = time.time()
         while self.render_times and self.render_times[0] < now - self.dt:
             self.render_times.pop(0)
-        print
-        print len(self.render_times)
         return len(self.render_times) / max(self.dt, now - self.render_times[0] if self.render_times else self.dt)
 
 def main():
     counter = FrameCounter()
     with FullscreenWindow() as window:
-        print 'Press escape to exit'
+        print('Press escape to exit')
         with Input() as input_generator:
             a = FSArray(window.height, window.width)
             c = None

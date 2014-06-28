@@ -12,9 +12,7 @@ import sys
 
 from curtsies.fmtfuncs import * # XXX boo hiss *
 
-from curtsies.window import Window
-from curtsies.terminal import Terminal
-from curtsies.fsarray import fsarray
+from curtsies import FullscreenWindow, Input, fsarray
 
 def main(argv):
     pool = dict((name[:-5], play) for name, play in globals().items()
@@ -34,13 +32,12 @@ def main(argv):
         print "where a player is one of:", ', '.join(sorted(pool))
         return 1
     else:
-        with Terminal(sys.stdin, sys.stdout) as tc:
-            with Window(tc) as w:
-                window_change_event = tc.get_event() # always the first event
-                tictactoe(w, *faceoff)
+        with Input() as i:
+            with FullscreenWindow() as w:
+                tictactoe(w, i, *faceoff)
         return 0
 
-def tictactoe(w, player, opponent, grid=None):
+def tictactoe(w, i, player, opponent, grid=None):
     "Put two strategies to a classic battle of wits."
     grid = grid or empty_grid
     while True:
@@ -51,7 +48,7 @@ def tictactoe(w, player, opponent, grid=None):
         if not successors(grid):
             print "A draw."
             break
-        grid = player(w, grid)
+        grid = player(w, i, grid)
         player, opponent = opponent, player
 
 
@@ -74,14 +71,14 @@ def memo(f):
 
 # Strategies. They all presume the game's not over.
 
-def human_play(w, grid):
+def human_play(w, i, grid):
     "Just ask for a move."
     plaint = ''
     prompt = whose_move(grid) + " move? [1-9] "
     while True:
         w.render_to_terminal(w.array_from_text(view(grid)
                                                + '\n\n' + plaint + prompt))
-        key = c = w.tc.get_event()
+        key = c = i.next()
         try:
             move = int(key)
         except ValueError:
@@ -98,15 +95,15 @@ def human_play(w, grid):
 
 grid_format = '\n'.join([' %s %s %s'] * 3)
 
-def drunk_play(w, grid):
+def drunk_play(w, i, grid):
     "Beatable, but not so stupid it seems mindless."
     return min(successors(grid), key=drunk_value)
 
-def spock_play(w, grid):
+def spock_play(w, i, grid):
     "Play supposing both players are rational."
     return min(successors(grid), key=evaluate)
 
-def max_play(w, grid):
+def max_play(w, i, grid):
     "Play like Spock, except breaking ties by drunk_value."
     return min(successors(grid),
                key=lambda succ: (evaluate(succ), drunk_value(succ)))

@@ -110,7 +110,7 @@ class BaseWindow(object):
             if i >= rows * columns:
                 return arr
             elif c in '\r\n':
-                i = ((i // columns) + 1) * columns
+                i = ((i // columns) + 1) * columns - 1
             else:
                 arr[i // arr.width, i % arr.width] = [fmtstr(c)]
             i += 1

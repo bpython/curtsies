@@ -1,9 +1,7 @@
 import sys
 import signal
 
-from curtsies.window import CursorAwareWindow
-from curtsies import input
-from curtsies.fmtstr import fmtstr
+from curtsies import CursorAwareWindow, input, fmtstr
 
 def cursor_winch():
     print 'this should be just off-screen'

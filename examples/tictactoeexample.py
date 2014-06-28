@@ -1,10 +1,7 @@
 import sys
 
 from curtsies.fmtfuncs import *
-
-from curtsies.window import Window
-from curtsies.terminal import Terminal
-from curtsies.fsarray import fsarray
+from curtsies import FullscreenWindow, Input, fsarray
 
 class Board(object):
     """
@@ -107,17 +104,16 @@ def ai(board, who='x'):
     return sorted(board.possible(), key=lambda b: value(b, who))[-1]
 
 def main():
-    with Terminal(sys.stdin, sys.stdout) as tc:
-        with Window(tc) as t:
+    with Input() as input:
+        with FullscreenWindow() as window:
             b = Board()
-            window_change_event = t.tc.get_event() # always the first event get_event() returns
             while True:
-                t.render_to_terminal(b.display())
+                window.render_to_terminal(b.display())
                 if b.turn == 9 or b.winner():
-                    c = t.tc.get_event() # hit any key
+                    c = input.next() # hit any key
                     sys.exit()
                 while True:
-                    c = t.tc.get_event()
+                    c = input.next()
                     if c == '':
                         sys.exit()
                     try:
@@ -125,10 +121,10 @@ def main():
                             b = b.move(int(c))
                     except ValueError:
                         continue
-                    t.render_to_terminal(b.display())
+                    window.render_to_terminal(b.display())
                     break
                 if b.turn == 9 or b.winner():
-                    c = t.tc.get_event() # hit any key
+                    c = input.next() # hit any key
                     sys.exit()
                 b = ai(b, 'o')
 

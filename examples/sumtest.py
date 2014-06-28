@@ -1,4 +1,4 @@
-from curtsies.fmtstr import FmtStr, Chunk
+from curtsies.formatstring import FmtStr, Chunk
 import time
 
 def add_things(n):
