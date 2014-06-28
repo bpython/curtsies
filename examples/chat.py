@@ -29,6 +29,15 @@ def main(host, port):
     with FullscreenWindow() as window:
         with Input() as input_generator:
             while True:
+                a = FSArray(10, 80)
+                in_text = ''.join(keypresses)[:80]
+                a[9:10, 0:len(in_text)] = [red(in_text)]
+                for i, line in zip(reversed(range(2,7)), reversed(conn.render())):
+                    a[i:i+1, 0:len(line)] = [line]
+                text = 'connected to %s:%d' % (host if len(host) < 50 else host[:50]+'...', port)
+                a[0:1, 0:len(text)] = [blue(text)]
+
+                window.render_to_terminal(a)
                 ready_to_read, _, _ = select.select([conn, input_generator], [], [])
                 for r in ready_to_read:
                     if r is conn:
@@ -43,24 +52,16 @@ def main(host, port):
                             keypresses = []
                         elif e == '<SPACE>':
                             keypresses.append(' ')
+                        elif e == '<DELETE>':
+                            keypresses = keypresses[:-1]
                         elif e is not None:
                             keypresses.append(e)
-
-                a = FSArray(10, 80)
-                in_text = ''.join(keypresses)[:80]
-                a[9:10, 0:len(in_text)] = [red(in_text)]
-                for i, line in zip(reversed(range(2,7)), reversed(conn.render())):
-                    a[i:i+1, 0:len(line)] = [line]
-                text = 'connected to %s:%d' % (host if len(host) < 50 else host[:50]+'...', port)
-                a[0:1, 0:len(text)] = [blue(text)]
-
-                window.render_to_terminal(a)
 
 if __name__ == '__main__':
     try:
         host, port = sys.argv[1:3]
     except ValueError:
-        print 'usage: python chat.py google 80'
+        print 'usage: python chat.py google.com 80'
         print '(if you use this example, try typing'
         print 'GET /'
         print 'and then hitting enter)'
