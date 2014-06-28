@@ -1,10 +1,8 @@
 import itertools
 import sys
 
+from curtsies import FullscreenWindow, Input, FSArray
 from curtsies.fmtfuncs import red, bold, green, on_blue, yellow, on_red
-from curtsies.window import FullscreenWindow
-from curtsies.input import Input
-from curtsies.fsarray import FSArray
 
 class Entity(object):
     def __init__(self, display, x, y, speed=1):

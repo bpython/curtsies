@@ -24,8 +24,8 @@ import re
 
 import blessings
 
-from .fmtstr import fmtstr
-from .fsarray import FSArray
+from .formatstring import fmtstr
+from .formatstringarray import FSArray
 from .termhelpers import Cbreak
 
 from . import events
@@ -348,7 +348,7 @@ class CursorAwareWindow(BaseWindow):
 
 
 def test():
-    import input
+    from . import input
     with FullscreenWindow(sys.stdout) as w:
         with input.Input(sys.stdin) as input_generator:
             rows, columns = w.t.height, w.t.width
@@ -383,7 +383,7 @@ def test():
 
 def main():
     logging.basicConfig(filename='display.log',level=logging.DEBUG)
-    from termhelpers import Cbreak
+    from .termhelpers import Cbreak
     print 'this should be just off-screen'
     w = FullscreenWindow(sys.stdout)
     rows, columns = w.t.height, w.t.width

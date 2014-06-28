@@ -12,7 +12,7 @@ import time
 import tty
 
 
-from .termhelpers import nonblocking
+from .termhelpers import Nonblocking
 from . import events
 
 # note: if select doesn't work out for reading input with a timeout,
@@ -126,7 +126,7 @@ class Input(object):
 
     def nonblocking_read(self):
         """Returns the number of characters read and adds them to self.unprocessed_bytes"""
-        with nonblocking(self.in_stream):
+        with Nonblocking(self.in_stream):
             if PY3:
                 data = os.read(self.in_stream.fileno(), READ_SIZE)
                 if data:

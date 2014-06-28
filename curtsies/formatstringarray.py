@@ -24,9 +24,9 @@ Format String 2D array
 import sys
 import logging
 
-from .fmtstr import fmtstr
-from .fmtstr import normalize_slice
-from .fmtstr import FmtStr
+from .formatstring import fmtstr
+from .formatstring import normalize_slice
+from .formatstring import FmtStr
 
 def slicesize(s):
     return int((s.stop - s.start) / (s.step if s.step else 1))

@@ -1,7 +1,7 @@
 from functools import partial as _partial
 from itertools import chain as _chain
 from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
-from .fmtstr import fmtstr
+from .formatstring import fmtstr
 
 for att in _chain(FG_COLORS, ('on_'+x for x in BG_COLORS), STYLES):
     locals()[att] = _partial(fmtstr, style=att)

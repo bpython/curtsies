@@ -3,7 +3,7 @@ import termios
 import fcntl
 import os
 
-class nonblocking(object):
+class Nonblocking(object):
     def __init__(self, stream):
         self.stream = stream
         self.fd = self.stream.fileno()
