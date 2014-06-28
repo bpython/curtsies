@@ -104,17 +104,7 @@ class BaseWindow(object):
 
     def array_from_text(self, msg):
         rows, columns = self.t.height, self.t.width
-        arr = FSArray(0, columns)
-        i = 0
-        for c in msg:
-            if i >= rows * columns:
-                return arr
-            elif c in '\r\n':
-                i = ((i // columns) + 1) * columns - 1
-            else:
-                arr[i // arr.width, i % arr.width] = [fmtstr(c)]
-            i += 1
-        return arr
+        return self.array_from_text_rc(msg, rows, columns)
 
     @classmethod
     def array_from_text_rc(cls, msg, rows, columns):
@@ -124,7 +114,7 @@ class BaseWindow(object):
             if i >= rows * columns:
                 return arr
             elif c in '\r\n':
-                i = ((i // columns) + 1) * columns
+                i = ((i // columns) + 1) * columns - 1
             else:
                 arr[i // arr.width, i % arr.width] = [fmtstr(c)]
             i += 1

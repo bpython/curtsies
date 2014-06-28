@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import unittest
-from curtsies.fmtstr import FmtStr, fmtstr, Chunk, linesplit, normalize_slice
+from curtsies.formatstring import FmtStr, fmtstr, Chunk, linesplit, normalize_slice
 from curtsies.fmtfuncs import *
 from curtsies.termformatconstants import FG_COLORS
-from curtsies.fsarray import fsarray, FSArray
+from curtsies.formatstringarray import fsarray, FSArray
 
 try:
     unicode = unicode
