@@ -40,5 +40,5 @@ CURTSIES_NAMES = dict([
   ('\x1b\x1b[B',   '<Meta-DOWN>'),
   ('\x1b\x1b[C',   '<Meta-RIGHT>'),
   ('\x1b\x1b[D',   '<Meta-LEFT>'),
-  ('\x1b',   '<Esc>'),
+  ('\x1b',   '<ESC>'),
   ])
