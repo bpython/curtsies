@@ -1,5 +1,7 @@
-Curses-like Terminal Wrapper
-============================
+Curtsies - A Curses-like Terminal Wrapper
+=========================================
+
+![Curtsies Logo](http://ballingt.com/assets/curtsies-tritone-small.png)
 
 Annotate portions of strings with terminal colors and formatting!
 Render that text to the terminal, and clean up afterwards!
@@ -280,3 +282,4 @@ Authors
 * Amber Wilcox-O'Hearn - paired on a refactoring
 * Darius Bacon - lots of great code review
 * inspired by a conversation with Scott Feeney
+* Lea Albaugh - beautiful Curtsies logo
