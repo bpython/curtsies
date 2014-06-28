@@ -4,9 +4,7 @@ soon
 ----
 
 * make api more beautiful!
-  * rename insert -> splice (and ensure semantics are the same)
-  * import some classes at Package level? (like flask imports)
-*
+  * input generator that defaults to passed timeout
 bugfix release bpython to use 0.0.32 and not higher
     * make a bugfix 0.0.* branch
 * Update readme (still talks about terminal objects)
