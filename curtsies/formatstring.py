@@ -420,8 +420,8 @@ def linesplit(string, columns):
     >>> linesplit(fmtstr(" home    is where the heart-eating mummy is", 'blue'), 10)
     [blue('home')+blue(' ')+blue('is'), blue('where')+blue(' ')+blue('the'), blue('heart-eati'), blue('ng')+blue(' ')+blue('mummy'), blue('is')]
     """
-    if isinstance(string, FmtStr):
-        string = fmtstr(string) # XXX isn't this redundant? should the previous line have a 'not'?
+    if not isinstance(string, FmtStr):
+        string = fmtstr(string)
 
     string_s = string.s
     matches = list(re.finditer(r'\s+', string_s))

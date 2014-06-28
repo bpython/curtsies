@@ -3,16 +3,11 @@ temporary todos not yet in GitHub issues, which is the official place for this k
 soon
 ----
 
-* make api more beautiful!
-  * input generator that defaults to passed timeout
-bugfix release bpython to use 0.0.32 and not higher
+* bugfix release bpython to use 0.0.32 and not higher
     * make a bugfix 0.0.* branch
 * Update readme (still talks about terminal objects)
-* example using select (use chat example https://github.com/thomasballinger/chat) 
-* release a new version
-* split out tests into multiple files
-* add a bpython-style cursor offset demo - some kind of REPL-y thing that preserves history the same way.
-* add a realtime demo (and functionality))
+* release a new version of curtsies
+  * do a bugfix release of bpython first
 * more tests! Even ones that just cover surface area! Everything py2/3 different that's testable
 
 eventually:
@@ -20,8 +15,6 @@ eventually:
 
 * real docs (not just a readme!) - after technical writing talk on Monday
   * docs should have colored strings somehow!
-* example using Python 3.4 async stuff
-* reconsider api for nonblocking version
+* consider adding more support for realtime uses
 * fix escape sequence parsing / use a library so all kinds of escape sequences work in bpython
-* add more demos! (Sturm demos are awesome)
-* investigate the global api, like https://github.com/darius/sturm/ (keep the objects behind the scenes)
+* consider adding basic window functionality etc.
