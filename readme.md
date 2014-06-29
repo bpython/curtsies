@@ -7,7 +7,6 @@ Annotate portions of strings with terminal colors and formatting!
 Render that text to the terminal, and clean up afterwards!
 Get use keystrokes in realtime!
 
-
 The a few main objects in curtsies you probably want to use:
 
 * [FmtStr](readme.md#fmtstr) objects are colored strings

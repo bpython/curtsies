@@ -1,7 +1,6 @@
 import random
 
 from curtsies import FullscreenWindow, Input, FSArray
-from curtsies.fmtfuncs import red, bold, green, on_blue, yellow, on_red
 
 def main():
     with FullscreenWindow() as window:
