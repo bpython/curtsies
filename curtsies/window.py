@@ -9,6 +9,7 @@ from .fsarray import FSArray
 
 from . import events
 
+logger = logging.getLogger(__name__)
 
 class Window(object):
     """ Renders 2D arrays of characters and cursor position """
@@ -27,7 +28,7 @@ class Window(object):
             down, up, left, back()
             get_event() -> 'c' | events.WindowChangeEvent(rows, columns)
         """
-        logging.debug('-------initializing Window object %r------' % self)
+        logger.debug('-------initializing Window object %r------' % self)
         self.tc = tc
         self.keep_last_line = keep_last_line
         self.hide_cursor = hide_cursor
@@ -42,11 +43,11 @@ class Window(object):
             self.tc.hide_cursor()
         self.top_usable_row, _ = self.tc.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
-        logging.debug('initial top_usable_row: %d' % self.top_usable_row)
+        logger.debug('initial top_usable_row: %d' % self.top_usable_row)
         return self
 
     def __exit__(self, type, value, traceback):
-        logging.debug("running Window.__exit__")
+        logger.debug("running Window.__exit__")
         if self.keep_last_line:
             self.tc.scroll_down()
         row, _ = self.tc.get_cursor_position()
@@ -115,20 +116,20 @@ class Window(object):
         offscreen_scrolls = 0
         self.tc.set_cursor_position((height, 1)) # since scroll-down only moves the screen if cursor is at bottom
         for line in rest_of_lines: # if array too big
-            logging.debug('sending scroll down message')
+            logger.debug('sending scroll down message')
             self.tc.scroll_down()
             if self.top_usable_row > 1:
                 self.top_usable_row -= 1
             else:
                 offscreen_scrolls += 1
             current_lines_by_row = dict((k-1, v) for k, v in current_lines_by_row.items())
-            logging.debug('new top_usable_row: %d' % self.top_usable_row)
+            logger.debug('new top_usable_row: %d' % self.top_usable_row)
             self.tc.set_cursor_position((height, 1)) # since scrolling moves the cursor
             self.tc.write(str(line))
             current_lines_by_row[height] = line
 
-        logging.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())
-        logging.debug('lines in current lines by row: %r' % current_lines_by_row.keys())
+        logger.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())
+        logger.debug('lines in current lines by row: %r' % current_lines_by_row.keys())
         self.tc.set_cursor_position((cursor_pos[0]-offscreen_scrolls+self.top_usable_row, cursor_pos[1]+1))
         self._last_cursor_row, self._last_cursor_column = (
                                     (cursor_pos[0]-offscreen_scrolls+self.top_usable_row, cursor_pos[1]+1))

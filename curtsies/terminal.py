@@ -20,6 +20,8 @@ from . import events
 
 PY3 = sys.version_info[0] >= 3
 
+logger = logging.getLogger(__name__)
+
 QUERY_CURSOR_POSITION = "\x1b[6n"
 SCROLL_DOWN = "D"
 CURSOR_UP, CURSOR_DOWN, CURSOR_FORWARD, CURSOR_BACK = ["[%s" for char in 'ABCD']
@@ -170,8 +172,8 @@ class Terminal(object):
                 return events.RefreshRequestEvent('terminal control')
             if len(chars) > 10: #debugging tool - eventually detect all key sequences!
                 raise ValueError("Key sequence not detected at some point: %r" % ''.join(chars))
-            logging.debug('getting key for %r', chars)
-            logging.debug('self.in_buffer %r', self.in_buffer)
+            logger.debug('getting key for %r', chars)
+            logger.debug('self.in_buffer %r', self.in_buffer)
             if chars == ["\x1b"]:
                 # This also won't work on Windows I think
                 if self.in_buffer or self.nonblocking_read():
@@ -240,7 +242,7 @@ class Terminal(object):
             try:
                 return self.in_stream.read(1)
             except IOError:
-                logging.debug('read interrupted, retrying')
+                logger.debug('read interrupted, retrying')
 
     def write(self, msg):
         self.out_stream.write(msg)
