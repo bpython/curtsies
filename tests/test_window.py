@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 import unittest
-from curtsies.window import BaseWindow, FullscreenWindow, CursorAwareWindow
-from cStringIO import StringIO
+import sys
 
+from curtsies.window import BaseWindow, FullscreenWindow, CursorAwareWindow
+
+if sys.version_info[0] == 3:
+    from io import StringIO
+else:
+    from cStringIO import StringIO
 class TestBaseWindow(unittest.TestCase):
     """Pretty pathetic tests for window"""
     def test_window(self):

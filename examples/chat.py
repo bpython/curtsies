@@ -61,9 +61,9 @@ if __name__ == '__main__':
     try:
         host, port = sys.argv[1:3]
     except ValueError:
-        print 'usage: python chat.py google.com 80'
-        print '(if you use this example, try typing'
-        print 'GET /'
-        print 'and then hitting enter)'
+        print('usage: python chat.py google.com 80')
+        print('(if you use this example, try typing')
+        print('GET /')
+        print('and then hitting enter)')
     else:
         main(host, int(port))

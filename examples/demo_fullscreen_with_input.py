@@ -4,10 +4,10 @@ import signal
 from curtsies import input, Cbreak, FullscreenWindow, fmtstr
 
 def fullscreen_winch_with_input():
-    print 'this should be just off-screen'
+    print('this should be just off-screen')
     w = FullscreenWindow(sys.stdout)
     def sigwinch_handler(signum, frame):
-        print 'sigwinch! Changed from %r to %r' % ((rows, columns), (w.height, w.width))
+        print('sigwinch! Changed from %r to %r' % ((rows, columns), (w.height, w.width)))
     signal.signal(signal.SIGWINCH, sigwinch_handler)
     with w:
         with Cbreak(sys.stdin):

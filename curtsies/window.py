@@ -374,7 +374,7 @@ def test():
 def main():
     logging.basicConfig(filename='display.log',level=logging.DEBUG)
     from .termhelpers import Cbreak
-    print 'this should be just off-screen'
+    print('this should be just off-screen')
     w = FullscreenWindow(sys.stdout)
     rows, columns = w.t.height, w.t.width
     with w:

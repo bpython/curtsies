@@ -28,8 +28,8 @@ def main(argv):
         else:
             raise KeyError
     except KeyError:
-        print "Usage: %s [player] [player]" % argv[0]
-        print "where a player is one of:", ', '.join(sorted(pool))
+        print("Usage: %s [player] [player]" % argv[0])
+        print("where a player is one of:", ', '.join(sorted(pool)))
         return 1
     else:
         with Input() as i:
@@ -43,10 +43,10 @@ def tictactoe(w, i, player, opponent, grid=None):
     while True:
         w.render_to_terminal(w.array_from_text(view(grid)))
         if is_won(grid):
-            print whose_move(grid), "wins."
+            print(whose_move(grid), "wins.")
             break
         if not successors(grid):
-            print "A draw."
+            print("A draw.")
             break
         grid = player(w, i, grid)
         player, opponent = opponent, player
@@ -131,7 +131,7 @@ def evaluate(grid):
 # lower-right square; the most significant is upper-left.
 
 # (Some scaffolding to view examples inline, below:)
-## def multiview(grids): print '\n'.join(reduce(beside, [view(g).split('\n') for g in grids])),
+## def multiview(grids): print('\n'.join(reduce(beside, [view(g).split('\n') for g in grids])), end=" ")
 ## def beside(block1, block2): return map('  '.join, zip(block1, block2))
 
 empty_grid = 0, 0
@@ -190,7 +190,7 @@ def view(grid):
                                for by_p, by_q in zip(*map(player_bits, grid)))
 
 # Starting from this board:
-## print view((0610, 0061)),
+## print(view((0610, 0061)), end="")
 #.  X X .
 #.  O O X
 #.  . . O
@@ -202,7 +202,7 @@ def view(grid):
 #.  . X O   X . O   . . O
 
 # and picks the win:
-## print view(spock_play((0610, 0061))),
+## print(view(spock_play((0610, 0061))), end="")
 #.  X X X
 #.  O O X
 #.  . . O

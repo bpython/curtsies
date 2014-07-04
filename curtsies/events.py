@@ -3,49 +3,55 @@ import sys
 
 PY3 = sys.version_info[0] >= 3
 
+if PY3:
+    raw_input = input
+    unicode = str
+
+chr_byte = lambda i: chr(i).encode('latin-1') if PY3 else chr(i)
+
 CURTSIES_NAMES = {}
-control_chars = dict((chr(i), '<Ctrl-%s' % chr(i + 0x60)) for i in range(0x00, 0x1b))
+control_chars = dict((chr_byte(i), u'<Ctrl-%s' % chr(i + 0x60)) for i in range(0x00, 0x1b))
 CURTSIES_NAMES.update(control_chars)
 for i in range(0x00, 0x80):
-    CURTSIES_NAMES[b'\x1b'+chr(i)] = '<Esc+%s>' % chr(i)
+    CURTSIES_NAMES[b'\x1b'+chr_byte(i)] = u'<Esc+%s>' % chr(i)
 for i in range(0x00, 0x1b): # Overwrite the control keys with better labels
-    CURTSIES_NAMES[b'\x1b'+chr(i)] = '<Esc+Ctrl-%s>' % chr(i + 0x40)
+    CURTSIES_NAMES[b'\x1b'+chr_byte(i)] = u'<Esc+Ctrl-%s>' % chr(i + 0x40)
 for i in range(0x00, 0x80):
-    CURTSIES_NAMES[chr(i + 0x80)] = '<Meta-%s>' % chr(i)
+    CURTSIES_NAMES[chr_byte(i + 0x80)] = u'<Meta-%s>' % chr(i)
 for i in range(0x00, 0x1b): # Overwrite the control keys with better labels
-    CURTSIES_NAMES[chr(i + 0x80)] = '<Meta-Ctrl-%s>' % chr(i + 0x40)
+    CURTSIES_NAMES[chr_byte(i + 0x80)] = u'<Meta-Ctrl-%s>' % chr(i + 0x40)
 
-from curtsieskeys import CURTSIES_NAMES as special_curtsies_names
+from .curtsieskeys import CURTSIES_NAMES as special_curtsies_names
 CURTSIES_NAMES.update(special_curtsies_names)
 
 CURSES_NAMES = {}
-CURSES_NAMES['\x1b[15~'] = 'KEY_F(5)'
-CURSES_NAMES['\x1b[17~'] = 'KEY_F(6)'
-CURSES_NAMES['\x1b[18~'] = 'KEY_F(7)'
-CURSES_NAMES['\x1b[19~'] = 'KEY_F(8)'
-CURSES_NAMES['\x1b[20~'] = 'KEY_F(9)'
-CURSES_NAMES['\x1b[21~'] = 'KEY_F(10)'
-CURSES_NAMES['\x1b[23~'] = 'KEY_F(11)'
-CURSES_NAMES['\x1b[24~'] = 'KEY_F(12)'
-CURSES_NAMES['\x1b[A'] = 'KEY_UP'
-CURSES_NAMES['\x1b[B'] = 'KEY_DOWN'
-CURSES_NAMES['\x1b[C'] = 'KEY_RIGHT'
-CURSES_NAMES['\x1b[D'] = 'KEY_LEFT'
-CURSES_NAMES['\x08'] = 'KEY_BACKSPACE'
-CURSES_NAMES['\x1b[3~'] = 'KEY_DC'
-CURSES_NAMES['\x1b[5~'] = 'KEY_PPAGE'
-CURSES_NAMES['\x1b[6~'] = 'KEY_NPAGE'
-CURSES_NAMES['\x1b[Z'] = 'KEY_BTAB'
+CURSES_NAMES[b'\x1b[15~'] = u'KEY_F(5)'
+CURSES_NAMES[b'\x1b[17~'] = u'KEY_F(6)'
+CURSES_NAMES[b'\x1b[18~'] = u'KEY_F(7)'
+CURSES_NAMES[b'\x1b[19~'] = u'KEY_F(8)'
+CURSES_NAMES[b'\x1b[20~'] = u'KEY_F(9)'
+CURSES_NAMES[b'\x1b[21~'] = u'KEY_F(10)'
+CURSES_NAMES[b'\x1b[23~'] = u'KEY_F(11)'
+CURSES_NAMES[b'\x1b[24~'] = u'KEY_F(12)'
+CURSES_NAMES[b'\x1b[A'] = u'KEY_UP'
+CURSES_NAMES[b'\x1b[B'] = u'KEY_DOWN'
+CURSES_NAMES[b'\x1b[C'] = u'KEY_RIGHT'
+CURSES_NAMES[b'\x1b[D'] = u'KEY_LEFT'
+CURSES_NAMES[b'\x08'] = u'KEY_BACKSPACE'
+CURSES_NAMES[b'\x1b[3~'] = u'KEY_DC'
+CURSES_NAMES[b'\x1b[5~'] = u'KEY_PPAGE'
+CURSES_NAMES[b'\x1b[6~'] = u'KEY_NPAGE'
+CURSES_NAMES[b'\x1b[Z'] = u'KEY_BTAB'
 #TODO add home and end? and everything else
 
 KEYMAP_PREFIXES = set()
 for table in (CURSES_NAMES, CURTSIES_NAMES):
     for k in table:
-        if k.startswith('\x1b'):
+        if k.startswith(b'\x1b'):
             for i in range(1, len(k)):
                 KEYMAP_PREFIXES.add(k[:i])
 
-MAX_KEYPRESS_SIZE = max(len(seq) for seq in CURSES_NAMES.keys() + CURTSIES_NAMES.keys())
+MAX_KEYPRESS_SIZE = max(len(seq) for seq in (list(CURSES_NAMES.keys()) + list(CURTSIES_NAMES.keys())))
 
 class Event(object):
     pass
@@ -86,24 +92,38 @@ class PasteEvent(Event):
     def name(self):
         return repr(self)
 
-def get_key(chars, keynames='curses', full=False):
-    """the plain name
+def decodable(seq, encoding):
+    try:
+        u = seq.decode(encoding)
+    except UnicodeDecodeError:
+        return False
+    else:
+        return True
+
+def get_key(bytes_, encoding, keynames='curses', full=False):
+    """Return key pressed from bytes_ or None
+
     Return a key name (possibly just a plain one like 'a') or None
-    meaning it's an incomplete sequence of characters (more chars
+    meaning it's an incomplete sequence of bytes (more bytes
     needed to determine the key pressed)
+
+    encoding is how the bytes should be interpreted
 
     if full, match a key even if it could be a prefix to another key
     (useful for detecting a plain escape key for instance, since
     escape is also a prefix to a bunch of char sequences for other keys)
 
+    Events are subclasses of Event, or unicode strings
+
     Precondition: get_key(prefix, keynames) is None for all proper prefixes of
-    chars. This means get_key should be called on progressively larger inputs
+    bytes. This means get_key should be called on progressively larger inputs
     (for 'asdf', first on 'a', then on 'as', then on 'asd' - until a non-None
     value is returned)
     """
-    seq = ''.join(chars)
+    assert all(isinstance(c, type(b'')) for c in bytes_), bytes_ # expects raw bytes
+    seq = b''.join(bytes_)
 
-    def known_key():
+    def key_name():
         if keynames == 'curses':
             return CURSES_NAMES.get(seq, seq)
         elif keynames == 'curtsies':
@@ -111,12 +131,14 @@ def get_key(chars, keynames='curses', full=False):
         else:
             return seq
 
-    if full and (seq in CURTSIES_NAMES or seq in CURSES_NAMES):
-        return known_key()
+    key_known = seq in CURTSIES_NAMES or seq in CURSES_NAMES or decodable(seq, encoding)
+
+    if full and key_known:
+        return key_name()
     elif seq in KEYMAP_PREFIXES:
         return None # need more input to make up a full keypress
-    elif seq in CURTSIES_NAMES or seq in CURSES_NAMES:
-        return known_key()
+    elif key_known:
+        return key_name()
     else:
         return seq # the plain name
 
@@ -153,7 +175,7 @@ def curses_name(seq):
 
 
 def try_keys():
-    print 'press a bunch of keys (not at the same time, but you can hit them pretty quickly)'
+    print('press a bunch of keys (not at the same time, but you can hit them pretty quickly)')
     import tty
     import termios
     import fcntl
@@ -161,43 +183,43 @@ def try_keys():
     from termhelpers import Cbreak
 
     def ask_what_they_pressed(seq, Normal):
-        print 'Unidentified character sequence!'
+        print('Unidentified character sequence!')
         with Normal():
             while True:
                 r = raw_input("type 'ok' to prove you're not pounding keys ")
                 if r.lower().strip() == 'ok':
                     break
         while True:
-            print 'Press the key that produced %r again please' % (seq,)
+            print('Press the key that produced %r again please' % (seq,))
             retry = os.read(sys.stdin.fileno(), 1000)
             if seq == retry:
                 break
-            print "nope, that wasn't it"
+            print("nope, that wasn't it")
         with Normal():
             name = raw_input('Describe in English what key you pressed')
             f = open('keylog.txt', 'a')
             f.write("%r is called %s\n" % (seq, name))
             f.close()
-            print 'Thanks! Sent thomasballinger@gmail.com an email with that, or submit a pull request'
+            print('Thanks! Sent thomasballinger@gmail.com an email with that, or submit a pull request')
 
     with Cbreak(sys.stdin) as NoCbreak:
         while True:
             try:
                 chars = os.read(sys.stdin.fileno(), 1000)
-                print '---'
-                print repr(chars)
+                print('---')
+                print(repr(chars))
                 if chars in CURTSIES_NAMES:
-                    print CURTSIES_NAMES[chars]
+                    print(CURTSIES_NAMES[chars])
                 elif len(chars) == 1:
-                    print 'literal'
+                    print('literal')
                 else:
-                    print 'unknown!!!'
+                    print('unknown!!!')
                     ask_what_they_pressed(chars, NoCbreak)
             except OSError:
                 pass
 
 if __name__ == '__main__':
-    seq = ['\x1b', 'O', 'P']
-    print seq
-    print get_key(seq)
+    seq = [b'\x1b', b'O', b'P']
+    print(seq)
+    print(get_key(seq, sys.stdin.encoding))
     try_keys()

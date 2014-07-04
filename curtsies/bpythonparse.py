@@ -99,7 +99,7 @@ def test():
     config = Struct()
     loadini(config, default_config_path())
 
-    all_tokens = list(PythonLexer().get_tokens('print 1 + 2'))
+    all_tokens = list(PythonLexer().get_tokens('print(1 + 2)'))
     formatted_line = format(all_tokens, BPythonFormatter(config.color_scheme))
     print((repr(formatted_line)))
     fs = parse(formatted_line)
