@@ -1,4 +1,4 @@
-"""Language for describing events that in terminal"""
+"""Events for keystrokes and other input events"""
 import sys
 
 PY3 = sys.version_info[0] >= 3
