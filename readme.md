@@ -1,6 +1,7 @@
+[![Build Status](https://travis-ci.org/thomasballinger/curtsies.svg?branch=master)](https://travis-ci.org/thomasballinger/curtsies)
+
 Curtsies: Terminal interaction w/o curses
 =========================================
-
 ![Curtsies Logo](http://ballingt.com/assets/curtsies-tritone-small.png)
 
 Annotate portions of strings with terminal colors and formatting!
