@@ -3,6 +3,7 @@ New terminal
 """
 
 import fcntl
+import locale
 import os
 import signal
 import select
@@ -74,7 +75,7 @@ class Input(object):
             current_bytes = []
             while self.unprocessed_bytes:
                 current_bytes.append(self.unprocessed_bytes.pop(0))
-                e = events.get_key(current_bytes, keynames=self.keynames, full=len(self.unprocessed_bytes)==0)
+                e = events.get_key(current_bytes, getpreferredencoding(), keynames=self.keynames, full=len(self.unprocessed_bytes)==0)
                 if e is not None:
                     self.current_bytes = []
                     return e

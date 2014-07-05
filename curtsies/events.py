@@ -25,6 +25,10 @@ from .curtsieskeys import CURTSIES_NAMES as special_curtsies_names
 CURTSIES_NAMES.update(special_curtsies_names)
 
 CURSES_NAMES = {}
+CURSES_NAMES[b'\x1bOP'] = u'KEY_F(1)'
+CURSES_NAMES[b'\x1bOQ'] = u'KEY_F(2)'
+CURSES_NAMES[b'\x1bOR'] = u'KEY_F(3)'
+CURSES_NAMES[b'\x1bOS'] = u'KEY_F(4)'
 CURSES_NAMES[b'\x1b[15~'] = u'KEY_F(5)'
 CURSES_NAMES[b'\x1b[17~'] = u'KEY_F(6)'
 CURSES_NAMES[b'\x1b[18~'] = u'KEY_F(7)'
