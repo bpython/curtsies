@@ -129,11 +129,11 @@ def get_key(bytes_, encoding, keynames='curses', full=False):
 
     def key_name():
         if keynames == 'curses':
-            return CURSES_NAMES.get(seq, seq)
+            return CURSES_NAMES.get(seq, seq.decode(encoding))
         elif keynames == 'curtsies':
-            return CURTSIES_NAMES.get(seq, seq)
+            return CURTSIES_NAMES.get(seq, seq.decode(encoding))
         else:
-            return seq
+            return seq.decode(encoding)
 
     key_known = seq in CURTSIES_NAMES or seq in CURSES_NAMES or decodable(seq, encoding)
 
@@ -144,7 +144,7 @@ def get_key(bytes_, encoding, keynames='curses', full=False):
     elif key_known:
         return key_name()
     else:
-        return seq # the plain name
+        return seq.decode(encoding) # the plain name
 
 def pp_event(seq):
     """Returns pretty representation of an Event or keypress"""
