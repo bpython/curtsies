@@ -1,4 +1,4 @@
-Curtsies - A Curses-like Terminal Wrapper
+Curtsies: Terminal interaction w/o curses
 =========================================
 
 ![Curtsies Logo](http://ballingt.com/assets/curtsies-tritone-small.png)
@@ -7,13 +7,36 @@ Annotate portions of strings with terminal colors and formatting!
 Render that text to the terminal, and clean up afterwards!
 Get use keystrokes in realtime!
 
+This is what using (nearly every feature of) curtsies looks like
+
+    import random
+
+    from curtsies import FullscreenWindow, Input, FSArray
+    from curtsies.fmtfuncs import red, bold, green, on_blue, yellow
+
+    print yellow('the following code takes over the screen')
+    with FullscreenWindow() as window:
+        print(red(on_blue(bold('Press escape to exit'))))
+        with Input() as input_generator:
+            a = FSArray(window.height, window.width)
+            for c in input_generator:
+                if c == '<ESC>':
+                    break
+                elif c == '<SPACE>':
+                    a = FSArray(window.height, window.width)
+                else:
+                    row = random.choice(range(window.height))
+                    column = random.choice(range(window.width-len(repr(c))))
+                    color = random.choice([red, green, on_blue, yellow])
+                    a[row, column:column+len(repr(c))] = [color(repr(c))]
+                window.render_to_terminal(a)
+
 The a few main objects in curtsies you probably want to use:
 
 * [FmtStr](readme.md#fmtstr) objects are colored strings
 * [FSArray](readme.md#fsarray) objects are 2D arrays of colored text
 * [Input](readme.md#input) provides keys as they are pressed by the user
 * [FullscreenWindow](readme.md#fullscreenwindow) sets up a fullscreen environment for rendering arrays of colored text
-and handling user input
 * [CursorAwareWindow](readme.md#cursorawarewindow) is a terminal wrapper (like curses) for rendering text to the terminal
 
 `FmtStr`
@@ -219,40 +242,6 @@ but note that curses doesn't have nice key names for many key combinations,
 so you'll be putting up with names like '\xe1' for
 option-j and '\x86' for ctrl-option-f.
 Pass 'plain' for this parameter to do no rewriting of keypresses.
-
-All together now
-----------------
-
-Canvas objects typically to be initialized with a Terminal object
-which sets up the terminal
-window and catches input in raw mode. Context managers make it so fatal
-exceptions won't prevent necessary cleanup to make the terminal usable again.
-
-Putting all that together:
-
-import random
-
-from curtsies import FullscreenWindow, Input, FSArray
-from curtsies.fmtfuncs import red, bold, green, on_blue, yellow, on_red
-
-    def main():
-        with FullscreenWindow() as window:
-            print('Press escape to exit')
-            with Input() as input_generator:
-                a = FSArray(window.height, window.width)
-                for c in input_generator:
-                    if c == '<ESC>':
-                        break
-                    elif c == '<SPACE>':
-                        a = FSArray(window.height, window.width)
-                    else:
-                        row = random.choice(range(window.height))
-                        column = random.choice(range(window.width-len(repr(c))))
-                        a[row, column:column+len(repr(c))] = [repr(c)]
-                    window.render_to_terminal(a)
-
-    if __name__ == '__main__':
-        main()
 
 Examples
 --------
