@@ -1,8 +1,16 @@
 from setuptools import setup
-import curtsies
+import ast
+import os
+
+def version():
+    """Return version string."""
+    with open(os.path.join('curtsies', '__init__.py')) as input_file:
+        for line in input_file:
+            if line.startswith('__version__'):
+                return ast.parse(line).body[0].value.s
 
 setup(name='curtsies',
-      version=curtsies.__version__,
+      version=version(),
       description='Curses-like terminal wrapper, with colored strings!',
       url='https://github.com/thomasballinger/curtsies',
       author='Thomas Ballinger',
