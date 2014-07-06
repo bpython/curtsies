@@ -5,9 +5,6 @@ import time
 from curtsies import FullscreenWindow, Input, FSArray
 from curtsies.fmtfuncs import red, bold, green, on_blue, yellow, on_red
 
-MAX_FPS = 5
-time_per_frame = 1. / MAX_FPS
-
 key_directions = {
                   '<UP>':   (-1, 0),
                   '<LEFT>':  (0,-1),
@@ -58,6 +55,9 @@ class Snake(object):
             self.snake_parts.pop()
 
 def main():
+    MAX_FPS = 5
+    time_per_frame = lambda: 1. / MAX_FPS
+
     with FullscreenWindow() as window:
         with Input() as input_generator:
             snake = Snake(window.height, window.width)
@@ -66,12 +66,16 @@ def main():
                 t0 = time.time()
                 while True:
                     t = time.time()
-                    temp_c = input_generator.send(max(0, t - (t0 + time_per_frame)))
-                    if c == '<ESC>':
+                    temp_c = input_generator.send(max(0, t - (t0 + time_per_frame())))
+                    if temp_c == '<ESC>':
                         return
+                    elif temp_c == '+':
+                        MAX_FPS += 1
+                    elif temp_c == '-':
+                        MAX_FPS = max(1, MAX_FPS - 1)
                     elif temp_c is not None:
-                        c = temp_c
-                    if time_per_frame < t - t0:
+                        c = temp_c # save this keypress to be used on next tick
+                    if time_per_frame() < t - t0:
                         break
 
                 if snake.tick(c):

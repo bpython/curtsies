@@ -1,1 +1,2 @@
 60d306917dc051a2f9b1aa242d260d5940a819de sigints working (perhaps too complicated) all different: 0.938528 all identical: 0.411068 change on character 0.290748 100 iterations
+a33c3de0f91e0c68819af4c301dbf7b7cee5d2cf fixes for python3 based on chat example all different: 0.781105 all identical: 0.343822 change on character 0.178675 100 iterations

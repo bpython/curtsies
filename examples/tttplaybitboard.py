@@ -121,7 +121,7 @@ def evaluate(grid):
     if is_won(grid): return -1
     succs = successors(grid)
     return -min(map(evaluate, succs)) if succs else 0
-    
+
 
 # We represent a tic-tac-toe grid as a pair of bit-vectors (p, q), p
 # for the player to move, q for their opponent. So p has 9
@@ -136,12 +136,13 @@ def evaluate(grid):
 
 empty_grid = 0, 0
 
-def is_won((p, q)):
+def is_won(grid):
     "Did the latest move win the game?"
+    p, q = grid
     return any(way == (way & q) for way in ways_to_win)
 
 # Numbers starting with 0 are in octal: 3 bits/digit, thus one row per digit.
-ways_to_win = (0700, 0070, 0007, 0444, 0222, 0111, 0421, 0124)
+ways_to_win = (0o700, 0o070, 0o007, 0o444, 0o222, 0o111, 0o421, 0o124)
 
 ## multiview((0, way) for way in ways_to_win)
 #.  X X X   . . .   . . .   X . .   . X .   . . X   X . .   . . X
@@ -157,8 +158,9 @@ def successors(grid):
 #.  . . .   . . .   . . .   . . X   . X .   X . .   . . .   . . .   . . .
 #.  . . X   . X .   X . .   . . .   . . .   . . .   . . .   . . .   . . .
 
-def apply_move((p, q), move):
+def apply_move(grid, move):
     "Try to move: return a new grid, or None if illegal."
+    p, q = grid
     bit = 1 << move
     return (q, p | bit) if 0 == (bit & (p | q)) else None
 
@@ -176,8 +178,9 @@ def whose_move(grid):
     "Return the mark of the player to move."
     return player_marks(grid)[0]
 
-def player_marks((p, q)):
+def player_marks(grid):
     "Return two results: the player's mark and their opponent's."
+    p, q = grid
     return 'XO' if sum(player_bits(p)) == sum(player_bits(q)) else 'OX'
 
 def player_bits(bits):
