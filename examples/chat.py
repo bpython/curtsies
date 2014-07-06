@@ -16,7 +16,7 @@ class Connection(object):
     def on_read(self):
         self.received.append(self.sock.recv(50))
     def render(self):
-        return linesplit(green(''.join(self.received)), 80) if self.received else ['']
+        return linesplit(green(''.join(s.decode('latin-1') for s in self.received)), 80) if self.received else ['']
 
 def main(host, port):
     client = socket.socket()
@@ -48,7 +48,7 @@ def main(host, port):
                             return
                         elif e == '<RETURN>':
                             keypresses.append('\n')
-                            client.send(''.join(keypresses))
+                            client.send((''.join(keypresses)).encode('latin-1'))
                             keypresses = []
                         elif e == '<SPACE>':
                             keypresses.append(' ')

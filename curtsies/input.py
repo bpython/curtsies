@@ -136,7 +136,7 @@ class Input(object):
                 except BlockingIOError:
                     return 0
                 if data:
-                    self.unprocessed_bytes.extend(data)
+                    self.unprocessed_bytes.extend(data[i:i+1] for i in range(len(data)))
                     return len(data)
                 else:
                     return 0
