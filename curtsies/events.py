@@ -124,6 +124,9 @@ def get_key(bytes_, encoding, keynames='curses', full=False):
     (for 'asdf', first on 'a', then on 'as', then on 'asd' - until a non-None
     value is returned)
     """
+    print(repr(bytes_))
+    for c in bytes_:
+        print(repr(c))
     if not all(isinstance(c, type(b'')) for c in bytes_):
         raise ValueError("get key expects bytes, got %r" % bytes_) # expects raw bytes
     seq = b''.join(bytes_)
@@ -164,7 +167,7 @@ def pp_event(seq):
     pretty = curtsies_name(seq)
     if pretty != seq:
         return pretty
-    return repr(seq)[2:-1]
+    return repr(seq).lstrip('u')[1:-1]
 
 def curtsies_name(seq):
     return CURTSIES_NAMES.get(seq, seq)

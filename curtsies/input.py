@@ -67,6 +67,8 @@ class Input(object):
     def next(self):
         return self.send(None)
 
+    __next__ = next
+
     def wait_for_read_ready_or_timeout(self, timeout):
         remaining_timeout = timeout
         t0 = time.time()
@@ -129,7 +131,10 @@ class Input(object):
         """Returns the number of characters read and adds them to self.unprocessed_bytes"""
         with Nonblocking(self.in_stream):
             if PY3:
-                data = os.read(self.in_stream.fileno(), READ_SIZE)
+                try:
+                    data = os.read(self.in_stream.fileno(), READ_SIZE)
+                except BlockingIOError:
+                    return 0
                 if data:
                     self.unprocessed_bytes.extend(data)
                     return len(data)

@@ -49,7 +49,7 @@ class TestInput(unittest.TestCase):
         first_time = [True]
         def side_effect():
             if first_time:
-                inp.unprocessed_bytes.extend(b'a'*n)
+                inp.unprocessed_bytes.extend([b'a']*n)
                 first_time.pop()
                 return n
             else:
@@ -57,5 +57,5 @@ class TestInput(unittest.TestCase):
         inp.nonblocking_read.side_effect = side_effect
 
         r = inp.send(0)
-        self.assertIsInstance(r, events.PasteEvent)
+        self.assertEqual(type(r), events.PasteEvent)
         self.assertEqual(r.events, [u'a'] * n)
