@@ -124,7 +124,8 @@ def get_key(bytes_, encoding, keynames='curses', full=False):
     (for 'asdf', first on 'a', then on 'as', then on 'asd' - until a non-None
     value is returned)
     """
-    assert all(isinstance(c, type(b'')) for c in bytes_), bytes_ # expects raw bytes
+    if not all(isinstance(c, type(b'')) for c in bytes_):
+        raise ValueError("get key expects bytes, got %r" % bytes_) # expects raw bytes
     seq = b''.join(bytes_)
 
     def key_name():
@@ -167,16 +168,6 @@ def pp_event(seq):
 
 def curtsies_name(seq):
     return CURTSIES_NAMES.get(seq, seq)
-
-def curses_name(seq):
-    return CURSES_NAMES.get(seq, seq)
-
-
-# What if we assume we'll always get all of the bytes from a keypress at the same time?
-# So our only job is to identify when we have more than one key.
-# While a char sequence is a prefix, get more characters.
-# Once it's not, is it a key? Return if so, error if not.
-
 
 def try_keys():
     print('press a bunch of keys (not at the same time, but you can hit them pretty quickly)')

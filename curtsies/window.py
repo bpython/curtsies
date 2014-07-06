@@ -64,10 +64,9 @@ class BaseWindow(object):
         self._last_rendered_height = None
 
     def scroll_down(self):
-        #TODO Figure out how to make sure blesings context managers write to the right stream
         logging.debug('sending scroll down message')
         with self.t.location(x=0, y=1000000):# since scroll-down only moves the screen if cursor is at bottom
-            SCROLL_DOWN = "D"
+            SCROLL_DOWN = "\x1bD"
             self.write(SCROLL_DOWN) #TODO will blessings do this?
 
     def write(self, msg):

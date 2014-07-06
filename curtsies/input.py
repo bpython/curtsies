@@ -67,6 +67,19 @@ class Input(object):
     def next(self):
         return self.send(None)
 
+    def wait_for_read_ready_or_timeout(self, timeout):
+        remaining_timeout = timeout
+        t0 = time.time()
+        while True:
+            try:
+                (rs, _, _) = select.select([self.in_stream.fileno()], [], [], remaining_timeout)
+                return rs, None
+            except select.error:
+                if self.sigints:
+                    return [], self.sigints.pop()
+                if remaining_timeout is not None:
+                    remaining_timeout = max(timeout - (time.time() - t0), 0)
+
     def send(self, timeout=None):
         """Returns a key or None if no key pressed"""
 
@@ -90,26 +103,13 @@ class Input(object):
         if e is not None:
             return e
 
-        def wait_for_read_ready_or_timeout():
-            remaining_timeout = timeout
-            t0 = time.time()
-            while True:
-                try:
-                    (rs, _, _) = select.select([self.in_stream.fileno()], [], [], remaining_timeout)
-                    return rs, None
-                except select.error:
-                    if self.sigints:
-                        return [], self.sigints.pop()
-                    if remaining_timeout is not None:
-                        remaining_timeout = max(timeout - (time.time() - t0), 0)
-
-        rs, sigint = wait_for_read_ready_or_timeout()
+        rs, sigint = self.wait_for_read_ready_or_timeout(timeout)
         if sigint:
             return sigint
         if not rs:
             return None
         num_bytes = self.nonblocking_read()
-        assert num_bytes > 0
+        assert num_bytes > 0, num_bytes
         if self.paste_threshold is not None and num_bytes > self.paste_threshold:
             paste = events.PasteEvent()
             while True:

@@ -20,6 +20,9 @@ setup(name='curtsies',
       install_requires = [
           'blessings==1.5.1'
       ],
+      tests_require = [
+          'mock'
+      ],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
