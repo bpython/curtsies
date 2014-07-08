@@ -30,6 +30,9 @@ from .termhelpers import Cbreak
 
 from . import events
 
+MAX_TERMINAL_WIDTH = 10000 # feels reasonable...
+SCROLL_DOWN = "\x1bD"
+
 #BIG TODO!!! 
 #TODO How to get cursor position? It's a thing we need!
 #
@@ -64,9 +67,8 @@ class BaseWindow(object):
         self._last_rendered_height = None
 
     def scroll_down(self):
-        logging.debug('sending scroll down message')
+        logging.debug('sending scroll down message w/ cursor on bottom line')
         with self.t.location(x=0, y=1000000):# since scroll-down only moves the screen if cursor is at bottom
-            SCROLL_DOWN = "\x1bD"
             self.write(SCROLL_DOWN) #TODO will blessings do this?
 
     def write(self, msg):
@@ -204,14 +206,11 @@ class CursorAwareWindow(BaseWindow):
         return BaseWindow.__enter__(self)
 
     def __exit__(self, type, value, traceback):
+        if self.keep_last_line:
+            self.write(SCROLL_DOWN) # just moves cursor down if not on last line
+        self.write(self.t.move_left*MAX_TERMINAL_WIDTH)
         self.write(self.t.clear_eos)
-        try:
-            row, _ = self.get_cursor_position()
-        except ValueError:
-            pass
-        else:
-            self.write(self.t.move(row, 0))
-            self.write(self.t.clear_eol)
+        self.write(self.t.clear_eol)
         self.cbreak.__exit__(type, value, traceback)
         BaseWindow.__exit__(self, type, value, traceback)
 
