@@ -89,10 +89,10 @@ class Terminal(object):
         self.original_stty = termios.tcgetattr(self.out_stream)
         self.turn_off_line_wrapping()
         if self.input_mode == 'raw':
-            tty.setraw(self.in_stream)
+            tty.setraw(self.in_stream, termios.TCSANOW)
         else:
             assert self.input_mode == 'cbreak'
-            tty.setcbreak(self.in_stream)
+            tty.setcbreak(self.in_stream, termios.TCSANOW)
             self.orig_sigint_handler = signal.getsignal(signal.SIGINT)
 
             def sigint_handler(signum, frame):
