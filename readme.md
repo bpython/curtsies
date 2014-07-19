@@ -5,7 +5,7 @@ Curtsies: Terminal interaction w/o curses
 
 Annotate portions of strings with terminal colors and formatting!
 Render that text to the terminal, and clean up afterwards!
-Get use keystrokes in realtime!
+Get user keystrokes when they happen!
 
 This is what using (nearly every feature of) curtsies looks like:
 
