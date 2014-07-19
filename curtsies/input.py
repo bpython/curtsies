@@ -47,7 +47,7 @@ class Input(object):
 
     def __enter__(self):
         self.original_stty = termios.tcgetattr(self.in_stream)
-        tty.setcbreak(self.in_stream)
+        tty.setcbreak(self.in_stream, termios.TCSANOW)
         if self.sigint_event:
             self.orig_sigint_handler = signal.getsignal(signal.SIGINT)
             signal.signal(signal.SIGINT, self.sigint_handler)
