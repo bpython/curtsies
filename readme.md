@@ -241,7 +241,7 @@ Examples
 
 ![screenshot](http://i.imgur.com/nv1RQd3.png)
 
-* [Bpython frontend bpython-scroll](https://bitbucket.org/thomasballinger/bpython/src/764d6710346db8d94d2e318d0f183cdf5ebf1174/bpython/scroll.py?at=scroll-frontend)
+* [Bpython frontend bpython-curtsies](https://github.com/bpython/bpython)
 
 [![ScreenShot](http://i.imgur.com/r7rZiBS.png)](http://www.youtube.com/watch?v=lwbpC4IJlyA)
 
