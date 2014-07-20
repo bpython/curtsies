@@ -18,7 +18,7 @@ class Cbreak(object):
         self.stream = stream
     def __enter__(self):
         self.original_stty = termios.tcgetattr(self.stream)
-        tty.setcbreak(self.stream)
+        tty.setcbreak(self.stream, termios.TCSANOW)
         return Termmode(self.stream, self.original_stty)
     def __exit__(self, *args):
         termios.tcsetattr(self.stream, termios.TCSANOW, self.original_stty)

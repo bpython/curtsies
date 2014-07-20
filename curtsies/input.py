@@ -100,6 +100,10 @@ class Input(object):
         if self.sigints:
             return self.sigints.pop()
 
+        if hasattr(sys, 'extra_stdin_chars'):
+            self.unprocessed_bytes.extend(sys.extra_stdin_chars)
+            sys.extra_stdin_chars = []
+
         # try to find an already pressed key from prev input
         e = find_key()
         if e is not None:

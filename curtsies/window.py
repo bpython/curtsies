@@ -26,7 +26,7 @@ import blessings
 
 from .formatstring import fmtstr
 from .formatstringarray import FSArray
-from .termhelpers import Cbreak
+from .termhelpers import Cbreak, Nonblocking
 
 from . import events
 
@@ -242,7 +242,11 @@ class CursorAwareWindow(BaseWindow):
                 col = int(m.groupdict()['column'])
                 extra = m.groupdict()['extra']
                 if extra:
-                    raise ValueError("Whoops! chars preceding cursor pos query response thrown out! %r" % (extra,))
+                    #raise ValueError("Whoops! chars preceding cursor pos query response thrown out! %r" % (extra,))
+                    if not hasattr(sys, 'extra_stdin_chars'):
+                        sys.extra_stdin_chars = []
+                    for i in range(len(extra)):
+                        sys.extra_stdin_chars.append(extra[i:i+1])
                 return (row-1, col-1)
 
     def get_cursor_vertical_diff(self):
