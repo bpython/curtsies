@@ -69,6 +69,10 @@ class Input(object):
 
     __next__ = next
 
+    def unget_bytes(self, string):
+        """Inserts a bytestring into unprocessed bytes buffer"""
+        self.unprocessed_bytes.extend(string[i:i+1] for i in range(len(string)))
+
     def wait_for_read_ready_or_timeout(self, timeout):
         remaining_timeout = timeout
         t0 = time.time()
@@ -99,10 +103,6 @@ class Input(object):
 
         if self.sigints:
             return self.sigints.pop()
-
-        if hasattr(sys, 'extra_stdin_chars'):
-            self.unprocessed_bytes.extend(sys.extra_stdin_chars)
-            sys.extra_stdin_chars = []
 
         # try to find an already pressed key from prev input
         e = find_key()

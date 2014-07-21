@@ -190,13 +190,20 @@ class CursorAwareWindow(BaseWindow):
 
     Cursor diff depends on cursor never being touched by the application
     Only use the render_to_terminal interface for moving the cursor"""
-    def __init__(self, out_stream=sys.stdout, in_stream=sys.stdin, keep_last_line=False, hide_cursor=True):
+    def __init__(self, out_stream=sys.stdout, in_stream=sys.stdin,
+                 keep_last_line=False, hide_cursor=True, extra_bytes_callback=None):
+        """
+
+        extra_bytes_callback is a function that will be called with extra bytes
+        read from in_stream if they are inadvertantly read during a cursor_position call
+        """
         BaseWindow.__init__(self, out_stream=out_stream, hide_cursor=hide_cursor)
         self.in_stream = in_stream
         self._last_cursor_column = None
         self._last_cursor_row = None
         self.keep_last_line = keep_last_line
         self.cbreak = Cbreak(self.in_stream)
+        self.extra_bytes_callback = extra_bytes_callback
 
     def __enter__(self):
         self.cbreak.__enter__()
@@ -242,11 +249,11 @@ class CursorAwareWindow(BaseWindow):
                 col = int(m.groupdict()['column'])
                 extra = m.groupdict()['extra']
                 if extra:
-                    #raise ValueError("Whoops! chars preceding cursor pos query response thrown out! %r" % (extra,))
-                    if not hasattr(sys, 'extra_stdin_chars'):
-                        sys.extra_stdin_chars = []
-                    for i in range(len(extra)):
-                        sys.extra_stdin_chars.append(extra[i:i+1])
+                    if self.extra_bytes_callback:
+                        self.extra_bytes_callback(extra)
+                    else:
+                        raise ValueError(("Bytes preceding cursor position query response thrown out:\n%r\n"
+                                          "Pass an extra_bytes_callback to CursorAwareWindow to prevent this") % (extra,))
                 return (row-1, col-1)
 
     def get_cursor_vertical_diff(self):
