@@ -250,7 +250,7 @@ class CursorAwareWindow(BaseWindow):
                 extra = m.groupdict()['extra']
                 if extra:
                     if self.extra_bytes_callback:
-                        self.extra_bytes_callback(extra)
+                        self.extra_bytes_callback(extra.encode(in_stream.encoding))
                     else:
                         raise ValueError(("Bytes preceding cursor position query response thrown out:\n%r\n"
                                           "Pass an extra_bytes_callback to CursorAwareWindow to prevent this") % (extra,))
