@@ -160,7 +160,6 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
                     return u'bytes: ' + u'-'.join(u'x%02X' % ord(seq[i:i+1]) for i in range(len(seq)))
                     #TODO if this isn't possible, return multiple meta keys as a paste event if paste events enabled
         elif keynames == 'curtsies':
-            print seq in CURTSIES_NAMES
             if seq in CURTSIES_NAMES:
                 return CURTSIES_NAMES[seq]
             return seq.decode(encoding) #assumes that curtsies names are a subset of curses ones
