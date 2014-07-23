@@ -1,3 +1,4 @@
+# -*- coding: UTF8 -*-
 import unittest
 from functools import partial
 
@@ -31,18 +32,30 @@ class TestDecodable(unittest.TestCase):
 
 class TestGetKey(unittest.TestCase):
     def test_utf8_full(self):
-        get_utf_full = partial(events.get_key, encoding='utf-8', keynames='plain', full=True)
+        get_utf_full = partial(events.get_key, encoding='utf-8', keynames='curtsies', full=True)
         self.assertEqual(get_utf_full([b'h']), u'h')
-        self.assertEqual(get_utf_full([b'\x1b', b'[']), u'\x1b[')
-        self.assertRaises(UnicodeDecodeError, get_utf_full, [b'\xfe'])
+        self.assertEqual(get_utf_full([b'\x1b', b'[']), u'<Esc+[>')
+        self.assertRaises(UnicodeDecodeError, get_utf_full, [b'\xfe\xfe'])
         self.assertRaises(ValueError, get_utf_full, u'a')
 
     def test_utf8(self):
-        get_utf = partial(events.get_key, encoding='utf-8', keynames='plain', full=False)
+        get_utf = partial(events.get_key, encoding='utf-8', keynames='curtsies', full=False)
         self.assertEqual(get_utf([b'h']), u'h')
         self.assertEqual(get_utf([b'\x1b', b'[']), None)
-        self.assertRaises(UnicodeDecodeError, get_utf, [b'\xfe'])
+        self.assertEqual(get_utf([b'\xe2']), None)
         self.assertRaises(ValueError, get_utf, u'a')
+
+    def test_multibyte_utf8(self):
+        get_utf = partial(events.get_key, encoding='utf-8', keynames='curtsies', full=False)
+        self.assertEqual(get_utf([b'\xc3']), None)
+        self.assertEqual(get_utf([b'\xe2']), None)
+        self.assertEqual(get_utf([b'\xe2'], full=True), u'<Meta-b>')
+        self.assertEqual(get_utf([b'\xc3', b'\x9f']), u'ß')
+        self.assertEqual(get_utf([b'\xc3', b'\x9f']), u'ß')
+        self.assertEqual(get_utf([b'\xe2', b'\x88', b'\x82']), u'∂')
+
+    def test_key_names(self):
+        self.assertTrue(set(events.CURTSIES_NAMES).issuperset(set(events.CURSES_NAMES)), set(events.CURSES_NAMES) - set(events.CURTSIES_NAMES))
 
 class TestPPEvent(unittest.TestCase):
     def test(self):

@@ -1,7 +1,7 @@
 from curtsies import Input
 
 def main():
-    with Input(keynames='curses') as input_generator:
+    with Input(keynames='curtsies') as input_generator:
         for e in input_generator:
             print(repr(e))
 

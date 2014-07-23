@@ -1,5 +1,6 @@
 """Events for keystrokes and other input events"""
 import sys
+import encodings
 
 PY3 = sys.version_info[0] >= 3
 
@@ -8,6 +9,7 @@ if PY3:
     unicode = str
 
 chr_byte = lambda i: chr(i).encode('latin-1') if PY3 else chr(i)
+chr_uni  = lambda i: chr(i) if PY3 else chr(i).decode('latin-1')
 
 CURTSIES_NAMES = {}
 control_chars = dict((chr_byte(i), u'<Ctrl-%s' % chr(i + 0x60)) for i in range(0x00, 0x1b))
@@ -104,14 +106,20 @@ def decodable(seq, encoding):
     else:
         return True
 
-def get_key(bytes_, encoding, keynames='curses', full=False):
+def get_key(bytes_, encoding, keynames='curtsies', full=False):
     """Return key pressed from bytes_ or None
 
-    Return a key name (possibly just a plain one like 'a') or None
-    meaning it's an incomplete sequence of bytes (more bytes
-    needed to determine the key pressed)
+    Return a key name or None meaning it's an incomplete sequence of bytes
+    (more bytes needed to determine the key pressed)
 
     encoding is how the bytes should be interpreted
+
+    keynames is a string describing how keys should be named.
+    curtsies uses unicode strings like <F8>
+    curses uses unicode strings like KEY_F(8), plus a few nonstandard
+      curses things necessary because I don't know how to represent meta
+      keys with unicode and curses (#TODO)
+    bytes returns the original bytes from stdin (NOT unicode)
 
     if full, match a key even if it could be a prefix to another key
     (useful for detecting a plain escape key for instance, since
@@ -126,26 +134,46 @@ def get_key(bytes_, encoding, keynames='curses', full=False):
     """
     if not all(isinstance(c, type(b'')) for c in bytes_):
         raise ValueError("get key expects bytes, got %r" % bytes_) # expects raw bytes
+    if keynames not in ['curtsies', 'curses', 'bytes']:
+        raise ValueError("keynames must be one of 'curtsies', 'curses' or 'bytes'")
     seq = b''.join(bytes_)
 
     def key_name():
         if keynames == 'curses':
-            return CURSES_NAMES.get(seq, seq.decode(encoding))
+            if seq in CURSES_NAMES: # may not be here (and still not decodable) curses names incomplete
+                return CURSES_NAMES[seq]
+            try:
+                return seq.decode(encoding)
+            except UnicodeDecodeError:
+                return u'bytes: ' + u'-'.join(u'\\x%20X' % ord(chr_byte(seq[i:i+1])) for i in range(len(seq)))
+                #TODO figure out a better thing to return here
         elif keynames == 'curtsies':
-            return CURTSIES_NAMES.get(seq, seq.decode(encoding))
+            print seq in CURTSIES_NAMES
+            if seq in CURTSIES_NAMES:
+                return CURTSIES_NAMES[seq]
+            return seq.decode(encoding) #assumes that curtsies names are a subset of curses ones
         else:
-            return seq.decode(encoding)
+            assert keynames == 'bytes'
+            return seq
 
     key_known = seq in CURTSIES_NAMES or seq in CURSES_NAMES or decodable(seq, encoding)
 
     if full and key_known:
         return key_name()
-    elif seq in KEYMAP_PREFIXES:
+    elif seq in KEYMAP_PREFIXES or seq in prefixes_for_encoding(encoding):
         return None # need more input to make up a full keypress
     elif key_known:
         return key_name()
     else:
         return seq.decode(encoding) # the plain name
+
+def prefixes_for_encoding(encoding):
+    if encodings.codecs.getdecoder(encoding) is not encodings.codecs.getdecoder('utf8'):
+        raise NotImplementedError
+    prefixes = set()
+    for i in range(0b11000000, 256): # http://en.wikipedia.org/wiki/UTF-8#Description
+        prefixes.add(chr_byte(i))
+    return prefixes
 
 def pp_event(seq):
     """Returns pretty representation of an Event or keypress"""

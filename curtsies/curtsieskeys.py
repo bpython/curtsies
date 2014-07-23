@@ -41,4 +41,7 @@ CURTSIES_NAMES = dict([
   (b'\x1b\x1b[C', u'<Meta-RIGHT>'),
   (b'\x1b\x1b[D', u'<Meta-LEFT>'),
   (b'\x1b',       u'<ESC>'),
+  (b'\x1b[3~',    u'<PADDELETE>'), #TODO check this name
+  (b'\x1b[5~',    u'<PAGEUP>'),
+  (b'\x1b[6~',    u'<PAGEDOWN>'),
   ])
