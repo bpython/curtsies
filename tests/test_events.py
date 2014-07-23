@@ -61,7 +61,7 @@ class TestGetKey(unittest.TestCase):
     def test_sequences_without_names(self):
         get_utf = partial(events.get_key, encoding='utf-8', keynames='curtsies', full=False)
         self.assertEqual(get_utf([b'\xc3'], full=True), '<Meta-C>')
-        self.assertEqual(get_utf([b'\xc3'], full=True, keynames='curses'), '\\xC3')
+        self.assertEqual(get_utf([b'\xc3'], full=True, keynames='curses'), 'xC3')
 
     def test_key_names(self):
         self.assertTrue(set(events.CURTSIES_NAMES).issuperset(set(events.CURSES_NAMES)), set(events.CURSES_NAMES) - set(events.CURTSIES_NAMES))
