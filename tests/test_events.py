@@ -11,6 +11,10 @@ class TestChrByte(unittest.TestCase):
             s = eval('b"\\x%s"' % ('0' + hex(i)[2:])[-2:])
             self.assertEqual(s, events.chr_byte(i))
 
+    def test_helpers(self):
+        self.assertEqual(events.chr_byte(97), b'a')
+        self.assertEqual(events.chr_uni(97), u'a')
+
 class TestCurtsiesNames(unittest.TestCase):
     def spot_check(self):
         self.assertEqual(events.CURTSIES_NAMES[b'\x1b\x08'], u'<Esc+Ctrl-H>')
@@ -53,6 +57,11 @@ class TestGetKey(unittest.TestCase):
         self.assertEqual(get_utf([b'\xc3', b'\x9f']), u'ß')
         self.assertEqual(get_utf([b'\xc3', b'\x9f']), u'ß')
         self.assertEqual(get_utf([b'\xe2', b'\x88', b'\x82']), u'∂')
+
+    def test_sequences_without_names(self):
+        get_utf = partial(events.get_key, encoding='utf-8', keynames='curtsies', full=False)
+        self.assertEqual(get_utf([b'\xc3'], full=True), '<Meta-C>')
+        self.assertEqual(get_utf([b'\xc3'], full=True, keynames='curses'), '\\xC3')
 
     def test_key_names(self):
         self.assertTrue(set(events.CURTSIES_NAMES).issuperset(set(events.CURSES_NAMES)), set(events.CURSES_NAMES) - set(events.CURTSIES_NAMES))

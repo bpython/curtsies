@@ -112,14 +112,21 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
     Return a key name or None meaning it's an incomplete sequence of bytes
     (more bytes needed to determine the key pressed)
 
-    encoding is how the bytes should be interpreted
+    encoding is how the bytes should be translated to unicode - it should
+    match the terminal encoding.
 
-    keynames is a string describing how keys should be named.
-    curtsies uses unicode strings like <F8>
-    curses uses unicode strings like KEY_F(8), plus a few nonstandard
-      curses things necessary because I don't know how to represent meta
-      keys with unicode and curses (#TODO)
-    bytes returns the original bytes from stdin (NOT unicode)
+    keynames is a string describing how keys should be named:
+
+    * curtsies uses unicode strings like <F8>
+
+    * curses uses unicode strings similar to those returned by
+      the Python ncurses window.getkey function, like KEY_F(8),
+      plus a nonstandard representation of meta keys (bytes 128-255)
+      because returning the corresponding unicode code point would be
+      indistinguishable from the multibyte sequence that encodes that
+      character in the current encoding
+
+    * bytes returns the original bytes from stdin (NOT unicode)
 
     if full, match a key even if it could be a prefix to another key
     (useful for detecting a plain escape key for instance, since
@@ -145,8 +152,13 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
             try:
                 return seq.decode(encoding)
             except UnicodeDecodeError:
-                return u'bytes: ' + u'-'.join(u'\\x%20X' % ord(chr_byte(seq[i:i+1])) for i in range(len(seq)))
-                #TODO figure out a better thing to return here
+                if len(seq) == 1:
+                    return u'x%02X' % ord(seq)
+                    #TODO figure out a better thing to return here
+                else:
+                    raise NotImplementedError("are multibyte unnameable sequences possible?")
+                    return u'bytes: ' + u'-'.join(u'x%02X' % ord(seq[i:i+1]) for i in range(len(seq)))
+                    #TODO if this isn't possible, return multiple meta keys as a paste event if paste events enabled
         elif keynames == 'curtsies':
             print seq in CURTSIES_NAMES
             if seq in CURTSIES_NAMES:
@@ -165,7 +177,8 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
     elif key_known:
         return key_name()
     else:
-        return seq.decode(encoding) # the plain name
+        seq.decode(encoding) # this will raise a unicode error (they're annoying to raise ourselves)
+        assert False, 'should have raised an unicode decode error'
 
 def prefixes_for_encoding(encoding):
     if encodings.codecs.getdecoder(encoding) is not encodings.codecs.getdecoder('utf8'):
