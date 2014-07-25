@@ -215,7 +215,7 @@ def try_keys():
     import termios
     import fcntl
     import os
-    from termhelpers import Cbreak
+    from .termhelpers import Cbreak
 
     def ask_what_they_pressed(seq, Normal):
         print('Unidentified character sequence!')
