@@ -66,6 +66,11 @@ class TestGetKey(unittest.TestCase):
     def test_key_names(self):
         self.assertTrue(set(events.CURTSIES_NAMES).issuperset(set(events.CURSES_NAMES)), set(events.CURSES_NAMES) - set(events.CURTSIES_NAMES))
 
+class TestGetKeyAscii(unittest.TestCase):
+        get_ascii_full = partial(events.get_key, encoding='', keynames='curtsies', full=True)
+        self.assertEqual(get_ascii_full(b'a'), u'a')
+        self.assertEqual(get_ascii_full(b'\xe1'), u'a')
+
 class TestPPEvent(unittest.TestCase):
     def test(self):
         self.assertEqual(events.pp_event(u'a'), 'a')

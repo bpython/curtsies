@@ -149,9 +149,12 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
         if keynames == 'curses':
             if seq in CURSES_NAMES: # may not be here (and still not decodable) curses names incomplete
                 return CURSES_NAMES[seq]
+
+            # Otherwise, there's no special curses name for this
             try:
-                return seq.decode(encoding)
+                return seq.decode(encoding) # for normal decodable text or a special curtsies sequence with bytes that can be decoded
             except UnicodeDecodeError:
+                # this sequence can't be decoded with this encoding, so we need to represent the bytes
                 if len(seq) == 1:
                     return u'x%02X' % ord(seq)
                     #TODO figure out a better thing to return here
