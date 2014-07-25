@@ -219,7 +219,7 @@ def try_keys():
 
     def ask_what_they_pressed(seq, Normal):
         print('Unidentified character sequence!')
-        with Normal():
+        with Normal:
             while True:
                 r = raw_input("type 'ok' to prove you're not pounding keys ")
                 if r.lower().strip() == 'ok':
@@ -230,12 +230,13 @@ def try_keys():
             if seq == retry:
                 break
             print("nope, that wasn't it")
-        with Normal():
-            name = raw_input('Describe in English what key you pressed')
+        with Normal:
+            name = raw_input('Describe in English what key you pressed: ')
             f = open('keylog.txt', 'a')
             f.write("%r is called %s\n" % (seq, name))
             f.close()
-            print('Thanks! Sent thomasballinger@gmail.com an email with that, or submit a pull request')
+            print('Thanks! Please open an issue at https://github.com/thomasballinger/curtsies/issues')
+            print('or email thomasballinger@gmail.com. Include this terminal history or keylog.txt.')
 
     with Cbreak(sys.stdin) as NoCbreak:
         while True:
