@@ -2,13 +2,14 @@
 # If you add a binding, add something about your setup
 # if you can figure out why it's different
 
+# Special names are for multi-character keys, or key names
+# that would be hard to write in a config file
+
 CURTSIES_NAMES = dict([
   (b' ',          u'<SPACE>'),
   (b'\x1b ',      u'<Esc+SPACE>'),
   (b'\t',         u'<TAB>'),
   (b'\x1b[Z',     u'<Shift-TAB>'),
-  (b'\r',         u'<RETURN>'),
-  (b'\n',         u'<RETURN>'),
   (b'\x1b[A',     u'<UP>'),
   (b'\x1b[B',     u'<DOWN>'),
   (b'\x1b[C',     u'<RIGHT>'),

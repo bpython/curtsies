@@ -13,7 +13,7 @@ chr_byte = lambda i: chr(i).encode('latin-1') if PY3 else chr(i)
 chr_uni  = lambda i: chr(i) if PY3 else chr(i).decode('latin-1')
 
 CURTSIES_NAMES = {}
-control_chars = dict((chr_byte(i), u'<Ctrl-%s' % chr(i + 0x60)) for i in range(0x00, 0x1b))
+control_chars = dict((chr_byte(i), u'<Ctrl-%s>' % chr(i + 0x60)) for i in range(0x00, 0x1b))
 CURTSIES_NAMES.update(control_chars)
 for i in range(0x00, 0x80):
     CURTSIES_NAMES[b'\x1b'+chr_byte(i)] = u'<Esc+%s>' % chr(i)
