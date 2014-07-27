@@ -1,6 +1,7 @@
 """Events for keystrokes and other input events"""
 import sys
 import encodings
+from functools import wraps
 
 PY3 = sys.version_info[0] >= 3
 
@@ -182,13 +183,26 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
         seq.decode(encoding) # this will raise a unicode error (they're annoying to raise ourselves)
         assert False, 'should have raised an unicode decode error'
 
+def cache(func):
+    func.cache = {}
+    @wraps(func)
+    def newfunc(arg):
+        if arg not in func.cache:
+            func.cache[arg] = func(arg)
+        return func.cache[arg]
+    return newfunc
+
+@cache
 def prefixes_for_encoding(encoding):
-    if encodings.codecs.getdecoder(encoding) is not encodings.codecs.getdecoder('utf8'):
+    if encodings.codecs.getdecoder('utf8') is encodings.codecs.getdecoder(encoding):
+        prefixes = set()
+        for i in range(0b11000000, 256): # http://en.wikipedia.org/wiki/UTF-8#Description
+            prefixes.add(chr_byte(i))
+        return prefixes
+    elif encodings.codecs.getdecoder('ascii') is encodings.codecs.getdecoder(encoding):
+        return set()
+    else:
         raise NotImplementedError
-    prefixes = set()
-    for i in range(0b11000000, 256): # http://en.wikipedia.org/wiki/UTF-8#Description
-        prefixes.add(chr_byte(i))
-    return prefixes
 
 def pp_event(seq):
     """Returns pretty representation of an Event or keypress"""
