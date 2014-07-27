@@ -69,23 +69,23 @@ class TestGetKey(unittest.TestCase):
 class TestGetKeyAscii(unittest.TestCase):
     def test_full(self):
         get_ascii_full = partial(events.get_key, encoding='ascii', keynames='curtsies', full=True)
-        self.assertEqual(get_ascii_full(b'a'), u'a')
-        self.assertEqual(get_ascii_full(b'\xe1'), u'<Meta-a>')
-        self.assertEqual(get_ascii_full(b'\xe1', keynames='curses'), u'xE1')
+        self.assertEqual(get_ascii_full([b'a']), u'a')
+        self.assertEqual(get_ascii_full([b'\xe1']), u'<Meta-a>')
+        self.assertEqual(get_ascii_full([b'\xe1'], keynames='curses'), u'xE1')
 
     def test_simple(self):
         get_ascii_full = partial(events.get_key, encoding='ascii', keynames='curtsies')
-        self.assertEqual(get_ascii_full(b'a'), u'a')
-        self.assertEqual(get_ascii_full(b'\xe1'), u'<Meta-a>')
-        self.assertEqual(get_ascii_full(b'\xe1', keynames='curses'), u'xE1')
+        self.assertEqual(get_ascii_full([b'a']), u'a')
+        self.assertEqual(get_ascii_full([b'\xe1']), u'<Meta-a>')
+        self.assertEqual(get_ascii_full([b'\xe1'], keynames='curses'), u'xE1')
 
 class TestUnknownEncoding(unittest.TestCase):
     def test_simple(self):
         get_utf16 = partial(events.get_key, encoding='utf16', keynames='curtsies')
-        self.assertEqual(get_utf16(b'a'), None)
-        self.assertEqual(get_utf16(b'a', full=True), None)
-        self.assertEqual(get_utf16(b'\xe1'), None)
-        self.assertEqual(get_utf16(b'\xe1', full=True), u'<Meta-a>')
+        self.assertEqual(get_utf16([b'a']), None)
+        self.assertEqual(get_utf16([b'a'], full=True), None)
+        self.assertEqual(get_utf16([b'\xe1']), None)
+        self.assertEqual(get_utf16([b'\xe1'], full=True), u'<Meta-a>')
 
 class TestPPEvent(unittest.TestCase):
     def test(self):
