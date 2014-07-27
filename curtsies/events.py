@@ -145,6 +145,8 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
     if keynames not in ['curtsies', 'curses', 'bytes']:
         raise ValueError("keynames must be one of 'curtsies', 'curses' or 'bytes'")
     seq = b''.join(bytes_)
+    if len(seq) > MAX_KEYPRESS_SIZE:
+        raise ValueError('unable to decode bytes %r', seq)
 
     def key_name():
         if keynames == 'curses':
@@ -175,13 +177,23 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
 
     if full and key_known:
         return key_name()
-    elif seq in KEYMAP_PREFIXES or seq in prefixes_for_encoding(encoding):
+    elif seq in KEYMAP_PREFIXES or could_be_unfinished_char(seq, encoding):
         return None # need more input to make up a full keypress
     elif key_known:
         return key_name()
     else:
         seq.decode(encoding) # this will raise a unicode error (they're annoying to raise ourselves)
         assert False, 'should have raised an unicode decode error'
+
+def could_be_unfinished_char(seq, encoding):
+    """Whether seq bytes might create a char in encoding if more bytes were added"""
+    if decodable(seq, encoding):
+        return False # any sensible encoding surely doesn't require lookahead (right?)
+        # (if seq bytes encoding a character, adding another byte shouldn't also encode something)
+    prefixes = prefixes_for_encoding(encoding)
+    if prefixes is None:
+        return True # We don't know, it could be
+    return seq in prefixes
 
 def cache(func):
     func.cache = {}
@@ -194,6 +206,10 @@ def cache(func):
 
 @cache
 def prefixes_for_encoding(encoding):
+    """Returns a set of proper prefixes of character in an encoding...
+
+    or at least enough to cover prevent
+    """
     if encodings.codecs.getdecoder('utf8') is encodings.codecs.getdecoder(encoding):
         prefixes = set()
         for i in range(0b11000000, 256): # http://en.wikipedia.org/wiki/UTF-8#Description
@@ -202,7 +218,7 @@ def prefixes_for_encoding(encoding):
     elif encodings.codecs.getdecoder('ascii') is encodings.codecs.getdecoder(encoding):
         return set()
     else:
-        raise NotImplementedError
+        return None
 
 def pp_event(seq):
     """Returns pretty representation of an Event or keypress"""
