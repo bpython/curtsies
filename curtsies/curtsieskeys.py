@@ -5,6 +5,8 @@
 # Special names are for multi-character keys, or key names
 # that would be hard to write in a config file
 
+#TODO add PAD keys hack as in bpython.cli
+
 CURTSIES_NAMES = dict([
   (b' ',          u'<SPACE>'),
   (b'\x1b ',      u'<Esc+SPACE>'),
@@ -23,6 +25,11 @@ CURTSIES_NAMES = dict([
   (b'\x1b[1;5B',  u'<Ctrl-DOWN>'),
   (b'\x1b[1;5C',  u'<Ctrl-RIGHT>'), # reported by myint
   (b'\x1b[1;5D',  u'<Ctrl-LEFT>'),  # reported by myint
+
+  (b'\x1b[5A',    u'<Ctrl-UP>'),    # not sure about these, someone wanted them for bpython
+  (b'\x1b[5B',    u'<Ctrl-DOWN>'),
+  (b'\x1b[5C',    u'<Ctrl-RIGHT>'),
+  (b'\x1b[5D',    u'<Ctrl-LEFT>'),
 
   (b'\x1b[1;9A',  u'<Esc+UP>'),
   (b'\x1b[1;9B',  u'<Esc+DOWN>'),
@@ -46,25 +53,25 @@ CURTSIES_NAMES = dict([
   (b'\x1b[21~',   u'<F10>'),
   (b'\x1b[23~',   u'<F11>'),
   (b'\x1b[24~',   u'<F12>'),
-  (b'\x1b\x7f',   u'<Esc+DELETE>'),
   (b'\x00',       u'<Ctrl-SPACE>'),
   (b'\x1c',       u'<Ctrl-\\>'),
   (b'\x1d',       u'<Ctrl-]>'),
   (b'\x1e',       u'<Ctrl-6>'),
   (b'\x1f',       u'<Ctrl-/>'),
-  (b'\x7f',       u'<DELETE>'),
-  (b'\x1b\x7f',   u'<Esc+DELETE>'),
-  (b'\xff',       u'<Meta-DELETE>'),
+  (b'\x7f',       u'<BACKSPACE>'),    # for some folks this is ctrl-backspace apparently
+  (b'\x1b\x7f',   u'<Esc+BACKSPACE>'),
+  (b'\xff',       u'<Meta-BACKSPACE>'),
   (b'\x1b\x1b[A', u'<Esc+UP>'),    # uncertain about these four
   (b'\x1b\x1b[B', u'<Esc+DOWN>'),
   (b'\x1b\x1b[C', u'<Esc+RIGHT>'),
   (b'\x1b\x1b[D', u'<Esc+LEFT>'),
   (b'\x1b',       u'<ESC>'),
+  (b'\x1b[1~',    u'<HOME>'),
+  (b'\x1b[2~',    u'<PADENTER>'),  #TODO untested
   (b'\x1b[3~',    u'<PADDELETE>'), #TODO check this name
+  (b'\x1b[4~',    u'<END>'),
   (b'\x1b[5~',    u'<PAGEUP>'),
   (b'\x1b[6~',    u'<PAGEDOWN>'),
-  (b'\x1b[1~',    u'<HOME>'),
-  (b'\x1b[4~',    u'<END>'),
   (b'\x1b\x1b[5~',u'<Esc+PAGEUP>'),
   (b'\x1b\x1b[6~',u'<Esc+PAGEDOWN>'),
   ])
