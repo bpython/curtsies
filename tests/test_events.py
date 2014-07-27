@@ -79,6 +79,14 @@ class TestGetKeyAscii(unittest.TestCase):
         self.assertEqual(get_ascii_full(b'\xe1'), u'<Meta-a>')
         self.assertEqual(get_ascii_full(b'\xe1', keynames='curses'), u'xE1')
 
+class TestUnknownEncoding(unittest.TestCase):
+    def test_simple(self):
+        get_utf16 = partial(events.get_key, encoding='utf16', keynames='curtsies')
+        self.assertEqual(get_utf16(b'a'), None)
+        self.assertEqual(get_utf16(b'a', full=True), None)
+        self.assertEqual(get_utf16(b'\xe1'), None)
+        self.assertEqual(get_utf16(b'\xe1', full=True), u'<Meta-a>')
+
 class TestPPEvent(unittest.TestCase):
     def test(self):
         self.assertEqual(events.pp_event(u'a'), 'a')
