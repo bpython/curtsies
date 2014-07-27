@@ -87,6 +87,11 @@ class TestUnknownEncoding(unittest.TestCase):
         self.assertEqual(get_utf16([b'\xe1']), None)
         self.assertEqual(get_utf16([b'\xe1'], full=True), u'<Meta-a>')
 
+class TestSpecialKeys(unittest.TestCase):
+    def test_simple(self):
+        seq = [b'\x1b', b'[', b'1', b';', b'9', b'C']
+        self.assertEqual([events.get_key(seq[:i], encoding='utf8') for i in range(1, len(seq)+1)], [None, None, None, None, None, u'<Esc+RIGHT>'])
+
 class TestPPEvent(unittest.TestCase):
     def test(self):
         self.assertEqual(events.pp_event(u'a'), 'a')

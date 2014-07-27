@@ -140,13 +140,14 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
     (for 'asdf', first on 'a', then on 'as', then on 'asd' - until a non-None
     value is returned)
     """
+    print 'called get_key(%r, encoding=%r, keynames=%r, full=%r)' % (bytes_, encoding, keynames, full)
     if not all(isinstance(c, type(b'')) for c in bytes_):
         raise ValueError("get key expects bytes, got %r" % bytes_) # expects raw bytes
     if keynames not in ['curtsies', 'curses', 'bytes']:
         raise ValueError("keynames must be one of 'curtsies', 'curses' or 'bytes'")
     seq = b''.join(bytes_)
     if len(seq) > MAX_KEYPRESS_SIZE:
-        raise ValueError('unable to decode bytes %r', seq)
+        raise ValueError('unable to decode bytes %r' % seq)
 
     def key_name():
         if keynames == 'curses':
@@ -174,6 +175,8 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
             return seq
 
     key_known = seq in CURTSIES_NAMES or seq in CURSES_NAMES or decodable(seq, encoding)
+    if key_known: print 'key known'
+    if seq in KEYMAP_PREFIXES: print 'key in keymap'
 
     if full and key_known:
         return key_name()
