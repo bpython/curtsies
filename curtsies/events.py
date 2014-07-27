@@ -140,7 +140,6 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
     (for 'asdf', first on 'a', then on 'as', then on 'asd' - until a non-None
     value is returned)
     """
-    print 'called get_key(%r, encoding=%r, keynames=%r, full=%r)' % (bytes_, encoding, keynames, full)
     if not all(isinstance(c, type(b'')) for c in bytes_):
         raise ValueError("get key expects bytes, got %r" % bytes_) # expects raw bytes
     if keynames not in ['curtsies', 'curses', 'bytes']:
@@ -175,8 +174,6 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
             return seq
 
     key_known = seq in CURTSIES_NAMES or seq in CURSES_NAMES or decodable(seq, encoding)
-    if key_known: print 'key known'
-    if seq in KEYMAP_PREFIXES: print 'key in keymap'
 
     if full and key_known:
         return key_name()
@@ -273,6 +270,7 @@ def try_keys():
             f.close()
             print('Thanks! Please open an issue at https://github.com/thomasballinger/curtsies/issues')
             print('or email thomasballinger@gmail.com. Include this terminal history or keylog.txt.')
+            print('You can keep pressing keys')
 
     with Cbreak(sys.stdin) as NoCbreak:
         while True:
@@ -291,7 +289,4 @@ def try_keys():
                 pass
 
 if __name__ == '__main__':
-    seq = [b'\x1b', b'O', b'P']
-    print(seq)
-    print(get_key(seq, sys.stdin.encoding))
     try_keys()
