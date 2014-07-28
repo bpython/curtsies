@@ -26,6 +26,15 @@ assert READ_SIZE >= events.MAX_KEYPRESS_SIZE
 # if a keypress could require more bytes than we read at a time to be identified,
 # the paste logic that reads more data as needed might not work.
 
+class ReplacedSigIntHandler(object):
+    def __init__(self, handler):
+        self.handler = handler
+    def __enter__(self):
+        self.orig_sigint_handler = signal.getsignal(signal.SIGINT)
+        signal.signal(signal.SIGINT, self.handler)
+    def __exit__(self, type, value, traceback):
+        signal.signal(signal.SIGINT, self.orig_sigint_handler)
+
 class Input(object):
     """Coroutine-interface respecting keypress generator"""
     def __init__(self, in_stream=sys.stdin, keynames='curtsies', paste_threshold=events.MAX_KEYPRESS_SIZE+1, sigint_event=False):
@@ -88,7 +97,13 @@ class Input(object):
 
     def send(self, timeout=None):
         """Returns a key or None if no key pressed"""
+        if self.sigint_event:
+            with ReplacedSigIntHandler(self.sigint_handler):
+                return self._send(timeout)
+        else:
+            return self._send(timeout)
 
+    def _send(self, timeout):
         def find_key():
             """Returns the keypress identified by adding unprocessed bytes, or None"""
             current_bytes = []
