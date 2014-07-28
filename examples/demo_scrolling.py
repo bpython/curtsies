@@ -3,12 +3,17 @@ import signal
 
 from curtsies import CursorAwareWindow, input, fmtstr
 
+rows, columns = '??'
 def cursor_winch():
+    global rows, columns
     print('this should be just off-screen')
     w = CursorAwareWindow(sys.stdout, sys.stdin, keep_last_line=True, hide_cursor=False)
     def sigwinch_handler(signum, frame):
+        global rows, columns
         dy = w.get_cursor_vertical_diff()
-        print('sigwinch! Changed from %r to %r' % ((rows, columns), (w.height, w.width)))
+        old_rows, old_columns = rows, columns
+        rows, columns = w.height, w.width
+        print('sigwinch! Changed from %r to %r' % ((old_rows, old_columns), (rows, columns)))
         print('cursor moved %d lines down' % dy)
         w.write(w.t.move_up)
         w.write(w.t.move_up)
