@@ -205,7 +205,8 @@ class CursorAwareWindow(BaseWindow):
         self.keep_last_line = keep_last_line
         self.cbreak = Cbreak(self.in_stream)
         self.extra_bytes_callback = extra_bytes_callback
-        self.another_sigwinch = False
+        self.another_sigwinch = False   # whether another SIGWINCH is queued up
+        self.in_get_cursor_diff = False # in the cursor query code of cursor diff
 
     def __enter__(self):
         self.cbreak.__enter__()
@@ -258,22 +259,26 @@ class CursorAwareWindow(BaseWindow):
                                           "Pass an extra_bytes_callback to CursorAwareWindow to prevent this") % (extra,))
                 return (row-1, col-1)
 
-    def in_cursor_diff_sigwinch_handler(self, *args):
-        self.another_sigwinch = True
-
     def get_cursor_vertical_diff(self):
         """Returns the how far down the cursor moved
+
+        If another get_cursor_vertical diff call is already in progress,
+        immediately returns zero.
 
         Does cursory querying until a SIGWINCH doesn't happen during
         the query. Calls to the function from a signal handler COULD STILL
         HAPPEN out of order - they just can't interrupt the actual cursor query.
-        (they could happen outside of the with statement
         """
+        if self.in_get_cursor_diff:
+            self.another_sigwinch = True
+            return 0
+
         cursor_dy = 0
         while True:
-            with ReplacedSigWinchHandler(self.in_cursor_diff_sigwinch_handler):
-                self.another_sigwinch = False
-                cursor_dy += self._get_cursor_vertical_diff_once()
+            self.in_get_cursor_diff = True
+            self.another_sigwinch = False
+            cursor_dy += self._get_cursor_vertical_diff_once()
+            self.in_get_cursor_diff = False
             if not self.another_sigwinch:
                 return cursor_dy
 
@@ -364,15 +369,6 @@ class CursorAwareWindow(BaseWindow):
         if not self.hide_cursor:
             self.write(self.t.normal_cursor)
         return offscreen_scrolls
-
-class ReplacedSigWinchHandler(object):
-    def __init__(self, handler):
-        self.handler = handler
-    def __enter__(self):
-        self.orig_sigwinch_handler = signal.getsignal(signal.SIGWINCH)
-        signal.signal(signal.SIGWINCH, self.handler)
-    def __exit__(self, type, value, traceback):
-        signal.signal(signal.SIGWINCH, self.orig_sigwinch_handler)
 
 def test():
     from . import input
