@@ -21,6 +21,7 @@ import sys
 import os
 import logging
 import re
+import signal
 
 import blessings
 
@@ -204,6 +205,7 @@ class CursorAwareWindow(BaseWindow):
         self.keep_last_line = keep_last_line
         self.cbreak = Cbreak(self.in_stream)
         self.extra_bytes_callback = extra_bytes_callback
+        self.another_sigwinch = False
 
     def __enter__(self):
         self.cbreak.__enter__()
@@ -256,9 +258,27 @@ class CursorAwareWindow(BaseWindow):
                                           "Pass an extra_bytes_callback to CursorAwareWindow to prevent this") % (extra,))
                 return (row-1, col-1)
 
-    def get_cursor_vertical_diff(self):
-        """Returns the how far down the cursor moved"""
+    def in_cursor_diff_sigwinch_handler(self, *args):
+        self.another_sigwinch = True
 
+    def get_cursor_vertical_diff(self):
+        """Returns the how far down the cursor moved
+
+        Does cursory querying until a SIGWINCH doesn't happen during
+        the query. Calls to the function from a signal handler COULD STILL
+        HAPPEN out of order - they just can't interrupt the actual cursor query.
+        (they could happen outside of the with statement
+        """
+        cursor_dy = 0
+        while True:
+            with ReplacedSigWinchHandler(self.in_cursor_diff_sigwinch_handler):
+                self.another_sigwinch = False
+                cursor_dy += self._get_cursor_vertical_diff_once()
+            if not self.another_sigwinch:
+                return cursor_dy
+
+    def _get_cursor_vertical_diff_once(self):
+        """Returns the how far down the cursor moved"""
         old_top_usable_row = self.top_usable_row
         row, col = self.get_cursor_position()
         if self._last_cursor_row is None:
@@ -345,6 +365,14 @@ class CursorAwareWindow(BaseWindow):
             self.write(self.t.normal_cursor)
         return offscreen_scrolls
 
+class ReplacedSigWinchHandler(object):
+    def __init__(self, handler):
+        self.handler = handler
+    def __enter__(self):
+        self.orig_sigwinch_handler = signal.getsignal(signal.SIGWINCH)
+        signal.signal(signal.SIGWINCH, self.handler)
+    def __exit__(self, type, value, traceback):
+        signal.signal(signal.SIGWINCH, self.orig_sigwinch_handler)
 
 def test():
     from . import input
