@@ -395,8 +395,6 @@ def test():
                     a = [fmtstr(c*columns) for _ in range(1)]
                 elif c == "e":
                     a = [fmtstr(c*columns) for _ in range(1)]
-                elif isinstance(c, events.WindowChangeEvent):
-                    a = w.array_from_text("window just changed to %d rows and %d columns" % (c.rows, c.columns))
                 elif c == '\x0c': # ctrl-L
                     [w.write('\n') for _ in range(rows)]
                     continue
