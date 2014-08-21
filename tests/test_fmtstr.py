@@ -224,6 +224,9 @@ class TestSlicing(unittest.TestCase):
     def test_slice(self):
         self.assertEqual(fmtstr('Hi!', 'blue')[1:2], fmtstr('i', 'blue'))
         self.assertEqual(fmtstr('Hi!', 'blue')[1:], fmtstr('i!', 'blue'))
+        s = fmtstr('imp') + ' '
+        self.assertEqual(s[1:], fmtstr('mp')+' ')
+
         # considering changing behavior so that this doens't work
         # self.assertEqual(fmtstr('Hi!', 'blue')[15:18], fmtstr('', 'blue'))
 
