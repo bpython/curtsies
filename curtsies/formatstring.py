@@ -347,7 +347,7 @@ class FmtStr(object):
         for fs in self.basefmtstrs:
             if index.start < counter + len(fs) and index.stop > counter:
                 start = max(0, index.start - counter)
-                end = index.stop - counter
+                end = min(index.stop - counter, len(fs))
                 if end - start == len(fs):
                     parts.append(fs)
                 else:
