@@ -162,6 +162,13 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(s.split(' '), [s[:5], s[6:]])
         self.assertEqual(blue('hello   \t\n\nthere').split(), [blue('hello'), blue('there')])
 
+        # split shouldn't create fmtstrs without basefmtstrs
+        self.assertEqual(fmtstr('a').split('a')[0].basefmtstrs, fmtstr('').basefmtstrs)
+        self.assertEqual(fmtstr('a').split('a')[1].basefmtstrs, fmtstr('').basefmtstrs)
+
+        self.assertEqual((fmtstr('imp') + ' ').split('i'), [fmtstr(''), fmtstr('mp  ')])
+        self.assertEqual((fmtstr('imp') + ' ').split('i'), [fmtstr(''), fmtstr('mp ')])
+
     def test_linessplit(self):
         text = blue('the sum of the squares of the sideways')
         result = [blue('the')+blue(' ')+blue('sum'),
