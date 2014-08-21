@@ -166,8 +166,7 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(fmtstr('a').split('a')[0].basefmtstrs, fmtstr('').basefmtstrs)
         self.assertEqual(fmtstr('a').split('a')[1].basefmtstrs, fmtstr('').basefmtstrs)
 
-        self.assertEqual((fmtstr('imp') + ' ').split('i'), [fmtstr(''), fmtstr('mp  ')])
-        self.assertEqual((fmtstr('imp') + ' ').split('i'), [fmtstr(''), fmtstr('mp ')])
+        self.assertEqual((fmtstr('imp') + ' ').split('i'), [fmtstr(''), fmtstr('mp') + ' '])
 
     def test_linessplit(self):
         text = blue('the sum of the squares of the sideways')

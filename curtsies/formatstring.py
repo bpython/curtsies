@@ -356,7 +356,7 @@ class FmtStr(object):
             counter += len(fs)
             if index.stop < counter:
                 break
-        return FmtStr(*parts)
+        return FmtStr(*parts) if parts else fmtstr('')
 
     def _getitem_normalized(self, index):
         """Builds the more compact fmtstrs by using fromstr( of the control sequences)"""
