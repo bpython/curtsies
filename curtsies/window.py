@@ -137,8 +137,7 @@ class FullscreenWindow(BaseWindow):
         if array received is of height too small, render it anyway
         if array received is of height too large, render the renderable portion (no scroll)
         """
-        if sys.version_info[0] == 2:
-            str = unicode
+        actualize = unicode if sys.version_info[0] == 2 else str
         #TODO there's a race condition here - these height and widths are
         # super fresh - they might change between the array being constructed and rendered
         # Maybe the right behavior is to throw away the render in the signal handler?
@@ -160,7 +159,7 @@ class FullscreenWindow(BaseWindow):
             if line == self._last_lines_by_row.get(row, None):
                 continue
             self.write(self.t.move(row, 0))
-            self.write(str(line))
+            self.write(actualize(line))
             if len(line) < width:
                 self.write(self.t.clear_eol)
 
@@ -312,8 +311,7 @@ class CursorAwareWindow(BaseWindow):
         if array received is of height too large, render it, scroll down,
             and render the rest of it, then return how much we scrolled down
         """
-        if sys.version_info[0] == 2:
-            str = unicode
+        actualize = unicode if sys.version_info[0] == 2 else str
         # caching of write and tc (avoiding the self. lookups etc) made
         # no significant performance difference here
         if not self.hide_cursor:
@@ -332,7 +330,7 @@ class CursorAwareWindow(BaseWindow):
             if line == self._last_lines_by_row.get(row, None):
                 continue
             self.write(self.t.move(row, 0))
-            self.write(str(line))
+            self.write(actualize(line))
             if len(line) < width:
                 self.write(self.t.clear_eol)
 
@@ -357,7 +355,7 @@ class CursorAwareWindow(BaseWindow):
             current_lines_by_row = dict((k-1, v) for k, v in current_lines_by_row.items())
             logging.debug('new top_usable_row: %d' % self.top_usable_row)
             self.write(self.t.move(height-1, 0)) # since scrolling moves the cursor
-            self.write(str(line))
+            self.write(actualize(line))
             current_lines_by_row[height-1] = line
 
         logging.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())

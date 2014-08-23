@@ -3,7 +3,11 @@ from __future__ import unicode_literals
 import sys
 import os
 import unittest
-import StringIO
+
+if sys.version_info[0] == 3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 import blessings
 import pyte
@@ -27,14 +31,15 @@ class ReportingStream(Stream):
 
 class ReportingScreen(Screen):
     def __init__(self, *args, **kwargs):
-        self._report_file = StringIO.StringIO()
+        self._report_file = StringIO()
         super(ReportingScreen, self).__init__(*args, **kwargs)
 
     def report_cursor_position(self):
         # cursor position is 1-indexed in the ANSI escape sequence API
         s = ctrl.CSI + "%d;%sR" % (self.cursor.y + 1, self.cursor.x + 1)
+        self._report_file.seek(0)
         self._report_file.write(s)
-        self._report_file.seek(-len(s), 1)
+        self._report_file.seek(0)
 
 class Bugger(object):
     __before__ = __after__ = lambda *args: None
@@ -97,7 +102,6 @@ class TestCursorAwareWindow(unittest.TestCase):
     def test_cursor_position(self):
         with self.window:
             self.window.render_to_terminal([u'hi', u'there'], cursor_pos=(2, 4))
-            print self.screen.display
             self.assertEqual(self.window.get_cursor_position(), (2, 4))
 
     def test_inital_cursor_position(self):
