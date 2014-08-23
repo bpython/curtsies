@@ -319,6 +319,10 @@ class TestUnicode(unittest.TestCase):
         repr(Chunk(u'–'))
         self.assertEqual(repr(fmtstr(u'–')), repr(u'–'))
 
+    def test_bad_utf8(self):
+        """FmtStrs of bytes that arne't valid utf8 even though a the output medium is shouldn't crash"""
+        str(fmtstr('\xf7'))
+
 class TestFSArray(unittest.TestCase):
     def test_no_hanging_space(self):
         a = FSArray(4, 2)

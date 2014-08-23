@@ -87,7 +87,7 @@ class Chunk(object):
     def __unicode__(self):
         value = self.color_str
         if isinstance(value, bytes):
-            return value.decode('utf8')
+            return value.decode('utf8', 'replace')
         return value
 
     def __eq__(self, other):
