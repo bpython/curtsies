@@ -21,7 +21,8 @@ setup(name='curtsies',
           'blessings==1.5.1'
       ],
       tests_require = [
-          'mock'
+          'mock',
+          'pyte'
       ],
       classifiers=[
           'Development Status :: 3 - Alpha',

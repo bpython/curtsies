@@ -15,6 +15,9 @@ is unknown how the window size change affected scrolling / the cursor.
 Leaving the context of the window deletes everything below the cursor
 at the beginning of the its current line.
 (use scroll_down() from the last rendered line if you want to save all history)
+
+All windows write only unicode to the terminal - that's what blessings does, so
+we match it.
 """
 
 import sys
@@ -31,8 +34,7 @@ from .termhelpers import Cbreak, Nonblocking
 
 from . import events
 
-MAX_TERMINAL_WIDTH = 10000 # feels reasonable...
-SCROLL_DOWN = "\x1bD"
+SCROLL_DOWN = u"\x1bD"
 
 #BIG TODO!!! 
 #TODO How to get cursor position? It's a thing we need!
@@ -48,20 +50,9 @@ SCROLL_DOWN = "\x1bD"
 class BaseWindow(object):
     """ Renders 2D arrays of characters and cursor position """
     def __init__(self, out_stream=sys.stdout, hide_cursor=True):
-        """
-        tc expected to have must have methods:
-            get_cursor_position()
-            get_screen_size() -> (row, col)
-            set_cursor_position((row, column))
-            write(msg)
-            scroll_down()
-            erase_line()
-            down, up, left, back()
-            get_event() -> 'c' | events.WindowChangeEvent(rows, columns)
-        """
         logging.debug('-------initializing Window object %r------' % self)
-        self.t = blessings.Terminal(stream=out_stream) #TODO how does blessings choose where to write?
-        self.out_stream = out_stream  #     if it assumes stdout, we might as well too
+        self.t = blessings.Terminal(stream=out_stream, force_styling=True)
+        self.out_stream = out_stream
         self.hide_cursor = hide_cursor
         self._last_lines_by_row = {}
         self._last_rendered_width = None
@@ -146,6 +137,8 @@ class FullscreenWindow(BaseWindow):
         if array received is of height too small, render it anyway
         if array received is of height too large, render the renderable portion (no scroll)
         """
+        if sys.version_info[0] == 2:
+            str = unicode
         #TODO there's a race condition here - these height and widths are
         # super fresh - they might change between the array being constructed and rendered
         # Maybe the right behavior is to throw away the render in the signal handler?
@@ -209,7 +202,8 @@ class CursorAwareWindow(BaseWindow):
         self.in_get_cursor_diff = False # in the cursor query code of cursor diff
 
     def __enter__(self):
-        self.cbreak.__enter__()
+        if hasattr(self.in_stream, 'file_no'): #fake files aren't buffered, no need for cbreak
+            self.cbreak.__enter__()
         self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
         logging.debug('initial top_usable_row: %d' % self.top_usable_row)
@@ -218,10 +212,11 @@ class CursorAwareWindow(BaseWindow):
     def __exit__(self, type, value, traceback):
         if self.keep_last_line:
             self.write(SCROLL_DOWN) # just moves cursor down if not on last line
-        self.write(self.t.move_left*MAX_TERMINAL_WIDTH)
+        self.write(self.t.move_x(0))
         self.write(self.t.clear_eos)
         self.write(self.t.clear_eol)
-        self.cbreak.__exit__(type, value, traceback)
+        if hasattr(self.in_stream, 'file_no'): #fake files aren't buffered
+            self.cbreak.__exit__(type, value, traceback)
         BaseWindow.__exit__(self, type, value, traceback)
 
     def get_cursor_position(self):
@@ -230,13 +225,16 @@ class CursorAwareWindow(BaseWindow):
         0-indexed, like blessings cursor positions"""
         in_stream = self.in_stream # TODO would this be cleaner as a parameter?
 
-        QUERY_CURSOR_POSITION = "\x1b[6n"
+        QUERY_CURSOR_POSITION = u"\x1b[6n"
         self.write(QUERY_CURSOR_POSITION)
 
         def retrying_read():
             while True:
                 try:
-                    return in_stream.read(1)
+                    c = in_stream.read(1)
+                    if c == '':
+                        raise ValueError("Stream should be blocking - should't return ''. Returned %r so far", (resp,))
+                    return c
                 except IOError:
                     raise ValueError('cursor get pos response read interrupted')
                     # to find out if this ever really happens
@@ -246,7 +244,7 @@ class CursorAwareWindow(BaseWindow):
         while True:
             c = retrying_read()
             resp += c
-            m = re.search('(?P<extra>.*)\x1b\[(?P<row>\\d+);(?P<column>\\d+)R', resp)
+            m = re.search('(?P<extra>.*)(?P<CSI>\x1b\[|\x9b)(?P<row>\\d+);(?P<column>\\d+)R', resp)
             if m:
                 row = int(m.groupdict()['row'])
                 col = int(m.groupdict()['column'])
@@ -314,6 +312,8 @@ class CursorAwareWindow(BaseWindow):
         if array received is of height too large, render it, scroll down,
             and render the rest of it, then return how much we scrolled down
         """
+        if sys.version_info[0] == 2:
+            str = unicode
         # caching of write and tc (avoiding the self. lookups etc) made
         # no significant performance difference here
         if not self.hide_cursor:
@@ -370,7 +370,7 @@ class CursorAwareWindow(BaseWindow):
             self.write(self.t.normal_cursor)
         return offscreen_scrolls
 
-def test():
+def demo():
     from . import input
     with FullscreenWindow(sys.stdout) as w:
         with input.Input(sys.stdin) as input_generator:
@@ -413,4 +413,4 @@ def main():
         w.render_to_terminal(a)
 
 if __name__ == '__main__':
-    test()
+    demo()
