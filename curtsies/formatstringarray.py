@@ -144,8 +144,8 @@ class FSArray(object):
                     a_line += str(a_char)
                     b_line += str(a_char)
                 else:
-                    a_line += str(blink(a_char))
-                    b_line += str(blink(b_char))
+                    a_line += str(underline(blink(a_char)))
+                    b_line += str(underline(blink(b_char)))
             a_rows.append(a_line)
             b_rows.append(b_line)
         hdiff = '\n'.join(a_line + ' | ' + b_line for a_line, b_line in zip(a_rows, b_rows))
