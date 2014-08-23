@@ -153,8 +153,8 @@ class FSArray(object):
 
 class FormatStringTest(unittest.TestCase):
     def assertFSArraysEqual(self, a, b):
-        self.assertIsInstance(a, FSArray)
-        self.assertIsInstance(b, FSArray)
+        self.assertEqual(type(a), FSArray)
+        self.assertEqual(type(b), FSArray)
         self.assertEqual((a.width, b.height), (a.width, b.height), 'fsarray dimensions do not match: %r %r' % (a.shape, b.shape))
         for i, (a_row, b_row) in enumerate(zip(a, b)):
             self.assertEqual(a_row, b_row, 'FSArrays differ first on line %s:\n%s' % (i, FSArray.diff(a, b)))
