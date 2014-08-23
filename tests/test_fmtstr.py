@@ -3,7 +3,7 @@ import unittest
 from curtsies.formatstring import FmtStr, fmtstr, Chunk, linesplit, normalize_slice
 from curtsies.fmtfuncs import *
 from curtsies.termformatconstants import FG_COLORS
-from curtsies.formatstringarray import fsarray, FSArray
+from curtsies.formatstringarray import fsarray, FSArray, FormatStringTest
 
 try:
     unicode = unicode
@@ -341,6 +341,19 @@ class TestFSArray(unittest.TestCase):
 
         self.assertEqual(normalize_slice(10, Slice[:3]), slice(0, 3, None))
         self.assertEqual(normalize_slice(11, Slice[3:]), slice(3, 11, None))
+
+class TestFSArray(FormatStringTest):
+
+    def test_diff_testing(self):
+        a = fsarray(['abc', 'def'])
+        b = fsarray(['abc', 'dqf'])
+        self.assertRaises(AssertionError, self.assertFSArraysEqual, a, b)
+        a = fsarray([blue('abc'), red('def')])
+        b = fsarray([blue('abc'), red('dqf')])
+        self.assertRaises(AssertionError, self.assertFSArraysEqual, a, b)
+        a = fsarray([blue('abc'), red('def')])
+        b = fsarray([blue('abc'), red('d')+blue('e')+red('f')])
+        self.assertRaises(AssertionError, self.assertFSArraysEqual, a, b)
 
 if __name__ == '__main__':
     import fmtstr.fmtstr

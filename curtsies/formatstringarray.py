@@ -23,6 +23,7 @@ Format String 2D array
 
 import sys
 import logging
+import unittest
 
 from .formatstring import fmtstr
 from .formatstring import normalize_slice
@@ -128,6 +129,35 @@ class FSArray(object):
         for line in self.rows:
             print(line)
 
+    @classmethod
+    def diff(cls, a, b):
+        """terminal output of diffs underlined"""
+        def underline(x): return '\x1b[4m%s\x1b[0m' % (x,)
+        def blink(x): return '\x1b[5m%s\x1b[0m' % (x,)
+        a_rows = []
+        b_rows = []
+        for a_row, b_row in zip(a, b):
+            a_line = ''
+            b_line = ''
+            for a_char, b_char in zip(a_row, b_row):
+                if a_char == b_char:
+                    a_line += str(a_char)
+                    b_line += str(a_char)
+                else:
+                    a_line += str(underline(blink(a_char)))
+                    b_line += str(underline(blink(b_char)))
+            a_rows.append(a_line)
+            b_rows.append(b_line)
+        hdiff = '\n'.join(a_line + ' | ' + b_line for a_line, b_line in zip(a_rows, b_rows))
+        return hdiff
+
+class FormatStringTest(unittest.TestCase):
+    def assertFSArraysEqual(self, a, b):
+        self.assertEqual(type(a), FSArray)
+        self.assertEqual(type(b), FSArray)
+        self.assertEqual((a.width, b.height), (a.width, b.height), 'fsarray dimensions do not match: %r %r' % (a.shape, b.shape))
+        for i, (a_row, b_row) in enumerate(zip(a, b)):
+            self.assertEqual(a_row, b_row, 'FSArrays differ first on line %s:\n%s' % (i, FSArray.diff(a, b)))
 
 if __name__ == '__main__':
     a = FSArray(3, 14, bg='blue')
