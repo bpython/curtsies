@@ -130,23 +130,28 @@ class FSArray(object):
             print(line)
 
     @classmethod
-    def diff(cls, a, b):
+    def diff(cls, a, b, ignore_formatting=False):
         """terminal output of diffs underlined"""
         def underline(x): return '\x1b[4m%s\x1b[0m' % (x,)
         def blink(x): return '\x1b[5m%s\x1b[0m' % (x,)
         a_rows = []
         b_rows = []
+        max_a_width = max(len(row) for row in a)
         for a_row, b_row in zip(a, b):
+            extra_a = ' ' * (max_a_width - len(a_row))
             a_line = ''
             b_line = ''
             for a_char, b_char in zip(a_row, b_row):
+                if ignore_formatting:
+                    a_char = a_char.s if isinstance(a_char, FmtStr) else a_char
+                    b_char = b_char.s if isinstance(b_char, FmtStr) else b_char
                 if a_char == b_char:
                     a_line += str(a_char)
-                    b_line += str(a_char)
+                    b_line += str(b_char)
                 else:
-                    a_line += str(underline(blink(a_char)))
-                    b_line += str(underline(blink(b_char)))
-            a_rows.append(a_line)
+                    a_line += underline(blink(str(a_char)))
+                    b_line += underline(blink(str(b_char)))
+            a_rows.append(a_line + extra_a)
             b_rows.append(b_line)
         hdiff = '\n'.join(a_line + ' | ' + b_line for a_line, b_line in zip(a_rows, b_rows))
         return hdiff
@@ -158,6 +163,15 @@ class FormatStringTest(unittest.TestCase):
         self.assertEqual((a.width, b.height), (a.width, b.height), 'fsarray dimensions do not match: %r %r' % (a.shape, b.shape))
         for i, (a_row, b_row) in enumerate(zip(a, b)):
             self.assertEqual(a_row, b_row, 'FSArrays differ first on line %s:\n%s' % (i, FSArray.diff(a, b)))
+
+    def assertFSArraysEqualIgnoringFormatting(self, a, b):
+        """Also accepts arrays of strings"""
+        self.assertEqual(len(a), len(b), 'fsarray heights do not match: %r %r' % (len(a), len(b)))
+        for i, (a_row, b_row) in enumerate(zip(a, b)):
+            a_row = a_row.s if isinstance(a_row, FmtStr) else a_row
+            b_row = b_row.s if isinstance(b_row, FmtStr) else b_row
+            self.assertEqual(a_row, b_row, 'FSArrays differ first on line %s:\n%s' % (i, FSArray.diff(a, b, ignore_formatting=True)))
+
 
 if __name__ == '__main__':
     a = FSArray(3, 14, bg='blue')
