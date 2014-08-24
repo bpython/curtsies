@@ -35,6 +35,7 @@ from .termhelpers import Cbreak, Nonblocking
 from . import events
 
 SCROLL_DOWN = u"\x1bD"
+FIRST_COLUMN = u"\x1b[1G"
 
 #BIG TODO!!! 
 #TODO How to get cursor position? It's a thing we need!
@@ -211,7 +212,8 @@ class CursorAwareWindow(BaseWindow):
     def __exit__(self, type, value, traceback):
         if self.keep_last_line:
             self.write(SCROLL_DOWN) # just moves cursor down if not on last line
-        self.write(self.t.move_x(0))
+
+        self.write(FIRST_COLUMN)
         self.write(self.t.clear_eos)
         self.write(self.t.clear_eol)
         if hasattr(self.in_stream, 'file_no'): #fake files aren't buffered
