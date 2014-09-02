@@ -31,7 +31,7 @@ This is what using (nearly every feature of) curtsies looks like:
                     a[row, column:column+len(repr(c))] = [color(repr(c))]
                 window.render_to_terminal(a)
 
-The a few main objects in curtsies you probably want to use:
+The are a few main objects in curtsies you probably want to use:
 
 * [FmtStr](readme.md#fmtstr) objects are colored strings
 * [FSArray](readme.md#fsarray) objects are 2D arrays of colored text
