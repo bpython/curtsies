@@ -12,6 +12,8 @@ cnames = dict(list(zip('krgybmcwd', colors + ('default',))))
 def func_for_letter(l, default='k'):
     if l == 'd':
         l = default
+    elif l == 'D':
+        l = default.upper()
     return partial(fmtstr, fg=cnames[l.lower()], bold=(l.lower() != l))
 
 def color_for_letter(l, default='k'):
