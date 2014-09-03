@@ -105,8 +105,9 @@ class Chunk(object):
             if att == 'fg': return FG_NUMBER_TO_COLOR[self.atts[att]]
             elif att == 'bg': return 'on_' + BG_NUMBER_TO_COLOR[self.atts[att]]
             else: return att
-        return (''.join(pp_att(att)+'(' for att in sorted(self.atts))
-                + repr(self.s) + ')'*len(self.atts))
+        atts_out = dict((k, v) for (k, v) in self.atts.items() if v) 
+        return (''.join(pp_att(att)+'(' for att in sorted(atts_out))
+                + repr(self.s) + ')'*len(atts_out))
 
 class FmtStr(object):
     """
