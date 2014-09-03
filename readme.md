@@ -65,7 +65,7 @@ If all you need are colored strings, you've got some other great options (other 
   than colored output.
 * https://github.com/verigak/colors/ (`pip install colors`)
 * https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py (`pip install clint`)
-* https://pypi.python.org/pypi/termcolor(`pip install termcolor`)
+* https://pypi.python.org/pypi/termcolor (`pip install termcolor`)
 
 In all of these libraries the expression `blue('hi') + ' ' + green('there)`
 or equivalent
