@@ -15,6 +15,8 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 '\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m'
 >>> fmtstr(', ').join(['a', fmtstr('b'), fmtstr('c', 'blue')])
 'a'+', '+'b'+', '+blue('c')
+>>> fmtstr('hello', 'red', bold=False)
+red('hello')
 """
 #TODO add a way to composite text without losing original formatting information
 
