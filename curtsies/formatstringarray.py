@@ -29,6 +29,8 @@ from .formatstring import fmtstr
 from .formatstring import normalize_slice
 from .formatstring import FmtStr
 
+logger = logging.getLogger(__name__)
+
 def slicesize(s):
     return int((s.stop - s.start) / (s.step if s.step else 1))
 
@@ -93,7 +95,7 @@ class FSArray(object):
 
     def __setitem__(self, slicetuple, value):
         """Place a FSArray in a FSArray"""
-        logging.debug('slice: %r', slicetuple)
+        logger.debug('slice: %r', slicetuple)
         if isinstance(slicetuple, slice):
             rowslice, colslice = slicetuple, slice(None)
             if isinstance(value, (bytes, unicode)):
@@ -113,8 +115,8 @@ class FSArray(object):
         additional_rows = max(0, rowslice.stop - len(self.rows))
         self.rows.extend([fmtstr('', *self.saved_args, **self.saved_kwargs)
                           for _ in range(additional_rows)])
-        logging.debug('num columns: %r', self.num_columns)
-        logging.debug('colslice: %r', colslice)
+        logger.debug('num columns: %r', self.num_columns)
+        logger.debug('colslice: %r', colslice)
         colslice = normalize_slice(self.num_columns, colslice)
         if slicesize(colslice) == 0 or slicesize(rowslice) == 0:
             return
