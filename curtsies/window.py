@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 SCROLL_DOWN = u"\x1bD"
 FIRST_COLUMN = u"\x1b[1G"
+NO_LINEWRAP = u"\x1b[?7l"
 
 #BIG TODO!!! 
 #TODO How to get cursor position? It's a thing we need!
@@ -209,6 +210,7 @@ class CursorAwareWindow(BaseWindow):
         self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
         logger.debug('initial top_usable_row: %d' % self.top_usable_row)
+        self.write(NO_LINEWRAP)
         return BaseWindow.__enter__(self)
 
     def __exit__(self, type, value, traceback):
@@ -315,6 +317,34 @@ class CursorAwareWindow(BaseWindow):
         if array received is of height too large, render it, scroll down,
             and render the rest of it, then return how much we scrolled down
         """
+        offscreen_scrolls = 0
+
+        def check_for_cursor_movement():
+            cursor_row, _ = self.get_cursor_position()
+            if self._last_cursor_row is not None:
+                if self._last_cursor_row != cursor_row:
+                    diff = cursor_row - self._last_cursor_row
+                    e = ValueError("cursor moved %s rows down! offscreen_scrolls: %s" % (diff, offscreen_scrolls))
+                    raise e
+            else:
+                self._last_cursor_row, _ = self.get_cursor_position()
+
+        def move_to_row_stepwise(row):
+            if not self._last_cursor_row:
+                self._last_cursor_row, _ = self.get_cursor_position()
+            diff = row - self._last_cursor_row
+            for _ in range(abs(diff)):
+                if diff > 0:
+                    self.write(self.t.move_down)
+                else:
+                    self.write(self.t.move_up)
+            self._last_cursor_row = row
+            check_for_cursor_movement()
+            self.write(self.t.move_x(0))
+            self._last_cursor_column = 0
+
+        check_for_cursor_movement()
+
         actualize = unicode if sys.version_info[0] == 2 else str
         # caching of write and tc (avoiding the self. lookups etc) made
         # no significant performance difference here
@@ -333,7 +363,7 @@ class CursorAwareWindow(BaseWindow):
             current_lines_by_row[row] = line
             if line == self._last_lines_by_row.get(row, None):
                 continue
-            self.write(self.t.move(row, 0))
+            move_to_row_stepwise(row)
             self.write(actualize(line))
             if len(line) < width:
                 self.write(self.t.clear_eol)
@@ -343,13 +373,12 @@ class CursorAwareWindow(BaseWindow):
         rest_of_rows = rows_for_use[shared:]
         for row in rest_of_rows: # if array too small
             if self._last_lines_by_row and row not in self._last_lines_by_row: continue
-            self.write(self.t.move(row, 0))
+            move_to_row_stepwise(row)
             self.write(self.t.clear_eol)
             self.write(self.t.clear_bol) #TODO probably not necessary - is first char cleared?
             current_lines_by_row[row] = None
 
         # lines for which we need to scroll down to render
-        offscreen_scrolls = 0
         for line in rest_of_lines: # if array too big
             self.scroll_down()
             if self.top_usable_row > 0:
@@ -358,15 +387,18 @@ class CursorAwareWindow(BaseWindow):
                 offscreen_scrolls += 1
             current_lines_by_row = dict((k-1, v) for k, v in current_lines_by_row.items())
             logger.debug('new top_usable_row: %d' % self.top_usable_row)
-            self.write(self.t.move(height-1, 0)) # since scrolling moves the cursor
+            move_to_row_stepwise(height - 1) # since scrolling moves the cursor
             self.write(actualize(line))
             current_lines_by_row[height-1] = line
 
         logger.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())
         logger.debug('lines in current lines by row: %r' % current_lines_by_row.keys())
-        self._last_cursor_row = cursor_pos[0]-offscreen_scrolls+self.top_usable_row
+        _cursor_row = cursor_pos[0]-offscreen_scrolls+self.top_usable_row
+        move_to_row_stepwise(_cursor_row) # since scrolling moves the cursor
+
+        self.write(self.t.move_x(cursor_pos[1]))
         self._last_cursor_column = cursor_pos[1]
-        self.write(self.t.move(self._last_cursor_row, self._last_cursor_column))
+
         self._last_lines_by_row = current_lines_by_row
         if not self.hide_cursor:
             self.write(self.t.normal_cursor)
