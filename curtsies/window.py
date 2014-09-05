@@ -34,6 +34,8 @@ from .termhelpers import Cbreak, Nonblocking
 
 from . import events
 
+logger = logging.getLogger(__name__)
+
 SCROLL_DOWN = u"\x1bD"
 FIRST_COLUMN = u"\x1b[1G"
 
@@ -51,7 +53,7 @@ FIRST_COLUMN = u"\x1b[1G"
 class BaseWindow(object):
     """ Renders 2D arrays of characters and cursor position """
     def __init__(self, out_stream=sys.stdout, hide_cursor=True):
-        logging.debug('-------initializing Window object %r------' % self)
+        logger.debug('-------initializing Window object %r------' % self)
         self.t = blessings.Terminal(stream=out_stream, force_styling=True)
         self.out_stream = out_stream
         self.hide_cursor = hide_cursor
@@ -60,23 +62,23 @@ class BaseWindow(object):
         self._last_rendered_height = None
 
     def scroll_down(self):
-        logging.debug('sending scroll down message w/ cursor on bottom line')
+        logger.debug('sending scroll down message w/ cursor on bottom line')
         with self.t.location(x=0, y=1000000):# since scroll-down only moves the screen if cursor is at bottom
             self.write(SCROLL_DOWN) #TODO will blessings do this?
 
     def write(self, msg):
-        #logging.debug('writing %r' % msg)
+        #logger.debug('writing %r' % msg)
         self.out_stream.write(msg)
         self.out_stream.flush()
 
     def __enter__(self):
-        logging.debug("running BaseWindow.__enter__")
+        logger.debug("running BaseWindow.__enter__")
         if self.hide_cursor:
             self.write(self.t.hide_cursor)
         return self
 
     def __exit__(self, type, value, traceback):
-        logging.debug("running BaseWindow.__exit__")
+        logger.debug("running BaseWindow.__exit__")
         if self.hide_cursor:
             self.write(self.t.normal_cursor)
 
@@ -172,8 +174,8 @@ class FullscreenWindow(BaseWindow):
             self.write(self.t.clear_bol)
             current_lines_by_row[row] = None
 
-        logging.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())
-        logging.debug('lines in current lines by row: %r' % current_lines_by_row.keys())
+        logger.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())
+        logger.debug('lines in current lines by row: %r' % current_lines_by_row.keys())
         self.write(self.t.move(*cursor_pos))
         self._last_lines_by_row = current_lines_by_row
         if not self.hide_cursor:
@@ -206,7 +208,7 @@ class CursorAwareWindow(BaseWindow):
             self.cbreak.__enter__()
         self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
-        logging.debug('initial top_usable_row: %d' % self.top_usable_row)
+        logger.debug('initial top_usable_row: %d' % self.top_usable_row)
         return BaseWindow.__enter__(self)
 
     def __exit__(self, type, value, traceback):
@@ -239,7 +241,7 @@ class CursorAwareWindow(BaseWindow):
                 except IOError:
                     raise ValueError('cursor get pos response read interrupted')
                     # to find out if this ever really happens
-                    logging.debug('read interrupted, retrying')
+                    logger.debug('read interrupted, retrying')
 
         resp = ''
         while True:
@@ -289,15 +291,15 @@ class CursorAwareWindow(BaseWindow):
             cursor_dy = 0
         else:
             cursor_dy = row - self._last_cursor_row
-            logging.info('cursor moved %d lines down' % cursor_dy)
+            logger.info('cursor moved %d lines down' % cursor_dy)
             while self.top_usable_row > -1 and cursor_dy > 0:
                 self.top_usable_row += 1
                 cursor_dy -= 1
             while self.top_usable_row > 1 and cursor_dy < 0:
                 self.top_usable_row -= 1
                 cursor_dy += 1
-        logging.info('top usable row changed from %d to %d', old_top_usable_row, self.top_usable_row)
-        logging.info('returning cursor dy of %d from curtsies' % cursor_dy)
+        logger.info('top usable row changed from %d to %d', old_top_usable_row, self.top_usable_row)
+        logger.info('returning cursor dy of %d from curtsies' % cursor_dy)
         self._last_cursor_row = row
         return cursor_dy
 
@@ -355,13 +357,13 @@ class CursorAwareWindow(BaseWindow):
             else:
                 offscreen_scrolls += 1
             current_lines_by_row = dict((k-1, v) for k, v in current_lines_by_row.items())
-            logging.debug('new top_usable_row: %d' % self.top_usable_row)
+            logger.debug('new top_usable_row: %d' % self.top_usable_row)
             self.write(self.t.move(height-1, 0)) # since scrolling moves the cursor
             self.write(actualize(line))
             current_lines_by_row[height-1] = line
 
-        logging.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())
-        logging.debug('lines in current lines by row: %r' % current_lines_by_row.keys())
+        logger.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())
+        logger.debug('lines in current lines by row: %r' % current_lines_by_row.keys())
         self._last_cursor_row = cursor_pos[0]-offscreen_scrolls+self.top_usable_row
         self._last_cursor_column = cursor_pos[1]
         self.write(self.t.move(self._last_cursor_row, self._last_cursor_column))
@@ -371,6 +373,9 @@ class CursorAwareWindow(BaseWindow):
         return offscreen_scrolls
 
 def demo():
+    handler = logging.FileHandler(filename='display.log')
+    logging.getLogger(__name__).setLevel(logging.DEBUG)
+    logging.getLogger(__name__).addHandler(handler)
     from . import input
     with FullscreenWindow(sys.stdout) as w:
         with input.Input(sys.stdin) as input_generator:
@@ -403,7 +408,9 @@ def demo():
                 w.render_to_terminal(a)
 
 def main():
-    logging.basicConfig(filename='display.log',level=logging.DEBUG)
+    handler = logging.FileHandler(filename='display.log', level=logging.DEBUG)
+    logging.getLogger(__name__).setLevel(logging.DEBUG)
+    logging.getLogger(__name__).addHandler(handler)
     from .termhelpers import Cbreak
     print('this should be just off-screen')
     w = FullscreenWindow(sys.stdout)
