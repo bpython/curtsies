@@ -20,11 +20,13 @@ All windows write only unicode to the terminal - that's what blessings does, so
 we match it.
 """
 
-import sys
-import os
+import functools
 import logging
+import math
+import os
 import re
 import signal
+import sys
 
 import blessings
 
@@ -210,7 +212,7 @@ class CursorAwareWindow(BaseWindow):
         self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
         logger.debug('initial top_usable_row: %d' % self.top_usable_row)
-        self.write(NO_LINEWRAP)
+        #self.write(NO_LINEWRAP)
         return BaseWindow.__enter__(self)
 
     def __exit__(self, type, value, traceback):
@@ -355,6 +357,10 @@ class CursorAwareWindow(BaseWindow):
         if height != self._last_rendered_height or width != self._last_rendered_width:
             self.on_terminal_size_change(height, width)
 
+        move_to_row_stepwise(self.top_usable_row)
+        self.write(self.t.move_x(0))
+        self.write(self.t.ed)
+
         current_lines_by_row = {}
         rows_for_use = list(range(self.top_usable_row, height))
 
@@ -368,6 +374,11 @@ class CursorAwareWindow(BaseWindow):
             self.write(actualize(line))
             if len(line) < width:
                 self.write(self.t.clear_eol)
+                pass
+            if self._last_cursor_row != self.height - 1:
+                self.write('\n')
+                self._last_cursor_row += 1
+                self._last_cursor_column = 0
 
         # rows already on screen that we don't have content for
         rest_of_lines = array[shared:]
@@ -395,6 +406,8 @@ class CursorAwareWindow(BaseWindow):
         logger.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())
         logger.debug('lines in current lines by row: %r' % current_lines_by_row.keys())
         _cursor_row = cursor_pos[0]-offscreen_scrolls+self.top_usable_row
+        if _cursor_row < 0:
+            pass #TODO: raise ValueError('Requested cursor position is in scrollback history! Applications should prevent this.')
         move_to_row_stepwise(_cursor_row) # since scrolling moves the cursor
 
         self.write(self.t.move_x(cursor_pos[1]))
@@ -404,6 +417,105 @@ class CursorAwareWindow(BaseWindow):
         if not self.hide_cursor:
             self.write(self.t.normal_cursor)
         return offscreen_scrolls
+
+class Resizer(object):
+    """Provides predictions for how a terminal will react to a given resizing
+
+    The resizer assumes there is plenty of history in the scrollback buffer.
+    Differences between the predicted and observed movement should be enough
+    to calculate how many lines of scrollback were or weren't there."""
+    def __init__(self, last_rendered_array, last_height, last_width, last_top_usable_row):
+        """Takes the full last rendered array, terminal dimensions, and top usable row
+
+        Heights and widths are of the entire terminal
+        last_top_usable_row is zero-indexed
+
+        The array may be so tall that only some bottom portion of it is now visible on screen.
+        """
+        if last_width < max(len(line) for line in last_rendered_array):
+            raise ValueError("Width of %d is less than max line length of %d" % (last_width, max(len(line) for line in last_rendered_array)))
+        if last_width <= 0 or last_height <= 0:
+            raise ValueError("height and width must be positive: %d %d" % (last_width, last_height))
+        if last_top_usable_row < 0:
+            raise ValueError("last_top_usable_row must be non-negative: %d" % (last_top_usable_row,))
+        if last_top_usable_row >= last_height:
+            raise ValueError("last_top_usable_row (%d) must be less than last_height (%d)" % (last_top_usable_row, last_height))
+        self.array = last_rendered_array
+        self.last_height = last_height
+        self.last_width = last_width
+        self.last_top_usable_row = last_top_usable_row
+
+    def _ensure_new_window_set(self):
+        if not (hasattr(self, 'new_width') and hasattr(self, 'new_height')):
+            raise ValueError("Must set new window dimensions first")
+
+    def set_new(self, new_height, new_width):
+        if new_width <= 0 or new_height <= 0:
+            raise ValueError("Height and width must be positive: %d %d" % (new_width, new_height))
+        if new_width > self.last_width:
+            raise ValueError("This is just for when the terminal gets less wide - getting wider is easy")
+        self.new_width = new_width
+        self.new_height = new_height
+
+    def top_usable_row(self):
+        """returns the top usable row of the terminal after transformation"""
+        self._ensure_new_window_set()
+
+        extra_lines = len(self.resized_array(include_bottom_empties=True)) -  len(self.array)
+
+        return max(0, self.last_top_usable_row - extra_lines)
+
+    def resized_array(self, include_bottom_empties=False):
+        """Returns a resized version of the portion of the input array on screen"""
+        self._ensure_new_window_set()
+
+        num_empty_rows_at_bottom = max(0, self.last_height - self.last_top_usable_row - len(self.array))
+        #assert not (num_empty_rows_at_bottom and len(self.array) >= self.last_height - self.top_usable_row()), 'empty rows and not enough rows'
+        num_rows_on_screen = self.last_height - self.last_top_usable_row
+
+        new_array = []
+        for row in self.array:
+            for i in range(int(math.ceil(len(row) / float(self.new_width)))):
+                new_array.append(row[i * self.new_width:(i+1) * self.new_width])
+
+        class Placeholder: pass
+        new_array = new_array + [Placeholder] * num_empty_rows_at_bottom
+        fit_on_screen = new_array[-self.new_height:]
+        if include_bottom_empties:
+            return fit_on_screen
+        return [row for row in fit_on_screen if row is not Placeholder]
+
+    def transform(self, x, y):
+        """Returns predicted zero-indexed terminal x, y of character at old terminal x, y"""
+        self._ensure_new_window_set()
+
+        array_y = y - self.last_top_usable_row
+
+        rows_per_old_row = [int(math.ceil(len(row) / float(self.new_width))) for row in self.array]
+        num_empty_rows_at_bottom = max(0, self.last_height - self.last_top_usable_row - len(self.array))
+
+        old_to_new_col = [col % self.new_width for i in range(self.last_width)]
+
+        new_num_rows = self.new_height - self.top_usable_row()
+
+        current_old_row = new_num_rows - num_empty_rows_at_bottom
+
+        # old empty rows - these still expect to be empty
+        current_new_row = self.new_height
+        for old_row in reversed(range(self.last_height - num_empty_rows_at_bottom, self.last_height)):
+            current_new_row -= 1
+            if old_row == y:
+                additional_y, new_column = divmod(x, self.new_width)
+                return (new_column, current_new_row + additional_y)
+
+        for old_row in reversed(range(0, self.last_height - num_empty_rows_at_bottom)):
+            current_new_row -= rows_per_old_row[old_row]
+            if old_row == y:
+                additional_y, new_column = divmod(x, self.new_width)
+                return (new_column, current_new_row + additional_y)
+
+        assert False
+
 
 def demo():
     handler = logging.FileHandler(filename='display.log')
