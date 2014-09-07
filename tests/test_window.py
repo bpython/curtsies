@@ -63,6 +63,7 @@ class TestResizer(FormatStringTest):
         r.set_new(5, 22)
         self.assertArraysEqual(r.resized_array(), ['hello', 'there', 'this is a longer line'])
         self.assertEqual(r.top_usable_row(), 0)
+        self.assertEqual(r.transform(0, 0), (0, 0))
 
     def test_drag_down(self):
         last_rendered_array = ['hello', 'there', 'this is a longer line']
@@ -70,6 +71,7 @@ class TestResizer(FormatStringTest):
         r.set_new(6, 22)
         self.assertArraysEqual(r.resized_array(), ['hello', 'there', 'this is a longer line'])
         self.assertEqual(r.top_usable_row(), 1)
+        self.assertEqual(r.transform(0, 0), (0, 1))
 
     def test_drag_up(self):
         last_rendered_array = ['hello', 'there', 'this is a longer line']
@@ -77,6 +79,7 @@ class TestResizer(FormatStringTest):
         r.set_new(4, 22)
         self.assertArraysEqual(r.resized_array(), ['hello', 'there', 'this is a longer line'])
         self.assertEqual(r.top_usable_row(), 1)
+        self.assertEqual(r.transform(0, 2), (0, 1))
 
     def test_narrow(self):
         last_rendered_array = ['hello', 'there', 'this is a longer line']
@@ -84,6 +87,7 @@ class TestResizer(FormatStringTest):
         r.set_new(5, 20)
         self.assertArraysEqual(r.resized_array(), ['hello', 'there', 'this is a longer lin', 'e'])
         self.assertEqual(r.top_usable_row(), 0)
+        self.assertEqual(r.transform(20, 3), (0, 3))
 
     def test_too_big(self):
         last_rendered_array = ['hello', 'there', 'this is a longer line']
@@ -91,4 +95,5 @@ class TestResizer(FormatStringTest):
         r.set_new(5, 22)
         self.assertArraysEqual(r.resized_array(), ['there', 'this is a longer line'])
         self.assertEqual(r.top_usable_row(), 3)
+        self.assertEqual(r.transform(0, 0), (0, 3))
 

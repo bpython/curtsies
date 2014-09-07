@@ -504,27 +504,30 @@ class Resizer(object):
         rows_per_old_row = [int(math.ceil(len(row) / float(self.new_width))) for row in self.array]
         num_empty_rows_at_bottom = max(0, self.last_height - self.last_top_usable_row - len(self.array))
 
-        old_to_new_col = [col % self.new_width for i in range(self.last_width)]
-
-        new_num_rows = self.new_height - self.top_usable_row()
-
-        current_old_row = new_num_rows - num_empty_rows_at_bottom
-
         # old empty rows - these still expect to be empty
+        answer = None
         current_new_row = self.new_height
         for old_row in reversed(range(self.last_height - num_empty_rows_at_bottom, self.last_height)):
             current_new_row -= 1
+            print 'processing old_row', old_row, '- it\'s new row', current_new_row
             if old_row == y:
                 additional_y, new_column = divmod(x, self.new_width)
-                return (new_column, current_new_row + additional_y)
+                answer = (new_column, current_new_row + additional_y)
+        if answer:
+            return answer
 
-        for old_row in reversed(range(0, self.last_height - num_empty_rows_at_bottom)):
-            current_new_row -= rows_per_old_row[old_row]
+        print rows_per_old_row
+        print 'number of empty rows at bottom:', num_empty_rows_at_bottom
+        for old_row in reversed(range(self.last_top_usable_row, self.last_height - num_empty_rows_at_bottom)):
+            current_new_row -= rows_per_old_row[old_row - self.last_top_usable_row]
+            print 'processing old_row', old_row, '- it\'s new rows %s' % (range(current_new_row, current_new_row + rows_per_old_row[old_row - self.last_top_usable_row]))
             if old_row == y:
                 additional_y, new_column = divmod(x, self.new_width)
-                return (new_column, current_new_row + additional_y)
+                answer = (new_column, current_new_row + additional_y)
 
-        assert False
+        if answer:
+            return answer
+        assert False, "got to end (old row is %d) without finding y (%d)" % (old_row, y)
 
 
 def demo():
