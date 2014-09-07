@@ -461,9 +461,13 @@ class Resizer(object):
         """returns the top usable row of the terminal after transformation"""
         self._ensure_new_window_set()
 
-        extra_lines = len(self.resized_array(include_bottom_empties=True)) -  len(self.array)
+        additional_lines = len(self.resized_array(include_bottom_empties=True)) - (self.last_height - self.last_top_usable_row)
+        print 'additional lines:', additional_lines
 
-        return max(0, self.last_top_usable_row - extra_lines)
+        additional_space = self.new_height - self.last_height
+        print 'additional space', additional_space
+
+        return max(0, self.last_top_usable_row - additional_lines + additional_space)
 
     def resized_array(self, include_bottom_empties=False):
         """Returns a resized version of the portion of the input array on screen"""
@@ -473,14 +477,20 @@ class Resizer(object):
         #assert not (num_empty_rows_at_bottom and len(self.array) >= self.last_height - self.top_usable_row()), 'empty rows and not enough rows'
         num_rows_on_screen = self.last_height - self.last_top_usable_row
 
+        array = self.array[-num_rows_on_screen:]
+
         new_array = []
-        for row in self.array:
+        for row in array:
             for i in range(int(math.ceil(len(row) / float(self.new_width)))):
                 new_array.append(row[i * self.new_width:(i+1) * self.new_width])
+
+        print 'Resulting array:', new_array
 
         class Placeholder: pass
         new_array = new_array + [Placeholder] * num_empty_rows_at_bottom
         fit_on_screen = new_array[-self.new_height:]
+        print 'new height:', self.new_height
+        print 'fit on screen:', fit_on_screen
         if include_bottom_empties:
             return fit_on_screen
         return [row for row in fit_on_screen if row is not Placeholder]

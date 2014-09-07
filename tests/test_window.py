@@ -46,7 +46,7 @@ class TestResizer(FormatStringTest):
         if isinstance(a, FSArray) and isinstance(b, FSArray):
             self.assertFSArraysEqual(self, a, b)
             return
-        self.assertEqual(len(a), len(b))
+        self.assertEqual(len(a), len(b), '\n%s\n---\n%s' % ('\n'.join(a), '\n'.join(b)))
         for i, (a_row, b_row) in enumerate(zip(a, b)):
             self.assertEqual(a_row, b_row, 'row %d differs' % (i,))
 
@@ -91,3 +91,4 @@ class TestResizer(FormatStringTest):
         r.set_new(5, 22)
         self.assertArraysEqual(r.resized_array(), ['there', 'this is a longer line'])
         self.assertEqual(r.top_usable_row(), 3)
+
