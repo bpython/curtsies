@@ -75,7 +75,7 @@ class TestResizer(FormatStringTest):
 
     def test_drag_up(self):
         last_rendered_array = ['hello', 'there', 'this is a longer line']
-        r = Resizer(last_rendered_array, 5, 22, 2)
+        r = Resizer(last_rendered_array, 5, 22, 1)
         r.set_new(4, 22)
         self.assertArraysEqual(r.resized_array(), ['hello', 'there', 'this is a longer line'])
         self.assertEqual(r.top_usable_row(), 1)

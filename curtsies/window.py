@@ -320,6 +320,17 @@ class CursorAwareWindow(BaseWindow):
         if array received is of height too large, render it, scroll down,
             and render the rest of it, then return how much we scrolled down
         """
+        width, height = self.width, self.height
+        if width != self._last_rendered_width or height != self._last_rendered_height:
+            resizer = Resizer(self._last_rendered_array, self._last_rendered_height,
+                              self._last_rendered_width, self.top_usable_row)
+            resizer.set_new(self.height, self.width)
+            expected_x, expected_y = resizer.transform(self._last_cursor_column,
+                                                       self._last_cursor_row)
+            logger.info("")
+
+        self._last_rendered_array = array
+
         offscreen_scrolls = 0
 
         def check_for_cursor_movement():
