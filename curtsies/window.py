@@ -144,7 +144,7 @@ class FullscreenWindow(BaseWindow):
         #TODO there's a race condition here - these height and widths are
         # super fresh - they might change between the array being constructed and rendered
         # Maybe the right behavior is to throw away the render in the signal handler?
-        height, width = self.t.height, self.t.width
+        height, width = self.height, self.width
 
         if not self.hide_cursor:
             self.write(self.t.hide_cursor)

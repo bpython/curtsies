@@ -8,6 +8,11 @@ if sys.version_info[0] == 3:
     from io import StringIO
 else:
     from cStringIO import StringIO
+
+class FakeFullscreenWindow(FullscreenWindow):
+    width = property(lambda self: 10)
+    height = property(lambda self: 4)
+
 class TestBaseWindow(unittest.TestCase):
     """Pretty pathetic tests for window"""
     def test_window(self):
@@ -38,4 +43,12 @@ class TestBaseWindow(unittest.TestCase):
         window.write('hi')
         fakestdout.seek(0)
         self.assertEqual(fakestdout.read(), 'hi')
+
+    def test_fullscreen_render_to_terminal(self):
+        fakestdout = StringIO()
+        window = FakeFullscreenWindow(fakestdout)
+        window.render_to_terminal(['hello', 'hello', 'hello'])
+        fakestdout.seek(0)
+        output = fakestdout.read()
+        self.assertEqual(output.count('hello'), 3)
 
