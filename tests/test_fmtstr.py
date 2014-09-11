@@ -358,6 +358,12 @@ class TestFSArray(FormatStringTest):
         a = fsarray([blue('abc'), red('def')])
         b = fsarray([blue('abc'), red('d')+blue('e')+red('f')])
         self.assertRaises(AssertionError, self.assertFSArraysEqual, a, b)
+        a = fsarray(['abc', 'def'])
+        b = fsarray(['abc', 'def'])
+        self.assertFSArraysEqual(a, b)
+        a = fsarray([blue('abc'), red('def')])
+        b = fsarray([blue('abc'), red('def')])
+        self.assertFSArraysEqual(a, b)
 
 if __name__ == '__main__':
     import fmtstr.fmtstr
