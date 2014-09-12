@@ -308,6 +308,36 @@ class CursorAwareWindow(BaseWindow):
         self._last_cursor_row = row
         return cursor_dy
 
+    def get_rows_scrolled(self):
+        old_top_usable_row = self.top_usable_row
+        width, height = self.width, self.height
+        row, col = self.get_cursor_position()
+
+        if width < self._last_rendered_width:
+            resizer = Resizer(self._last_rendered_array, self._last_rendered_height,
+                              self._last_rendered_width, self.top_usable_row)
+            resizer.set_new(self.height, self.width)
+            expected_x, expected_y = resizer.transform(self._last_cursor_column,
+                                                       self._last_cursor_row)
+            logger.info("expected y: %d", expected_y)
+            logger.info("cursor row expected: %d actual: %d", expected_y, row)
+
+        logger.info("if different, take some kind of action?")
+
+        cursor_dy = row - self._last_cursor_row # expected_y
+        logger.info('\ncursor moved %d line%s %s' % (abs(cursor_dy), 's' if abs(cursor_dy) == 1 else '', 'down' if cursor_dy >= 0 else 'up'))
+        while self.top_usable_row > -1 and cursor_dy > 0:
+            self.top_usable_row += 1
+            cursor_dy -= 1
+        while self.top_usable_row > 1 and cursor_dy < 0:
+            self.top_usable_row -= 1
+            cursor_dy += 1
+        if old_top_usable_row != self.top_usable_row:
+            logger.info('top usable row changed from %d to %d', old_top_usable_row, self.top_usable_row)
+        logger.info('returning cursor dy of %d from curtsies' % cursor_dy)
+        self._last_cursor_row = row
+        return cursor_dy
+
     def render_to_terminal(self, array, cursor_pos=(0,0)):
         """Renders array to terminal, returns the number of lines
             scrolled offscreen
@@ -321,13 +351,6 @@ class CursorAwareWindow(BaseWindow):
             and render the rest of it, then return how much we scrolled down
         """
         width, height = self.width, self.height
-        if width != self._last_rendered_width or height != self._last_rendered_height:
-            resizer = Resizer(self._last_rendered_array, self._last_rendered_height,
-                              self._last_rendered_width, self.top_usable_row)
-            resizer.set_new(self.height, self.width)
-            expected_x, expected_y = resizer.transform(self._last_cursor_column,
-                                                       self._last_cursor_row)
-            logger.info("")
 
         self._last_rendered_array = array
 
@@ -429,6 +452,7 @@ class CursorAwareWindow(BaseWindow):
             self.write(self.t.normal_cursor)
         return offscreen_scrolls
 
+#TODO lines which have their first row go offscreen aren't wrapped (?!?)
 class Resizer(object):
     """Provides predictions for how a terminal will react to a given resizing
 
@@ -520,18 +544,18 @@ class Resizer(object):
         current_new_row = self.new_height
         for old_row in reversed(range(self.last_height - num_empty_rows_at_bottom, self.last_height)):
             current_new_row -= 1
-            print 'processing old_row', old_row, '- it\'s new row', current_new_row
+            #print 'processing old_row', old_row, '- it\'s new row', current_new_row
             if old_row == y:
                 additional_y, new_column = divmod(x, self.new_width)
                 answer = (new_column, current_new_row + additional_y)
         if answer:
             return answer
 
-        print rows_per_old_row
-        print 'number of empty rows at bottom:', num_empty_rows_at_bottom
+        #print rows_per_old_row
+        #print 'number of empty rows at bottom:', num_empty_rows_at_bottom
         for old_row in reversed(range(self.last_top_usable_row, self.last_height - num_empty_rows_at_bottom)):
             current_new_row -= rows_per_old_row[old_row - self.last_top_usable_row]
-            print 'processing old_row', old_row, '- it\'s new rows %s' % (range(current_new_row, current_new_row + rows_per_old_row[old_row - self.last_top_usable_row]))
+            # print 'processing old_row', old_row, '- it\'s new rows %s' % (range(current_new_row, current_new_row + rows_per_old_row[old_row - self.last_top_usable_row]))
             if old_row == y:
                 additional_y, new_column = divmod(x, self.new_width)
                 answer = (new_column, current_new_row + additional_y)
