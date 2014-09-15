@@ -193,6 +193,10 @@ class TestFmtStr(unittest.TestCase):
         a = blue(red('hello'))
         self.assertEqual(a, blue('hello'))
 
+    def test_repr(self):
+        self.assertEqual(fmtstr('hello', 'red', bold=False), red('hello'))
+        self.assertEqual(fmtstr('hello', 'red', bold=True), bold(red('hello')))
+
 class TestDoubleUnders(unittest.TestCase):
     def test_equality(self):
         x = fmtstr("adfs")
