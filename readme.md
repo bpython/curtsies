@@ -261,11 +261,11 @@ To set a timeout on the blocking get, treat it like a generator and call
 Examples
 --------
 
-* [Tic-Tac-Toe](tictactoeexample.py)
+* [Tic-Tac-Toe](/examples/tictactoeexample.py)
 
 ![screenshot](http://i.imgur.com/AucB55B.png)
 
-* [Avoid the X's game](gameexample.py)
+* [Avoid the X's game](/examples/gameexample.py)
 
 ![screenshot](http://i.imgur.com/nv1RQd3.png)
 
