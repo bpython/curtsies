@@ -4,6 +4,44 @@ from collections import namedtuple
 
 TerminalState = namedtuple('TerminalState', ['history', 'rendered', 'top_usable_line', 'scrolled', 'cursor', 'display'])
 
+def divide_term_states(s):
+    """Return a list of verically divided terminal diagrams from one string
+
+    >>> len(divide_term_states('''
+    ... +-----+    +-------+   +--+
+    ... |ABC  |    |ABC    |   +--+
+    ... +-----+    +-------+   |@ |
+    ... |BC   | -> |BC     |   +--+
+    ... |abc@ |    |abc@   |
+    ... |     |    |       |
+    ... +-----+    +-------+
+    ... '''))
+    3
+    """
+    #TODO allow the first line to have content on it (has to be blank right now)
+    lines = s.split('\n')
+    if lines[0].strip():
+        raise ValueError('Top line needs to be blank')
+    max_length = max(len(line) for line in lines)
+    spaces_by_line = [set(m.start() for m in re.finditer(r' ', line)).union(
+                          set(range(len(line), max_length)))
+                      for line in s.split('\n') if s.strip()]
+    empty_columns = set.intersection(*spaces_by_line)
+    empty_columns.add(max_length)
+
+    sections = []
+    last = 0
+    for index in sorted(empty_columns):
+        vertical_strip = []
+        for line in s.split('\n'):
+            vertical_strip.append(line[last:index])
+        sections.append(vertical_strip)
+        last = index
+    candidates = ['\n'.join(section) for section in sections]
+    diagrams = [s for s in candidates if '|' in s and '-' in s and '@' in s]
+    return diagrams
+
+
 def parse_term_state(s):
     """Returns TerminalState tuple given a terminal state diagram
 
