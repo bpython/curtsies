@@ -2,7 +2,9 @@ import unittest
 import re
 from collections import namedtuple
 
-TerminalState = namedtuple('TerminalState', ['history', 'rendered', 'top_usable_line', 'scrolled', 'cursor', 'display'])
+TerminalState = namedtuple('TerminalState',
+                           ['history', 'rendered', 'top_usable_row',
+                            'scrolled', 'cursor', 'visible', 'rows', 'columns'])
 
 def divide_term_states(s):
     """Return a list of verically divided terminal diagrams from one string
@@ -46,6 +48,7 @@ def parse_term_state(s):
     """Returns TerminalState tuple given a terminal state diagram
 
     >>> parse_term_state('''
+    ...  label
     ... +-----+
     ... |ABC  |
     ... +-----+
@@ -54,10 +57,12 @@ def parse_term_state(s):
     ... |     |
     ... +-----+
     ... ''')
-    TerminalState(history=['abc'], rendered=['abc'], top_usable_line=1, scrolled=0, cursor=[1, 3], display=['bc', 'abc'])
+    ('label', TerminalState(history=['abc'], rendered=['abc'], top_usable_row=1, scrolled=0, cursor=[1, 3], visible=['bc', 'abc'], rows=3, columns=5))
     """
 
-    top_line = re.search(r'(?<=\n)\s*([+][-]+[+])\s*(?=\n)', s).group(1)
+    m = re.search(r'(?<=\n)\s*([+][-]+[+])\s*(?=\n)', s)
+    label = ' '.join(line.strip() for line in s[:m.start()].split('\n') if line.strip())
+    top_line = m.group(1)
     width = len(top_line) - 2
     assert width > 0
     lines = re.findall(r'(?<=\n)\s*([+|].*[+!|])\s*(?=\n)', s)
@@ -69,13 +74,13 @@ def parse_term_state(s):
     sections = ('before', 'history', 'visible', 'after')
     section = sections[0]
     current_display_line = -1
-    maybe_for_display = []
+    maybe_for_visible = []
 
     history = []
     rendered = []
-    display = []
+    visible = []
     cursor= None
-    top_usable_line = 0
+    top_usable_row = 0
     scrolled = 0
 
     for line in lines:
@@ -99,10 +104,10 @@ def parse_term_state(s):
             history.append(inner.lower().rstrip())
         elif section == 'visible':
             if inner.strip():
-                display.extend(maybe_for_display)
-                display.append(inner.lower().rstrip())
+                visible.extend(maybe_for_visible)
+                visible.append(inner.lower().rstrip())
             else:
-                maybe_for_display.append(inner.lower().rstrip())
+                maybe_for_visible.append(inner.lower().rstrip())
         elif section == 'after':
             break
         elif section == 'before':
@@ -114,15 +119,45 @@ def parse_term_state(s):
         if inner.islower() and section == 'history':
             scrolled += 1
         elif inner.isupper() and section == 'visible':
-            top_usable_line += 1
+            top_usable_row += 1
 
     if not section == 'after':
         raise ValueError("finish in section %s - didn't complete terminal diagram:\n%s" % (section, s))
 
-    return TerminalState(history=history, rendered=rendered,
-                         top_usable_line=top_usable_line, scrolled=scrolled,
-                         cursor=cursor, display=display)
+    return (label,
+            TerminalState(history=history, rendered=rendered,
+                          top_usable_row=top_usable_row, scrolled=scrolled,
+                          cursor=cursor, visible=visible,
+                          rows=current_display_line+1, columns=width))
 
+class TestTerminalResizing(object):
+    """Mixin for testing """
+    def assertResizeMatches(self, diagram):
+        term_states = divide_term_states(diagram)
+        label1, initial = parse_term_state(term_states[0])
+        label2, final = parse_term_state(term_states[1])
+        #TODO when testing different terminals, use labels to identify
+
+        self.prepare_terminal(initial.rows, initial.columns, initial.history,
+                              initial.visible, initial.cursor)
+        self.resize(final.rows, final.columns)
+        requested_cursor_row = final.cursor[0] - final.top_usable_row
+        self.render(final.rendered, requested_cursor_row)
+        self.check_output()
+
+    def prepare_terminal(self, rows, columns, history, visible, cursor):
+        """Set self.terminal to have these properties"""
+        raise NotImplementedError
+
+    def render(self, array):
+        raise NotImplementedError
+
+    def resize(self, rows, columns):
+        raise NotImplementedError
+
+    def check_output(self, history, scrolled, ): #TODO: need to add more things
+        """Checks that output matches final terminal"""
+        raise NotImplementedError
 
 
 class test_parse_term_state(unittest.TestCase):

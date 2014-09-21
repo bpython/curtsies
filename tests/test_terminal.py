@@ -18,9 +18,11 @@ else:
 import blessings
 import pyte
 from pyte import control as ctrl, Stream, Screen, HistoryScreen
+from pyte.screens import Margins
 
 from curtsies.window import BaseWindow, FullscreenWindow, CursorAwareWindow
 from curtsies.input import Input
+from terminal_dsl import TestTerminalResizing
 
 # thanks superbobry for this code: https://github.com/selectel/pyte/issues/13
 class ReportingStream(Stream):
@@ -47,6 +49,56 @@ class ReportingScreen(HistoryScreen):
         self._report_file.seek(0)
         self._report_file.write(s)
         self._report_file.seek(0)
+
+class HistoryPreservingOnResizeScreen(ReportingScreen):
+    """Overriding resize to
+    * preserve history that is pushed off screen
+    * move cursor if necessary
+    """
+    #TODO: This is super hacky. It's been manipulated just enough
+    #      to get the behavior I observe from xterm.
+    #      Would be much better to find a proper implementation
+    #      Cursor movement is wrong in edge cases, adding to history is less bad
+    def resize(self, lines=None, columns=None):
+        lines = lines or self.lines
+        columns = columns or self.columns
+
+        # First resize the lines:
+        diff = self.lines - lines
+
+        # a) if the current display size is less than the requested
+        #    size, add lines to the bottom.
+        if diff < 0:
+            self.buffer.extend(take(self.columns, self.default_line)
+                               for _ in range(diff, 0))
+        # b) if the current display size is greater than requested
+        #    size, take lines off the top.
+        elif diff > 0:
+            self.history.top.extend(self.buffer[:diff])
+            self.buffer[:diff] = ()
+            self.cursor.y -= diff
+
+        # Then resize the columns:
+        diff = self.columns - columns
+
+        # a) if the current display size is less than the requested
+        #    size, expand each line to the new size.
+        if diff < 0:
+            for y in range(lines):
+                self.buffer[y].extend(take(abs(diff), self.default_line))
+        # b) if the current display size is greater than requested
+        #    size, trim each line from the right to the new size.
+        elif diff > 0:
+            for line in self.buffer:
+                del line[columns:]
+
+        self.lines, self.columns = lines, columns
+        self.margins = Margins(0, self.lines - 1)
+        old_x, old_y = self.cursor.x, self.cursor.y
+        self.reset_mode(pyte.modes.DECOM)
+        self.cursor.x = old_x
+        self.cursor.y = old_y
+
 
 class Bugger(object):
     __before__ = __after__ = lambda *args: None
@@ -141,7 +193,7 @@ class FakeBpythonRepl(object):
 
 class TestCursorAwareWindowHistoryPreservation(unittest.TestCase):
     def setUp(self):
-        self.screen = ReportingScreen(6, 3)
+        self.screen = HistoryPreservingOnResizeScreen(6, 3)
         self.stream = ReportingStream()
         self.stream.attach(self.screen)
         self.stream.attach(Bugger())
@@ -160,13 +212,12 @@ class TestCursorAwareWindowHistoryPreservation(unittest.TestCase):
 
     def render(self):
         a = self.repl.paint()
-        self.repl.scrolled += self.window.render_to_terminal(a, (len(a), 0))
+        self.repl.scrolled += self.window.render_to_terminal(a, (len(a) - 1, 0))
 
     def assertScreenMatches(self, display, row, col):
         self.assertEqual(len(display), len(self.screen.display))
         for row, expected in zip(self.screen.display, display):
             self.assertEqual(row, expected)
-
 
     def assertCursor(self, row, col):
         self.assertEqual((self.screen.cursor.x, self.screen.cursor.y), (col, row))
@@ -188,6 +239,8 @@ class TestCursorAwareWindowHistoryPreservation(unittest.TestCase):
         self.assertEqual(self.screen.display, [u'3-3-3-', u'4-4-4-', u'5-5-5-'])
         self.assertEqual(self.history_lines(), [u'0-0-0-', u'1-1-1-', u'2-2-2-'])
 
+    #TODO: hack pyte Screen to throw out empty lines when scrolling up
+    #      or find a better real xterm emulator
     @skip("pyte's behavior differs from xterm here")
     def test_change_window_height_with_space_at_bottom(self):
         self.render()
@@ -200,14 +253,33 @@ class TestCursorAwareWindowHistoryPreservation(unittest.TestCase):
         self.screen.resize(4, 6)
         self.assertEqual(self.screen.display, [u'0-0-0-'] + [u'      '] * 3)
 
-    @skip("pyte doesn't add lines moved via resize to history")
     def test_change_window_height_with_no_space_at_bottom(self):
         self.repl.add_line()
         self.repl.add_line()
         self.render()
         self.screen.resize(2, 6)
         self.assertEqual(self.history_lines(), [u'0-0-0-'])
-        self.assertEqual(self.screen.display(), [u'1-1-1-', u'2-2-2-'])
+        self.assertEqual(self.screen.display, [u'1-1-1-', u'2-2-2-'])
         self.assertCursor(row=1, col=0)
 
+class TestTestTerminalResizing(unittest.TestCase, TestTerminalResizing):
+    def test_simple(self):
+        self.actions = []
+        self.assertResizeMatches("""
+        +--+   +--+
+        +--+   +--+
+        |a |   |a |
+        |b@|   |b@|
+        +--+   +--+
+        """)
+        self.assertTrue(word +' called' in self.actions
+                        for word in ['prepare_terminal', 'render', 'resize', 'check_output'])
+    def prepare_terminal(self, rows, columns, history, visible, cursor):
+        self.actions.append('prepare_terminal called')
+    def render(self, array, cursor):
+        self.actions.append('render called')
+    def resize(self, rows, columns):
+        self.actions.append('resize called')
+    def check_output(self):
+        self.actions.append('check_output called')
 
