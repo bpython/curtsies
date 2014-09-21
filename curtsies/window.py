@@ -89,7 +89,7 @@ class BaseWindow(object):
 
     def render_to_terminal(self, array, cursor_pos=(0,0)):
         """Renders array to terminal"""
-        raise NotImplemented
+        raise NotImplementedError()
 
     def get_term_hw(self):
         """Returns current terminal width and height"""
@@ -333,7 +333,9 @@ class CursorAwareWindow(BaseWindow):
             current_lines_by_row[row] = line
             if line == self._last_lines_by_row.get(row, None):
                 continue
-            self.write(self.t.move(row, 0))
+            d = self.t.move(row, 0)
+            self.write(d)
+            #self.write(self.t.move(row, 0))
             self.write(actualize(line))
             if len(line) < width:
                 self.write(self.t.clear_eol)

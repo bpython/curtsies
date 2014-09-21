@@ -1,4 +1,28 @@
+"""
+Terminal diagrams for describing how text is moved when the window of a
+terminal emulator is resized.
+
+# @ is cursor
+# * is content in application (not our job to reflow)
+# + means this is a continued line
+# . means a space character (spaced are empty)
+# capital letters mean history
+# lowercase letters are in the app's control
+# 
+
+A diagram looks like this:
+    +-----+
+    |ABC  |
+    +-----+
+    |BC   |
+    |abc@ |
+    |     |
+    +-----+
+
+"""
+
 import unittest
+from functools import partial
 import re
 from collections import namedtuple
 
@@ -57,7 +81,7 @@ def parse_term_state(s):
     ... |     |
     ... +-----+
     ... ''')
-    ('label', TerminalState(history=['abc'], rendered=['abc'], top_usable_row=1, scrolled=0, cursor=[1, 3], visible=['bc', 'abc'], rows=3, columns=5))
+    ('label', TerminalState(history=['abc'], rendered=['abc'], top_usable_row=1, scrolled=0, cursor=(1, 3), visible=['bc', 'abc'], rows=3, columns=5))
     """
 
     m = re.search(r'(?<=\n)\s*([+][-]+[+])\s*(?=\n)', s)
@@ -65,7 +89,7 @@ def parse_term_state(s):
     top_line = m.group(1)
     width = len(top_line) - 2
     assert width > 0
-    lines = re.findall(r'(?<=\n)\s*([+|].*[+!|])\s*(?=\n)', s)
+    lines = re.findall(r'(?<=\n)\s*([+|].*[+!|])\s*(?=\n|\Z)', s)
     for line in lines:
         if len(line) - 2 != width:
             raise ValueError("terminal diagram line not of width %d: %r" % (width + 2, line,))
@@ -75,6 +99,7 @@ def parse_term_state(s):
     section = sections[0]
     current_display_line = -1
     maybe_for_visible = []
+    maybe_for_rendered = []
 
     history = []
     rendered = []
@@ -97,7 +122,7 @@ def parse_term_state(s):
         if '@' in inner:
             if cursor is not None:
                 raise ValueError("Two cursors (@'s) in terminal diagram:\n%s" % (s,))
-            cursor = [current_display_line, inner.index('@')]
+            cursor = (current_display_line, inner.index('@'))
             inner = inner.replace('@', ' ')
 
         if section == 'history':
@@ -105,6 +130,7 @@ def parse_term_state(s):
         elif section == 'visible':
             if inner.strip():
                 visible.extend(maybe_for_visible)
+                del maybe_for_visible[:]
                 visible.append(inner.lower().rstrip())
             else:
                 maybe_for_visible.append(inner.lower().rstrip())
@@ -113,16 +139,25 @@ def parse_term_state(s):
         elif section == 'before':
             continue
 
-        if inner.islower():
-            rendered.append(inner.rstrip())
-
-        if inner.islower() and section == 'history':
-            scrolled += 1
-        elif inner.isupper() and section == 'visible':
-            top_usable_row += 1
+        if inner.strip():
+            if is_lower(inner):
+                if section == 'history':
+                    scrolled += 1
+                    scrolled += len(maybe_for_rendered)
+                rendered.extend(maybe_for_rendered)
+                rendered.append(inner.rstrip())
+                del maybe_for_rendered[:]
+            elif is_upper(inner) and section == 'visible':
+                if rendered:
+                    raise ValueError('Uppercase lines after lowercase line (%r) in terminal diagram:\n%s' % (line, s))
+                top_usable_row += 1
+        else:
+            maybe_for_rendered.append(inner.strip())
 
     if not section == 'after':
         raise ValueError("finish in section %s - didn't complete terminal diagram:\n%s" % (section, s))
+    if cursor is None:
+        raise ValueError("No cursor found (@) in terminal diagram:\n%s" % (s,))
 
     return (label,
             TerminalState(history=history, rendered=rendered,
@@ -130,24 +165,49 @@ def parse_term_state(s):
                           cursor=cursor, visible=visible,
                           rows=current_display_line+1, columns=width))
 
+def line_is(type, line):
+    has_upper = bool(re.search('[A-Z]', line))
+    has_lower = bool(re.search('[a-z]', line))
+    if has_upper and has_lower:
+        raise ValueError('Both uppercase and lowercase letters in terminal diagram line: %r' % (line,))
+    elif not has_upper and not has_lower:
+        raise ValueError('no uppercase or lowercase letters in terminal diagram line: %r' % (line,))
+    elif type == 'upper' and has_upper and not has_lower:
+        return True
+    elif type == 'lower' and has_lower and not has_upper:
+        return True
+    else:
+        return False
+
+is_lower = partial(line_is, 'lower')
+is_upper = partial(line_is, 'upper')
+
 class TestTerminalResizing(object):
     """Mixin for testing """
     def assertResizeMatches(self, diagram):
         term_states = divide_term_states(diagram)
         label1, initial = parse_term_state(term_states[0])
         label2, final = parse_term_state(term_states[1])
+        print type(final.rendered[0])
         #TODO when testing different terminals, use labels to identify
 
         self.prepare_terminal(initial.rows, initial.columns, initial.history,
-                              initial.visible, initial.cursor)
+                              initial.visible, initial.cursor, initial.rendered,
+                              initial.top_usable_row)
         self.resize(final.rows, final.columns)
         requested_cursor_row = final.cursor[0] - final.top_usable_row
-        self.render(final.rendered, requested_cursor_row)
-        self.check_output()
+        print 'requested_cursor_row:', requested_cursor_row
+        self.render(final.rendered, (requested_cursor_row, final.cursor[1]))
+        print 'expected cursor row:', final.cursor[0]
+        self.check_output(final.history, final.visible, final.cursor, final.rows, final.columns)
 
-    def prepare_terminal(self, rows, columns, history, visible, cursor):
-        """Set self.terminal to have these properties"""
-        raise NotImplementedError
+    def prepare_terminal(self, rows, columns, history, visible, cursor, rendered, top_usable_row):
+        """Set terminal emulator to have these properties
+
+        self.window should now refer to a CursorAwareWindow object
+        wired up to talk to a terminal
+        """
+        raise NotImplementedError()
 
     def render(self, array):
         raise NotImplementedError
@@ -155,7 +215,7 @@ class TestTerminalResizing(object):
     def resize(self, rows, columns):
         raise NotImplementedError
 
-    def check_output(self, history, scrolled, ): #TODO: need to add more things
+    def check_output(self, history, visible, cursor, rows, columns):
         """Checks that output matches final terminal"""
         raise NotImplementedError
 
@@ -254,13 +314,6 @@ decrease_height_with_cursor_not_at_bottom = """
 |bcdefghij|         |bcdefghij|    |bcdefghij|
 +---------+         +---------+    +---------+
 """
-# @ is cursor
-# * is content in application (not our job to reflow)
-# + means this is a continued line
-# . means a space character (spaced are empty)
-# capital letters mean history
-# lowercase letters are in the app's control
-# 
 
 # what the app does: render its lines based on initial top usable and scrolled
 

@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import sys
 import os
 import unittest
+import mock
 
 try:
     from unittest import skip
@@ -22,7 +23,7 @@ from pyte.screens import Margins
 
 from curtsies.window import BaseWindow, FullscreenWindow, CursorAwareWindow
 from curtsies.input import Input
-from terminal_dsl import TestTerminalResizing
+from terminal_dsl import TestTerminalResizing, TerminalState, parse_term_state, divide_term_states
 
 # thanks superbobry for this code: https://github.com/selectel/pyte/issues/13
 class ReportingStream(Stream):
@@ -262,6 +263,69 @@ class TestCursorAwareWindowHistoryPreservation(unittest.TestCase):
         self.assertEqual(self.screen.display, [u'1-1-1-', u'2-2-2-'])
         self.assertCursor(row=1, col=0)
 
+
+class TestCursorAwareWindowHistoryPreservationWithDiagrams(unittest.TestCase, TestTerminalResizing):
+    def setUp(self):
+
+        class FakeBlessingsTerminal(blessings.Terminal):
+            height = property(lambda terminal_self: self.screen.size[0])
+            width = property(lambda terminal_self: self.screen.size[1])
+
+        patcher = mock.patch('blessings.Terminal', new=FakeBlessingsTerminal)
+        self.FakeTerminal = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_scroll_with_diagram(self):
+        """Similar test to above, but with a diagram"""
+        self.assertResizeMatches(u"""
+        +------+   +------+
+        +------+   |A-A-A-|
+        |a-a-a-|   +------+
+        |b-b-b-|   |b-b-b-|
+        |@-c-c-|   |@-c-c-|
+        +------+   +------+""")
+
+    def history_lines(self):
+        return [''.join(c.data for c in line) for line in self.screen.history.top]
+
+    def prepare_terminal(self, rows, columns, history, visible, cursor, rendered, top_usable_row):
+        self.screen = HistoryPreservingOnResizeScreen(columns, rows)
+        self.stream = ReportingStream()
+        self.stream.attach(self.screen)
+        self.stream.attach(Bugger())
+        stdout = ScreenStdout(self.stream)
+        self.window = CursorAwareWindow(out_stream=stdout,
+                                        in_stream=self.screen._report_file)
+        self.window.top_usable_row = top_usable_row
+        self.window._last_cursor_row = cursor[0]
+        self.window._last_cursor_column = cursor[1]
+        #TODO properly set up the window - that's a lot of stuff
+        assert not history #TODO implement filling out history
+
+        old_mode = self.screen.mode
+        self.screen.mode = set() # don't newline at end of line
+        for row, line in enumerate(visible):
+            self.screen.cursor_to_line(row+1)
+            self.screen.cursor_to_column(1)
+            for c in line:
+                self.screen.draw(c)
+        self.screen.cursor_to_line(cursor[0]+1)
+        self.screen.cursor_to_column(cursor[1]+1)
+        self.screen.mode = old_mode
+
+    def render(self, array, cursor):
+        self.window.render_to_terminal(array, cursor)
+
+    def resize(self, rows, columns):
+        self.screen.resize(rows, columns)
+
+    def check_output(self, history, visible, cursor, rows, columns):
+        self.assertEqual(len(visible), len(self.screen.display))
+        for row, expected in zip(self.screen.display, visible):
+            self.assertEqual(row, expected)
+        self.assertEqual((self.screen.cursor.y, self.screen.cursor.x), (cursor[0], cursor[1]))
+        self.assertEqual(self.history_lines(), history)
+
 class TestTestTerminalResizing(unittest.TestCase, TestTerminalResizing):
     def test_simple(self):
         self.actions = []
@@ -274,12 +338,55 @@ class TestTestTerminalResizing(unittest.TestCase, TestTerminalResizing):
         """)
         self.assertTrue(word +' called' in self.actions
                         for word in ['prepare_terminal', 'render', 'resize', 'check_output'])
-    def prepare_terminal(self, rows, columns, history, visible, cursor):
+    def prepare_terminal(self, rows, columns, history, visible, cursor, rendered, top_usable_row):
         self.actions.append('prepare_terminal called')
     def render(self, array, cursor):
         self.actions.append('render called')
     def resize(self, rows, columns):
         self.actions.append('resize called')
-    def check_output(self):
+    def check_output(self, *args):
         self.actions.append('check_output called')
+
+class TestTerminalDiagramParsing(unittest.TestCase):
+    def test_parse_term_state(self):
+        s = """
+        +------+
+        +------+
+        |a-a-a-|
+        |b-b-b-|
+        |@-c-c-|
+        +------+"""
+        self.assertEqual(parse_term_state(s), ('', TerminalState(
+            history=[],
+            rendered=['a-a-a-', 'b-b-b-', ' -c-c-'],
+            top_usable_row=0,
+            scrolled=0,
+            cursor=(2, 0),
+            visible=['a-a-a-', 'b-b-b-', ' -c-c-'],
+            rows=3,
+            columns=6)))
+    def test_parse_term_state_input_rejection(self):
+        s = """
+        +------+
+        +------+
+        |1-1-1-|
+        |2-2-2-|
+        |@-3-3-|
+        +------+"""
+        self.assertRaises(ValueError, parse_term_state, s)
+        s = """
+        +------+
+        |a-a-a-|
+        |b-b-b-|
+        |@-c-c-|
+        +------+"""
+        self.assertRaises(ValueError, parse_term_state, s)
+        s = """
+        +------+
+        +------+
+        |a-a-a-|
+        |b-b-b-|
+        |c-c-c-|
+        +------+"""
+        self.assertRaises(ValueError, parse_term_state, s)
 
