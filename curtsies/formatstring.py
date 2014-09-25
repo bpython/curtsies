@@ -54,9 +54,7 @@ class FrozenDict(dict):
         return FrozenDict(itertools.chain(self.items(), dictlike.items()))
 
 class Chunk(object):
-    """
-    A string carrying attributes (which are the same all the way through).
-    """
+    """A string with a single set of formatting attributes"""
     def __init__(self, string, atts=()):
         self._s = string
         self._atts = FrozenDict(atts)
@@ -116,7 +114,7 @@ class FmtStr(object):
     A string whose substrings carry attributes (which may be different from one to the next).
     """
     def __init__(self, *components):
-        # The assertions below could be useful for debugging, but slow things down considerably
+        # These assertions below could be useful for debugging, but slow things down considerably
         #assert all([len(x) > 0 for x in components])
         #self.basefmtstrs = [x for x in components if len(x) > 0]
         self.basefmtstrs = list(components)
@@ -175,9 +173,9 @@ class FmtStr(object):
         return result
 
     def splice(self, new_str, start, end=None):
-        """Splices the input string at the given index of the fmtstr by
-        creating a new list of basefmtstrs. If end is provided, new_str will
-        replace the substring self.s[start:end-1].
+        """Returns a new FmtStr with the input string spliced into the
+        the original FmtStr at start and end.
+        If end is provided, new_str will replace the substring self.s[start:end-1].
         """
         if len(new_str) == 0:
             return self

@@ -12,6 +12,7 @@ SPECIALS = {
 
 #TODO make a precalculated version of this
 class KeyMap(object):
+    """Maps config file key syntax to Curtsies names"""
     def __getitem__(self, key):
         if not key: # Unbound key
             return ()

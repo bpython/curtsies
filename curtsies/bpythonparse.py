@@ -10,6 +10,7 @@ import re
 cnames = dict(list(zip('krgybmcwd', colors + ('default',))))
 
 def func_for_letter(l, default='k'):
+    """Returns FmtStr constructor for a bpython-style color code"""
     if l == 'd':
         l = default
     elif l == 'D':
@@ -23,6 +24,8 @@ def color_for_letter(l, default='k'):
 
 def parse(s):
     r"""
+    Returns a FmtStr object from a bpython-formatted colored string
+
     >>> parse('\x01y\x03print\x04')
     yellow('print')
     >>> parse('\x01y\x03print\x04\x01c\x03 \x04\x01g\x031\x04\x01c\x03 \x04\x01Y\x03+\x04\x01c\x03 \x04\x01g\x032\x04')
