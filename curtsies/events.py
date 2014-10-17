@@ -1,6 +1,5 @@
 """Events for keystrokes and other input events"""
 import sys
-import time
 import encodings
 from functools import wraps
 
@@ -200,35 +199,23 @@ def could_be_unfinished_char(seq, encoding):
     if decodable(seq, encoding):
         return False # any sensible encoding surely doesn't require lookahead (right?)
         # (if seq bytes encoding a character, adding another byte shouldn't also encode something)
-    prefixes = prefixes_for_encoding(encoding)
-    if prefixes is None:
-        return True # We don't know, it could be
-    return seq in prefixes
 
-def cache(func):
-    func.cache = {}
-    @wraps(func)
-    def newfunc(arg):
-        if arg not in func.cache:
-            func.cache[arg] = func(arg)
-        return func.cache[arg]
-    return newfunc
-
-@cache
-def prefixes_for_encoding(encoding):
-    """Returns a set of proper prefixes of character in an encoding...
-
-    or at least enough to cover prevent
-    """
     if encodings.codecs.getdecoder('utf8') is encodings.codecs.getdecoder(encoding):
-        prefixes = set()
-        for i in range(0b11000000, 256): # http://en.wikipedia.org/wiki/UTF-8#Description
-            prefixes.add(chr_byte(i))
-        return prefixes
+        return could_be_unfinished_utf8(seq)
     elif encodings.codecs.getdecoder('ascii') is encodings.codecs.getdecoder(encoding):
-        return set()
+        return False
     else:
-        return None
+        return True # We don't know, it could be
+
+def could_be_unfinished_utf8(seq):
+    # http://en.wikipedia.org/wiki/UTF-8#Description
+    if   ord(seq[0:1]) & 0b10000000 == 0b10000000 and len(seq) < 1: return True
+    elif ord(seq[0:1]) & 0b11100000 == 0b11000000 and len(seq) < 2: return True
+    elif ord(seq[0:1]) & 0b11110000 == 0b11100000 and len(seq) < 3: return True
+    elif ord(seq[0:1]) & 0b11111000 == 0b11110000 and len(seq) < 4: return True
+    elif ord(seq[0:1]) & 0b11111100 == 0b11111000 and len(seq) < 5: return True
+    elif ord(seq[0:1]) & 0b11111110 == 0b11111100 and len(seq) < 6: return True
+    else: return False
 
 def pp_event(seq):
     """Returns pretty representation of an Event or keypress"""
