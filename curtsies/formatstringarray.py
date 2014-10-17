@@ -134,7 +134,6 @@ class FSArray(object):
     @classmethod
     def diff(cls, a, b, ignore_formatting=False):
         """terminal output of diffs underlined"""
-        actualize = str if sys.version_info[0] == 3 else unicode
         def underline(x): return u'\x1b[4m%s\x1b[0m' % (x,)
         def blink(x): return u'\x1b[5m%s\x1b[0m' % (x,)
         a_rows = []
@@ -145,8 +144,8 @@ class FSArray(object):
         for a_row, b_row in zip(a, b):
             a_lengths.append(len(a_row))
             b_lengths.append(len(b_row))
-            extra_a = u' ' * (max_width - len(a_row))
-            extra_b = u' ' * (max_width - len(b_row))
+            extra_a = u'`' * (max_width - len(a_row))
+            extra_b = u'`' * (max_width - len(b_row))
             a_line = u''
             b_line = u''
             for a_char, b_char in zip(a_row + extra_a, b_row + extra_b):
@@ -167,17 +166,22 @@ class FSArray(object):
         hdiff = '\n'.join(a_line + u' %3d | %3d ' % (a_len, b_len) + b_line for a_line, b_line, a_len, b_len in zip(a_rows, b_rows, a_lengths, b_lengths))
         return hdiff
 
+actualize = str if sys.version_info[0] == 3 else unicode
+
+def simple_format(x):
+    return '\n'.join(actualize(l) for l in x)
+
 class FormatStringTest(unittest.TestCase):
     def assertFSArraysEqual(self, a, b):
         self.assertEqual(type(a), FSArray)
         self.assertEqual(type(b), FSArray)
-        self.assertEqual((a.width, b.height), (a.width, b.height), 'fsarray dimensions do not match: %r %r' % (a.shape, b.shape))
+        self.assertEqual((a.width, b.height), (a.width, b.height), 'fsarray dimensions do not match: %s %s' % (a.shape, b.shape))
         for i, (a_row, b_row) in enumerate(zip(a, b)):
             self.assertEqual(a_row, b_row, 'FSArrays differ first on line %s:\n%s' % (i, FSArray.diff(a, b)))
 
     def assertFSArraysEqualIgnoringFormatting(self, a, b):
         """Also accepts arrays of strings"""
-        self.assertEqual(len(a), len(b), 'fsarray heights do not match: %r %r' % (len(a), len(b)))
+        self.assertEqual(len(a), len(b), 'fsarray heights do not match: %s %s \n%s \n%s' % (len(a), len(b), simple_format(a), simple_format(b)))
         for i, (a_row, b_row) in enumerate(zip(a, b)):
             a_row = a_row.s if isinstance(a_row, FmtStr) else a_row
             b_row = b_row.s if isinstance(b_row, FmtStr) else b_row
@@ -191,3 +195,4 @@ if __name__ == '__main__':
 
     a = fsarray(['hey', 'there'], bg='cyan')
     a.dumb_display()
+    print(FSArray.diff(a, fsarray(['hey', 'there ']), ignore_formatting=True))
