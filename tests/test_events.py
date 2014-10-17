@@ -55,7 +55,8 @@ class TestGetKey(unittest.TestCase):
         self.assertEqual(get_utf([b'\xe2']), None)
         self.assertEqual(get_utf([b'\xe2'], full=True), u'<Meta-b>')
         self.assertEqual(get_utf([b'\xc3', b'\x9f']), u'ß')
-        self.assertEqual(get_utf([b'\xc3', b'\x9f']), u'ß')
+        self.assertEqual(get_utf([b'\xe2']), None)
+        self.assertEqual(get_utf([b'\xe2', b'\x88']), None)
         self.assertEqual(get_utf([b'\xe2', b'\x88', b'\x82']), u'∂')
 
     def test_sequences_without_names(self):
