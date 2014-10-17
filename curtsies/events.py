@@ -209,12 +209,12 @@ def could_be_unfinished_char(seq, encoding):
 
 def could_be_unfinished_utf8(seq):
     # http://en.wikipedia.org/wiki/UTF-8#Description
-    if   ord(seq[0]) & 0b10000000 == 0b10000000 and len(seq) < 1: return True
-    elif ord(seq[0]) & 0b11100000 == 0b11000000 and len(seq) < 2: return True
-    elif ord(seq[0]) & 0b11110000 == 0b11100000 and len(seq) < 3: return True
-    elif ord(seq[0]) & 0b11111000 == 0b11110000 and len(seq) < 4: return True
-    elif ord(seq[0]) & 0b11111100 == 0b11111000 and len(seq) < 5: return True
-    elif ord(seq[0]) & 0b11111110 == 0b11111100 and len(seq) < 6: return True
+    if   ord(seq[0:1]) & 0b10000000 == 0b10000000 and len(seq) < 1: return True
+    elif ord(seq[0:1]) & 0b11100000 == 0b11000000 and len(seq) < 2: return True
+    elif ord(seq[0:1]) & 0b11110000 == 0b11100000 and len(seq) < 3: return True
+    elif ord(seq[0:1]) & 0b11111000 == 0b11110000 and len(seq) < 4: return True
+    elif ord(seq[0:1]) & 0b11111100 == 0b11111000 and len(seq) < 5: return True
+    elif ord(seq[0:1]) & 0b11111110 == 0b11111100 and len(seq) < 6: return True
     else: return False
 
 def pp_event(seq):
