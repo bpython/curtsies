@@ -1,0 +1,4 @@
+include LICENSE
+include tests/*.py
+include examples/*.py
+include readme.md
