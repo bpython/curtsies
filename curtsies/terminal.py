@@ -87,7 +87,6 @@ class Terminal(object):
         signal.signal(signal.SIGWINCH, sigwinch_handler)
 
         self.original_stty = termios.tcgetattr(self.out_stream)
-        self.turn_off_line_wrapping()
         if self.input_mode == 'raw':
             tty.setraw(self.in_stream, termios.TCSANOW)
         else:
