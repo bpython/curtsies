@@ -64,15 +64,10 @@ MAX_KEYPRESS_SIZE = max(len(seq) for seq in (list(CURSES_NAMES.keys()) + list(CU
 class Event(object):
     pass
 
-class RefreshRequestEvent(Event):
-    def __init__(self, who='?', when='now'):
-        self.who = who
-        self.when = when # time.time() + how long
-    def __repr__(self):
-        if self.when == 'now':
-            return "<RefreshRequestEvent from %r for now>" % (self.who,)
-        else:
-            return "<RefreshRequestEvent from %r for %s seconds from now>" % (self.who, self.when - time.time())
+class ScheduledEvent(Event):
+    def __init__(self, when):
+        self.when = when
+
 class WindowChangeEvent(Event):
     def __init__(self, rows, columns, cursor_dy=None):
         self.rows = rows
@@ -102,12 +97,6 @@ class PasteEvent(Event):
     @property
     def name(self):
         return repr(self)
-
-class ReloadEvent(Event):
-    def __init__(self, files_modified=('?',)):
-        self.files_modified = files_modified
-    def __repr__(self):
-        return "<ReloadEvent from %s>" % (' & '.join(self.files_modified))
 
 def decodable(seq, encoding):
     try:

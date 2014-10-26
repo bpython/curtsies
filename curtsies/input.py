@@ -12,6 +12,9 @@ import termios
 import time
 import tty
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 from .termhelpers import Nonblocking
 from . import events
@@ -50,6 +53,11 @@ class Input(object):
         self.sigint_event = sigint_event
         self.sigints = []
 
+        self.readers = []
+        self.queued_interrupting_events = []
+        self.queued_events = []
+        self.queued_scheduled_events = []
+
     #prospective: this could be useful for an external select loop
     def fileno(self):
         return self.in_stream.fileno()
@@ -83,15 +91,33 @@ class Input(object):
         self.unprocessed_bytes.extend(string[i:i+1] for i in range(len(string)))
 
     def wait_for_read_ready_or_timeout(self, timeout):
+        """Returns tuple of whether stdin has bytes to read and an event.
+
+        If an event is returned, that event is more pressing than reading
+        bytes on stdin to create a keyboard input event."""
         remaining_timeout = timeout
         t0 = time.time()
         while True:
             try:
-                (rs, _, _) = select.select([self.in_stream.fileno()], [], [], remaining_timeout)
-                return rs, None
+                (rs, _, _) = select.select([self.in_stream.fileno()] + self.readers, [], [], remaining_timeout)
+                if not rs:
+                    return False, None
+                r = rs[0]  # if there's more than one, get it in the next loop
+                if r == self.in_stream.fileno():
+                    return True, None
+                else:
+                    os.read(r, 1024)
+                    if self.queued_interrupting_events:
+                        return False, self.queued_interrupting_events.pop(0)
+                    elif remaining_timeout is not None:
+                        remaining_timeout = max(0, t0 + timeout - time.time())
+                        continue
+                    else:
+                        continue
+
             except select.error:
                 if self.sigints:
-                    return [], self.sigints.pop()
+                    return False, self.sigints.pop()
                 if remaining_timeout is not None:
                     remaining_timeout = max(timeout - (time.time() - t0), 0)
 
@@ -118,17 +144,37 @@ class Input(object):
 
         if self.sigints:
             return self.sigints.pop()
+        if self.queued_events:
+            return self.queued_events.pop(0)
+        if self.queued_interrupting_events:
+            return self.queued_interrupting_events.pop(0)
+
+        if self.queued_scheduled_events:
+            self.queued_scheduled_events.sort() #TODO use a data structure that inserts sorted
+            when, _ = self.queued_scheduled_events[0]
+            if when < time.time():
+                logger.warning('popping an event! %r %r', self.queued_scheduled_events[0], self.queued_scheduled_events[1:])
+                return self.queued_scheduled_events.pop(0)[1]
+            else:
+                time_until_check = min(max(0, when - time.time()), timeout)
+        else:
+            time_until_check = timeout
 
         # try to find an already pressed key from prev input
         e = find_key()
         if e is not None:
             return e
 
-        rs, sigint = self.wait_for_read_ready_or_timeout(timeout)
-        if sigint:
-            return sigint
-        if not rs:
+        stdin_has_bytes, event = self.wait_for_read_ready_or_timeout(time_until_check)
+        if event:
+            return event
+        if self.queued_scheduled_events and when < time.time(): # when should always be defined
+            # because queued_scheduled_events should not be modified during this time
+            logger.warning('popping an event! %r %r', self.queued_scheduled_events[0], self.queued_scheduled_events[1:])
+            return self.queued_scheduled_events.pop(0)[1]
+        if not stdin_has_bytes:
             return None
+
         num_bytes = self.nonblocking_read()
         assert num_bytes > 0, num_bytes
         if self.paste_threshold is not None and num_bytes > self.paste_threshold:
@@ -168,8 +214,44 @@ class Input(object):
                     self.unprocessed_bytes.extend(data)
                     return len(data)
 
+    def event_trigger(self, event_type):
+        """Returns a callback that creates events.
+
+        Returned callback function will add an event of type event_type
+        to a queue which will be checked the next time an event is requested"""
+        def callback(**kwargs):
+            self.queued_events.append(event_type(**kwargs))
+        return callback
+
+    def scheduled_event_trigger(self, event_type):
+        """Returns a callback that schedules events for the future.
+
+        Returned callback function will add an event of type event_type
+        to a queue which will be checked the next time an event is requested"""
+        def callback(when, **kwargs):
+            self.queued_scheduled_events.append((when, event_type(when=when, **kwargs)))
+        return callback
+
+    def threadsafe_event_trigger(self, event_type):
+        """Returns a callback to schedule events, interrupting event requests.
+
+        Returned callback function will add an event of type event_type
+        which will interrupt an event request if one
+        is concurrently occuring, otherwise adding the event to a queue
+        that will be checked on the next event request"""
+        readfd, writefd = os.pipe()
+        self.readers.append(readfd)
+
+        def callback(**kwargs):
+            self.queued_interrupting_events.append(event_type(**kwargs))  #TODO use a threadsafe queue for this
+            logger.warning('added event to events list %r', self.queued_interrupting_events)
+            os.write(writefd, b'interrupting event!')
+        return callback
+
+
 def getpreferredencoding():
     return locale.getpreferredencoding() or sys.getdefaultencoding()
+
 
 def main():
     with Input() as input_generator:

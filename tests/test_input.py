@@ -1,13 +1,20 @@
 import unittest
 from mock import Mock
-from curtsies import events
-import select
 
-from curtsies.input import Input, getpreferredencoding
+try:
+    from unittest import skip
+except ImportError:
+    def skip(f):
+        return lambda self: None
+
+from curtsies import events
+
+from curtsies.input import Input
+
 
 class TestInput(unittest.TestCase):
     def test_create(self):
-        inp = Input()
+        Input()
 
     def test_iter(self):
         inp = Input()
@@ -47,6 +54,7 @@ class TestInput(unittest.TestCase):
         n = inp.paste_threshold + 1
 
         first_time = [True]
+
         def side_effect():
             if first_time:
                 inp.unprocessed_bytes.extend([b'a']*n)
@@ -59,3 +67,31 @@ class TestInput(unittest.TestCase):
         r = inp.send(0)
         self.assertEqual(type(r), events.PasteEvent)
         self.assertEqual(r.events, [u'a'] * n)
+
+    @skip('TODO')
+    def test_event_trigger(self):
+        pass
+
+    @skip('TODO')
+    def test_schedule_event_trigger(self):
+        pass
+
+    @skip('TODO')
+    def test_threadsafe_event_trigger(self):
+        pass
+
+    @skip('TODO')
+    def test_send_with_queued_events(self):
+        pass
+
+    @skip('TODO')
+    def test_send_with_queued_scheduled_events(self):
+        pass
+
+    @skip('TODO')
+    def test_send_with_queued_interrupting_events(self):
+        pass
+
+    @skip('TODO')
+    def test_send_with(self):
+        pass
