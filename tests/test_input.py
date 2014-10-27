@@ -1,6 +1,8 @@
+import os
+import signal
+import threading
 import time
 import unittest
-import threading
 from mock import Mock
 
 try:
@@ -103,3 +105,16 @@ class TestInput(unittest.TestCase):
         t.start()
         f()
         t.join()
+
+    def test_interrupting_sigint(self):
+        inp = Input(sigint_event=True)
+
+        def send_sigint():
+            os.kill(os.getpid(), signal.SIGINT)
+
+        with inp:
+            t = threading.Thread(target=send_sigint)
+            t.start()
+            self.assertEqual(type(inp.send(1)), events.SigIntEvent)
+            self.assertEqual(inp.send(0), None)
+            t.join()
