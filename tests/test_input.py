@@ -1,4 +1,6 @@
+import time
 import unittest
+import threading
 from mock import Mock
 
 try:
@@ -12,6 +14,14 @@ from curtsies import events
 from curtsies.input import Input
 
 
+class CustomEvent(events.Event):
+    pass
+
+
+class CustomScheduledEvent(events.ScheduledEvent):
+    pass
+
+
 class TestInput(unittest.TestCase):
     def test_create(self):
         Input()
@@ -23,13 +33,6 @@ class TestInput(unittest.TestCase):
         for i, e in zip(range(3), inp):
             self.assertEqual(e, None)
         self.assertEqual(inp.send.call_count, 3)
-
-    def test_mocks(self):
-        events.a = 10
-        self.assertTrue(True)
-
-    def test_mocks2(self):
-        self.assertEqual(events.a, 10)
 
     def test_send(self):
         inp = Input()
@@ -68,30 +71,35 @@ class TestInput(unittest.TestCase):
         self.assertEqual(type(r), events.PasteEvent)
         self.assertEqual(r.events, [u'a'] * n)
 
-    @skip('TODO')
     def test_event_trigger(self):
-        pass
+        inp = Input()
+        f = inp.event_trigger(CustomEvent)
+        self.assertEqual(inp.send(0), None)
+        f()
+        self.assertEqual(type(inp.send(0)), CustomEvent)
+        self.assertEqual(inp.send(0), None)
 
-    @skip('TODO')
     def test_schedule_event_trigger(self):
-        pass
+        inp = Input()
+        f = inp.scheduled_event_trigger(CustomScheduledEvent)
+        self.assertEqual(inp.send(0), None)
+        f(when=time.time())
+        self.assertEqual(type(inp.send(0)), CustomScheduledEvent)
+        self.assertEqual(inp.send(0), None)
+        f(when=time.time()+0.01)
+        self.assertEqual(inp.send(0), None)
+        time.sleep(0.01)
+        self.assertEqual(type(inp.send(0)), CustomScheduledEvent)
+        self.assertEqual(inp.send(0), None)
 
-    @skip('TODO')
     def test_threadsafe_event_trigger(self):
-        pass
+        inp = Input()
+        f = inp.threadsafe_event_trigger(CustomEvent)
+        def check_event():
+            self.assertEqual(type(inp.send(1)), CustomEvent)
+            self.assertEqual(inp.send(0), None)
 
-    @skip('TODO')
-    def test_send_with_queued_events(self):
-        pass
-
-    @skip('TODO')
-    def test_send_with_queued_scheduled_events(self):
-        pass
-
-    @skip('TODO')
-    def test_send_with_queued_interrupting_events(self):
-        pass
-
-    @skip('TODO')
-    def test_send_with(self):
-        pass
+        t = threading.Thread(target=check_event)
+        t.start()
+        f()
+        t.join()
