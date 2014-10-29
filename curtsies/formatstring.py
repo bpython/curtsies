@@ -23,6 +23,7 @@ red('hello')
 import itertools
 import re
 import sys
+import wcwidth
 
 from .escseqparse import parse
 from .termformatconstants import (FG_COLORS, BG_COLORS, STYLES,
@@ -56,6 +57,8 @@ class FrozenDict(dict):
 class Chunk(object):
     """A string with a single set of formatting attributes"""
     def __init__(self, string, atts=()):
+        if len(string) > 0 and wcwidth.wcswidth(string) < 1:
+            raise ValueError("Can't calculate width of string %r" % string)
         self._s = string
         self._atts = FrozenDict(atts)
 
@@ -66,7 +69,9 @@ class Chunk(object):
                     "Attributes, e.g. {'fg': 34, 'bold': True} where 34 is the escape code for ...")
 
     def __len__(self):
-        return len(self.s)
+        l = wcwidth.wcswidth(self.s)
+        assert l >= 0
+        return l
 
     #TODO cache this
     @property
@@ -409,6 +414,36 @@ class FmtStr(object):
 
     def copy(self):
         return FmtStr(*self.basefmtstrs)
+
+
+def interval_overlap(a, b, x, y):
+    """Returns by how much two intervals overlap
+
+    assumed that a <= b and x <= y"""
+    if b <= x or a >= y:
+        return 0
+    elif x <= a <= y:
+        return min(b, y) - a
+    elif x <= b <= y:
+        return b - max(a, x)
+    elif a >= x and b <= y:
+        return b - a
+    else:
+        assert False
+
+
+def width_aware_slice(s, start, end, replacement_char=u' '):
+    divides = [wcwidth.wcswidth(s, i) for i in range(len(s)+1)]
+
+    new_chunk_chars = []
+    for char, char_start, char_end in zip(s, divides[:-1], divides[1:]):
+        if char_start >= start and char_end <= end:
+            new_chunk_chars.append(char)
+        else:
+            new_chunk_chars.extend(replacement_char * interval_overlap(char_start, char_end, start, end))
+
+    return ''.join(new_chunk_chars)
+
 
 def linesplit(string, columns):
     """Returns a list of lines, split on the last possible space of each line.

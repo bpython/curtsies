@@ -31,6 +31,8 @@ from .formatstring import FmtStr
 
 logger = logging.getLogger(__name__)
 
+#TODO check that strings used in arrays don't have tabs or spaces in them!
+
 def slicesize(s):
     return int((s.stop - s.start) / (s.step if s.step else 1))
 
