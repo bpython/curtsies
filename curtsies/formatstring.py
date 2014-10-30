@@ -59,11 +59,12 @@ class Chunk(object):
     def __init__(self, string, atts=()):
         if len(string) > 0 and wcwidth.wcswidth(string) < 1:
             raise ValueError("Can't calculate width of string %r" % string)
+        if not isinstance(string, unicode):
+            raise ValueError("unicode string required, got %r" % string)
         self._s = string
         self._atts = FrozenDict(atts)
 
-    s = property(lambda self: self._s) #makes self.s immutable
-
+    s = property(lambda self: self._s)  # resist changes to s and atts
     atts = property(lambda self: self._atts,
                     None, None,
                     "Attributes, e.g. {'fg': 34, 'bold': True} where 34 is the escape code for ...")
@@ -110,7 +111,7 @@ class Chunk(object):
             if att == 'fg': return FG_NUMBER_TO_COLOR[self.atts[att]]
             elif att == 'bg': return 'on_' + BG_NUMBER_TO_COLOR[self.atts[att]]
             else: return att
-        atts_out = dict((k, v) for (k, v) in self.atts.items() if v) 
+        atts_out = dict((k, v) for (k, v) in self.atts.items() if v)
         return (''.join(pp_att(att)+'(' for att in sorted(atts_out))
                 + repr(self.s) + ')'*len(atts_out))
 
@@ -350,16 +351,16 @@ class FmtStr(object):
         index = normalize_slice(len(self), index)
         counter = 0
         parts = []
-        for fs in self.basefmtstrs:
-            if index.start < counter + len(fs) and index.stop > counter:
+        for chunk in self.basefmtstrs:
+            if index.start < counter + len(chunk) and index.stop > counter:
                 start = max(0, index.start - counter)
-                end = min(index.stop - counter, len(fs))
-                if end - start == len(fs):
-                    parts.append(fs)
+                end = min(index.stop - counter, len(chunk))
+                if end - start == len(chunk):
+                    parts.append(chunk)
                 else:
-                    s_part = fs.s[max(0, index.start - counter):index.stop - counter]
-                    parts.append(Chunk(s_part, fs.atts))
-            counter += len(fs)
+                    s_part = width_aware_slice(chunk.s, max(0, index.start - counter), index.stop - counter)
+                    parts.append(Chunk(s_part, chunk.atts))
+            counter += len(chunk)
             if index.stop < counter:
                 break
         return FmtStr(*parts) if parts else fmtstr('')

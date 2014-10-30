@@ -349,8 +349,8 @@ class TestCharacterWidth(unittest.TestCase):
 
     @skip('need helpers first')
     def test_subdivide(self):
-        self.assertEqual(fmtstr(u'Ｅ')[:1], ' ')
-        self.assertEqual(fmtstr(u'Ｅ')[:2], 'Ｅ')
+        self.assertEqual(fmtstr(u'Ｅ')[:1].s, u' ')
+        self.assertEqual(fmtstr(u'Ｅ')[:2].s, u'Ｅ')
 
     def test_multi_width(self):
         self.assertEqual(len(fmtstr(u'a\u0300')), 1)
