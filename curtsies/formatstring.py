@@ -56,10 +56,10 @@ class FrozenDict(dict):
         return FrozenDict(itertools.chain(self.items(), dictlike.items()))
 
 class Chunk(object):
-    """A string with a single set of formatting attributes"""
+    """A string with a single set of formatting attributes
+
+    Subject to change, not part of the API"""
     def __init__(self, string, atts=()):
-        if len(string) > 0 and wcwidth.wcswidth(string) < 1:
-            raise ValueError("Can't calculate width of string %r" % string)
         if not isinstance(string, unicode):
             raise ValueError("unicode string required, got %r" % string)
         self._s = string
@@ -71,9 +71,14 @@ class Chunk(object):
                     "Attributes, e.g. {'fg': 34, 'bold': True} where 34 is the escape code for ...")
 
     def __len__(self):
-        l = wcwidth.wcswidth(self.s)
-        assert l >= 0
-        return l
+        return len(self._s)
+
+    @property
+    def width(self):
+        width = wcwidth.wcswidth(self._s)
+        if len(self._s) > 0 and width < 1:
+            raise ValueError("Can't calculate width of string %r" % string)
+        return width
 
     #TODO cache this
     @property
@@ -131,6 +136,7 @@ class FmtStr(object):
         self._unicode = None
         self._len = None
         self._s = None
+        self._width = None
 
     @classmethod
     def from_str(cls, s):
@@ -271,7 +277,6 @@ class FmtStr(object):
     def __str__(self):
         if self._str is not None:
             return self._str
-        print self.basefmtstrs
         self._str = b''.join(str(fs) for fs in self.basefmtstrs)
         return self._str
 
@@ -280,6 +285,13 @@ class FmtStr(object):
             return self._len
         self._len = sum(len(fs) for fs in self.basefmtstrs)
         return self._len
+
+    @property
+    def width(self):
+        if self._width is not None:
+            return self._width
+        self._width = sum(fs.width for fs in self.basefmtstrs)
+        return self._width
 
     def __repr__(self):
         return '+'.join(repr(fs) for fs in self.basefmtstrs)
@@ -324,6 +336,8 @@ class FmtStr(object):
 
     def __getattr__(self, att):
         # thanks to @aerenchyma/@jczett
+        if not hasattr(self.s, att):
+            raise AttributeError("No attribute %r" % (att,))
         def func_help(*args, **kwargs):
              result = getattr(self.s, att)(*args, **kwargs)
              if isinstance(result, (bytes, unicode)):
@@ -360,9 +374,30 @@ class FmtStr(object):
                 if end - start == len(chunk):
                     parts.append(chunk)
                 else:
-                    s_part = width_aware_slice(chunk.s, max(0, index.start - counter), index.stop - counter)
+                    s_part = chunk.s[max(0, index.start - counter): index.stop - counter]
                     parts.append(Chunk(s_part, chunk.atts))
             counter += len(chunk)
+            if index.stop < counter:
+                break
+        return FmtStr(*parts) if parts else fmtstr('')
+
+    def width_aware_slice(self, index):
+        if wcwidth.wcswidth(self.s) == -1:
+            raise ValueError('bad values for width aware slicing')
+        index = normalize_slice(self.width, index)
+        counter = 0
+        parts = []
+        for chunk in self.basefmtstrs:
+            if index.start < counter + chunk.width and index.stop > counter:
+                start = max(0, index.start - counter)
+                end = min(index.stop - counter, chunk.width)
+                if end - start == chunk.width:
+                    parts.append(chunk)
+                else:
+                    s_part = width_aware_slice(chunk.s, max(0, index.start - counter), index.stop - counter)
+                    print s_part
+                    parts.append(Chunk(s_part, chunk.atts))
+            counter += chunk.width
             if index.stop < counter:
                 break
         return FmtStr(*parts) if parts else fmtstr('')
@@ -387,6 +422,7 @@ class FmtStr(object):
         self._unicode = None
         self._str = None
         self._len = None
+        self._width = None
         index = normalize_slice(len(self), index)
         if isinstance(value, (bytes, unicode)):
             value = FmtStr(Chunk(value))

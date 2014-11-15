@@ -186,9 +186,11 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(fmtstr('a').split('a')[1].basefmtstrs, fmtstr('').basefmtstrs)
 
         self.assertEqual((fmtstr('imp') + ' ').split('i'), [fmtstr(''), fmtstr('mp') + ' '])
+        self.assertEqual(blue('abcbd').split('b'), [blue('a'), blue('c'), blue('d')])
 
-    @skip('strings with tabs and newlines are a problem for wcwidth')
     def test_split_with_spaces(self):
+        self.assertEqual(blue('a\nb').split(), [blue('a'), blue('b')])
+        self.assertEqual(blue('a   \t\n\nb').split(), [blue('a'), blue('b')])
         self.assertEqual(blue('hello   \t\n\nthere').split(), [blue('hello'), blue('there')])
 
     def test_linessplit(self):
@@ -252,6 +254,7 @@ class TestSlicing(unittest.TestCase):
         self.assertEqual(fmtstr('Hi!', 'blue')[1:], fmtstr('i!', 'blue'))
         s = fmtstr('imp') + ' '
         self.assertEqual(s[1:], fmtstr('mp')+' ')
+        self.assertEqual(blue('a\nb')[0:1], blue('a'))
 
         # considering changing behavior so that this doens't work
         # self.assertEqual(fmtstr('Hi!', 'blue')[15:18], fmtstr('', 'blue'))
@@ -284,12 +287,6 @@ class TestUnicode(unittest.TestCase):
         str(fmtstr('⁇', 'blue'))
         unicode(fmtstr('⁇', 'blue'))
         self.assertTrue(True)
-
-    @skip('If we require knowing terminal width, these will not work')
-    def test_funny_chars_with_bytes(self):
-        unicode(fmtstr('⁇', 'blue'))
-        str(fmtstr('⁇', 'blue'))
-        fmtstr('⁇', 'blue')
 
     def test_right_sequence_in_py3(self):
         red_on_blue = fmtstr('hello', 'red', 'on_blue')
@@ -344,25 +341,24 @@ class TestUnicode(unittest.TestCase):
         repr(Chunk('–'))
         self.assertEqual(repr(fmtstr('–')), repr_without_leading_u('–'))
 
-    @skip("no longer makes sense, right? Now unicode strings are required")
-    def test_bad_utf8(self):
-        """FmtStrs of bytes that aren't valid utf8 even though the output medium is shouldn't crash"""
-        str(fmtstr('\xf7'))
-
 class TestCharacterWidth(unittest.TestCase):
 
     def test_doublewide_width(self):
-        self.assertEqual(len(fmtstr('Ｅ', 'blue')), 2)
-        self.assertEqual(len(fmtstr('ｈｉ')), 4)
-
-    @skip('need helpers first')
-    def test_subdivide(self):
-        self.assertEqual(fmtstr('Ｅ')[:1].s, ' ')
-        self.assertEqual(fmtstr('Ｅ')[:2].s, 'Ｅ')
+        self.assertEqual(len(fmtstr('Ｅ', 'blue')), 1)
+        print dir(fmtstr('Ｅ', 'blue'))
+        self.assertEqual(fmtstr('Ｅ', 'blue').width, 2)
+        self.assertEqual(len(fmtstr('ｈｉ')), 2)
+        self.assertEqual(fmtstr('ｈｉ').width, 4)
 
     def test_multi_width(self):
-        self.assertEqual(len(fmtstr('a\u0300')), 1)
+        self.assertEqual(len(fmtstr('a\u0300')), 2)
+        self.assertEqual(fmtstr('a\u0300').width, 1)
 
+    def test_width_aware_slice(self):
+        self.assertEqual(fmtstr('Ｅ').width_aware_slice(slice(None, 1, None)).s, ' ')
+        self.assertEqual(fmtstr('Ｅ').width_aware_slice(slice(None, 2, None)).s, 'Ｅ')
+        self.assertEqual(fmtstr('HＥ!', 'blue').width_aware_slice(slice(1, 2, None)), fmtstr(' ', 'blue'))
+        self.assertEqual(fmtstr('HＥ!', 'blue').width_aware_slice(slice(1, 3, None)), fmtstr('Ｅ', 'blue'))
 
 class TestWidthHelpers(unittest.TestCase):
 
