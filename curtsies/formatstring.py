@@ -122,9 +122,7 @@ class Chunk(object):
                 + (repr(self.s) if PY3 else repr(self.s)[1:]) + ')'*len(atts_out))
 
 class FmtStr(object):
-    """
-    A string whose substrings carry attributes (which may be different from one to the next).
-    """
+    """ A string whose substrings carry attributes (which may be different from one to the next).  """
     def __init__(self, *components):
         # These assertions below could be useful for debugging, but slow things down considerably
         #assert all([len(x) > 0 for x in components])
