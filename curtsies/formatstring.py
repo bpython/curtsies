@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 r"""Colored strings that behave mostly like strings
 
 >>> s = fmtstr("Hey there!", 'red')
@@ -15,7 +16,7 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 '\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m'
 >>> fmtstr(', ').join(['a', fmtstr('b'), fmtstr('c', 'blue')])
 'a'+', '+'b'+', '+blue('c')
->>> fmtstr('hello', 'red', bold=False)
+>>> fmtstr(u'hello', u'red', bold=False)
 red('hello')
 """
 #TODO add a way to composite text without losing original formatting information
@@ -113,7 +114,7 @@ class Chunk(object):
             else: return att
         atts_out = dict((k, v) for (k, v) in self.atts.items() if v)
         return (''.join(pp_att(att)+'(' for att in sorted(atts_out))
-                + repr(self.s) + ')'*len(atts_out))
+                + (repr(self.s) if PY3 else repr(self.s)[1:]) + ')'*len(atts_out))
 
 class FmtStr(object):
     """
@@ -270,7 +271,8 @@ class FmtStr(object):
     def __str__(self):
         if self._str is not None:
             return self._str
-        self._str = ''.join(str(fs) for fs in self.basefmtstrs)
+        print self.basefmtstrs
+        self._str = b''.join(str(fs) for fs in self.basefmtstrs)
         return self._str
 
     def __len__(self):

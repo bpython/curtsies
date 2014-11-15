@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+import sys
 import unittest
 from curtsies.formatstring import (FmtStr, fmtstr, Chunk, linesplit, normalize_slice,
                                    width_aware_slice)
@@ -12,10 +14,21 @@ except ImportError:
     def skip(f):
         return lambda self: None
 
+PY2 = sys.version_info[0] == 2
+
 try:
     unicode = unicode
 except:
     unicode = str
+
+def repr_without_leading_u(s):
+    assert isinstance(s, type(u''))
+    if PY2:
+        r = repr(s)
+        assert r[0] == 'u'
+        return r[1:]
+    else:
+        return repr(s)
 
 class TestFmtStrInitialization(unittest.TestCase):
     def test_bad(self):
@@ -258,23 +271,18 @@ class TestUnicode(unittest.TestCase):
     def test_output_type(self):
         self.assertEqual(type(str(fmtstr('hello', 'blue'))), str)
         self.assertEqual(type(unicode(fmtstr('hello', 'blue'))), unicode)
-        self.assertEqual(type(str(fmtstr(u'hello', 'blue'))), str)
-        self.assertEqual(type(unicode(fmtstr(u'hello', 'blue'))), unicode)
 
     def test_normal_chars(self):
         fmtstr('a', 'blue')
-        fmtstr(u'a', 'blue')
         str(fmtstr('a', 'blue'))
-        str(fmtstr(u'a', 'blue'))
         unicode(fmtstr('a', 'blue'))
-        unicode(fmtstr(u'a', 'blue'))
         self.assertTrue(True)
 
     def test_funny_chars(self):
-        fmtstr(u'⁇', 'blue')
-        fmtstr(u'⁇', 'blue')
-        str(fmtstr(u'⁇', 'blue'))
-        unicode(fmtstr(u'⁇', 'blue'))
+        fmtstr('⁇', 'blue')
+        str(Chunk('⁇', {'fg':'blue'}))
+        str(fmtstr('⁇', 'blue'))
+        unicode(fmtstr('⁇', 'blue'))
         self.assertTrue(True)
 
     @skip('If we require knowing terminal width, these will not work')
@@ -292,12 +300,12 @@ class TestUnicode(unittest.TestCase):
         self.assertEqual(str(full), '\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m')
 
     def test_len_of_unicode(self):
-        self.assertEqual(len(fmtstr(u'┌─')), 2)
-        lines = [u'┌─', 'an', u'┌─']
+        self.assertEqual(len(fmtstr('┌─')), 2)
+        lines = ['┌─', 'an', '┌─']
         r = fsarray(lines)
         self.assertEqual(r.shape, (3, 2))
-        self.assertEqual(len(fmtstr(fmtstr(u'┌─'))), len(fmtstr(u'┌─')))
-        self.assertEqual(fmtstr(fmtstr(u'┌─')), fmtstr(u'┌─'))
+        self.assertEqual(len(fmtstr(fmtstr('┌─'))), len(fmtstr('┌─')))
+        self.assertEqual(fmtstr(fmtstr('┌─')), fmtstr('┌─'))
         #TODO should we make this one work?
         # always coerce everything to unicode?
         #self.assertEqual(len(fmtstr('┌─')), 2)
@@ -305,14 +313,14 @@ class TestUnicode(unittest.TestCase):
     def test_len_of_unicode_in_fsarray(self):
 
         fsa = FSArray(3, 2)
-        fsa.rows[0] = fsa.rows[0].setslice_with_length(0, 2, u'┌─', 2)
+        fsa.rows[0] = fsa.rows[0].setslice_with_length(0, 2, '┌─', 2)
         self.assertEqual(fsa.shape, (3, 2))
-        fsa.rows[0] = fsa.rows[0].setslice_with_length(0, 2, fmtstr(u'┌─', 'blue'), 2)
+        fsa.rows[0] = fsa.rows[0].setslice_with_length(0, 2, fmtstr('┌─', 'blue'), 2)
         self.assertEqual(fsa.shape, (3, 2))
 
 
 
-        #lines = [u'┌─', 'an', u'┌─']
+        #lines = ['┌─', 'an', '┌─']
         #r = fsarray(lines[:3])
         #self.assertEqual(r.shape, (3, 2))
         #self.assertEqual(fsarray(r).shape, (3, 2))
@@ -320,60 +328,60 @@ class TestUnicode(unittest.TestCase):
         #self.assertEqual(fsarray(r[:, :]).shape, (3, 2))
 
     def test_add_unicode_to_byte(self):
-        fmtstr(u'┌') + fmtstr('a')
-        fmtstr('a') + fmtstr(u'┌')
-        u'┌' + fmtstr(u'┌')
-        u'┌' + fmtstr('a')
-        fmtstr(u'┌') + u'┌'
-        fmtstr('a') + u'┌'
+        fmtstr('┌') + fmtstr('a')
+        fmtstr('a') + fmtstr('┌')
+        '┌' + fmtstr('┌')
+        '┌' + fmtstr('a')
+        fmtstr('┌') + '┌'
+        fmtstr('a') + '┌'
 
     def test_unicode_slicing(self):
-        self.assertEqual(fmtstr(u'┌adfs', 'blue')[:2], fmtstr(u'┌a', 'blue'))
-        self.assertEqual(type(fmtstr(u'┌adfs', 'blue')[:2].s), type(fmtstr(u'┌a', 'blue').s))
-        self.assertEqual(len(fmtstr(u'┌adfs', 'blue')[:2]), 2)
+        self.assertEqual(fmtstr('┌adfs', 'blue')[:2], fmtstr('┌a', 'blue'))
+        self.assertEqual(type(fmtstr('┌adfs', 'blue')[:2].s), type(fmtstr('┌a', 'blue').s))
+        self.assertEqual(len(fmtstr('┌adfs', 'blue')[:2]), 2)
 
     def test_unicode_repr(self):
-        repr(Chunk(u'–'))
-        self.assertEqual(repr(fmtstr(u'–')), repr(u'–'))
+        repr(Chunk('–'))
+        self.assertEqual(repr(fmtstr('–')), repr_without_leading_u('–'))
 
+    @skip("no longer makes sense, right? Now unicode strings are required")
     def test_bad_utf8(self):
         """FmtStrs of bytes that aren't valid utf8 even though the output medium is shouldn't crash"""
         str(fmtstr('\xf7'))
 
-
 class TestCharacterWidth(unittest.TestCase):
 
     def test_doublewide_width(self):
-        self.assertEqual(len(fmtstr(u'Ｅ', 'blue')), 2)
-        self.assertEqual(len(fmtstr(u'ｈｉ')), 4)
+        self.assertEqual(len(fmtstr('Ｅ', 'blue')), 2)
+        self.assertEqual(len(fmtstr('ｈｉ')), 4)
 
     @skip('need helpers first')
     def test_subdivide(self):
-        self.assertEqual(fmtstr(u'Ｅ')[:1].s, u' ')
-        self.assertEqual(fmtstr(u'Ｅ')[:2].s, u'Ｅ')
+        self.assertEqual(fmtstr('Ｅ')[:1].s, ' ')
+        self.assertEqual(fmtstr('Ｅ')[:2].s, 'Ｅ')
 
     def test_multi_width(self):
-        self.assertEqual(len(fmtstr(u'a\u0300')), 1)
+        self.assertEqual(len(fmtstr('a\u0300')), 1)
 
 
 class TestWidthHelpers(unittest.TestCase):
 
     def test_combining_char_aware_slice(self):
-        self.assertEqual(width_aware_slice(u'abc', 0, 2), u'ab')
-        self.assertEqual(width_aware_slice(u'abc', 1, 3), u'bc')
-        self.assertEqual(width_aware_slice(u'abc', 0, 3), u'abc')
-        self.assertEqual(width_aware_slice(u'ab\u0300c', 0, 3), u'ab\u0300c')
-        self.assertEqual(width_aware_slice(u'ab\u0300c', 0, 2), u'ab\u0300')
-        self.assertEqual(width_aware_slice(u'ab\u0300c', 1, 3), u'b\u0300c')
-        self.assertEqual(width_aware_slice(u'ab\u0300\u0300c', 1, 3), u'b\u0300\u0300c')
+        self.assertEqual(width_aware_slice('abc', 0, 2), 'ab')
+        self.assertEqual(width_aware_slice('abc', 1, 3), 'bc')
+        self.assertEqual(width_aware_slice('abc', 0, 3), 'abc')
+        self.assertEqual(width_aware_slice('ab\u0300c', 0, 3), 'ab\u0300c')
+        self.assertEqual(width_aware_slice('ab\u0300c', 0, 2), 'ab\u0300')
+        self.assertEqual(width_aware_slice('ab\u0300c', 1, 3), 'b\u0300c')
+        self.assertEqual(width_aware_slice('ab\u0300\u0300c', 1, 3), 'b\u0300\u0300c')
 
 
     def test_char_width_aware_slice(self):
-        self.assertEqual(width_aware_slice(u'abc', 1, 2), u'b')
-        self.assertEqual(width_aware_slice(u'aＥbc', 0, 4), u'aＥb')
-        self.assertEqual(width_aware_slice(u'aＥbc', 1, 4), u'Ｅb')
-        self.assertEqual(width_aware_slice(u'aＥbc', 2, 4), u' b')
-        self.assertEqual(width_aware_slice(u'aＥbc', 0, 2), u'a ')
+        self.assertEqual(width_aware_slice('abc', 1, 2), 'b')
+        self.assertEqual(width_aware_slice('aＥbc', 0, 4), 'aＥb')
+        self.assertEqual(width_aware_slice('aＥbc', 1, 4), 'Ｅb')
+        self.assertEqual(width_aware_slice('aＥbc', 2, 4), ' b')
+        self.assertEqual(width_aware_slice('aＥbc', 0, 2), 'a ')
 
 
 class TestFSArray(unittest.TestCase):
