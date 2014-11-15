@@ -4,9 +4,7 @@
 sphinxcontrib-ansi seems to be the right thing to use, but it's
 missing sequences. It does the right thing and remove color when
 output format isn't html. This just always outputs raw html.  """
-import sys
 import re
-from os.path import basename
 from textwrap import dedent
 
 try:
@@ -15,11 +13,9 @@ except ImportError:
     from io import StringIO
 
 from sphinx.util.compat import Directive
-from docutils.parsers.rst.directives import flag
-from docutils import nodes, statemachine
+from docutils import nodes
 import pexpect
 from ansi2html import Ansi2HTMLConverter
-from docutils import nodes
 
 class python_terminal_block(nodes.literal_block):
     pass
@@ -27,7 +23,6 @@ class python_terminal_block(nodes.literal_block):
 def htmlize(ansi):
     conv = Ansi2HTMLConverter(inline=True, dark_bg=True)
     return conv.convert(ansi, full=False)
-
 
 class ANSIHTMLParser(object):
     def __call__(self, app, doctree, docname):
@@ -38,8 +33,8 @@ class ANSIHTMLParser(object):
         for ansi_block in doctree.traverse(python_terminal_block):
             handler(ansi_block)
 
-    def _strip_color_from_block_content(self, source):
-        content = re.sub('\x1b\\[([^m]+)m', source)
+    def _strip_color_from_block_content(self, block):
+        content = re.sub('\x1b\\[([^m]+)m', block.rawsource)
         literal_node = nodes.literal_block(content, content)
         block.replace_self(literal_node)
 
@@ -59,8 +54,9 @@ def run_lines(lines):
     child = pexpect.spawn('python -i')
     out = StringIO()
     child.logfile_read = out
+    #TODO make this detect `...` when it shouldn't be there, forgot a )
     for line in lines:
-        child.expect('>>> ')
+        child.expect(['>>> ', '... '])
         child.sendline(line)
     child.sendeof()
     child.read()
@@ -69,7 +65,12 @@ def run_lines(lines):
     return output[output.index('>>>'):output.rindex('>>>')]
 
 def get_lines(multiline_string):
-    return [line for line in dedent(multiline_string).split('\n') if line]
+    lines = dedent(multiline_string).split('\n')
+    while lines and not lines[0]:
+        lines.pop(0)
+    while lines and not lines[-1]:
+        lines.pop()
+    return lines
 
 class PythonTerminalDirective(Directive):
     """Execute the specified python code and insert the output into the document"""
@@ -78,7 +79,7 @@ class PythonTerminalDirective(Directive):
     def run(self):
 
         text = default_colors_to_resets(run_lines(get_lines('\n'.join(self.content))))
-        return [python_terminal_block(text, text)]
+        return [python_terminal_block(text.decode('utf8'), text.decode('utf8'))]
 
 def setup(app):
     app.add_directive('python_terminal_session', PythonTerminalDirective)
