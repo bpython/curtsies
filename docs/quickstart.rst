@@ -1,6 +1,6 @@
 Quickstart
 *****************
-This is what using (nearly every feature of) Curtsies looks like
+This is what using (nearly every feature of) Curtsies looks like:
 
 .. code-block:: python
 
@@ -29,4 +29,4 @@ This is what using (nearly every feature of) Curtsies looks like
                    a[row, column:column+len(s)] = [color(s)]
                window.render_to_terminal(a)
 
-Paste it into a file to try it out!
+Paste it into a file and try it out!
