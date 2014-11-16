@@ -22,7 +22,7 @@ User keyboard input events like pressing the up arrow key are detected by an
 all of these classes.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    quickstart
    examples

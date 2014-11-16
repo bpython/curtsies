@@ -197,7 +197,7 @@ The amound of horizontal space a string takes up in a terminal may differ from t
 (2, 1, u'a\u0324')
 
 API Docs
---------
+========
 
 .. automodule:: curtsies.formatstring
    :members: fmtstr
