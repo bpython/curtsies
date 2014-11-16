@@ -235,10 +235,12 @@ class FmtStr(object):
         return self.splice(string, len(self.s))
 
     def copy_with_new_atts(self, **attributes):
+        """Returns a new FmtStr with the same content but new formatting"""
         return FmtStr(*[Chunk(bfs.s, bfs.atts.extend(attributes))
                         for bfs in self.basefmtstrs])
 
     def join(self, iterable):
+        """Joins an iterable yielding strings or FmtStrs with self as separator"""
         before = []
         basefmtstrs = []
         for i, s in enumerate(iterable):
@@ -254,6 +256,10 @@ class FmtStr(object):
 
     #TODO make this split work like str.split
     def split(self, sep=None, maxsplit=None, regex=False):
+        """Split based on seperator, optionally using a regex
+
+        Capture groups are ignored in regex, the whole pattern is matched
+        and used to split the original FmtStr."""
         if maxsplit is not None:
             raise NotImplementedError('no maxsplit yet')
         s = self.s
@@ -286,10 +292,19 @@ class FmtStr(object):
 
     @property
     def width(self):
+        """The number of columns it would take to display this string"""
         if self._width is not None:
             return self._width
         self._width = sum(fs.width for fs in self.basefmtstrs)
         return self._width
+
+    def width_at_offset(self, n):
+        """Returns the horizontal position of character n of the string"""
+        #TODO make more efficient?
+        width = wcwidth.wcswidth(self.s[:n])
+        assert width != -1
+        return width
+
 
     def __repr__(self):
         return '+'.join(repr(fs) for fs in self.basefmtstrs)
@@ -380,6 +395,7 @@ class FmtStr(object):
         return FmtStr(*parts) if parts else fmtstr('')
 
     def width_aware_slice(self, index):
+        """Slice based on the number of columns it would take to display the substring"""
         if wcwidth.wcswidth(self.s) == -1:
             raise ValueError('bad values for width aware slicing')
         index = normalize_slice(self.width, index)
