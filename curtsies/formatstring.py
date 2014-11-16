@@ -409,7 +409,6 @@ class FmtStr(object):
                     parts.append(chunk)
                 else:
                     s_part = width_aware_slice(chunk.s, max(0, index.start - counter), index.stop - counter)
-                    print s_part
                     parts.append(Chunk(s_part, chunk.atts))
             counter += chunk.width
             if index.stop < counter:

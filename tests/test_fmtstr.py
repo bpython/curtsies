@@ -346,7 +346,6 @@ class TestCharacterWidth(unittest.TestCase):
 
     def test_doublewide_width(self):
         self.assertEqual(len(fmtstr('Ｅ', 'blue')), 1)
-        print dir(fmtstr('Ｅ', 'blue'))
         self.assertEqual(fmtstr('Ｅ', 'blue').width, 2)
         self.assertEqual(len(fmtstr('ｈｉ')), 2)
         self.assertEqual(fmtstr('ｈｉ').width, 4)
