@@ -33,10 +33,10 @@ Use as a context manager
 :py:meth:`~curtsies.window.BaseWindow.render_to_terminal` should only be called within the context
 of a window. Within the context of an instance of :py:class:`~curtsies.window.BaseWindow`
 it's important not to write to the stream the window is using (usually ``sys.stdout``).
-Displayed content and even cursor position are assumed not to change between renders.
+Terminal window contents and even cursor position are assumed not to change between renders.
 Any change that does occur in cursor position is attributed to movement of content
 in response to a window size change and is used to calculate how this content has moved,
-since this behavior differs on different terminal emulators.
+necessary because this behavior differs between terminal emulators.
 
 Entering the context of a FullscreenWindow object hides the cursor and switches to
 the alternate terminal screen. Entering the context of a CursorAwareWindow hides

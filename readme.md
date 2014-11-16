@@ -5,42 +5,45 @@ Curtsies: Terminal interaction
 ![Curtsies Logo](http://ballingt.com/assets/curtsiestitle.png)
 
 Curtsies is a library for interacting with the terminal.
-
-[Documentation](http://curtsies.readthedocs.org/en/latest/)
-
-Installation: `pip install curtsies`
-
 This is what using (nearly every feature of) curtsies looks like:
 
-    from __future__ import unicode_literals # convenient for Python 2
-    import random
+```python
+from __future__ import unicode_literals # convenient for Python 2
+import random
 
-    from curtsies import FullscreenWindow, Input, FSArray
-    from curtsies.fmtfuncs import red, bold, green, on_blue, yellow
+from curtsies import FullscreenWindow, Input, FSArray
+from curtsies.fmtfuncs import red, bold, green, on_blue, yellow
 
-    print(yellow('this prints normally, not to the alternate screen'))
-    with FullscreenWindow() as window:
-        with Input() as input_generator:
-            msg = red(on_blue(bold('Press escape to exit')))
-            a = FSArray(window.height, window.width)
-            a[0:1, 0:msg.width] = [msg]
-            for c in input_generator:
-                if c == '<ESC>':
-                    break
-                elif c == '<SPACE>':
-                    a = FSArray(window.height, window.width)
-                else:
-                    s = repr(c).decode()
-                    row = random.choice(range(window.height))
-                    column = random.choice(range(window.width-len(s)))
-                    color = random.choice([red, green, on_blue, yellow])
-                    a[row, column:column+len(s)] = [color(s)]
-                window.render_to_terminal(a)
+print(yellow('this prints normally, not to the alternate screen'))
+with FullscreenWindow() as window:
+    with Input() as input_generator:
+        msg = red(on_blue(bold('Press escape to exit')))
+        a = FSArray(window.height, window.width)
+        a[0:1, 0:msg.width] = [msg]
+        for c in input_generator:
+            if c == '<ESC>':
+                break
+            elif c == '<SPACE>':
+                a = FSArray(window.height, window.width)
+            else:
+                s = repr(c).decode()
+                row = random.choice(range(window.height))
+                column = random.choice(range(window.width-len(s)))
+                color = random.choice([red, green, on_blue, yellow])
+                a[row, column:column+len(s)] = [color(s)]
+            window.render_to_terminal(a)
+```
 
 Paste it in a `something.py` file and try it out!
 
+Installation: `pip install curtsies`
+
+[Documentation](http://curtsies.readthedocs.org/en/latest/)
+
 [FmtStr](http://curtsies.readthedocs.org/en/latest/FmtStr.html) objects are strings formatted with
 colors and styles displayable in a terminal with [ANSI escape sequences](http://en.wikipedia.org/wiki/ANSI_escape_code>`_).
+
+(the api shown below is outdated)
 ![fmtstr example screenshot](http://i.imgur.com/7lFaxsz.png)
 
 [FSArray](http://curtsies.readthedocs.org/en/latest/FSArray.html) objects contain multiple such strings
@@ -48,6 +51,7 @@ with each formatted string on its own row, and FSArray
 objects can be superimposed on each other
 to build complex grids of colored and styled characters through composition.
 
+(the api shown below is outdated)
 ![fsarray example screenshot](http://i.imgur.com/rvTRPv1.png)
 
 Such grids of characters can be rendered to the terminal in alternate screen mode
