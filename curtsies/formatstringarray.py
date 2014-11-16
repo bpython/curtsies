@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 """
 Format String 2D array
 2d array for compositing term-formated strings
@@ -31,6 +32,8 @@ from .formatstring import FmtStr
 
 logger = logging.getLogger(__name__)
 
+#TODO check that strings used in arrays don't have tabs or spaces in them!
+
 def slicesize(s):
     return int((s.stop - s.start) / (s.step if s.step else 1))
 
@@ -42,6 +45,7 @@ def fsarray(strings, *args, **kwargs):
     If a width is provided, raises a ValueError if any of the strings
     are of length greater than this width"""
 
+    strings = list(strings)
     if 'width' in kwargs:
         width = kwargs['width']
         del kwargs['width']
@@ -90,8 +94,8 @@ class FSArray(object):
         """tuple of (len(rows, len(num_columns)) numpy-style shape"""
         return len(self.rows), self.num_columns
 
-    height = property(lambda self: len(self.rows))
-    width = property(lambda self: self.num_columns)
+    height = property(lambda self: len(self.rows), None, None, """The number of rows""")
+    width = property(lambda self: self.num_columns, None, None, """The number of columns""")
 
     def __setitem__(self, slicetuple, value):
         """Place a FSArray in a FSArray"""
@@ -127,13 +131,13 @@ class FSArray(object):
                      self.rows[rowslice.stop:])
 
     def dumb_display(self):
-        """Prints rows, one per line"""
+        """Prints each row followed by a newline without regard for the terminal window size"""
         for line in self.rows:
             print(line)
 
     @classmethod
     def diff(cls, a, b, ignore_formatting=False):
-        """terminal output of diffs underlined"""
+        """Returns two FSArrays with differences underlined"""
         def underline(x): return u'\x1b[4m%s\x1b[0m' % (x,)
         def blink(x): return u'\x1b[5m%s\x1b[0m' % (x,)
         a_rows = []

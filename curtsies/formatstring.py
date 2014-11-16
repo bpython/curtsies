@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 r"""Colored strings that behave mostly like strings
 
 >>> s = fmtstr("Hey there!", 'red')
@@ -15,7 +16,7 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 '\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m'
 >>> fmtstr(', ').join(['a', fmtstr('b'), fmtstr('c', 'blue')])
 'a'+', '+'b'+', '+blue('c')
->>> fmtstr('hello', 'red', bold=False)
+>>> fmtstr(u'hello', u'red', bold=False)
 red('hello')
 """
 #TODO add a way to composite text without losing original formatting information
@@ -23,6 +24,7 @@ red('hello')
 import itertools
 import re
 import sys
+import wcwidth
 
 from .escseqparse import parse
 from .termformatconstants import (FG_COLORS, BG_COLORS, STYLES,
@@ -54,19 +56,29 @@ class FrozenDict(dict):
         return FrozenDict(itertools.chain(self.items(), dictlike.items()))
 
 class Chunk(object):
-    """A string with a single set of formatting attributes"""
+    """A string with a single set of formatting attributes
+
+    Subject to change, not part of the API"""
     def __init__(self, string, atts=()):
+        if not isinstance(string, unicode):
+            raise ValueError("unicode string required, got %r" % string)
         self._s = string
         self._atts = FrozenDict(atts)
 
-    s = property(lambda self: self._s) #makes self.s immutable
-
+    s = property(lambda self: self._s)  # resist changes to s and atts
     atts = property(lambda self: self._atts,
                     None, None,
                     "Attributes, e.g. {'fg': 34, 'bold': True} where 34 is the escape code for ...")
 
     def __len__(self):
-        return len(self.s)
+        return len(self._s)
+
+    @property
+    def width(self):
+        width = wcwidth.wcswidth(self._s)
+        if len(self._s) > 0 and width < 1:
+            raise ValueError("Can't calculate width of string %r" % string)
+        return width
 
     #TODO cache this
     @property
@@ -105,14 +117,12 @@ class Chunk(object):
             if att == 'fg': return FG_NUMBER_TO_COLOR[self.atts[att]]
             elif att == 'bg': return 'on_' + BG_NUMBER_TO_COLOR[self.atts[att]]
             else: return att
-        atts_out = dict((k, v) for (k, v) in self.atts.items() if v) 
+        atts_out = dict((k, v) for (k, v) in self.atts.items() if v)
         return (''.join(pp_att(att)+'(' for att in sorted(atts_out))
-                + repr(self.s) + ')'*len(atts_out))
+                + (repr(self.s) if PY3 else repr(self.s)[1:]) + ')'*len(atts_out))
 
 class FmtStr(object):
-    """
-    A string whose substrings carry attributes (which may be different from one to the next).
-    """
+    """ A string whose substrings carry attributes (which may be different from one to the next).  """
     def __init__(self, *components):
         # These assertions below could be useful for debugging, but slow things down considerably
         #assert all([len(x) > 0 for x in components])
@@ -124,6 +134,7 @@ class FmtStr(object):
         self._unicode = None
         self._len = None
         self._s = None
+        self._width = None
 
     @classmethod
     def from_str(cls, s):
@@ -224,10 +235,12 @@ class FmtStr(object):
         return self.splice(string, len(self.s))
 
     def copy_with_new_atts(self, **attributes):
+        """Returns a new FmtStr with the same content but new formatting"""
         return FmtStr(*[Chunk(bfs.s, bfs.atts.extend(attributes))
                         for bfs in self.basefmtstrs])
 
     def join(self, iterable):
+        """Joins an iterable yielding strings or FmtStrs with self as separator"""
         before = []
         basefmtstrs = []
         for i, s in enumerate(iterable):
@@ -243,6 +256,10 @@ class FmtStr(object):
 
     #TODO make this split work like str.split
     def split(self, sep=None, maxsplit=None, regex=False):
+        """Split based on seperator, optionally using a regex
+
+        Capture groups are ignored in regex, the whole pattern is matched
+        and used to split the original FmtStr."""
         if maxsplit is not None:
             raise NotImplementedError('no maxsplit yet')
         s = self.s
@@ -264,7 +281,7 @@ class FmtStr(object):
     def __str__(self):
         if self._str is not None:
             return self._str
-        self._str = ''.join(str(fs) for fs in self.basefmtstrs)
+        self._str = b''.join(str(fs) for fs in self.basefmtstrs)
         return self._str
 
     def __len__(self):
@@ -272,6 +289,22 @@ class FmtStr(object):
             return self._len
         self._len = sum(len(fs) for fs in self.basefmtstrs)
         return self._len
+
+    @property
+    def width(self):
+        """The number of columns it would take to display this string"""
+        if self._width is not None:
+            return self._width
+        self._width = sum(fs.width for fs in self.basefmtstrs)
+        return self._width
+
+    def width_at_offset(self, n):
+        """Returns the horizontal position of character n of the string"""
+        #TODO make more efficient?
+        width = wcwidth.wcswidth(self.s[:n])
+        assert width != -1
+        return width
+
 
     def __repr__(self):
         return '+'.join(repr(fs) for fs in self.basefmtstrs)
@@ -316,6 +349,8 @@ class FmtStr(object):
 
     def __getattr__(self, att):
         # thanks to @aerenchyma/@jczett
+        if not hasattr(self.s, att):
+            raise AttributeError("No attribute %r" % (att,))
         def func_help(*args, **kwargs):
              result = getattr(self.s, att)(*args, **kwargs)
              if isinstance(result, (bytes, unicode)):
@@ -345,16 +380,38 @@ class FmtStr(object):
         index = normalize_slice(len(self), index)
         counter = 0
         parts = []
-        for fs in self.basefmtstrs:
-            if index.start < counter + len(fs) and index.stop > counter:
+        for chunk in self.basefmtstrs:
+            if index.start < counter + len(chunk) and index.stop > counter:
                 start = max(0, index.start - counter)
-                end = min(index.stop - counter, len(fs))
-                if end - start == len(fs):
-                    parts.append(fs)
+                end = min(index.stop - counter, len(chunk))
+                if end - start == len(chunk):
+                    parts.append(chunk)
                 else:
-                    s_part = fs.s[max(0, index.start - counter):index.stop - counter]
-                    parts.append(Chunk(s_part, fs.atts))
-            counter += len(fs)
+                    s_part = chunk.s[max(0, index.start - counter): index.stop - counter]
+                    parts.append(Chunk(s_part, chunk.atts))
+            counter += len(chunk)
+            if index.stop < counter:
+                break
+        return FmtStr(*parts) if parts else fmtstr('')
+
+    def width_aware_slice(self, index):
+        """Slice based on the number of columns it would take to display the substring"""
+        if wcwidth.wcswidth(self.s) == -1:
+            raise ValueError('bad values for width aware slicing')
+        index = normalize_slice(self.width, index)
+        counter = 0
+        parts = []
+        for chunk in self.basefmtstrs:
+            if index.start < counter + chunk.width and index.stop > counter:
+                start = max(0, index.start - counter)
+                end = min(index.stop - counter, chunk.width)
+                if end - start == chunk.width:
+                    parts.append(chunk)
+                else:
+                    s_part = width_aware_slice(chunk.s, max(0, index.start - counter), index.stop - counter)
+                    print s_part
+                    parts.append(Chunk(s_part, chunk.atts))
+            counter += chunk.width
             if index.stop < counter:
                 break
         return FmtStr(*parts) if parts else fmtstr('')
@@ -379,6 +436,7 @@ class FmtStr(object):
         self._unicode = None
         self._str = None
         self._len = None
+        self._width = None
         index = normalize_slice(len(self), index)
         if isinstance(value, (bytes, unicode)):
             value = FmtStr(Chunk(value))
@@ -409,6 +467,36 @@ class FmtStr(object):
 
     def copy(self):
         return FmtStr(*self.basefmtstrs)
+
+
+def interval_overlap(a, b, x, y):
+    """Returns by how much two intervals overlap
+
+    assumed that a <= b and x <= y"""
+    if b <= x or a >= y:
+        return 0
+    elif x <= a <= y:
+        return min(b, y) - a
+    elif x <= b <= y:
+        return b - max(a, x)
+    elif a >= x and b <= y:
+        return b - a
+    else:
+        assert False
+
+
+def width_aware_slice(s, start, end, replacement_char=u' '):
+    divides = [wcwidth.wcswidth(s, i) for i in range(len(s)+1)]
+
+    new_chunk_chars = []
+    for char, char_start, char_end in zip(s, divides[:-1], divides[1:]):
+        if char_start >= start and char_end <= end:
+            new_chunk_chars.append(char)
+        else:
+            new_chunk_chars.extend(replacement_char * interval_overlap(char_start, char_end, start, end))
+
+    return ''.join(new_chunk_chars)
+
 
 def linesplit(string, columns):
     """Returns a list of lines, split on the last possible space of each line.

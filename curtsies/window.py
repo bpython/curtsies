@@ -1,20 +1,6 @@
-"""Classes for buffered rendering of 2D arrays of (colored) characters to the terminal
+"""Windows provide buffered rendering of 2D arrays of styled characters to the terminal.
 
-Windows provide buffered rendering of 2d arrays of (colored) charactors.
 
-FullscreenWindow will only render arrays the size of the terminal
-or smaller, and leaves no trace on exit (like top or vim). It never
-scrolls the terminal. Changing the terminal size doesn't do anything,
-but 2d array rendered needs to fit on the screen.
-
-CursorAwareWindow provides the ability to find the
-location of the cursor, and allows scrolling.
-Sigwinches can be annotated with how the terminal scroll changed
-Changing the terminal size breaks the cache, because it
-is unknown how the window size change affected scrolling / the cursor.
-Leaving the context of the window deletes everything below the cursor
-at the beginning of the its current line.
-(use scroll_down() from the last rendered line if you want to save all history)
 
 All windows write only unicode to the terminal - that's what blessings does, so
 we match it.
@@ -52,8 +38,10 @@ FIRST_COLUMN = u"\x1b[1G"
 
 class BaseWindow(object):
     """ Renders 2D arrays of characters and cursor position """
-    def __init__(self, out_stream=sys.stdout, hide_cursor=True):
+    def __init__(self, out_stream=None, hide_cursor=True):
         logger.debug('-------initializing Window object %r------' % self)
+        if out_stream is None:
+            out_stream = sys.__stdout__
         self.t = blessings.Terminal(stream=out_stream, force_styling=True)
         self.out_stream = out_stream
         self.hide_cursor = hide_cursor
@@ -119,8 +107,13 @@ class BaseWindow(object):
 class FullscreenWindow(BaseWindow):
     """A 2d-text rendering window that dissappears when its context is left
 
+    FullscreenWindow will only render arrays the size of the terminal
+    or smaller, and leaves no trace on exit (like top or vim). It never
+    scrolls the terminal. Changing the terminal size doesn't do anything,
+    but 2d array rendered needs to fit on the screen.
+
     Uses blessings's fullscreen capabilities"""
-    def __init__(self, out_stream=sys.stdout, hide_cursor=True):
+    def __init__(self, out_stream=None, hide_cursor=True):
         BaseWindow.__init__(self, out_stream=out_stream, hide_cursor=hide_cursor)
         self.fullscreen_ctx = self.t.fullscreen()
 
@@ -181,19 +174,36 @@ class FullscreenWindow(BaseWindow):
         if not self.hide_cursor:
             self.write(self.t.normal_cursor)
 
+
 class CursorAwareWindow(BaseWindow):
     """
+    CursorAwareWindow provides the ability to find the
+    location of the cursor, and allows scrolling.
+
+    Sigwinches can be annotated with how the terminal scroll changed
+
+    Changing the terminal size breaks the cache, because it
+    is unknown how the window size change affected scrolling / the cursor.
+
+    Leaving the context of the window deletes everything below the cursor
+    at the beginning of the its current line.
 
     Cursor diff depends on cursor never being touched by the application
-    Only use the render_to_terminal interface for moving the cursor"""
-    def __init__(self, out_stream=sys.stdout, in_stream=sys.stdin,
+    Only use the render_to_terminal interface for moving the cursor
+    """
+    def __init__(self, out_stream=None, in_stream=None,
                  keep_last_line=False, hide_cursor=True, extra_bytes_callback=None):
         """
+        out_stream defaults to sys.__stdout__ if None
+        in_stream defaults to sys.__stdin__ if None
+        keep_last_line is whether
 
         extra_bytes_callback is a function that will be called with extra bytes
         read from in_stream if they are inadvertantly read during a cursor_position call
         """
         BaseWindow.__init__(self, out_stream=out_stream, hide_cursor=hide_cursor)
+        if in_stream is None:
+            in_stream = sys.__stdin__
         self.in_stream = in_stream
         self._last_cursor_column = None
         self._last_cursor_row = None

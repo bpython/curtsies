@@ -1,28 +1,51 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+import sys
 import unittest
-from curtsies.formatstring import FmtStr, fmtstr, Chunk, linesplit, normalize_slice
+from curtsies.formatstring import (FmtStr, fmtstr, Chunk, linesplit,
+                                   normalize_slice, width_aware_slice)
 from curtsies.fmtfuncs import *
 from curtsies.termformatconstants import FG_COLORS
 from curtsies.formatstringarray import fsarray, FSArray, FormatStringTest
+
+try:
+    from unittest import skip
+except ImportError:
+    def skip(f):
+        return lambda self: None
+
+PY2 = sys.version_info[0] == 2
 
 try:
     unicode = unicode
 except:
     unicode = str
 
+
+def repr_without_leading_u(s):
+    assert isinstance(s, type(u''))
+    if PY2:
+        r = repr(s)
+        assert r[0] == 'u'
+        return r[1:]
+    else:
+        return repr(s)
+
+
 class TestFmtStrInitialization(unittest.TestCase):
     def test_bad(self):
         # Can't specify fg or bg color two ways
-        self.assertRaises(ValueError, fmtstr, 'hello', 'blue', {'fg':30})
-        self.assertRaises(ValueError, fmtstr, 'hello', 'on_blue', {'bg':40})
+        self.assertRaises(ValueError, fmtstr, 'hello', 'blue', {'fg': 30})
+        self.assertRaises(ValueError, fmtstr, 'hello', 'on_blue', {'bg': 40})
         # Only specific fg and bg colors are allowed
-        self.assertRaises(ValueError, fmtstr, 'hello', {'bg':30})
-        self.assertRaises(ValueError, fmtstr, 'hello', {'fg':40})
+        self.assertRaises(ValueError, fmtstr, 'hello', {'bg': 30})
+        self.assertRaises(ValueError, fmtstr, 'hello', {'fg': 40})
         # Only existing xforms can be used in kwargs
         self.assertRaises(ValueError, fmtstr, 'hello', 'make it big')
 
     def test_actual_init(self):
         FmtStr()
+
 
 class TestImmutability(unittest.TestCase):
 
@@ -30,7 +53,7 @@ class TestImmutability(unittest.TestCase):
         a = fmtstr('hi', 'blue')
         b = fmtstr('there', 'red')
         c = a + b
-        d = green(c)
+        green(c)
         self.assertEqual(a.shared_atts['fg'], FG_COLORS['blue'])
         self.assertEqual(b.shared_atts['fg'], FG_COLORS['red'])
 
@@ -124,7 +147,7 @@ class TestFmtStr(unittest.TestCase):
 
     def test_copy_with_new_atts(self):
         a = fmtstr('hello')
-        b = a.copy_with_new_atts(bold = True)
+        b = a.copy_with_new_atts(bold=True)
         self.assertEqual(a.shared_atts, {})
         self.assertEqual(b.shared_atts, {'bold': True})
 
@@ -160,13 +183,18 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(blue('hello there').split(' '), [blue('hello'), blue('there')])
         s = blue('hello there')
         self.assertEqual(s.split(' '), [s[:5], s[6:]])
-        self.assertEqual(blue('hello   \t\n\nthere').split(), [blue('hello'), blue('there')])
 
         # split shouldn't create fmtstrs without basefmtstrs
         self.assertEqual(fmtstr('a').split('a')[0].basefmtstrs, fmtstr('').basefmtstrs)
         self.assertEqual(fmtstr('a').split('a')[1].basefmtstrs, fmtstr('').basefmtstrs)
 
         self.assertEqual((fmtstr('imp') + ' ').split('i'), [fmtstr(''), fmtstr('mp') + ' '])
+        self.assertEqual(blue('abcbd').split('b'), [blue('a'), blue('c'), blue('d')])
+
+    def test_split_with_spaces(self):
+        self.assertEqual(blue('a\nb').split(), [blue('a'), blue('b')])
+        self.assertEqual(blue('a   \t\n\nb').split(), [blue('a'), blue('b')])
+        self.assertEqual(blue('hello   \t\n\nthere').split(), [blue('hello'), blue('there')])
 
     def test_linessplit(self):
         text = blue('the sum of the squares of the sideways')
@@ -197,12 +225,14 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(fmtstr('hello', 'red', bold=False), red('hello'))
         self.assertEqual(fmtstr('hello', 'red', bold=True), bold(red('hello')))
 
+
 class TestDoubleUnders(unittest.TestCase):
     def test_equality(self):
         x = fmtstr("adfs")
         self.assertEqual(x, x)
         self.assertTrue(fmtstr("adfs"), fmtstr("adfs"))
         self.assertTrue(fmtstr("adfs", 'blue'), fmtstr("adfs", fg='blue'))
+
 
 class TestConvenience(unittest.TestCase):
     def test_fg(self):
@@ -220,18 +250,23 @@ class TestConvenience(unittest.TestCase):
         blink('asdf')
         self.assertTrue(True)
 
+
 class TestSlicing(unittest.TestCase):
+
     def test_index(self):
         self.assertEqual(fmtstr('Hi!', 'blue')[0], fmtstr('H', 'blue'))
         self.assertRaises(IndexError, fmtstr('Hi!', 'blue').__getitem__, 5)
+
     def test_slice(self):
         self.assertEqual(fmtstr('Hi!', 'blue')[1:2], fmtstr('i', 'blue'))
         self.assertEqual(fmtstr('Hi!', 'blue')[1:], fmtstr('i!', 'blue'))
         s = fmtstr('imp') + ' '
         self.assertEqual(s[1:], fmtstr('mp')+' ')
+        self.assertEqual(blue('a\nb')[0:1], blue('a'))
 
         # considering changing behavior so that this doens't work
         # self.assertEqual(fmtstr('Hi!', 'blue')[15:18], fmtstr('', 'blue'))
+
 
 class TestComposition(unittest.TestCase):
 
@@ -248,26 +283,18 @@ class TestUnicode(unittest.TestCase):
     def test_output_type(self):
         self.assertEqual(type(str(fmtstr('hello', 'blue'))), str)
         self.assertEqual(type(unicode(fmtstr('hello', 'blue'))), unicode)
-        self.assertEqual(type(str(fmtstr(u'hello', 'blue'))), str)
-        self.assertEqual(type(unicode(fmtstr(u'hello', 'blue'))), unicode)
 
     def test_normal_chars(self):
         fmtstr('a', 'blue')
-        fmtstr(u'a', 'blue')
         str(fmtstr('a', 'blue'))
-        str(fmtstr(u'a', 'blue'))
         unicode(fmtstr('a', 'blue'))
-        unicode(fmtstr(u'a', 'blue'))
         self.assertTrue(True)
 
     def test_funny_chars(self):
         fmtstr('⁇', 'blue')
-        fmtstr(u'⁇', 'blue')
-        fmtstr(u'⁇', 'blue')
+        str(Chunk('⁇', {'fg': 'blue'}))
         str(fmtstr('⁇', 'blue'))
-        str(fmtstr(u'⁇', 'blue'))
         unicode(fmtstr('⁇', 'blue'))
-        unicode(fmtstr(u'⁇', 'blue'))
         self.assertTrue(True)
 
     def test_right_sequence_in_py3(self):
@@ -279,12 +306,12 @@ class TestUnicode(unittest.TestCase):
         self.assertEqual(str(full), '\x1b[31m\x1b[44mhello\x1b[49m\x1b[39m \x1b[34m\x1b[41mthere\x1b[49m\x1b[39m\x1b[32m!\x1b[39m')
 
     def test_len_of_unicode(self):
-        self.assertEqual(len(fmtstr(u'┌─')), 2)
-        lines = [u'┌─', 'an', u'┌─']
+        self.assertEqual(len(fmtstr('┌─')), 2)
+        lines = ['┌─', 'an', '┌─']
         r = fsarray(lines)
         self.assertEqual(r.shape, (3, 2))
-        self.assertEqual(len(fmtstr(fmtstr(u'┌─'))), len(fmtstr(u'┌─')))
-        self.assertEqual(fmtstr(fmtstr(u'┌─')), fmtstr(u'┌─'))
+        self.assertEqual(len(fmtstr(fmtstr('┌─'))), len(fmtstr('┌─')))
+        self.assertEqual(fmtstr(fmtstr('┌─')), fmtstr('┌─'))
         #TODO should we make this one work?
         # always coerce everything to unicode?
         #self.assertEqual(len(fmtstr('┌─')), 2)
@@ -292,40 +319,77 @@ class TestUnicode(unittest.TestCase):
     def test_len_of_unicode_in_fsarray(self):
 
         fsa = FSArray(3, 2)
-        fsa.rows[0] = fsa.rows[0].setslice_with_length(0, 2, u'┌─', 2)
+        fsa.rows[0] = fsa.rows[0].setslice_with_length(0, 2, '┌─', 2)
         self.assertEqual(fsa.shape, (3, 2))
-        fsa.rows[0] = fsa.rows[0].setslice_with_length(0, 2, fmtstr(u'┌─', 'blue'), 2)
+        fsa.rows[0] = fsa.rows[0].setslice_with_length(0, 2, fmtstr('┌─', 'blue'), 2)
         self.assertEqual(fsa.shape, (3, 2))
-
-
-
-        #lines = [u'┌─', 'an', u'┌─']
-        #r = fsarray(lines[:3])
-        #self.assertEqual(r.shape, (3, 2))
-        #self.assertEqual(fsarray(r).shape, (3, 2))
-        #self.assertEqual(fsarray(r[:]).shape, (3, 2))
-        #self.assertEqual(fsarray(r[:, :]).shape, (3, 2))
 
     def test_add_unicode_to_byte(self):
-        fmtstr(u'┌') + fmtstr('a')
-        fmtstr('a') + fmtstr(u'┌')
-        u'┌' + fmtstr(u'┌')
-        u'┌' + fmtstr('a')
-        fmtstr(u'┌') + u'┌'
-        fmtstr('a') + u'┌'
+        fmtstr('┌') + fmtstr('a')
+        fmtstr('a') + fmtstr('┌')
+        '┌' + fmtstr('┌')
+        '┌' + fmtstr('a')
+        fmtstr('┌') + '┌'
+        fmtstr('a') + '┌'
 
     def test_unicode_slicing(self):
-        self.assertEqual(fmtstr(u'┌adfs', 'blue')[:2], fmtstr(u'┌a', 'blue'))
-        self.assertEqual(type(fmtstr(u'┌adfs', 'blue')[:2].s), type(fmtstr(u'┌a', 'blue').s))
-        self.assertEqual(len(fmtstr(u'┌adfs', 'blue')[:2]), 2)
+        self.assertEqual(fmtstr('┌adfs', 'blue')[:2], fmtstr('┌a', 'blue'))
+        self.assertEqual(type(fmtstr('┌adfs', 'blue')[:2].s), type(fmtstr('┌a', 'blue').s))
+        self.assertEqual(len(fmtstr('┌adfs', 'blue')[:2]), 2)
 
     def test_unicode_repr(self):
-        repr(Chunk(u'–'))
-        self.assertEqual(repr(fmtstr(u'–')), repr(u'–'))
+        repr(Chunk('–'))
+        self.assertEqual(repr(fmtstr('–')), repr_without_leading_u('–'))
 
-    def test_bad_utf8(self):
-        """FmtStrs of bytes that arne't valid utf8 even though a the output medium is shouldn't crash"""
-        str(fmtstr('\xf7'))
+
+class TestCharacterWidth(unittest.TestCase):
+
+    def test_doublewide_width(self):
+        self.assertEqual(len(fmtstr('Ｅ', 'blue')), 1)
+        print dir(fmtstr('Ｅ', 'blue'))
+        self.assertEqual(fmtstr('Ｅ', 'blue').width, 2)
+        self.assertEqual(len(fmtstr('ｈｉ')), 2)
+        self.assertEqual(fmtstr('ｈｉ').width, 4)
+
+    def test_multi_width(self):
+        self.assertEqual(len(fmtstr('a\u0300')), 2)
+        self.assertEqual(fmtstr('a\u0300').width, 1)
+
+    def test_width_aware_slice(self):
+        self.assertEqual(fmtstr('Ｅ').width_aware_slice(slice(None, 1, None)).s, ' ')
+        self.assertEqual(fmtstr('Ｅ').width_aware_slice(slice(None, 2, None)).s, 'Ｅ')
+        self.assertEqual(fmtstr('HＥ!', 'blue').width_aware_slice(slice(1, 2, None)), fmtstr(' ', 'blue'))
+        self.assertEqual(fmtstr('HＥ!', 'blue').width_aware_slice(slice(1, 3, None)), fmtstr('Ｅ', 'blue'))
+
+    def test_width_at_offset(self):
+        self.assertEqual(fmtstr('abＥcdef').width_at_offset(0), 0)
+        self.assertEqual(fmtstr('abＥcdef').width_at_offset(2), 2)
+        self.assertEqual(fmtstr('abＥcdef').width_at_offset(3), 4)
+        self.assertEqual(fmtstr('a\u0300b\u3000c').width_at_offset(0), 0)
+        self.assertEqual(fmtstr('a\u0300b\u3000c').width_at_offset(1), 1)
+        self.assertEqual(fmtstr('a\u0300b\u3000c').width_at_offset(2), 1)
+        self.assertEqual(fmtstr('a\u0300b\u3000c').width_at_offset(3), 2)
+        self.assertEqual(len(fmtstr('a\u0300')), 2)
+        self.assertEqual(fmtstr('a\u0300').width, 1)
+
+class TestWidthHelpers(unittest.TestCase):
+
+    def test_combining_char_aware_slice(self):
+        self.assertEqual(width_aware_slice('abc', 0, 2), 'ab')
+        self.assertEqual(width_aware_slice('abc', 1, 3), 'bc')
+        self.assertEqual(width_aware_slice('abc', 0, 3), 'abc')
+        self.assertEqual(width_aware_slice('ab\u0300c', 0, 3), 'ab\u0300c')
+        self.assertEqual(width_aware_slice('ab\u0300c', 0, 2), 'ab\u0300')
+        self.assertEqual(width_aware_slice('ab\u0300c', 1, 3), 'b\u0300c')
+        self.assertEqual(width_aware_slice('ab\u0300\u0300c', 1, 3), 'b\u0300\u0300c')
+
+    def test_char_width_aware_slice(self):
+        self.assertEqual(width_aware_slice('abc', 1, 2), 'b')
+        self.assertEqual(width_aware_slice('aＥbc', 0, 4), 'aＥb')
+        self.assertEqual(width_aware_slice('aＥbc', 1, 4), 'Ｅb')
+        self.assertEqual(width_aware_slice('aＥbc', 2, 4), ' b')
+        self.assertEqual(width_aware_slice('aＥbc', 0, 2), 'a ')
+
 
 class TestFSArray(unittest.TestCase):
     def test_no_hanging_space(self):
@@ -334,8 +398,8 @@ class TestFSArray(unittest.TestCase):
 
     def test_assignment_working(self):
         t = FSArray(10, 10)
-        t[2,2] = 'a'
-        t[2,2] == 'a'
+        t[2, 2] = 'a'
+        t[2, 2] == 'a'
 
     def test_normalize_slice(self):
         class SliceBuilder(object):
@@ -346,7 +410,13 @@ class TestFSArray(unittest.TestCase):
         self.assertEqual(normalize_slice(10, Slice[:3]), slice(0, 3, None))
         self.assertEqual(normalize_slice(11, Slice[3:]), slice(3, 11, None))
 
-class TestFSArray(FormatStringTest):
+    @skip('TODO')
+    def test_oomerror(self):
+        a = FSArray(10, 40)
+        a[2:-2, 2:-2] = fsarray(['asdf', 'zxcv'])
+
+
+class TestFSArrayWithDiff(FormatStringTest):
 
     def test_diff_testing(self):
         a = fsarray(['abc', 'def'])

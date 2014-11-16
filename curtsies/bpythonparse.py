@@ -26,9 +26,9 @@ def parse(s):
     r"""
     Returns a FmtStr object from a bpython-formatted colored string
 
-    >>> parse('\x01y\x03print\x04')
+    >>> parse(u'\x01y\x03print\x04')
     yellow('print')
-    >>> parse('\x01y\x03print\x04\x01c\x03 \x04\x01g\x031\x04\x01c\x03 \x04\x01Y\x03+\x04\x01c\x03 \x04\x01g\x032\x04')
+    >>> parse(u'\x01y\x03print\x04\x01c\x03 \x04\x01g\x031\x04\x01c\x03 \x04\x01Y\x03+\x04\x01c\x03 \x04\x01g\x032\x04')
     yellow('print')+cyan(' ')+green('1')+cyan(' ')+bold(yellow('+'))+cyan(' ')+green('2')
     """
     rest = s
