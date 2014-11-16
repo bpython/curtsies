@@ -6,15 +6,14 @@ Windows successively render 2D grids of text (usually :py:class:`~curtsies.forma
 to the terminal. Window should own its output stream - it is assumed no additional output occurs between renders, an assumption required for example to prevent redrawing portions of the screen which have not changed between renders.
 
 There are two useful window classes, both subclasses of :py:class:`~curtsies.window.BaseWindow`: :py:class:`~curtsies.window.FullscreenWindow`
-renders to the terminal's `alternate screen buffer`_ (no history preserved, like ``Vim``, ``top`` etc.)
+renders to the terminal's `alternate screen buffer<http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#The%20Alternate%20Screen%20Buffer>`_
+(no history preserved, like ``Vim``, ``top`` etc.)
 while :py:class:`~curtsies.window.CursorAwareWindow` renders to the normal screen.
 It is also is capable of querying the terminal for the cursor location,
 and uses this functionality to detect how a terminal moves
 its contents around during a window size change.
 This information can be used to compensate for
 this movement and prevent the overwriting of history on the terminal screen.
-
-.. _alternate screen buffer http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#The%20Alternate%20Screen%20Buffer
 
 Example
 -------

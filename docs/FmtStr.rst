@@ -1,7 +1,8 @@
 FmtStr
 ^^^^^^
 
-:py:class:`~curtsies.formatstring.FmtStr` is a string with each character colored and styled in ways representable by `ANSI escape codes`_.
+:py:class:`~curtsies.formatstring.FmtStr` is a string with each character colored
+and styled in ways representable by `ANSI escape codes<http://en.wikipedia.org/wiki/ANSI_escape_code>`_.
 
 .. automodule:: curtsies.formatstring
 
@@ -33,20 +34,14 @@ creating them.
 Rationale
 =========
 
-If all you need is to print colored text, many other libraries also make `ANSI escape codes`_ easy to use.
+If all you need is to print colored text, many other libraries also make `ANSI escape codes<http://en.wikipedia.org/wiki/ANSI_escape_code>`_ easy to use.
 
-* Blessings_ (``pip install blessings``)
+* `Blessings<https://github.com/erikrose/blessings>`_ (``pip install blessings``)
   As of version 0.1.0, Curtsies uses Blessings for terminal capabilities other
   than colored output.
-* termcolor_ (``pip install termcolor``)
-* Clint_ (``pip install clint``)
-* colors_ (``pip install colors``)
-
-.. _ANSI escape codes http://en.wikipedia.org/wiki/ANSI_escape_code
-.. _Blessings https://github.com/erikrose/blessings
-.. _termcolor https://pypi.python.org/pypi/termcolor
-.. _Clint https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py 
-.. _colors https://github.com/verigak/colors/
+* `termcolor<https://pypi.python.org/pypi/termcolor>`_ (``pip install termcolor``)
+* `Clint<https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py >`_ (``pip install clint``)
+* `colors<https://github.com/verigak/colors/>`_ (``pip install colors``)
 
 In all of the libraries listed above the expression ``blue('hi') + ' ' + green('there)``
 or equivalent
@@ -115,7 +110,8 @@ It's easy to turn ANSI terminal formatted strings into :py:class:`FmtStr`
 Using str methods on :py:class:`FmtStr` objects
 -----------------------------------
 
-All sorts of `string methods`_ can be used on a :py:class:`FmtStr`, so you can often
+All sorts of `string methods<https://docs.python.org/2/library/stdtypes.html#string-methods>`_
+can be used on a :py:class:`FmtStr`, so you can often
 use :py:class:`FmtStr` objects where you had strings in your program before:
 
     >>> from curtsies.fmtfuncs import *
@@ -126,8 +122,6 @@ use :py:class:`FmtStr` objects where you had strings in your program before:
     True
     >>> blue(', ').join(['a', red('b')])
     "a"+blue(", ")+red("b")
-
-.. _string methods https://docs.python.org/2/library/stdtypes.html#string-methods
 
 If :py:class:`FmtStr` doesn't implement a method, it tries its best to use the string
 method, which often works pretty well:
