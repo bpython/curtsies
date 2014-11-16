@@ -1,5 +1,6 @@
 Input
 *****************
+.. automodule:: curtsies.input
 
 Within the (context-manager) context of an Input generator, an in-stream
 is put in raw mode or cbreak mode, and keypresses are stored to be reported
@@ -37,3 +38,11 @@ will be returned as `SigIntEvent()`s.
 
 To set a timeout on the blocking get, treat it like a generator and call
 `.send(timeout)`. The call will return None if no event is available.
+
+API docs
+--------
+
+
+.. autoclass:: curtsies.Input
+   :members:
+
