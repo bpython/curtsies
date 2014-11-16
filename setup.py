@@ -24,9 +24,9 @@ setup(name='curtsies',
       dependency_links=['http://github.com/thomasballinger/wcwidth/tarball/fixes#egg=wcwidth-0.1.1'],
       tests_require = [
           'mock',
-          'pyte'
-          'bpython'
-          'nose'
+          'pyte',
+          'bpython',
+          'nose',
       ],
       classifiers=[
           'Development Status :: 3 - Alpha',

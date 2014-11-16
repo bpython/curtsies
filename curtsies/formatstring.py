@@ -278,11 +278,14 @@ class FmtStr(object):
         self._unicode = ''.join(unicode(fs) for fs in self.basefmtstrs)
         return self._unicode
 
-    def __str__(self):
-        if self._str is not None:
+    if PY3:
+        __str__ = __unicode__
+    else:
+        def __str__(self):
+            if self._str is not None:
+                return self._str
+            self._str = str('').join(str(fs) for fs in self.basefmtstrs)
             return self._str
-        self._str = b''.join(str(fs) for fs in self.basefmtstrs)
-        return self._str
 
     def __len__(self):
         if self._len is not None:
