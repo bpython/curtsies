@@ -1,13 +1,20 @@
 About
 *****
 
-Curtsies is written by `Thomas Ballinger <http://ballingt.com>`_ to create
-a frontend for `bpython <http://bpython-interpreter.org/>`_ that preserved terminal history.
+Resources
+---------
 
 I've written a little bit about Curtsies on `my blog <http://ballingt.com/2014/05/13/bpython-curtsies-release.html>`_.
 
-The source and issue tracker are on `Github <https://github.com/thomasballinger/curtsies>`_.
-A good place to ask questions about curtsies would be in #bpython on irc.freenode.net.
+The source and issue tracker for Curtsies are on `Github <https://github.com/thomasballinger/curtsies>`_.
+
+A good place to ask questions about Curtsies is #bpython on irc.freenode.net.
+
+Authors
+-------
+
+Curtsies is written by `Thomas Ballinger <http://ballingt.com>`_ to create
+a frontend for `bpython <http://bpython-interpreter.org/>`_ that preserved terminal history.
 
 Thanks so much to the many people that have contributed to it!
 
