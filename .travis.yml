@@ -9,7 +9,6 @@ python:
 install:
     - "python setup.py install"
     - "pip install pyte coverage"
-    - "pip install git+git://github.com/thomasballinger/wcwidth.git@fixes"
 
 script:
     - nosetests tests
