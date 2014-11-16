@@ -18,11 +18,15 @@ setup(name='curtsies',
       license='MIT',
       packages=['curtsies'],
       install_requires = [
-          'blessings>=1.5'
+          'blessings>=1.5',
+          'wcwidth>=0.1.1',
       ],
+      dependency_links=['http://github.com/thomasballinger/wcwidth/tarball/fixes#egg=wcwidth-0.1.1'],
       tests_require = [
           'mock',
-          'pyte'
+          'pyte',
+          'bpython',
+          'nose',
       ],
       classifiers=[
           'Development Status :: 3 - Alpha',

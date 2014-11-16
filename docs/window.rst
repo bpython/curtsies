@@ -16,15 +16,15 @@ this movement and prevent the overwriting of history on the terminal screen.
 
 .. _alternate screen buffer http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#The%20Alternate%20Screen%20Buffer
 
-Exaple
+Example
 -------
 
     >>> from curtsies import FullscreenWindow, fsarray
     >>> import time
     >>> with FullscreenWindow() as win:
-    ...     win.render_to_terminal(fsarray([u'asdf', u'asdf']j
+    ...     win.render_to_terminal(fsarray([u'asdf', u'asdf']))
     ...     time.sleep(1)
-    ...     win.render_to_terminal(fsarray([u'asdf', u'qwer'])
+    ...     win.render_to_terminal(fsarray([u'asdf', u'qwer']))
     ...     time.sleep(1)
 
 Use as a context manager

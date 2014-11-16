@@ -1,0 +1,4 @@
+ansi2html==1.0.7
+pexpect==3.3
+git+git://github.com/thomasballinger/wcwidth.git@fixes
+git+git://github.com/thomasballinger/curtsies.git@master
