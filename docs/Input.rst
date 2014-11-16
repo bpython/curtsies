@@ -1,7 +1,5 @@
-Quickstart
+Input
 *****************
-`Input` (missing from documentation)
-=======
 
 Within the (context-manager) context of an Input generator, an in-stream
 is put in raw mode or cbreak mode, and keypresses are stored to be reported
