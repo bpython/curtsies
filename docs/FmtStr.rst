@@ -1,6 +1,8 @@
 FmtStr
 ^^^^^^
 
+:py:class:`~curtsies.formatstring.FmtStr` is a string with each character colored and styled in ways representable by `ANSI escape codes`_.
+
 .. automodule:: curtsies.formatstring
 
 Demo
@@ -33,12 +35,12 @@ Rationale
 
 If all you need is to print colored text, many other libraries also make `ANSI escape codes`_ easy to use.
 
-* Blessings_ (`pip install blessings`)
+* Blessings_ (``pip install blessings``)
   As of version 0.1.0, Curtsies uses Blessings for terminal capabilities other
   than colored output.
-* termcolor_ (`pip install termcolor`)
-* Clint_ (`pip install clint`)
-* colors_ (`pip install colors`)
+* termcolor_ (``pip install termcolor``)
+* Clint_ (``pip install clint``)
+* colors_ (``pip install colors``)
 
 .. _ANSI escape codes http://en.wikipedia.org/wiki/ANSI_escape_code
 .. _Blessings https://github.com/erikrose/blessings
@@ -52,7 +54,7 @@ evaluates to a Python string, not a colored string object. If all you plan
 to do with this string is print it, this is great. But if you need to
 do more formatting with this colored string later, the length will be
 something like 29 instead of 9; structured formatting information is lost.
-Methods like `.center` and `.ljust()` won't properly format the string for display.
+Methods like ``.center`` and ``.ljust()`` won't properly format the string for display.
 
 >>> import blessings
 >>> t = blessings.Terminal()

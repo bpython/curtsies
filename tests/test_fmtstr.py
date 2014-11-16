@@ -410,6 +410,11 @@ class TestFSArray(unittest.TestCase):
         self.assertEqual(normalize_slice(10, Slice[:3]), slice(0, 3, None))
         self.assertEqual(normalize_slice(11, Slice[3:]), slice(3, 11, None))
 
+    @skip('TODO')
+    def test_oomerror(self):
+        a = FSArray(10, 40)
+        a[2:-2, 2:-2] = fsarray(['asdf', 'zxcv'])
+
 
 class TestFSArrayWithDiff(FormatStringTest):
 
