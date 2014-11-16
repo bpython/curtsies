@@ -27,14 +27,14 @@ def htmlize(ansi):
 class ANSIHTMLParser(object):
     def __call__(self, app, doctree, docname):
         handler = self._format_it
-        if app.builder.name != 'html':
+        if app.builder.name not in ['html', 'readthedocs']:
             # strip all color codes in non-html output
             handler = self._strip_color_from_block_content
         for ansi_block in doctree.traverse(python_terminal_block):
             handler(ansi_block)
 
     def _strip_color_from_block_content(self, block):
-        content = re.sub('\x1b\\[([^m]+)m', block.rawsource)
+        content = re.sub('\x1b\\[([^m]+)m', '', block.rawsource)
         literal_node = nodes.literal_block(content, content)
         block.replace_self(literal_node)
 
@@ -51,7 +51,7 @@ def default_colors_to_resets(s):
     return s.replace('[39m', '[0m').replace('[49m', '[0m')
 
 def run_lines(lines):
-    child = pexpect.spawn('python -i')
+    child = pexpect.spawn(sys.executable + ' -i')
     out = StringIO()
     child.logfile_read = out
     #TODO make this detect `...` when it shouldn't be there, forgot a )
