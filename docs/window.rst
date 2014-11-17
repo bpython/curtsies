@@ -2,13 +2,14 @@ Window Objects
 ^^^^^^^^^^^^^^
 
 Windows successively render 2D grids of text (usually instances of :py:class:`~curtsies.formatstringarray.FSArray`)
-to the terminal. A window owns its output stream - it is assumed no additional output occurs between renders, an assumption required for example to avoid needing to redraw portions of the screen which do not change between renderings.
+to the terminal. A window owns its output stream - it is assumed (but not enforced) that no additional data is written to this stream between renders,
+an assumption which allowing for example portions of the screen which do not change between renderings not to be redrawn during a rendering.
 
 .. automodule:: curtsies.window
 
 There are two useful window classes, both subclasses of :py:class:`~curtsies.window.BaseWindow`: :py:class:`~curtsies.window.FullscreenWindow`
-renders to the terminal's `alternate screen buffer<http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#The%20Alternate%20Screen%20Buffer>`_
-(no history preserved, like ``Vim``, ``top`` etc.)
+renders to the terminal's `alternate screen buffer <http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#The%20Alternate%20Screen%20Buffer>`_
+(no history preserved, like command line tools ``Vim`` and ``top``)
 while :py:class:`~curtsies.window.CursorAwareWindow` renders to the normal screen.
 It is also is capable of querying the terminal for the cursor location,
 and uses this functionality to detect how a terminal moves

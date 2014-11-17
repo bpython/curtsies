@@ -18,8 +18,10 @@ Example
 
 `fsarray` is a convenience function returning a FSArray constructed from its arguments.
 
-Arrays can be composed to build up complex text interfaces, which might be repeatedly
-constructed and rendered with a :py:mod:`curtsies.window` object::
+Using FSArrays
+--------------
+
+Arrays can be composed to build up complex text interfaces::
 
     >>> import time
     >>> from curtsies import FSArray, fsarray, fmtstr
@@ -49,6 +51,8 @@ constructed and rendered with a :py:mod:`curtsies.window` object::
     ++............................21:59:31++
     ++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++++++++++++++++++++
+
+An array like shown above might be repeatedly constructed and rendered with a :py:mod:`curtsies.window` object.
 
 Slicing works like it does with FmtStrs, but in two dimensions.
 FSArrays are *mutable*, so array assignment syntax can be used for natural

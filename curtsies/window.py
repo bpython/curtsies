@@ -17,7 +17,6 @@ FIRST_COLUMN = u"\x1b[1G"
 
 
 class BaseWindow(object):
-    """ Renders 2D arrays of characters and cursor position """
     def __init__(self, out_stream=None, hide_cursor=True):
         logger.debug('-------initializing Window object %r------' % self)
         if out_stream is None:
@@ -50,22 +49,26 @@ class BaseWindow(object):
             self.write(self.t.normal_cursor)
 
     def on_terminal_size_change(self, height, width):
+        # Changing the terminal size breaks the cache, because it
+        # is unknown how the window size change affected scrolling / the cursor
         self._last_lines_by_row = {}
         self._last_rendered_width = width
         self._last_rendered_height = height
 
     def render_to_terminal(self, array, cursor_pos=(0, 0)):
-        """Renders array to terminal"""
         raise NotImplemented
 
     def get_term_hw(self):
-        """Returns current terminal width and height"""
+        """Returns current terminal height and width"""
         return self.t.height, self.t.width
 
-    width  = property(lambda self: self.t.width)
-    height = property(lambda self: self.t.height)
+    width = property(lambda self: self.t.width, None, None,
+                     "The current width of the terminal window")
+    height = property(lambda self: self.t.height, None, None,
+                      "The current height of the terminal window")
 
     def array_from_text(self, msg):
+        """Returns a FSArray of the size of the window containing msg"""
         rows, columns = self.t.height, self.t.width
         return self.array_from_text_rc(msg, rows, columns)
 
@@ -85,15 +88,27 @@ class BaseWindow(object):
 
 
 class FullscreenWindow(BaseWindow):
-    """A 2d-text rendering window that dissappears when its context is left
+    """2D-text rendering window that dissappears when its context is left
 
     FullscreenWindow will only render arrays the size of the terminal
     or smaller, and leaves no trace on exit (like top or vim). It never
     scrolls the terminal. Changing the terminal size doesn't do anything,
-    but 2d array rendered needs to fit on the screen.
+    but rendered arrays need to fit on the screen.
 
-    Uses blessings's fullscreen capabilities"""
+    Note:
+        The context of the FullscreenWindow
+        object must be entered before calling any of its methods.
+
+        Within the context of CursorAwareWindow, refrain from writing to
+        its out_stream; cached writes will be inaccurate.
+    """
     def __init__(self, out_stream=None, hide_cursor=True):
+        """Constructs a FullscreenWindow
+
+        Args:
+            out_stream (file): Defaults to sys.__stdout__
+            hide_cursor (bool): Hides cursor while in context
+        """
         BaseWindow.__init__(self, out_stream=out_stream, hide_cursor=hide_cursor)
         self.fullscreen_ctx = self.t.fullscreen()
 
@@ -108,10 +123,16 @@ class FullscreenWindow(BaseWindow):
     def render_to_terminal(self, array, cursor_pos=(0, 0)):
         """Renders array to terminal and places (0-indexed) cursor
 
-        If array received is of width too small, render it anyway
-        if array received is of width too large, render the renderable portion
-        if array received is of height too small, render it anyway
-        if array received is of height too large, render the renderable portion (no scroll)
+        Args:
+          array (FSArray): Grid of styled characters to be rendered.
+
+            If array received is of width too small, render it anyway
+
+            if array received is of width too large, render the renderable portion
+
+            if array received is of height too small, render it anyway
+
+            if array received is of height too large, render the renderable portion (no scroll)
         """
         actualize = unicode if sys.version_info[0] == 2 else str
         #TODO there's a race condition here - these height and widths are
@@ -158,30 +179,32 @@ class FullscreenWindow(BaseWindow):
 
 class CursorAwareWindow(BaseWindow):
     """
-    CursorAwareWindow provides the ability to find the
-    location of the cursor, and allows scrolling.
+    Renders to the normal terminal screen and
+    can find the location of the cursor.
 
-    Sigwinches can be annotated with how the terminal scroll changed
+    Note:
+        The context of the CursorAwareWindow
+        object must be entered before calling any of its methods.
 
-    Changing the terminal size breaks the cache, because it
-    is unknown how the window size change affected scrolling / the cursor.
-
-    Leaving the context of the window deletes everything below the cursor
-    at the beginning of the its current line.
-
-    Cursor diff depends on cursor never being touched by the application
-    Only use the render_to_terminal interface for moving the cursor
+        Within the context of CursorAwareWindow, refrain from writing to
+        its out_stream; cached writes will be inaccurate and calculating
+        cursor depends on cursor not having moved since the last render.
+        Only use the render_to_terminal interface for moving the cursor.
     """
     def __init__(self, out_stream=None, in_stream=None,
                  keep_last_line=False, hide_cursor=True,
                  extra_bytes_callback=None):
-        """
-        out_stream defaults to sys.__stdout__ if None
-        in_stream defaults to sys.__stdin__ if None
-        keep_last_line is whether
+        """Constructs a CursorAwareWindow
 
-        extra_bytes_callback is a function that will be called with extra bytes
-        read from in_stream if they are inadvertantly read during a cursor_position call
+        Args:
+            out_stream (file): Defaults to sys.__stdout__
+            in_stream (file): Defaults to sys.__stdin__
+            keep_last_line (bool): Causes the cursor to be moved down one line
+                on leaving context
+            hide_cursor (bool): Hides cursor while in context
+            extra_bytes_callback (f(bytes) -> None): Will be called with extra
+                bytes inadvertantly read in get_cursor_position(). If not
+                provided, a ValueError will be raised when this occurs.
         """
         BaseWindow.__init__(self, out_stream=out_stream, hide_cursor=hide_cursor)
         if in_stream is None:
@@ -253,15 +276,16 @@ class CursorAwareWindow(BaseWindow):
                 return (row-1, col-1)
 
     def get_cursor_vertical_diff(self):
-        """Returns the how far down the cursor moved
+        """Returns the how far down the cursor moved since last render.
 
-        If another get_cursor_vertical diff call is already in progress,
-        immediately returns zero.
-
-        Does cursory querying until a SIGWINCH doesn't happen during
-        the query. Calls to the function from a signal handler COULD STILL
-        HAPPEN out of order - they just can't interrupt the actual cursor query.
+        Note:
+            If another get_cursor_vertical diff call is already in progress,
+            immediately returns zero.
         """
+        # Probably called by a SIGWINCH handler, and therefore
+        # will do cursor querying until a SIGWINCH doesn't happen during
+        # the query. Calls to the function from a signal handler COULD STILL
+        # HAPPEN out of order - they just can't interrupt the actual cursor query.
         if self.in_get_cursor_diff:
             self.another_sigwinch = True
             return 0
@@ -276,7 +300,7 @@ class CursorAwareWindow(BaseWindow):
                 return cursor_dy
 
     def _get_cursor_vertical_diff_once(self):
-        """Returns the how far down the cursor moved"""
+        """Returns the how far down the cursor moved."""
         old_top_usable_row = self.top_usable_row
         row, col = self.get_cursor_position()
         if self._last_cursor_row is None:
@@ -298,14 +322,21 @@ class CursorAwareWindow(BaseWindow):
     def render_to_terminal(self, array, cursor_pos=(0, 0)):
         """Renders array to terminal, returns the number of lines
             scrolled offscreen
-        outputs:
-         -number of times scrolled
+        Returns:
+          Number of times scrolled
 
-        If array received is of width too small, render it anyway
-        if array received is of width too large, render it anyway
-        if array received is of height too small, render it anyway
-        if array received is of height too large, render it, scroll down,
+        Args:
+          array (FSArray): Grid of styled characters to be rendered.
+
+            If array received is of width too small, render it anyway
+
+            if array received is of width too large, render it anyway
+
+            if array received is of height too small, render it anyway
+
+            if array received is of height too large, render it, scroll down,
             and render the rest of it, then return how much we scrolled down
+
         """
         actualize = unicode if sys.version_info[0] == 2 else str
         # caching of write and tc (avoiding the self. lookups etc) made
