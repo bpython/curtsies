@@ -8,7 +8,7 @@ I've written a little bit about Curtsies on `my blog <http://ballingt.com/2014/0
 
 The source and issue tracker for Curtsies are on `Github <https://github.com/thomasballinger/curtsies>`_.
 
-A good place to ask questions about Curtsies is `#bpython on irc.freenode.net<http://webchat.freenode.net/?channels=bpython>`_.
+A good place to ask questions about Curtsies is `#bpython on irc.freenode.net <http://webchat.freenode.net/?channels=bpython>`_.
 
 Authors
 -------
