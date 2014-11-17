@@ -16,6 +16,7 @@ This is what using (nearly every feature of) Curtsies looks like:
            msg = red(on_blue(bold('Press escape to exit')))
            a = FSArray(window.height, window.width)
            a[0:1, 0:msg.width] = [msg]
+           window.render_to_terminal(a)
            for c in input_generator:
                if c == '<ESC>':
                    break
