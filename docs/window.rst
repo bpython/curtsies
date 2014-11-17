@@ -1,9 +1,10 @@
 Window Objects
 ^^^^^^^^^^^^^^
-.. automodule:: curtsies.window
 
-Windows successively render 2D grids of text (usually :py:class:`~curtsies.formatstringarray.FSArray` objects)
-to the terminal. Window should own its output stream - it is assumed no additional output occurs between renders, an assumption required for example to prevent redrawing portions of the screen which have not changed between renders.
+Windows successively render 2D grids of text (usually instances of :py:class:`~curtsies.formatstringarray.FSArray`)
+to the terminal. A window owns its output stream - it is assumed no additional output occurs between renders, an assumption required for example to avoid needing to redraw portions of the screen which do not change between renderings.
+
+.. automodule:: curtsies.window
 
 There are two useful window classes, both subclasses of :py:class:`~curtsies.window.BaseWindow`: :py:class:`~curtsies.window.FullscreenWindow`
 renders to the terminal's `alternate screen buffer<http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#The%20Alternate%20Screen%20Buffer>`_

@@ -1,7 +1,5 @@
 [![Build Status](https://travis-ci.org/thomasballinger/curtsies.svg?branch=master)](https://travis-ci.org/thomasballinger/curtsies)
 [![Documentation Status](https://readthedocs.org/projects/curtsies/badge/?version=latest)](https://readthedocs.org/projects/curtsies/?badge=latest)
-Curtsies: Terminal interaction
-=========================================
 ![Curtsies Logo](http://ballingt.com/assets/curtsiestitle.png)
 
 Curtsies is a library for interacting with the terminal.
@@ -46,7 +44,7 @@ Primer
 [FmtStr](http://curtsies.readthedocs.org/en/latest/FmtStr.html) objects are strings formatted with
 colors and styles displayable in a terminal with [ANSI escape sequences](http://en.wikipedia.org/wiki/ANSI_escape_code>`_).
 
-(the api shown below is outdated)
+(the import statement shown below is outdated)
 ![fmtstr example screenshot](http://i.imgur.com/7lFaxsz.png)
 
 [FSArray](http://curtsies.readthedocs.org/en/latest/FSArray.html) objects contain multiple such strings
@@ -54,7 +52,7 @@ with each formatted string on its own row, and FSArray
 objects can be superimposed on each other
 to build complex grids of colored and styled characters through composition.
 
-(the api shown below is outdated)
+(the import statement shown below is outdated)
 ![fsarray example screenshot](http://i.imgur.com/rvTRPv1.png)
 
 Such grids of characters can be rendered to the terminal in alternate screen mode

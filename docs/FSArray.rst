@@ -17,9 +17,8 @@ Example
    a.dumb_display()
 
 `fsarray` is a convenience function returning a FSArray constructed from its arguments.
-FSArrays deal with the display width of strings.
 
-Arrays can be composed to build up complex text interfaces, which could be repeatedly
+Arrays can be composed to build up complex text interfaces, which might be repeatedly
 constructed and rendered with a :py:mod:`curtsies.window` object::
 
     >>> import time
@@ -51,18 +50,15 @@ constructed and rendered with a :py:mod:`curtsies.window` object::
     ++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++++++++++++++++++++
 
-and s
-
 Slicing works like it does with FmtStrs, but in two dimensions.
 FSArrays are *mutable*, so array assignment syntax can be used for natural
-compositing.
+compositing as in the above exaple.
 
 If you're dealing with terminal output, the *width* of a string becomes more
-important than it's *length* (`len(s)`). Graphemes, full width characters, etc. LINK TO FmtStr section on width
+important than it's *length* (see :ref:`len-vs-width`).
 
-
-This module also contains useful formatting tools for constructing and modifying
-FSArrays: getting width
+In the future FSArrays will do slicing and array assignment based on width
+instead of number of characters, but this is not currently implemented.
 
 API docs
 --------

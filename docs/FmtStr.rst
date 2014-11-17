@@ -2,7 +2,7 @@ FmtStr
 ^^^^^^
 
 :py:class:`~curtsies.formatstring.FmtStr` is a string with each character colored
-and styled in ways representable by `ANSI escape codes<http://en.wikipedia.org/wiki/ANSI_escape_code>`_.
+and styled in ways representable by `ANSI escape codes <http://en.wikipedia.org/wiki/ANSI_escape_code>`_.
 
 .. automodule:: curtsies.formatstring
 
@@ -18,30 +18,30 @@ Demo
    bang = bold(underline(green(u'!')))
    full = red_on_blue + blue_on_red + bang
    str(full)
-   print full
+   print(full)
 
 We start here with such a complicated example because it you only need something simple like
 
 .. python_terminal_session::
 
    from curtsies.fmtfuncs import *
-   print blue(bold(u'Deep blue sea'))
+   print(blue(bold(u'Deep blue sea')))
 
-you probably don't need to be using curtsies.  
-Curtsies allows you to continue manipulating colored strings after
-creating them.
+another library may be a better fit than Curtsies.
+Unlink other libraries, Curtsies allows these colored strings to be further manipulated after
+they are created.
 
 Rationale
 =========
 
-If all you need is to print colored text, many other libraries also make `ANSI escape codes<http://en.wikipedia.org/wiki/ANSI_escape_code>`_ easy to use.
+If all you need is to print colored text, many other libraries also make `ANSI escape codes <http://en.wikipedia.org/wiki/ANSI_escape_code>`_ easy to use.
 
-* `Blessings<https://github.com/erikrose/blessings>`_ (``pip install blessings``)
+* `Blessings <https://github.com/erikrose/blessings>`_ (``pip install blessings``)
   As of version 0.1.0, Curtsies uses Blessings for terminal capabilities other
   than colored output.
-* `termcolor<https://pypi.python.org/pypi/termcolor>`_ (``pip install termcolor``)
-* `Clint<https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py >`_ (``pip install clint``)
-* `colors<https://github.com/verigak/colors/>`_ (``pip install colors``)
+* `termcolor <https://pypi.python.org/pypi/termcolor>`_ (``pip install termcolor``)
+* `Clint <https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py>`_ (``pip install clint``)
+* `colors <https://github.com/verigak/colors/>`_ (``pip install colors``)
 
 In all of the libraries listed above the expression ``blue('hi') + ' ' + green('there)``
 or equivalent
@@ -49,7 +49,9 @@ evaluates to a Python string, not a colored string object. If all you plan
 to do with this string is print it, this is great. But if you need to
 do more formatting with this colored string later, the length will be
 something like 29 instead of 9; structured formatting information is lost.
-Methods like ``.center`` and ``.ljust()`` won't properly format the string for display.
+Methods like :py:meth:`center <https://docs.python.org/2/library/stdtypes.html#str.center>`
+and :py:meth:`ljust <https://docs.python.org/2/library/stdtypes.html#str.ljust>`
+won't properly format the string for display.
 
 >>> import blessings
 >>> t = blessings.Terminal()
@@ -108,11 +110,11 @@ It's easy to turn ANSI terminal formatted strings into :py:class:`FmtStr`
     blue("tom")
 
 Using str methods on :py:class:`FmtStr` objects
------------------------------------
+-----------------------------------------------
 
-All sorts of `string methods<https://docs.python.org/2/library/stdtypes.html#string-methods>`_
+All sorts of `string methods <https://docs.python.org/2/library/stdtypes.html#string-methods>`_
 can be used on a :py:class:`FmtStr`, so you can often
-use :py:class:`FmtStr` objects where you had strings in your program before:
+use :py:class:`FmtStr` objects where you had strings in your program before::
 
     >>> from curtsies.fmtfuncs import *
     >>> f = blue(underline('As you like it'))
@@ -124,7 +126,7 @@ use :py:class:`FmtStr` objects where you had strings in your program before:
     "a"+blue(", ")+red("b")
 
 If :py:class:`FmtStr` doesn't implement a method, it tries its best to use the string
-method, which often works pretty well:
+method, which often works pretty well::
 
     >>> from curtsies.fmtfuncs import *
     >>> f = blue(underline('As you like it'))
@@ -139,7 +141,7 @@ method, which often works pretty well:
     >>> f.split(' ')
     [blue(underline("As")), blue(underline("you")), blue(underline("like")), blue(underline("it"))]
 
-But formatting information will be lost for attributes which are not the same through the whole string
+But formatting information will be lost for attributes which are not the same throughout the initial string::
 
     >>> from curtsies.fmtfuncs import *
     >>> f = bold(red('hi')+' '+on_blue('there'))
@@ -151,34 +153,36 @@ But formatting information will be lost for attributes which are not the same th
 Encoding
 --------
 
-In Python 2, you might run into something like this:
+In Python 2, you might run into something like this::
 
->>> from curtsies.fmtfuncs import *
->>> red(u'hi')
-red('hi')
->>> red('hi')
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-  File "/Users/tomb/Dropbox/code/curtsies/curtsies/formatstring.py", line 582, in fmtstr
-    string = FmtStr.from_str(string)
-  File "/Users/tomb/Dropbox/code/curtsies/curtsies/formatstring.py", line 162, in from_str
-    return FmtStr(Chunk(s))
-  File "/Users/tomb/Dropbox/code/curtsies/curtsies/formatstring.py", line 64, in __init__
-    raise ValueError("unicode string required, got %r" % string)
-ValueError: unicode string required, got 'hi'
+    >>> from curtsies.fmtfuncs import *
+    >>> red(u'hi')
+    red('hi')
+    >>> red('hi')
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "/Users/tomb/Dropbox/code/curtsies/curtsies/formatstring.py", line 582, in fmtstr
+        string = FmtStr.from_str(string)
+      File "/Users/tomb/Dropbox/code/curtsies/curtsies/formatstring.py", line 162, in from_str
+        return FmtStr(Chunk(s))
+      File "/Users/tomb/Dropbox/code/curtsies/curtsies/formatstring.py", line 64, in __init__
+        raise ValueError("unicode string required, got %r" % string)
+    ValueError: unicode string required, got 'hi'
 
-:py:class:`FmtStr` require unicode strings, so in Python 2 it is convenient to use the unicode_literals compiler directive:
+:py:class:`FmtStr` requires unicode strings, so in Python 2 it is convenient to use the unicode_literals compiler directive:
 
     >>> from __future__ import unicode_literals
     >>> from curtsies.fmtfuncs import *
     >>> red('hi')
     red('hi')
 
+.. _len-vs-width:
+
 len vs width
 ------------
 
-The amound of horizontal space a string takes up in a terminal may differ from the length of the string returned by `len()`.
-:py:class:`FmtStrs` have a width property useful when writing layout code:
+The amound of horizontal space a string takes up in a terminal may differ from the length of the string returned by ``len()``.
+:py:class:`FmtStr` objects have a width property useful when writing layout code:
 
 >>> #encoding: utf8
 ... 
@@ -190,6 +194,8 @@ The amound of horizontal space a string takes up in a terminal may differ from t
 >>> len(combined), combined.width, combined.s
 (2, 1, u'a\u0324')
 
+As shown above, `full width characters <http://en.wikipedia.org/wiki/Halfwidth_and_fullwidth_forms>`_ can take up two columns, and `combining characters <http://en.wikipedia.org/wiki/Combining_character>`_ may be combined with the previous character to form a single grapheme.
+
 API Docs
 ========
 
@@ -197,7 +203,7 @@ API Docs
    :members: fmtstr
 
 .. autoclass:: FmtStr
-   :members: width, splice, copy_with_new_atts, copy_with_new_str, join, split, width_aware_slice, 
+   :members: width, splice, copy_with_new_atts, copy_with_new_str, join, split, width_aware_slice
 
 .. automodule:: curtsies.fmtfuncs
 
