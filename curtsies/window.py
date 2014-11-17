@@ -1,39 +1,19 @@
-"""Windows provide buffered rendering of 2D arrays of styled characters to the terminal.
-
-
-
-All windows write only unicode to the terminal - that's what blessings does, so
-we match it.
-"""
-
+# All windows write only unicode to the terminal - that's what blessings does, so
+# we match it.
 import sys
-import os
 import logging
 import re
-import signal
 
 import blessings
 
 from .formatstring import fmtstr
 from .formatstringarray import FSArray
-from .termhelpers import Cbreak, Nonblocking
-
-from . import events
+from .termhelpers import Cbreak
 
 logger = logging.getLogger(__name__)
 
 SCROLL_DOWN = u"\x1bD"
 FIRST_COLUMN = u"\x1b[1G"
-
-#BIG TODO!!! 
-#TODO How to get cursor position? It's a thing we need!
-#
-# Option 1: Window has a reference to the corresponding stdin
-#           For now, going to HCF when we read input that isn't a reponse to a cursor query
-#           Later will figure out how to deal with this (ungetc, use the same input gen, etc.)
-#
-# Is seems ungetc would require compiling code to install - that's a bit of a barrier
-# for something you want to install all the time like bpython
 
 
 class BaseWindow(object):
@@ -51,11 +31,10 @@ class BaseWindow(object):
 
     def scroll_down(self):
         logger.debug('sending scroll down message w/ cursor on bottom line')
-        with self.t.location(x=0, y=1000000):# since scroll-down only moves the screen if cursor is at bottom
-            self.write(SCROLL_DOWN) #TODO will blessings do this?
+        with self.t.location(x=0, y=1000000):  # since scroll-down only moves the screen if cursor is at bottom
+            self.write(SCROLL_DOWN)  #TODO will blessings do this?
 
     def write(self, msg):
-        #logger.debug('writing %r' % msg)
         self.out_stream.write(msg)
         self.out_stream.flush()
 
@@ -75,7 +54,7 @@ class BaseWindow(object):
         self._last_rendered_width = width
         self._last_rendered_height = height
 
-    def render_to_terminal(self, array, cursor_pos=(0,0)):
+    def render_to_terminal(self, array, cursor_pos=(0, 0)):
         """Renders array to terminal"""
         raise NotImplemented
 
@@ -104,6 +83,7 @@ class BaseWindow(object):
             i += 1
         return arr
 
+
 class FullscreenWindow(BaseWindow):
     """A 2d-text rendering window that dissappears when its context is left
 
@@ -125,7 +105,7 @@ class FullscreenWindow(BaseWindow):
         self.fullscreen_ctx.__exit__(type, value, traceback)
         BaseWindow.__exit__(self, type, value, traceback)
 
-    def render_to_terminal(self, array, cursor_pos=(0,0)):
+    def render_to_terminal(self, array, cursor_pos=(0, 0)):
         """Renders array to terminal and places (0-indexed) cursor
 
         If array received is of width too small, render it anyway
@@ -161,7 +141,8 @@ class FullscreenWindow(BaseWindow):
 
         # rows onscreen that we don't have content for
         for row in rest_of_rows:
-            if self._last_lines_by_row and row not in self._last_lines_by_row: continue
+            if self._last_lines_by_row and row not in self._last_lines_by_row:
+                continue
             self.write(self.t.move(row, 0))
             self.write(self.t.clear_eol)
             self.write(self.t.clear_bol)
@@ -192,7 +173,8 @@ class CursorAwareWindow(BaseWindow):
     Only use the render_to_terminal interface for moving the cursor
     """
     def __init__(self, out_stream=None, in_stream=None,
-                 keep_last_line=False, hide_cursor=True, extra_bytes_callback=None):
+                 keep_last_line=False, hide_cursor=True,
+                 extra_bytes_callback=None):
         """
         out_stream defaults to sys.__stdout__ if None
         in_stream defaults to sys.__stdin__ if None
@@ -210,11 +192,11 @@ class CursorAwareWindow(BaseWindow):
         self.keep_last_line = keep_last_line
         self.cbreak = Cbreak(self.in_stream)
         self.extra_bytes_callback = extra_bytes_callback
-        self.another_sigwinch = False   # whether another SIGWINCH is queued up
-        self.in_get_cursor_diff = False # in the cursor query code of cursor diff
+        self.another_sigwinch = False    # whether another SIGWINCH is queued up
+        self.in_get_cursor_diff = False  # in the cursor query code of cursor diff
 
     def __enter__(self):
-        if hasattr(self.in_stream, 'file_no'): #fake files aren't buffered, no need for cbreak
+        if hasattr(self.in_stream, 'file_no'):  #fake files aren't buffered, no need for cbreak
             self.cbreak.__enter__()
         self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
@@ -223,12 +205,12 @@ class CursorAwareWindow(BaseWindow):
 
     def __exit__(self, type, value, traceback):
         if self.keep_last_line:
-            self.write(SCROLL_DOWN) # just moves cursor down if not on last line
+            self.write(SCROLL_DOWN)  # just moves cursor down if not on last line
 
         self.write(FIRST_COLUMN)
         self.write(self.t.clear_eos)
         self.write(self.t.clear_eol)
-        if hasattr(self.in_stream, 'file_no'): #fake files aren't buffered
+        if hasattr(self.in_stream, 'file_no'):  #fake files aren't buffered
             self.cbreak.__exit__(type, value, traceback)
         BaseWindow.__exit__(self, type, value, traceback)
 
@@ -236,7 +218,7 @@ class CursorAwareWindow(BaseWindow):
         """Returns the terminal (row, column) of the cursor
 
         0-indexed, like blessings cursor positions"""
-        in_stream = self.in_stream # TODO would this be cleaner as a parameter?
+        in_stream = self.in_stream  # TODO would this be cleaner as a parameter?
 
         QUERY_CURSOR_POSITION = u"\x1b[6n"
         self.write(QUERY_CURSOR_POSITION)
@@ -313,7 +295,7 @@ class CursorAwareWindow(BaseWindow):
         self._last_cursor_row = row
         return cursor_dy
 
-    def render_to_terminal(self, array, cursor_pos=(0,0)):
+    def render_to_terminal(self, array, cursor_pos=(0, 0)):
         """Renders array to terminal, returns the number of lines
             scrolled offscreen
         outputs:
@@ -330,7 +312,7 @@ class CursorAwareWindow(BaseWindow):
         # no significant performance difference here
         if not self.hide_cursor:
             self.write(self.t.hide_cursor)
-        height, width = self.t.height, self.t.width #TODO race condition here?
+        height, width = self.t.height, self.t.width  #TODO race condition here?
         if height != self._last_rendered_height or width != self._last_rendered_width:
             self.on_terminal_size_change(height, width)
 
@@ -338,7 +320,7 @@ class CursorAwareWindow(BaseWindow):
         rows_for_use = list(range(self.top_usable_row, height))
 
         # rows which we have content for and don't require scrolling
-        shared = min(len(array), len(rows_for_use)) #TODO rename shared
+        shared = min(len(array), len(rows_for_use))  #TODO rename shared
         for row, line in zip(rows_for_use[:shared], array[:shared]):
             current_lines_by_row[row] = line
             if line == self._last_lines_by_row.get(row, None):
@@ -351,7 +333,7 @@ class CursorAwareWindow(BaseWindow):
         # rows already on screen that we don't have content for
         rest_of_lines = array[shared:]
         rest_of_rows = rows_for_use[shared:]
-        for row in rest_of_rows: # if array too small
+        for row in rest_of_rows:  # if array too small
             if self._last_lines_by_row and row not in self._last_lines_by_row: continue
             self.write(self.t.move(row, 0))
             self.write(self.t.clear_eol)
@@ -360,7 +342,7 @@ class CursorAwareWindow(BaseWindow):
 
         # lines for which we need to scroll down to render
         offscreen_scrolls = 0
-        for line in rest_of_lines: # if array too big
+        for line in rest_of_lines:  # if array too big
             self.scroll_down()
             if self.top_usable_row > 0:
                 self.top_usable_row -= 1
@@ -368,7 +350,7 @@ class CursorAwareWindow(BaseWindow):
                 offscreen_scrolls += 1
             current_lines_by_row = dict((k-1, v) for k, v in current_lines_by_row.items())
             logger.debug('new top_usable_row: %d' % self.top_usable_row)
-            self.write(self.t.move(height-1, 0)) # since scrolling moves the cursor
+            self.write(self.t.move(height-1, 0))  # since scrolling moves the cursor
             self.write(actualize(line))
             current_lines_by_row[height-1] = line
 
@@ -393,7 +375,7 @@ def demo():
             while True:
                 c = input_generator.next()
                 if c == "":
-                    sys.exit() # same as raise SystemExit()
+                    sys.exit()  # same as raise SystemExit()
                 elif c == "h":
                     a = w.array_from_text("a for small array")
                 elif c == "a":
@@ -410,18 +392,18 @@ def demo():
                     a = [fmtstr(c*columns) for _ in range(1)]
                 elif c == "e":
                     a = [fmtstr(c*columns) for _ in range(1)]
-                elif c == '\x0c': # ctrl-L
+                elif c == '\x0c':  # ctrl-L
                     [w.write('\n') for _ in range(rows)]
                     continue
                 else:
                     a = w.array_from_text("unknown command")
                 w.render_to_terminal(a)
 
+
 def main():
     handler = logging.FileHandler(filename='display.log', level=logging.DEBUG)
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(__name__).addHandler(handler)
-    from .termhelpers import Cbreak
     print('this should be just off-screen')
     w = FullscreenWindow(sys.stdout)
     rows, columns = w.t.height, w.t.width
