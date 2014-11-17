@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/thomasballinger/curtsies.svg?branch=master)](https://travis-ci.org/thomasballinger/curtsies)
-![Docs Build Status](https://readthedocs.org/projects/curtsies/badge/?version=latest)
+[![Documentation Status](https://readthedocs.org/projects/curtsies/badge/?version=latest)](https://readthedocs.org/projects/curtsies/?badge=latest)
 Curtsies: Terminal interaction
 =========================================
 ![Curtsies Logo](http://ballingt.com/assets/curtsiestitle.png)
@@ -39,6 +39,9 @@ Paste it in a `something.py` file and try it out!
 Installation: `pip install curtsies`
 
 [Documentation](http://curtsies.readthedocs.org/en/latest/)
+
+Primer
+------
 
 [FmtStr](http://curtsies.readthedocs.org/en/latest/FmtStr.html) objects are strings formatted with
 colors and styles displayable in a terminal with [ANSI escape sequences](http://en.wikipedia.org/wiki/ANSI_escape_code>`_).
