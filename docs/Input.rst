@@ -10,24 +10,62 @@ Example
 
     >>> from curtsies import Input
     >>> with Input(keynames='curtsies') as input_generator:
-    >>>     for e in Input():
-    >>>         if e in (u'<ESC>', u'<Ctrl-d>'):
-    >>>             break
-    >>>         else:
-    >>>             print(e)
+    ...     for e in Input():
+    ...         if e in (u'<ESC>', u'<Ctrl-d>'):
+    ...             break
+    ...         else:
+    ...             print(e)
 
-Using Input
------------
+Use
+---
+
+The simplest way to use an :class:`~curtsies.input.Input` object is to
+iterate over it in a for loop:
+each time a keypress is detected or other event occurs, an event is produced
+and can be acted upon.
+Since it's iterable, ``next()`` can be used to wait for a single event.
+:meth:`~curtsies.input.Input.send` works like ``next()`` but takes a timeout
+in seconds, which if reached will cause None to be returned signalling
+that no keypress or other event occured within the timeout.
+
+Key events are unicode strings, but sometimes event objects
+(see :mod:`curtsies.events`) are returned instead.
+Built-in events signal SigInt events from the OS and PasteEvents consisting
+of multiple keypress events if reporting of these types of events was enabled
+in instatiation of the :py:class:`~curtsies.input.Input` object.
+
+Custom events can also be scheduled to be returned from
+:py:class:`~curtsies.input.Input` with callback functions
+created by the event trigger methods.
+
+Each of these methods returns a callback that will schedule an instance of the
+desired event type:
+
+* Using a callback created by :py:meth:`~curtsies.input.Input.event_trigger`
+  schedules an event to be returned the next time an event is requested, but
+  not if an event has already been requested (if called from another thread).
+
+* :py:meth:`~curtsies.input.Input.threadsafe_event_trigger` does the same,
+  but may notify a concurrent request for an event so that the custom event
+  is immediately returned.
+
+* :py:meth:`~curtsies.input.Input.scheduled_event_trigger` scheduls an event
+  to be returned at some point in the future.
+
+Use as context manager
+----------------------
+
+``next()`` and :meth:`~curtsies.input.Input.send()``
+must be used within the context of that :class:`~curtsies.input.Input` object.
 
 Within the (context-manager) context of an Input generator, an in-stream
 is put in raw mode or cbreak mode, and keypresses are stored to be reported
-later.
+later. Original tty attribute are recorded to be restored on exiting
+the context. The SigInt signal handler may be replaced if this behavior was
+specified on creation of the :class:`~curtsies.input.Input` object
 
-``Terminal.next()`` waits for a keypress.
-Key events are unicode
-strings, but ``Terminal.next()`` will sometimes return event objects which
-inherit from events.Event. ``Terminal`` objects are
-iterable, so these events can be obtained by looping over the object.
+Notes
+~~~~~
 
 ``Input`` takes an optional argument for how to name
 keypress events, which is 'curtsies' by default.
@@ -36,9 +74,6 @@ but note that curses doesn't have nice key names for many key combinations
 so you'll be putting up with names like ``u'\xe1'`` for
 option-j and ``'\x86'`` for ctrl-option-f.
 Pass 'plain' for this parameter to return a simple unicode representation.
-
-The events returned will be unicode strings representing single keypresses,
-or subclasses of events.Event.
 
 PasteEvent objects representing multple keystrokes in very rapid succession
 (typically because the user pasted in text, but possibly because they typed
@@ -94,15 +129,17 @@ Unicode strings (in Python 2 and 3):
 Likely points of confusion for keypress strings:
 
 * Enter is ``<Ctrl-j>``
-* Normal Meta (the escape-prepending version) key is ``<Esc+a>`` while control and shift keys are is ``<Ctrl-a>`` (note the ``+`` vs ``-``)
-* Letters are capitalized in `<Esc+Ctrl-A>` while they are lowercase in ``<Ctrl-a>``
+* Modern meta (the escape-prepending version) key is ``<Esc+a>`` while control and shift keys are is ``<Ctrl-a>`` (note the + vs -)
+* Letter keys are capitalized in ``<Esc+Ctrl-A>`` while they are lowercase in ``<Ctrl-a>``
   (this should be fixed in the next api-breaking release)
 * Some special characters lose their special names when used with modifier keys, for example:
   ``<TAB>, <Shift-TAB>, <Esc+Ctrl-Y>, <Esc+Ctrl-I>`` are all produced by the tab key, while ``y, Y, <Shift-TAB>, <Esc+y>, <Esc+Y>, <Esc+Ctrl-y>, <Esc+Ctrl-Y>, <Ctrl-Y>`` are all produced by the y key. (This should really be figured out)
+
 
 API docs
 --------
 
 .. autoclass:: curtsies.Input
    :members:
+   :member-order: bysource
 

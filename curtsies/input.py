@@ -37,7 +37,7 @@ class ReplacedSigIntHandler(object):
 
 class Input(object):
     """Keypress and control event generator"""
-    def __init__(self, in_stream=sys.stdin, keynames='curtsies',
+    def __init__(self, in_stream=None, keynames='curtsies',
                  paste_threshold=events.MAX_KEYPRESS_SIZE+1, sigint_event=False):
         """Returns an Input instance.
 
@@ -94,7 +94,11 @@ class Input(object):
     __next__ = next
 
     def unget_bytes(self, string):
-        """Inserts a bytestring into unprocessed bytes buffer"""
+        """Adds bytes to be internal buffer to be read
+
+        This method is for reporting bytes from an in_stream read
+        not initiated by this Input object"""
+
         self.unprocessed_bytes.extend(string[i:i+1] for i in range(len(string)))
 
     def wait_for_read_ready_or_timeout(self, timeout):
@@ -232,7 +236,7 @@ class Input(object):
         """Returns a callback that creates events.
 
         Returned callback function will add an event of type event_type
-        to a queue which will be checked the next time an event is requested"""
+        to a queue which will be checked the next time an event is requested."""
         def callback(**kwargs):
             self.queued_events.append(event_type(**kwargs))
         return callback
@@ -241,18 +245,18 @@ class Input(object):
         """Returns a callback that schedules events for the future.
 
         Returned callback function will add an event of type event_type
-        to a queue which will be checked the next time an event is requested"""
+        to a queue which will be checked the next time an event is requested."""
         def callback(when, **kwargs):
             self.queued_scheduled_events.append((when, event_type(when=when, **kwargs)))
         return callback
 
     def threadsafe_event_trigger(self, event_type):
-        """Returns a callback to schedule events, interrupting event requests.
+        """Returns a callback to creates events, interrupting current event requests.
 
-        Returned callback function will add an event of type event_type
+        Returned callback function will create an event of type event_type
         which will interrupt an event request if one
         is concurrently occuring, otherwise adding the event to a queue
-        that will be checked on the next event request"""
+        that will be checked on the next event request."""
         readfd, writefd = os.pipe()
         self.readers.append(readfd)
 
