@@ -255,8 +255,7 @@ class CursorAwareWindow(BaseWindow):
                     return c
                 except IOError:
                     raise ValueError('cursor get pos response read interrupted')
-                    # to find out if this ever really happens
-                    logger.debug('read interrupted, retrying')
+                    # find out if this ever really happens - if so, continue
 
         resp = ''
         while True:
@@ -279,8 +278,12 @@ class CursorAwareWindow(BaseWindow):
         """Returns the how far down the cursor moved since last render.
 
         Note:
-            If another get_cursor_vertical diff call is already in progress,
-            immediately returns zero.
+            If another get_cursor_vertical_diff call is already in progress,
+            immediately returns zero. (This situation is likely if
+            get_cursor_vertical_diff is called from a SIGWINCH signal
+            handler, since sigwinches can happen in rapid succession and
+            terminal emulators seem not to respond to cursor position
+            queries before the next sigwinch occurs.)
         """
         # Probably called by a SIGWINCH handler, and therefore
         # will do cursor querying until a SIGWINCH doesn't happen during

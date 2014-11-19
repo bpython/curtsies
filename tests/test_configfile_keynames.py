@@ -2,7 +2,8 @@
 import unittest
 from functools import partial
 
-from curtsies.configfile_keynames import keymap, CURTSIES_NAMES
+from curtsies.configfile_keynames import keymap
+from curtsies.events import CURTSIES_NAMES
 
 class TestKeymap(unittest.TestCase):
     def config(self, mapping, curtsies):

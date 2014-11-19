@@ -78,7 +78,6 @@ class PythonTerminalDirective(Directive):
     has_content = True
 
     def run(self):
-
         text = default_colors_to_resets(run_lines(get_lines('\n'.join(self.content))))
         return [python_terminal_block(text.decode('utf8'), text.decode('utf8'))]
 

@@ -21,7 +21,7 @@ def cursor_winch():
     with w:
         for e in input.Input():
             rows, columns = w.height, w.width
-            a = [fmtstr((('.%sx%s.' % (rows, columns)) * rows)[:columns]) for row in range(rows)]
+            a = [fmtstr(((u'.%sx%s.' % (rows, columns)) * rows)[:columns]) for row in range(rows)]
             w.render_to_terminal(a)
 if __name__ == '__main__':
     cursor_winch()

@@ -9,7 +9,9 @@ True
 True
 """
 
-from .termformatconstants import *
+from .termformatconstants import (FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR,
+                                  NUMBER_TO_STYLE, RESET_ALL, RESET_FG,
+                                  RESET_BG, STYLES)
 import re
 
 
@@ -28,7 +30,7 @@ def parse(s):
         if token:
             try:
                 stuff.append(token_type(token))
-            except ValueError as e:
+            except ValueError:
                 raise ValueError("Can't parse escape sequence: %r %r %r %r" % (s, repr(front), token, repr(rest)))
         if not rest:
             break

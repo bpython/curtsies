@@ -77,7 +77,7 @@ class Chunk(object):
     def width(self):
         width = wcwidth.wcswidth(self._s)
         if len(self._s) > 0 and width < 1:
-            raise ValueError("Can't calculate width of string %r" % string)
+            raise ValueError("Can't calculate width of string %r" % self._s)
         return width
 
     #TODO cache this
@@ -435,37 +435,6 @@ class FmtStr(object):
 
     def __setitem__(self, index, value):
         raise Exception("No!")
-        self._unicode = None
-        self._str = None
-        self._len = None
-        self._width = None
-        index = normalize_slice(len(self), index)
-        if isinstance(value, (bytes, unicode)):
-            value = FmtStr(Chunk(value))
-        elif not isinstance(value, FmtStr):
-            raise ValueError('Should be str or FmtStr')
-        counter = 0
-        old_basefmtstrs = self.basefmtstrs[:]
-        self.basefmtstrs = []
-        inserted = False
-        for fs in old_basefmtstrs:
-            if index.start < counter + len(fs) and index.stop > counter:
-                start = max(0, index.start - counter)
-                end = index.stop - counter
-                front = Chunk(fs.s[:start], fs.atts)
-                # stuff
-                new = value
-                back = Chunk(fs.s[end:], fs.atts)
-                if len(front) > 0:
-                    self.basefmtstrs.append(front)
-                if len(new) > 0 and not inserted:
-                    self.basefmtstrs.extend(new.basefmtstrs)
-                    inserted = True
-                if len(back) > 0:
-                    self.basefmtstrs.append(back)
-            else:
-                self.basefmtstrs.append(fs)
-            counter += len(fs)
 
     def copy(self):
         return FmtStr(*self.basefmtstrs)

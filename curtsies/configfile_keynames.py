@@ -2,8 +2,6 @@
 
 In the style of bpython config files and keymap"""
 
-from .events import CURTSIES_NAMES
-
 SPECIALS = {
         'C-[': u'<ESC>',
         'C-^': u'<Ctrl-6>',
