@@ -53,8 +53,8 @@ class TestInput(unittest.TestCase):
     def test_send_paste(self):
         inp = Input()
         inp.unprocessed_bytes = []
-        inp.wait_for_read_ready_or_timeout = Mock()
-        inp.wait_for_read_ready_or_timeout.return_value = (True, None)
+        inp._wait_for_read_ready_or_timeout = Mock()
+        inp._wait_for_read_ready_or_timeout.return_value = (True, None)
         inp._nonblocking_read = Mock()
         n = inp.paste_threshold + 1
 

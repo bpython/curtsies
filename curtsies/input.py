@@ -101,7 +101,7 @@ class Input(object):
 
         self.unprocessed_bytes.extend(string[i:i+1] for i in range(len(string)))
 
-    def wait_for_read_ready_or_timeout(self, timeout):
+    def _wait_for_read_ready_or_timeout(self, timeout):
         """Returns tuple of whether stdin has bytes to read and an event.
 
         If an event is returned, that event is more pressing than reading
@@ -182,7 +182,7 @@ class Input(object):
         if e is not None:
             return e
 
-        stdin_has_bytes, event = self.wait_for_read_ready_or_timeout(time_until_check)
+        stdin_has_bytes, event = self._wait_for_read_ready_or_timeout(time_until_check)
         if event:
             return event
         if self.queued_scheduled_events and when < time.time():  # when should always be defined
