@@ -36,9 +36,9 @@ CURTSIES_NAMES = dict([
   (b'\x1b[1;9C',  u'<Esc+RIGHT>'),
   (b'\x1b[1;9D',  u'<Esc+LEFT>'),
 
-  (b'\x1b[1;10A', u'<Esc+Shift-LEFT>'),
-  (b'\x1b[1;10B', u'<Esc+Shift-LEFT>'),
-  (b'\x1b[1;10C', u'<Esc+Shift-LEFT>'),
+  (b'\x1b[1;10A', u'<Esc+Shift-UP>'),
+  (b'\x1b[1;10B', u'<Esc+Shift-DOWN>'),
+  (b'\x1b[1;10C', u'<Esc+Shift-RIGHT>'),
   (b'\x1b[1;10D', u'<Esc+Shift-LEFT>'),
 
   (b'\x1bOP',     u'<F1>'),
