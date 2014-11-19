@@ -559,8 +559,10 @@ def fmtstr(string, *args, **kwargs):
     """
     Convenience function for creating a FmtStr
 
-    >>> fmtstr('asdf', 'blue', 'on_red')
-    on_red(blue('asdf'))
+    >>> fmtstr('asdf', 'blue', 'on_red', 'bold')
+    on_red(bold(blue('asdf')))
+    >>> fmtstr('blarg', fg='blue', bg='on_red', bold=True)
+    on_red(bold(blue('blarg')))
     """
     atts = parse_args(args, kwargs)
     if isinstance(string, FmtStr):
