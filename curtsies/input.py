@@ -180,13 +180,13 @@ class Input(object):
         if not stdin_has_bytes:
             return None
 
-        num_bytes = self.nonblocking_read()
+        num_bytes = self._nonblocking_read()
         assert num_bytes > 0, num_bytes
         if self.paste_threshold is not None and num_bytes > self.paste_threshold:
             paste = events.PasteEvent()
             while True:
                 if len(self.unprocessed_bytes) < events.MAX_KEYPRESS_SIZE:
-                    self.nonblocking_read()  # may need to read to get the rest of a keypress
+                    self._nonblocking_read()  # may need to read to get the rest of a keypress
                 e = find_key()
                 if e is None:
                     return paste
@@ -197,7 +197,7 @@ class Input(object):
             assert e is not None
             return e
 
-    def nonblocking_read(self):
+    def _nonblocking_read(self):
         """Returns the number of characters read and adds them to self.unprocessed_bytes"""
         with Nonblocking(self.in_stream):
             if PY3:

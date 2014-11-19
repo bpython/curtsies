@@ -48,14 +48,14 @@ class TestInput(unittest.TestCase):
 
     def test_nonblocking_read(self):
         inp = Input()
-        self.assertEqual(inp.nonblocking_read(), 0)
+        self.assertEqual(inp._nonblocking_read(), 0)
 
     def test_send_paste(self):
         inp = Input()
         inp.unprocessed_bytes = []
         inp.wait_for_read_ready_or_timeout = Mock()
         inp.wait_for_read_ready_or_timeout.return_value = (True, None)
-        inp.nonblocking_read = Mock()
+        inp._nonblocking_read = Mock()
         n = inp.paste_threshold + 1
 
         first_time = [True]
@@ -67,7 +67,7 @@ class TestInput(unittest.TestCase):
                 return n
             else:
                 return None
-        inp.nonblocking_read.side_effect = side_effect
+        inp._nonblocking_read.side_effect = side_effect
 
         r = inp.send(0)
         self.assertEqual(type(r), events.PasteEvent)
