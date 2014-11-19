@@ -115,7 +115,7 @@ Event Objects
 Keypress Strings
 ----------------
 
-Unicode strings (in Python 2 and 3):
+Keypress events are Unicode strings in both Python 2 and 3 like:
 
 * ``a, 4, *, ?``
 * ``<UP>, <DOWN>, <RIGHT>, <LEFT>``
