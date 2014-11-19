@@ -5,7 +5,7 @@ Input
 :py:class:`~curtsies.input.Input` objects provide user keypress events
 and other control events.
 
-Example
+Input - Example
 =======
 
     >>> from curtsies import Input
@@ -16,8 +16,8 @@ Example
     ...         else:
     ...             print(e)
 
-Getting Keyboard Input
-======================
+Input - Getting Keyboard Events
+===============================
 
 The simplest way to use an :class:`~curtsies.input.Input` object is to
 iterate over it in a for loop:
@@ -34,8 +34,8 @@ Built-in events signal SigInt events from the OS and PasteEvents consisting
 of multiple keypress events if reporting of these types of events was enabled
 in instatiation of the :py:class:`~curtsies.input.Input` object.
 
-Using Input as a Reactor
-========================
+Input - Using as a Reactor
+==========================
 
 Custom events can also be scheduled to be returned from
 :py:class:`~curtsies.input.Input` with callback functions
@@ -55,8 +55,8 @@ desired event type:
 * :py:meth:`~curtsies.input.Input.scheduled_event_trigger` schedules an event
   to be returned at some point in the future.
 
-Use as context manager
-======================
+Input - Context
+===============
 
 ``next()`` and :meth:`~curtsies.input.Input.send()``
 must be used within the context of that :class:`~curtsies.input.Input` object.
@@ -67,8 +67,8 @@ later. Original tty attribute are recorded to be restored on exiting
 the context. The SigInt signal handler may be replaced if this behavior was
 specified on creation of the :class:`~curtsies.input.Input` object
 
-Notes
-=====
+Input - Notes
+=============
 
 ``Input`` takes an optional argument for how to name
 keypress events, which is 'curtsies' by default.
@@ -92,8 +92,8 @@ will be returned as ``SigIntEvent()`` instances.
 To set a timeout on the blocking get, treat it like a generator and call
 ``.send(timeout)``. The call will return None if no event is available.
 
-Events
-======
+Input - Events
+==============
 .. automodule:: curtsies.events
 
 To see what a given keypress is called (what unicode string is returned
@@ -103,8 +103,8 @@ Events returned by :py:class:`~curtsies.input.Input` fall into two categories:
 instances of subclasses of :class:`curtsies.event.Event` and
 Keypress strings.
 
-Event Objects
--------------
+Input - Event Objects
+---------------------
 
 .. autoclass:: curtsies.events.SigIntEvent
 
@@ -112,8 +112,8 @@ Event Objects
 
 .. autoclass:: curtsies.events.ScheduledEvent
 
-Keypress Strings
-----------------
+Input - Keypress Strings
+------------------------
 
 Keypress events are Unicode strings in both Python 2 and 3 like:
 
@@ -137,8 +137,8 @@ Likely points of confusion for keypress strings:
   ``<TAB>, <Shift-TAB>, <Esc+Ctrl-Y>, <Esc+Ctrl-I>`` are all produced by the tab key, while ``y, Y, <Shift-TAB>, <Esc+y>, <Esc+Y>, <Esc+Ctrl-y>, <Esc+Ctrl-Y>, <Ctrl-Y>`` are all produced by the y key. (This should really be figured out)
 
 
-API docs
-========
+Input - API docs
+================
 
 .. autoclass:: curtsies.Input
    :members:

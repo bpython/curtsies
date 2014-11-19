@@ -6,8 +6,8 @@ and styled in ways representable by `ANSI escape codes <http://en.wikipedia.org/
 
 .. automodule:: curtsies.formatstring
 
-Example
-=======
+FmtStr - Example
+================
 
 .. python_terminal_session::
 
@@ -31,8 +31,8 @@ another library may be a better fit than Curtsies.
 Unlink other libraries, Curtsies allows these colored strings to be further manipulated after
 they are created.
 
-Rationale
-=========
+FmtStr - Rationale
+================
 
 If all you need is to print colored text, many other libraries also make `ANSI escape codes <http://en.wikipedia.org/wiki/ANSI_escape_code>`_ easy to use.
 
@@ -71,8 +71,8 @@ One :py:class:`FmtStr` can have several kinds of formatting applied to different
 >>> blue('asdf') + on_red('adsf')
 blue("asdf")+on_red("adsf")
 
-Using :py:class:`FmtStr`
-========================
+FmtStr - Using
+==============
 
 A :py:class:`FmtStr` can be sliced to produce a new :py:class:`FmtStr` object:
 
@@ -109,8 +109,8 @@ It's easy to turn ANSI terminal formatted strings into :py:class:`FmtStr`
     >>> FmtStr.from_str(str(blue('tom')))
     blue("tom")
 
-Using str methods on :py:class:`FmtStr` objects
------------------------------------------------
+FmtStr - Using str methods
+--------------------------
 
 All sorts of `string methods <https://docs.python.org/2/library/stdtypes.html#string-methods>`_
 can be used on a :py:class:`FmtStr`, so you can often
@@ -150,8 +150,8 @@ But formatting information will be lost for attributes which are not the same th
     >>> f.center(10)
     bold(" hi there ")
 
-Encoding
---------
+FmtStr - Unicode
+----------------
 
 In Python 2, you might run into something like this:
 
@@ -163,7 +163,6 @@ In Python 2, you might run into something like this:
    >>> red('hi')
    ValueError: unicode string required, got 'hi'
 
-asdf
 :py:class:`FmtStr` requires unicode strings, so in Python 2 it is convenient to use the unicode_literals compiler directive:
 
     >>> from __future__ import unicode_literals
@@ -173,8 +172,8 @@ asdf
 
 .. _len-vs-width:
 
-len vs width
-------------
+FmtStr - len vs width
+---------------------
 
 The amound of horizontal space a string takes up in a terminal may differ from the length of the string returned by ``len()``.
 :py:class:`FmtStr` objects have a width property useful when writing layout code:
@@ -191,8 +190,8 @@ The amound of horizontal space a string takes up in a terminal may differ from t
 
 As shown above, `full width characters <http://en.wikipedia.org/wiki/Halfwidth_and_fullwidth_forms>`_ can take up two columns, and `combining characters <http://en.wikipedia.org/wiki/Combining_character>`_ may be combined with the previous character to form a single grapheme. Curtsies uses a `Python implementation of wcwidth <https://github.com/jquast/wcwidth>` to do this calculation.
 
-API Docs
-========
+FmtStr - API Docs
+=================
 
 .. automodule:: curtsies.formatstring
    :members: fmtstr

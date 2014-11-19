@@ -3,8 +3,8 @@ FSArray
 
 :py:class:`~curtsies.formatstringarray.FSArray` is a two dimensional grid of colored and styled characters.
 
-Example
-=======
+FSArray - Example
+=================
 
 .. python_terminal_session::
 
@@ -18,8 +18,8 @@ Example
 
 `fsarray` is a convenience function returning a FSArray constructed from its arguments.
 
-Using FSArrays
-==============
+FSArray - Using
+===============
 
 Arrays can be composed to build up complex text interfaces::
 
@@ -64,8 +64,8 @@ important than it's *length* (see :ref:`len-vs-width`).
 In the future FSArrays will do slicing and array assignment based on width
 instead of number of characters, but this is not currently implemented.
 
-API docs
-========
+FSArray - API docs
+==================
 
 .. automodule:: curtsies.formatstringarray
    :members: FSArray, fsarray

@@ -21,8 +21,8 @@ its contents around during a window size change.
 This information can be used to compensate for
 this movement and prevent the overwriting of history on the terminal screen.
 
-Example
-=======
+Window Objects - Example
+========================
 
     >>> from curtsies import FullscreenWindow, fsarray
     >>> import time
@@ -32,7 +32,7 @@ Example
     ...     win.render_to_terminal(fsarray([u'asdf', u'qwer']))
     ...     time.sleep(1)
 
-Use as a context manager
+Window Objects - Context
 ========================
 
 :py:meth:`~curtsies.window.BaseWindow.render_to_terminal` should only be called within the context
@@ -48,8 +48,8 @@ the alternate terminal screen. Entering the context of a CursorAwareWindow hides
 the cursor, turns on cbreak mode, and records the cursor position. Leaving the context
 does more or less the inverse.
 
-API Docs
-========
+Window Objects - API Docs
+=========================
 
 .. autoclass:: BaseWindow
    :members:
