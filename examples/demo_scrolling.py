@@ -5,9 +5,9 @@ from curtsies import CursorAwareWindow, input, fmtstr
 
 rows, columns = '??'
 def cursor_winch():
-    global rows, columns
+    global rows, columns # instead of closure for Python 2 compatibility
     print('this should be just off-screen')
-    w = CursorAwareWindow(sys.stdout, sys.stdin, keep_last_line=True, hide_cursor=False)
+    w = CursorAwareWindow(sys.stdout, sys.stdin, keep_last_line=False, hide_cursor=False)
     def sigwinch_handler(signum, frame):
         global rows, columns
         dy = w.get_cursor_vertical_diff()
@@ -23,5 +23,7 @@ def cursor_winch():
             rows, columns = w.height, w.width
             a = [fmtstr(((u'.%sx%s.' % (rows, columns)) * rows)[:columns]) for row in range(rows)]
             w.render_to_terminal(a)
+            if e == u'<ESC>':
+                break
 if __name__ == '__main__':
     cursor_winch()

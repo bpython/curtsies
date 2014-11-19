@@ -36,14 +36,23 @@ class ReplacedSigIntHandler(object):
 
 
 class Input(object):
-    """Coroutine-interface respecting keypress generator"""
+    """Keypress and control event generator"""
     def __init__(self, in_stream=sys.stdin, keynames='curtsies',
                  paste_threshold=events.MAX_KEYPRESS_SIZE+1, sigint_event=False):
-        """in_stream should be standard input
-        keynames are how keypresses should be named - one of 'curtsies', 'curses', or 'plain'
-        paste_threshold is how many bytes must be read in a single read for
-          the keypresses they represent to be combined into a single paste event
+        """Returns an Input instance.
+
+        Args:
+            in_stream (file): Defaults to sys.__stdin__
+            keynames (string): How keypresses should be named - one of
+              'curtsies', 'curses', or 'plain'.
+            paste_threshold (int): How many bytes must be read in one
+              os.read on the in_stream to trigger the keypresses they
+              represent to be combined into a single paste event
+            sigint_event (bool): Whether SIGINT signals from the OS
+              should be intercepted and returned as SigIntEvent objects
         """
+        if in_stream is None:
+            in_stream = sys.__stdin__
         self.in_stream = in_stream
         self.unprocessed_bytes = []  # leftover from stdin, unprocessed yet
         self.keynames = keynames
