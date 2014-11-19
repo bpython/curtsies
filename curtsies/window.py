@@ -219,8 +219,7 @@ class CursorAwareWindow(BaseWindow):
         self.in_get_cursor_diff = False  # in the cursor query code of cursor diff
 
     def __enter__(self):
-        if hasattr(self.in_stream, 'fileno'):  #faked stdin isn't buffered, no need for cbreak
-            self.cbreak.__enter__()
+        self.cbreak.__enter__()
         self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
         logger.debug('initial top_usable_row: %d' % self.top_usable_row)
@@ -233,8 +232,7 @@ class CursorAwareWindow(BaseWindow):
         self.write(FIRST_COLUMN)
         self.write(self.t.clear_eos)
         self.write(self.t.clear_eol)
-        if hasattr(self.in_stream, 'fileno'):  #fake files aren't buffered
-            self.cbreak.__exit__(type, value, traceback)
+        self.cbreak.__exit__(type, value, traceback)
         BaseWindow.__exit__(self, type, value, traceback)
 
     def get_cursor_position(self):

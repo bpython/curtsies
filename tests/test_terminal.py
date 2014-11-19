@@ -81,6 +81,10 @@ class TestFullscreenWindow(unittest.TestCase):
             self.window.scroll_down()
         self.assertEqual(self.screen.display, [u'there     ', u'          ', u'          '])
 
+class NopContext(object):
+    def __enter__(*args): pass
+    def __exit__(*args): pass
+
 class TestCursorAwareWindow(unittest.TestCase):
     def setUp(self):
         self.screen = ReportingScreen(6, 3)
@@ -90,6 +94,7 @@ class TestCursorAwareWindow(unittest.TestCase):
         stdout = ScreenStdout(self.stream)
         self.window = CursorAwareWindow(out_stream=stdout,
                                         in_stream=self.screen._report_file)
+        self.window.cbreak = NopContext()
         blessings.Terminal.height = 3
         blessings.Terminal.width = 6
 
