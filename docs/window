@@ -7,7 +7,6 @@ Windows successively render 2D grids of text (usually instances of :py:class:`~c
 to the terminal.
 
 Using FSArrays
---------------
 
 A window owns its output stream - it is assumed (but not enforced) that no additional data is written to this stream between renders,
 an assumption which allowing for example portions of the screen which do not change between renderings not to be redrawn during a rendering.
@@ -23,7 +22,7 @@ This information can be used to compensate for
 this movement and prevent the overwriting of history on the terminal screen.
 
 Example
--------
+=======
 
     >>> from curtsies import FullscreenWindow, fsarray
     >>> import time
@@ -34,7 +33,7 @@ Example
     ...     time.sleep(1)
 
 Use as a context manager
-------------------------
+========================
 
 :py:meth:`~curtsies.window.BaseWindow.render_to_terminal` should only be called within the context
 of a window. Within the context of an instance of :py:class:`~curtsies.window.BaseWindow`
@@ -50,7 +49,7 @@ the cursor, turns on cbreak mode, and records the cursor position. Leaving the c
 does more or less the inverse.
 
 API Docs
---------
+========
 
 .. autoclass:: BaseWindow
    :members:

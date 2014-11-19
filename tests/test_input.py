@@ -94,6 +94,12 @@ class TestInput(unittest.TestCase):
         self.assertEqual(type(inp.send(0)), CustomScheduledEvent)
         self.assertEqual(inp.send(0), None)
 
+    def test_schedule_event_trigger_blocking(self):
+        inp = Input()
+        f = inp.scheduled_event_trigger(CustomScheduledEvent)
+        f(when=time.time()+0.05)
+        self.assertEqual(type(next(inp)), CustomScheduledEvent)
+
     def test_threadsafe_event_trigger(self):
         inp = Input()
         f = inp.threadsafe_event_trigger(CustomEvent)

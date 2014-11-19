@@ -55,7 +55,7 @@ class Snake(object):
             self.snake_parts.pop()
 
 def main():
-    MAX_FPS = 5
+    MAX_FPS = 20
     time_per_frame = lambda: 1. / MAX_FPS
 
     with FullscreenWindow() as window:

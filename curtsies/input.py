@@ -173,7 +173,7 @@ class Input(object):
                                self.queued_scheduled_events[1:])
                 return self.queued_scheduled_events.pop(0)[1]
             else:
-                time_until_check = min(max(0, when - time.time()), timeout)
+                time_until_check = min(max(0, when - time.time()), timeout if timeout is not None else sys.maxint)
         else:
             time_until_check = timeout
 

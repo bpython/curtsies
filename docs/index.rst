@@ -1,5 +1,5 @@
-Welcome to the Curtsies documentation
-=====================================
+Curtsies documentation
+^^^^^^^^^^^^^^^^^^^^^^
 .. |shoes| image:: http://ballingt.com/assets/curtsies-tritone-small.png
 .. |curtsiestitle| image:: http://ballingt.com/assets/curtsiestitle.png
 
@@ -21,16 +21,13 @@ User keyboard input events like pressing the up arrow key are detected by an
 :py:class:`~curtsies.input.Input` object. See the :doc:`quickstart` to get started using
 all of these classes.
 
-.. toctree::
-   :maxdepth: 3
-
-   quickstart
-   examples
-   FmtStr
-   FSArray
-   window
-   Input
-   about
+.. include:: quickstart
+.. include:: FmtStr
+.. include:: FSArray
+.. include:: window
+.. include:: Input
+.. include:: examples
+.. include:: about
 
 
 Indices and tables

@@ -124,15 +124,12 @@ class FullscreenWindow(BaseWindow):
         """Renders array to terminal and places (0-indexed) cursor
 
         Args:
-          array (FSArray): Grid of styled characters to be rendered.
+            array (FSArray): Grid of styled characters to be rendered.
 
-            If array received is of width too small, render it anyway
-
-            if array received is of width too large, render the renderable portion
-
-            if array received is of height too small, render it anyway
-
-            if array received is of height too large, render the renderable portion (no scroll)
+        * If array received is of width too small, render it anyway
+        * if array received is of width too large, render the renderable portion
+        * if array received is of height too small, render it anyway
+        * if array received is of height too large, render the renderable portion (no scroll)
         """
         actualize = unicode if sys.version_info[0] == 2 else str
         #TODO there's a race condition here - these height and widths are
@@ -321,10 +318,10 @@ class CursorAwareWindow(BaseWindow):
         return cursor_dy
 
     def render_to_terminal(self, array, cursor_pos=(0, 0)):
-        """Renders array to terminal, returns the number of lines
-            scrolled offscreen
+        """Renders array to terminal, returns the number of lines scrolled offscreen
+
         Returns:
-          Number of times scrolled
+            Number of times scrolled
 
         Args:
           array (FSArray): Grid of styled characters to be rendered.

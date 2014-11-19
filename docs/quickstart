@@ -1,5 +1,5 @@
 Quickstart
-*****************
+^^^^^^^^^^
 This is what using (nearly every feature of) Curtsies looks like:
 
 .. literalinclude:: ../examples/quickstart.py
