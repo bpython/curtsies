@@ -153,22 +153,17 @@ But formatting information will be lost for attributes which are not the same th
 Encoding
 --------
 
-In Python 2, you might run into something like this::
+In Python 2, you might run into something like this:
 
-    >>> from curtsies.fmtfuncs import *
-    >>> red(u'hi')
-    red('hi')
-    >>> red('hi')
-    Traceback (most recent call last):
-      File "<stdin>", line 1, in <module>
-      File "/Users/tomb/Dropbox/code/curtsies/curtsies/formatstring.py", line 582, in fmtstr
-        string = FmtStr.from_str(string)
-      File "/Users/tomb/Dropbox/code/curtsies/curtsies/formatstring.py", line 162, in from_str
-        return FmtStr(Chunk(s))
-      File "/Users/tomb/Dropbox/code/curtsies/curtsies/formatstring.py", line 64, in __init__
-        raise ValueError("unicode string required, got %r" % string)
-    ValueError: unicode string required, got 'hi'
+.. code-block:: python
 
+   >>> from curtsies.fmtfuncs import *
+   >>> red(u'hi')
+   red('hi')
+   >>> red('hi')
+   ValueError: unicode string required, got 'hi'
+
+asdf
 :py:class:`FmtStr` requires unicode strings, so in Python 2 it is convenient to use the unicode_literals compiler directive:
 
     >>> from __future__ import unicode_literals

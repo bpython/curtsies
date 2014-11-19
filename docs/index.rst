@@ -18,8 +18,7 @@ Such grids of characters can be efficiently rendered to the terminal in alternat
 (no scrollback history, like ``Vim``, ``top`` etc.) by :py:class:`~curtsies.window.FullscreenWindow` objects
 or to the normal history-preserving screen by :py:class:`~curtsies.window.CursorAwareWindow` objects.
 User keyboard input events like pressing the up arrow key are detected by an
-:py:class:`~curtsies.input.Input` object. See the :doc:`quickstart` to get started using
-all of these classes.
+:py:class:`~curtsies.input.Input` object.
 
 .. include:: quickstart
 .. include:: FmtStr
