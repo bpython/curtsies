@@ -134,7 +134,7 @@ class Input(object):
                     remaining_timeout = max(timeout - (time.time() - t0), 0)
 
     def send(self, timeout=None):
-        """Returns a key or None if no key pressed"""
+        """Returns an event or None if no events occur before timeout."""
         if self.sigint_event:
             with ReplacedSigIntHandler(self.sigint_handler):
                 return self._send(timeout)

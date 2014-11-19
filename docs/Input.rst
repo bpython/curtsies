@@ -65,7 +65,7 @@ the context. The SigInt signal handler may be replaced if this behavior was
 specified on creation of the :class:`~curtsies.input.Input` object
 
 Notes
-~~~~~
+-----
 
 ``Input`` takes an optional argument for how to name
 keypress events, which is 'curtsies' by default.
@@ -103,13 +103,11 @@ Keypress strings.
 Event Objects
 ~~~~~~~~~~~~~
 
-.. autoclass:: curtsies.events.ScheduledEvent
-
-.. autoclass:: curtsies.events.WindowChangeEvent
-
 .. autoclass:: curtsies.events.SigIntEvent
 
 .. autoclass:: curtsies.events.PasteEvent
+
+.. autoclass:: curtsies.events.ScheduledEvent
 
 Keypress Strings
 ~~~~~~~~~~~~~~~~

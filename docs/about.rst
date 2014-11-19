@@ -13,7 +13,7 @@ A good place to ask questions about Curtsies is `#bpython on irc.freenode.net <h
 Authors
 -------
 
-Curtsies is written by `Thomas Ballinger <http://ballingt.com>`_ to create
+Curtsies was written by `Thomas Ballinger <http://ballingt.com>`_ to create
 a frontend for `bpython <http://bpython-interpreter.org/>`_ that preserved terminal history.
 
 Thanks so much to the many people that have contributed to it!

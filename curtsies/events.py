@@ -65,6 +65,13 @@ class Event(object):
     pass
 
 class ScheduledEvent(Event):
+    """Event scheduled for a future time.
+
+    args:
+        when (float): unix time in seconds for which this event is scheduled
+
+    Custom events that occur at a specific time in the future should
+    be subclassed from ScheduledEvent."""
     def __init__(self, when):
         self.when = when
 
@@ -83,6 +90,7 @@ class WindowChangeEvent(Event):
         return '<WindowChangeEvent>'
 
 class SigIntEvent(Event):
+    """Event signifying a SIGINT"""
     def __repr__(self):
         return "<SigInt Event>"
     @property
@@ -90,6 +98,10 @@ class SigIntEvent(Event):
         return repr(self)
 
 class PasteEvent(Event):
+    """Multiple keypress events combined, likely from copy/paste.
+
+    The events attribute contains a list of keypress event strings.
+    """
     def __init__(self):
         self.events = []
     def __repr__(self):

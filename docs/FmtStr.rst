@@ -194,7 +194,7 @@ The amound of horizontal space a string takes up in a terminal may differ from t
 >>> len(combined), combined.width, combined.s
 (2, 1, u'a\u0324')
 
-As shown above, `full width characters <http://en.wikipedia.org/wiki/Halfwidth_and_fullwidth_forms>`_ can take up two columns, and `combining characters <http://en.wikipedia.org/wiki/Combining_character>`_ may be combined with the previous character to form a single grapheme.
+As shown above, `full width characters <http://en.wikipedia.org/wiki/Halfwidth_and_fullwidth_forms>`_ can take up two columns, and `combining characters <http://en.wikipedia.org/wiki/Combining_character>`_ may be combined with the previous character to form a single grapheme. Curtsies uses a `Python implementation of wcwidth <https://github.com/jquast/wcwidth>` to do this calculation.
 
 API Docs
 ========
