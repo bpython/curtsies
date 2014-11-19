@@ -6,8 +6,8 @@ and styled in ways representable by `ANSI escape codes <http://en.wikipedia.org/
 
 .. automodule:: curtsies.formatstring
 
-Demo
-====
+Example
+=======
 
 .. python_terminal_session::
 
