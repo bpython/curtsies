@@ -18,17 +18,19 @@ Such grids of characters can be efficiently rendered to the terminal in alternat
 (no scrollback history, like ``Vim``, ``top`` etc.) by :py:class:`~curtsies.window.FullscreenWindow` objects
 or to the normal history-preserving screen by :py:class:`~curtsies.window.CursorAwareWindow` objects.
 User keyboard input events like pressing the up arrow key are detected by an
-:py:class:`~curtsies.input.Input` object.
+:py:class:`~curtsies.input.Input` object. See the :doc:`quickstart` to get started using
+all of these classes.
 
-.. include:: quickstart.rst
-.. include:: FmtStr.rst
-.. include:: FSArray.rst
-.. include:: window.rst
-.. include:: Input.rst
-.. include:: examples.rst
-.. include:: game.rst
-.. include:: about.rst
+.. toctree::
+   :maxdepth: 3
 
+   quickstart
+   examples
+   FmtStr
+   FSArray
+   window
+   Input
+   about
 
 Indices and tables
 ==================
