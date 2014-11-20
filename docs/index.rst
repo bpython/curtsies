@@ -20,13 +20,14 @@ or to the normal history-preserving screen by :py:class:`~curtsies.window.Cursor
 User keyboard input events like pressing the up arrow key are detected by an
 :py:class:`~curtsies.input.Input` object.
 
-.. include:: quickstart
-.. include:: FmtStr
-.. include:: FSArray
-.. include:: window
-.. include:: Input
-.. include:: examples
-.. include:: about
+.. include:: quickstart.rst
+.. include:: FmtStr.rst
+.. include:: FSArray.rst
+.. include:: window.rst
+.. include:: Input.rst
+.. include:: examples.rst
+.. include:: game.rst
+.. include:: about.rst
 
 
 Indices and tables
