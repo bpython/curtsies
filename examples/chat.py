@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 """A more realtime netcat"""
 import sys
 import select
@@ -46,13 +47,13 @@ def main(host, port):
                         e = input_generator.send(0)
                         if e == '<ESC>':
                             return
-                        elif e == '<RETURN>':
+                        elif e == '<Ctrl-j>':
                             keypresses.append('\n')
                             client.send((''.join(keypresses)).encode('latin-1'))
                             keypresses = []
                         elif e == '<SPACE>':
                             keypresses.append(' ')
-                        elif e == '<DELETE>':
+                        elif e in ('<DELETE>', '<BACKSPACE>'):
                             keypresses = keypresses[:-1]
                         elif e is not None:
                             keypresses.append(e)
