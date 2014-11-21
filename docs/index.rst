@@ -30,6 +30,7 @@ all of these classes.
    FSArray
    window
    Input
+   gameloop
    about
 
 Indices and tables
