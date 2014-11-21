@@ -33,10 +33,3 @@ all of these classes.
    examples
    about
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
