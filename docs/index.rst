@@ -25,12 +25,12 @@ all of these classes.
    :maxdepth: 3
 
    quickstart
-   examples
    FmtStr
    FSArray
    window
    Input
    gameloop
+   examples
    about
 
 Indices and tables
