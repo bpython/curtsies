@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import itertools
 import sys
 
@@ -68,7 +70,7 @@ class World(object):
         self.turn += 1
         if self.turn % 20 == 0:
             self.player.speed = max(1, self.player.speed - 1)
-            self.player.display = on_blue(green(bold(str(self.player.speed))))
+            self.player.display = on_blue(green(bold(str(self.player.speed).decode('utf8'))))
 
     def get_array(self):
         a = FSArray(self.height, self.width)
