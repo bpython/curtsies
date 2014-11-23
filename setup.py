@@ -19,9 +19,8 @@ setup(name='curtsies',
       packages=['curtsies'],
       install_requires = [
           'blessings>=1.5',
-          'wcwidth>=0.1.1',
+          'wcwidth>=0.1.4',
       ],
-      dependency_links=['http://github.com/thomasballinger/wcwidth/tarball/fixes#egg=wcwidth-0.1.1'],
       tests_require = [
           'mock',
           'pyte',
