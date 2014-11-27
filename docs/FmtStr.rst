@@ -90,7 +90,7 @@ A :py:class:`FmtStr` can be sliced to produce a new :py:class:`FmtStr` object:
     >>> f.splice('something longer', 2)
     blue("h")+"something longer"+blue("ot")+blue(" there")+on_red(" Tom!")
 
-:py:class:`FmtStr` greedily absorb strings, but no formatting is applied to this added text
+:py:class:`FmtStr` greedily absorbs strings, but no formatting is applied to this added text.
 
     >>> from curtsies.fmtfuncs import *
     >>> f = blue("The story so far:") + "In the beginning..."
