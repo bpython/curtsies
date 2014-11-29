@@ -6,8 +6,6 @@ Window Objects
 Windows successively render 2D grids of text (usually instances of :py:class:`~curtsies.formatstringarray.FSArray`)
 to the terminal.
 
-Using FSArrays
-
 A window owns its output stream - it is assumed (but not enforced) that no additional data is written to this stream between renders,
 an assumption which allowing for example portions of the screen which do not change between renderings not to be redrawn during a rendering.
 
