@@ -547,12 +547,12 @@ def parse_args(args, kwargs):
         if kwargs['fg'] in FG_COLORS:
             kwargs['fg'] = FG_COLORS[kwargs['fg']]
         if kwargs['fg'] not in list(FG_COLORS.values()):
-            raise ValueError("Bad fg value: %s", kwargs['fg'])
+            raise ValueError("Bad fg value: %r" % kwargs['fg'])
     if 'bg' in kwargs:
         if kwargs['bg'] in BG_COLORS:
             kwargs['bg'] = BG_COLORS[kwargs['bg']]
         if kwargs['bg'] not in list(BG_COLORS.values()):
-            raise ValueError("Bad bg value: %s", kwargs['bg'])
+            raise ValueError("Bad bg value: %r" % kwargs['bg'])
     return kwargs
 
 def fmtstr(string, *args, **kwargs):
@@ -561,7 +561,7 @@ def fmtstr(string, *args, **kwargs):
 
     >>> fmtstr('asdf', 'blue', 'on_red', 'bold')
     on_red(bold(blue('asdf')))
-    >>> fmtstr('blarg', fg='blue', bg='on_red', bold=True)
+    >>> fmtstr('blarg', fg='blue', bg='red', bold=True)
     on_red(bold(blue('blarg')))
     """
     atts = parse_args(args, kwargs)
