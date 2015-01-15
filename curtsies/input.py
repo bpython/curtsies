@@ -156,7 +156,7 @@ class Input(object):
                 logger.warning('popping an event! %r %r', self.queued_scheduled_events[0], self.queued_scheduled_events[1:])
                 return self.queued_scheduled_events.pop(0)[1]
             else:
-                time_until_check = min(max(0, when - time.time()), timeout)
+                time_until_check = min([max(0, when - time.time()), timeout], key=lambda x: sys.maxsize if x is None else x)
         else:
             time_until_check = timeout
 
