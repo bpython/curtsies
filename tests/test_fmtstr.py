@@ -196,6 +196,17 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(blue('a   \t\n\nb').split(), [blue('a'), blue('b')])
         self.assertEqual(blue('hello   \t\n\nthere').split(), [blue('hello'), blue('there')])
 
+    def test_ljust(self):
+        """"""
+        t = fmtstr(u'ab', 'blue', 'on_red', 'bold')
+        x = fmtstr(u'cd', 'green', 'on_red', 'bold')
+        s = t + x
+        self.assertEqual(s.ljust(6), on_red(bold(green('ab')))+on_red(bold(blue('cd'))) + on_red(bold('  ')))
+
+    # behavior if background different
+    # formatted string passed in
+    # unformatted string passed in
+
     def test_linessplit(self):
         text = blue('the sum of the squares of the sideways')
         result = [blue('the')+blue(' ')+blue('sum'),

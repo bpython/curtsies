@@ -272,6 +272,16 @@ class FmtStr(object):
             [0] + [m.end() for m in matches],
             [m.start() for m in matches] + [len(s)])]
 
+    def ljust(self, width, fillchar=None):
+        """S.ljust(width[, fillchar]) -> string
+
+        """
+        # proxying to the string via __getattr__ is insufficient
+        # because we shouldn't drop foreground formatting info
+        to_add = ' ' * (width - len(self.s))
+        return self + fmtstr(to_add, **self.shared_atts)
+
+
     def __unicode__(self):
         if self._unicode is not None:
             return self._unicode
