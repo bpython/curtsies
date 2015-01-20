@@ -173,6 +173,12 @@ class TestFmtStr(unittest.TestCase):
         self.assertTrue('fg' in a.shared_atts)
         self.assertTrue('fg' in c.shared_atts)
 
+    def test_new_with_atts_removed(self):
+        a = fmtstr('hi', 'blue', 'on_green')
+        b = fmtstr('there', 'blue', 'on_red')
+        c = a + b
+        self.assertEqual(c.new_with_atts_removed('fg'), on_green('hi')+on_red('there'))
+
     def setUp(self):
         self.s = fmtstr('hello!', 'on_blue', fg='red')
 
@@ -195,6 +201,34 @@ class TestFmtStr(unittest.TestCase):
         self.assertEqual(blue('a\nb').split(), [blue('a'), blue('b')])
         self.assertEqual(blue('a   \t\n\nb').split(), [blue('a'), blue('b')])
         self.assertEqual(blue('hello   \t\n\nthere').split(), [blue('hello'), blue('there')])
+
+    def test_ljust_rjust(self):
+        """"""
+        b = fmtstr(u'ab', 'blue', 'on_red', 'bold')
+        g = fmtstr(u'cd', 'green', 'on_red', 'bold')
+        s = b + g
+        self.assertEqual(s.ljust(6), b + g + on_red('  '))
+        self.assertEqual(s.rjust(6), on_red('  ') + b + g)
+
+        # doesn't add empties to end
+        self.assertEqual(s.ljust(4), b + g)
+        self.assertEqual(s.rjust(4), b + g)
+
+        # behavior if background different
+        s = on_blue('a') + on_green('b')
+        self.assertEqual(s.ljust(3), fmtstr('ab '))
+        self.assertEqual(s.rjust(3), fmtstr(' ab'))
+        s = blue(on_blue('a')) + green(on_green('b'))
+        self.assertEqual(s.ljust(3), blue('a') + green('b') + fmtstr(' '))
+        self.assertEqual(s.rjust(3), fmtstr(' ') + blue('a') + green('b'))
+
+        #using fillchar
+        self.assertEqual(s.ljust(3, '*'), fmtstr('ab*'))
+        self.assertEqual(s.rjust(3, '*'), fmtstr('*ab'))
+
+        #TODO:  (not tested or implemented)
+        # formatted string passed in
+        # preserve some non-uniform styles (bold, dark, blink) but not others (underline, invert)
 
     def test_linessplit(self):
         text = blue('the sum of the squares of the sideways')

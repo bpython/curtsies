@@ -54,6 +54,8 @@ class FrozenDict(dict):
         raise Exception("Cannot change value.")
     def extend(self, dictlike):
         return FrozenDict(itertools.chain(self.items(), dictlike.items()))
+    def remove(self, *keys):
+        return FrozenDict((k, v) for k, v in self.items() if k not in keys)
 
 class Chunk(object):
     """A string with a single set of formatting attributes
@@ -272,6 +274,38 @@ class FmtStr(object):
             [0] + [m.end() for m in matches],
             [m.start() for m in matches] + [len(s)])]
 
+    # proxying to the string via __getattr__ is insufficient
+    # because we shouldn't drop foreground or formatting info
+    def ljust(self, width, fillchar=None):
+        """S.ljust(width[, fillchar]) -> string
+
+        If a fillchar is provided, less formatting information will be preserved
+        """
+        if fillchar is not None:
+            return fmtstr(self.s.ljust(width, fillchar), **self.shared_atts)
+        to_add = ' ' * (width - len(self.s))
+        shared = self.shared_atts
+        if 'bg' in shared:
+            return self + fmtstr(to_add, bg=shared[str('bg')]) if to_add else self
+        else:
+            uniform = self.new_with_atts_removed('bg')
+            return uniform + fmtstr(to_add, **self.shared_atts) if to_add else uniform
+
+    def rjust(self, width, fillchar=None):
+        """S.rjust(width[, fillchar]) -> string
+
+        If a fillchar is provided, less formatting information will be preserved
+        """
+        if fillchar is not None:
+            return fmtstr(self.s.rjust(width, fillchar), **self.shared_atts)
+        to_add = ' ' * (width - len(self.s))
+        shared = self.shared_atts
+        if 'bg' in shared:
+            return fmtstr(to_add, bg=shared[str('bg')]) + self if to_add else self
+        else:
+            uniform = self.new_with_atts_removed('bg')
+            return fmtstr(to_add, **self.shared_atts) + uniform if to_add else uniform
+
     def __unicode__(self):
         if self._unicode is not None:
             return self._unicode
@@ -349,6 +383,11 @@ class FmtStr(object):
             if all(fs.atts.get(att, '???') == first.atts[att] for fs in self.basefmtstrs if len(fs) > 0):
                 atts[att] = first.atts[att]
         return atts
+
+    def new_with_atts_removed(self, *attributes):
+        """Returns a new FmtStr with the same content but some attributes removed"""
+        return FmtStr(*[Chunk(bfs.s, bfs.atts.remove(*attributes))
+                        for bfs in self.basefmtstrs])
 
     def __getattr__(self, att):
         # thanks to @aerenchyma/@jczett
