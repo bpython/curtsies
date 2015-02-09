@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
-import sys
+import locale
 import os
+import sys
 import unittest
 
 if sys.version_info[0] == 3:
@@ -59,7 +60,10 @@ class ScreenStdout(object):
     def __init__(self, stream):
         self.stream = stream
     def write(self, s):
-        self.stream.feed(s)
+        if sys.version_info[0] == 3:
+            self.stream.feed(s)
+        else:
+            self.stream.feed(s.decode(locale.getpreferredencoding()))
     def flush(self): pass
 
 class TestFullscreenWindow(unittest.TestCase):

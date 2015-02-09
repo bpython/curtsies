@@ -1,14 +1,19 @@
 # All windows write only unicode to the terminal - that's what blessings does, so
 # we match it.
-import sys
+
+import locale
 import logging
+import os
 import re
+import signal
+import sys
 
 import blessings
 
 from .formatstring import fmtstr
 from .formatstringarray import FSArray
-from .termhelpers import Cbreak
+from .termhelpers import Cbreak, Nonblocking
+from . import events
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +91,20 @@ class BaseWindow(object):
             i += 1
         return arr
 
+    def fmtstr_to_stdout_xform(self):
+        if sys.version_info[0] == 2:
+            if hasattr(self.out_stream, 'encoding'):
+                encoding = self.out_stream.encoding
+            else:
+                encoding = locale.getpreferredencoding()
+
+            def for_stdout(s):
+                return unicode(s).encode(encoding, 'replace')
+        else:
+            def for_stdout(s):
+                return str(s)
+        return for_stdout
+
 
 class FullscreenWindow(BaseWindow):
     """2D-text rendering window that dissappears when its context is left
@@ -131,12 +150,12 @@ class FullscreenWindow(BaseWindow):
         * if array received is of height too small, render it anyway
         * if array received is of height too large, render the renderable portion (no scroll)
         """
-        actualize = unicode if sys.version_info[0] == 2 else str
         #TODO there's a race condition here - these height and widths are
         # super fresh - they might change between the array being constructed and rendered
         # Maybe the right behavior is to throw away the render in the signal handler?
         height, width = self.height, self.width
 
+        for_stdout = self.fmtstr_to_stdout_xform()
         if not self.hide_cursor:
             self.write(self.t.hide_cursor)
         if height != self._last_rendered_height or width != self._last_rendered_width:
@@ -153,7 +172,7 @@ class FullscreenWindow(BaseWindow):
             if line == self._last_lines_by_row.get(row, None):
                 continue
             self.write(self.t.move(row, 0))
-            self.write(actualize(line))
+            self.write(for_stdout(line))
             if len(line) < width:
                 self.write(self.t.clear_eol)
 
@@ -336,7 +355,7 @@ class CursorAwareWindow(BaseWindow):
             and render the rest of it, then return how much we scrolled down
 
         """
-        actualize = unicode if sys.version_info[0] == 2 else str
+        for_stdout = self.fmtstr_to_stdout_xform()
         # caching of write and tc (avoiding the self. lookups etc) made
         # no significant performance difference here
         if not self.hide_cursor:
@@ -355,7 +374,7 @@ class CursorAwareWindow(BaseWindow):
             if line == self._last_lines_by_row.get(row, None):
                 continue
             self.write(self.t.move(row, 0))
-            self.write(actualize(line))
+            self.write(for_stdout(line))
             if len(line) < width:
                 self.write(self.t.clear_eol)
 
@@ -380,7 +399,7 @@ class CursorAwareWindow(BaseWindow):
             current_lines_by_row = dict((k-1, v) for k, v in current_lines_by_row.items())
             logger.debug('new top_usable_row: %d' % self.top_usable_row)
             self.write(self.t.move(height-1, 0))  # since scrolling moves the cursor
-            self.write(actualize(line))
+            self.write(for_stdout(line))
             current_lines_by_row[height-1] = line
 
         logger.debug('lines in last lines by row: %r' % self._last_lines_by_row.keys())
@@ -392,6 +411,7 @@ class CursorAwareWindow(BaseWindow):
         if not self.hide_cursor:
             self.write(self.t.normal_cursor)
         return offscreen_scrolls
+
 
 def demo():
     handler = logging.FileHandler(filename='display.log')
