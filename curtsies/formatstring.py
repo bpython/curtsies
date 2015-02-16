@@ -46,16 +46,20 @@ xforms = {
     'invert' :    lambda s: seq(STYLES['invert'])   +s+seq(RESET_ALL),
 }
 
+
 class FrozenDict(dict):
     """Immutable dictionary class"""
     def __setitem__(self, key, value):
         raise Exception("Cannot change value.")
     def update(self, dictlike):
         raise Exception("Cannot change value.")
+
     def extend(self, dictlike):
         return FrozenDict(itertools.chain(self.items(), dictlike.items()))
+
     def remove(self, *keys):
         return FrozenDict((k, v) for k, v in self.items() if k not in keys)
+
 
 class Chunk(object):
     """A string with a single set of formatting attributes
@@ -122,6 +126,7 @@ class Chunk(object):
         atts_out = dict((k, v) for (k, v) in self.atts.items() if v)
         return (''.join(pp_att(att)+'(' for att in sorted(atts_out))
                 + (repr(self.s) if PY3 else repr(self.s)[1:]) + ')'*len(atts_out))
+
 
 class FmtStr(object):
     """ A string whose substrings carry attributes (which may be different from one to the next).  """
@@ -256,7 +261,7 @@ class FmtStr(object):
                 raise TypeError("expected str or FmtStr, %r found" % type(s))
         return FmtStr(*basefmtstrs)
 
-    #TODO make this split work like str.split
+    # TODO make this split work like str.split
     def split(self, sep=None, maxsplit=None, regex=False):
         """Split based on seperator, optionally using a regex
 
