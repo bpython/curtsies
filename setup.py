@@ -24,7 +24,6 @@ setup(name='curtsies',
       tests_require = [
           'mock',
           'pyte',
-          'bpython',
           'nose',
       ],
       classifiers=[
