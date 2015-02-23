@@ -25,8 +25,8 @@ for i in range(0x00, 0x80):
 for i in range(0x00, 0x1b): # Overwrite the control keys with better labels
     CURTSIES_NAMES[chr_byte(i + 0x80)] = u'<Meta-Ctrl-%s>' % chr(i + 0x40)
 
-from .curtsieskeys import CURTSIES_NAMES as special_curtsies_names
-CURTSIES_NAMES.update(special_curtsies_names)
+from .curtsieskeys import get_curtsies_names
+CURTSIES_NAMES.update(get_curtsies_names())
 
 CURSES_NAMES = {}
 CURSES_NAMES[b'\x1bOP'] = u'KEY_F(1)'
