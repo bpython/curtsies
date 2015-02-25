@@ -1,3 +1,7 @@
+notifications:
+    webhooks:
+        - secure: "JcXvV3fY/mIJ0ABqxp4ztSQQXsYhfbbfJaFzZfQ0AYCEZYD0jze7V+DorFOhXkyRgO6n57QaAIdsFmMjJHm3TuICTpWJEyi7cn7E2BhqyaPD3YNAR2vd2SWBNKyH3bAKJWyCf5g5uewVNgk2+y3vIhkEE3CnKBesld/Z5s7Axkc="
+
 language: python
 
 python:
