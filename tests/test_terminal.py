@@ -42,6 +42,21 @@ class ReportingScreen(Screen):
         self._report_file.write(s)
         self._report_file.seek(0)
 
+
+class ReportingScreenWithExtra(ReportingScreen):
+    def __init__(self, *args, **kwargs):
+        super(ReportingScreenWithExtra, self).__init__(*args, **kwargs)
+        self._report_file.encoding = 'ascii'
+
+    def report_cursor_position(self):
+        # cursor position is 1-indexed in the ANSI escape sequence API
+        extra = 'qwerty\nasdf\nzxcv'
+        s = ctrl.CSI + "%d;%sR" % (self.cursor.y + 1, self.cursor.x + 1)
+        self._report_file.seek(0)
+        self._report_file.write(extra + s)
+        self._report_file.seek(0)
+
+
 class Bugger(object):
     __before__ = __after__ = lambda *args: None
 
@@ -120,4 +135,27 @@ class TestCursorAwareWindow(unittest.TestCase):
             self.assertEqual(self.window.top_usable_row, 1)
             self.window.render_to_terminal([u'hi', u'there'])
             self.assertEqual(self.screen.display, [u'      ', u'hi    ', u'there '])
+
+class TestCursorAwareWindowWithExtraInput(unittest.TestCase):
+    def setUp(self):
+        self.screen = ReportingScreenWithExtra(6, 3)
+        self.stream = ReportingStream()
+        self.stream.attach(self.screen)
+        self.stream.attach(Bugger())
+        stdout = ScreenStdout(self.stream)
+        self.extra_bytes = []
+        self.window = CursorAwareWindow(out_stream=stdout,
+                                        in_stream=self.screen._report_file,
+                                        extra_bytes_callback=self.extra_bytes_callback)
+        self.window.cbreak = NopContext()
+        blessings.Terminal.height = 3
+        blessings.Terminal.width = 6
+
+    def extra_bytes_callback(self, bytes):
+        self.extra_bytes.append(bytes)
+
+    def test_report_extra_bytes(self):
+        with self.window:
+            pass # should have triggered getting initial cursor position
+        self.assertEqual(''.join(self.extra_bytes), 'qwerty\nasdf\nzxcv')
 
