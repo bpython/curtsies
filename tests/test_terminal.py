@@ -16,6 +16,11 @@ from pyte import control as ctrl, Stream, Screen
 
 from curtsies.window import BaseWindow, FullscreenWindow, CursorAwareWindow
 
+
+class FakeStdin(StringIO):
+    encoding = 'ascii'
+
+
 # thanks superbobry for this code: https://github.com/selectel/pyte/issues/13
 class ReportingStream(Stream):
     report_escape = {
@@ -30,9 +35,10 @@ class ReportingStream(Stream):
         else:
             return super(ReportingStream, self)._arguments(char)
 
+
 class ReportingScreen(Screen):
     def __init__(self, *args, **kwargs):
-        self._report_file = StringIO()
+        self._report_file = FakeStdin()
         super(ReportingScreen, self).__init__(*args, **kwargs)
 
     def report_cursor_position(self):
@@ -44,10 +50,6 @@ class ReportingScreen(Screen):
 
 
 class ReportingScreenWithExtra(ReportingScreen):
-    def __init__(self, *args, **kwargs):
-        super(ReportingScreenWithExtra, self).__init__(*args, **kwargs)
-        self._report_file.encoding = 'ascii'
-
     def report_cursor_position(self):
         # cursor position is 1-indexed in the ANSI escape sequence API
         extra = 'qwerty\nasdf\nzxcv'
@@ -71,6 +73,7 @@ class Bugger(object):
             to.write(os.linesep)
         return inner
 
+
 class ScreenStdout(object):
     def __init__(self, stream):
         self.stream = stream
@@ -80,6 +83,7 @@ class ScreenStdout(object):
         else:
             self.stream.feed(s.decode(locale.getpreferredencoding()))
     def flush(self): pass
+
 
 class TestFullscreenWindow(unittest.TestCase):
     def setUp(self):
@@ -99,6 +103,12 @@ class TestFullscreenWindow(unittest.TestCase):
             self.window.render_to_terminal([u'hi', u'there'])
             self.window.scroll_down()
         self.assertEqual(self.screen.display, [u'there     ', u'          ', u'          '])
+
+
+class NopContext(object):
+    def __enter__(*args): pass
+    def __exit__(*args): pass
+
 
 class TestCursorAwareWindow(unittest.TestCase):
     def setUp(self):
@@ -131,6 +141,7 @@ class TestCursorAwareWindow(unittest.TestCase):
             self.window.render_to_terminal([u'hi', u'there'])
             self.assertEqual(self.screen.display, [u'      ', u'hi    ', u'there '])
 
+
 class TestCursorAwareWindowWithExtraInput(unittest.TestCase):
     def setUp(self):
         self.screen = ReportingScreenWithExtra(6, 3)
@@ -152,5 +163,4 @@ class TestCursorAwareWindowWithExtraInput(unittest.TestCase):
     def test_report_extra_bytes(self):
         with self.window:
             pass # should have triggered getting initial cursor position
-        self.assertEqual(''.join(self.extra_bytes), 'qwerty\nasdf\nzxcv')
-
+        self.assertEqual(b''.join(self.extra_bytes), b'qwerty\nasdf\nzxcv')
