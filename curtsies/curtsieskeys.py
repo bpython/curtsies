@@ -74,4 +74,7 @@ CURTSIES_NAMES = dict([
   (b'\x1b[6~',    u'<PAGEDOWN>'),
   (b'\x1b\x1b[5~',u'<Esc+PAGEUP>'),
   (b'\x1b\x1b[6~',u'<Esc+PAGEDOWN>'),
+
+  (b'\x1b[H',     u'<HOME>'),    # reported by amorozov in bpython #490
+  (b'\x1b[F',     u'<END>'),     # reported by amorozov in bpython #490
   ])
