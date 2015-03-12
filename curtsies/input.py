@@ -72,6 +72,13 @@ class Input(object):
     def __enter__(self):
         self.original_stty = termios.tcgetattr(self.in_stream)
         tty.setcbreak(self.in_stream, termios.TCSANOW)
+
+        if sys.platform == 'darwin':
+            attrs = termios.tcgetattr(self.in_stream)
+            VDSUSP = termios.VSUSP + 1
+            attrs[-1][VDSUSP] = 0
+            termios.tcsetattr(self.in_stream, termios.TCSANOW, attrs)
+
         if self.sigint_event:
             self.orig_sigint_handler = signal.getsignal(signal.SIGINT)
             signal.signal(signal.SIGINT, self.sigint_handler)
