@@ -103,10 +103,12 @@ class Input(object):
                                       for i in range(len(string)))
 
     def _wait_for_read_ready_or_timeout(self, timeout):
-        """Returns tuple of whether stdin has bytes to read and an event.
+        """Returns tuple of whether stdin is ready to read and an event.
 
         If an event is returned, that event is more pressing than reading
-        bytes on stdin to create a keyboard input event."""
+        bytes on stdin to create a keyboard input event.
+        If stdin is ready, either there are bytes to read or a SIGTSTP
+        triggered by dsusp has been received"""
         remaining_timeout = timeout
         t0 = time.time()
         while True:
@@ -184,7 +186,7 @@ class Input(object):
         if e is not None:
             return e
 
-        stdin_has_bytes, event = self._wait_for_read_ready_or_timeout(time_until_check)
+        stdin_ready_for_read, event = self._wait_for_read_ready_or_timeout(time_until_check)
         if event:
             return event
         if self.queued_scheduled_events and when < time.time():  # when should always be defined
@@ -192,11 +194,15 @@ class Input(object):
             logger.warning('popping an event! %r %r', self.queued_scheduled_events[0],
                            self.queued_scheduled_events[1:])
             return self.queued_scheduled_events.pop(0)[1]
-        if not stdin_has_bytes:
+        if not stdin_ready_for_read:
             return None
 
         num_bytes = self._nonblocking_read()
-        assert num_bytes > 0, num_bytes
+        if num_bytes == 0:
+            # thought stdin was ready, but not bytes to read is triggered
+            # when SIGTSTP was send by dsusp
+            return None
+
         if self.paste_threshold is not None and num_bytes > self.paste_threshold:
             paste = events.PasteEvent()
             while True:
