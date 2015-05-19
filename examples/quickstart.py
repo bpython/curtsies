@@ -17,7 +17,7 @@ with FullscreenWindow() as window:
             elif c == '<SPACE>':
                 a = FSArray(window.height, window.width)
             else:
-                s = repr(c).decode()
+                s = repr(c)
                 row = random.choice(range(window.height))
                 column = random.choice(range(window.width-len(s)))
                 color = random.choice([red, green, on_blue, yellow])
