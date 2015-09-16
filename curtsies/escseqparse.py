@@ -66,7 +66,7 @@ def peel_off_esc_code(s):
         del d['front']
         del d['rest']
         if 'numbers' in d and d['numbers'].split(';'):
-            d['numbers'] = [int(x) for x in d['numbers'].split()]
+            d['numbers'] = [int(x) for x in d['numbers'].split(';')]
 
         return m.groupdict()['front'], d, m.groupdict()['rest']
     else:
