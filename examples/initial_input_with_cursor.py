@@ -8,7 +8,7 @@ def main():
         def extra_bytes_callback(string):
             print('got extra bytes', repr(string))
             print('type:', type(string))
-            input_generator.unget_bytes(string)
+            input_generator.unget_texts(string)
         time.sleep(1)
         with CursorAwareWindow(extra_bytes_callback=extra_bytes_callback) as window:
             window.get_cursor_position()

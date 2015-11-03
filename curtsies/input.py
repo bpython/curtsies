@@ -11,6 +11,7 @@ import tty
 import logging
 logger = logging.getLogger(__name__)
 
+import blessed
 
 from .termhelpers import Nonblocking
 from . import events
@@ -43,11 +44,9 @@ class Input(object):
 
         Args:
             in_stream (file): Defaults to sys.__stdin__
-            keynames (string): How keypresses should be named - one of
-              'curtsies', 'curses', or 'plain'.
-            paste_threshold (int): How many bytes must be read in one
-              os.read on the in_stream to trigger the keypresses they
-              represent to be combined into a single paste event
+            keynames (string): How keypresses should be named - either
+              'curtsies' or 'curses'. 'curtsies' may be deprecated in
+              future version of Curtsies.
             sigint_event (bool): Whether SIGINT signals from the OS
               should be intercepted and returned as SigIntEvent objects
         """
@@ -55,6 +54,8 @@ class Input(object):
             in_stream = sys.__stdin__
         self.in_stream = in_stream
         self.unprocessed_bytes = []  # leftover from stdin, unprocessed yet
+        if not keynames in ('curtsies', 'curses'):
+            raise ValueError("keynames must be 'curses' or 'curtsies'")
         self.keynames = keynames
         self.paste_threshold = paste_threshold
         self.sigint_event = sigint_event
@@ -64,6 +65,8 @@ class Input(object):
         self.queued_interrupting_events = []
         self.queued_events = []
         self.queued_scheduled_events = []
+
+        self.term = blessed.Terminal()
 
     # prospective: this could be useful for an external select loop
     def fileno(self):
@@ -100,14 +103,12 @@ class Input(object):
 
     __next__ = next
 
-    def unget_bytes(self, string):
+    def unget_text(self, string):
         """Adds bytes to be internal buffer to be read
 
-        This method is for reporting bytes from an in_stream read
+        This method is for reporting text from an in_stream read
         not initiated by this Input object"""
-
-        self.unprocessed_bytes.extend(string[i:i + 1]
-                                      for i in range(len(string)))
+        self.term.ungetch(string)
 
     def _wait_for_read_ready_or_timeout(self, timeout):
         """Returns tuple of whether stdin is ready to read and an event.
@@ -153,20 +154,17 @@ class Input(object):
             return self._send(timeout)
 
     def _send(self, timeout):
-        def find_key():
-            """Returns keypress identified by adding unprocessed bytes or None"""
-            current_bytes = []
-            while self.unprocessed_bytes:
-                current_bytes.append(self.unprocessed_bytes.pop(0))
-                e = events.get_key(current_bytes,
-                                   getpreferredencoding(),
-                                   keynames=self.keynames,
-                                   full=len(self.unprocessed_bytes)==0)
-                if e is not None:
-                    self.current_bytes = []
-                    return e
-            if current_bytes:  # incomplete keys shouldn't happen
-                raise ValueError("Couldn't identify key sequence: %r" % self.current_bytes)
+        def keyname(e):
+            """Translate from a Blessed Keystroke to the correct name"""
+            if e == u'':
+                return None
+            if self.keynames == 'curses':
+                s = e.name if e.name is not None else e
+                return s
+            elif self.keynames == 'curtsies':
+                return events.CURTSIES_NAMES.get(e, e)
+            else:
+                raise ValueError("Invalid keynames")
 
         if self.sigints:
             return self.sigints.pop()
@@ -176,7 +174,7 @@ class Input(object):
             return self.queued_interrupting_events.pop(0)
 
         if self.queued_scheduled_events:
-            self.queued_scheduled_events.sort()  #TODO use a data structure that inserts sorted
+            self.queued_scheduled_events.sort()
             when, _ = self.queued_scheduled_events[0]
             if when < time.time():
                 logger.warning('popping an event! %r %r',
@@ -188,10 +186,14 @@ class Input(object):
         else:
             time_until_check = timeout
 
-        # try to find an already pressed key from prev input
-        e = find_key()
-        if e is not None:
-            return e
+        # TODO why was this important? Is it ok to just call inkey with timeout of zero?
+        ## try to find an already pressed key from prev input
+        #e = find_key()
+        #if e is not None:
+        #    return e
+        e = self.term.inkey(timeout=0)
+        if e != u'':
+            return keyname(e)
 
         stdin_ready_for_read, event = self._wait_for_read_ready_or_timeout(time_until_check)
         if event:
@@ -204,48 +206,9 @@ class Input(object):
         if not stdin_ready_for_read:
             return None
 
-        num_bytes = self._nonblocking_read()
-        if num_bytes == 0:
-            # thought stdin was ready, but not bytes to read is triggered
-            # when SIGTSTP was send by dsusp
-            return None
-
-        if self.paste_threshold is not None and num_bytes > self.paste_threshold:
-            paste = events.PasteEvent()
-            while True:
-                if len(self.unprocessed_bytes) < events.MAX_KEYPRESS_SIZE:
-                    self._nonblocking_read()  # may need to read to get the rest of a keypress
-                e = find_key()
-                if e is None:
-                    return paste
-                else:
-                    paste.events.append(e)
-        else:
-            e = find_key()
-            assert e is not None
-            return e
-
-    def _nonblocking_read(self):
-        """Returns the number of characters read and adds them to self.unprocessed_bytes"""
-        with Nonblocking(self.in_stream):
-            if PY3:
-                try:
-                    data = os.read(self.in_stream.fileno(), READ_SIZE)
-                except BlockingIOError:
-                    return 0
-                if data:
-                    self.unprocessed_bytes.extend(data[i:i+1] for i in range(len(data)))
-                    return len(data)
-                else:
-                    return 0
-            else:
-                try:
-                    data = os.read(self.in_stream.fileno(), READ_SIZE)
-                except OSError:
-                    return 0
-                else:
-                    self.unprocessed_bytes.extend(data)
-                    return len(data)
+        #TODO check for SIGTSTP: if stdin ready for read by no byte there
+        e = self.term.inkey()
+        return keyname(e)
 
     def event_trigger(self, event_type):
         """Returns a callback that creates events.
