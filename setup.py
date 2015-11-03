@@ -18,8 +18,7 @@ setup(name='curtsies',
       license='MIT',
       packages=['curtsies'],
       install_requires = [
-          'blessings>=1.5',
-          'wcwidth>=0.1.4',
+          'blessed>=1.12',
       ],
       tests_require = [
           'mock',

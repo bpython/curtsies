@@ -1,5 +1,5 @@
 # All windows write only unicode to the terminal -
-# that's what blessings does, so we match it.
+# that's what blessed does, so we match it.
 
 from __future__ import unicode_literals
 
@@ -8,7 +8,7 @@ import logging
 import re
 import sys
 
-import blessings
+import blessed
 
 from .formatstring import fmtstr
 from .formatstringarray import FSArray
@@ -25,7 +25,7 @@ class BaseWindow(object):
         logger.debug('-------initializing Window object %r------' % self)
         if out_stream is None:
             out_stream = sys.__stdout__
-        self.t = blessings.Terminal(stream=out_stream, force_styling=True)
+        self.t = blessed.Terminal(stream=out_stream, force_styling=True)
         self.out_stream = out_stream
         self.hide_cursor = hide_cursor
         self._last_lines_by_row = {}
@@ -37,7 +37,7 @@ class BaseWindow(object):
 
         # since scroll-down only moves the screen if cursor is at bottom
         with self.t.location(x=0, y=1000000):
-            self.write(SCROLL_DOWN)  # TODO will blessings do this?
+            self.write(SCROLL_DOWN)  # TODO will blessed do this?
 
     def write(self, msg):
         self.out_stream.write(msg)
@@ -271,7 +271,7 @@ class CursorAwareWindow(BaseWindow):
     def get_cursor_position(self):
         """Returns the terminal (row, column) of the cursor
 
-        0-indexed, like blessings cursor positions"""
+        0-indexed, like blessed cursor positions"""
         # TODO would this be cleaner as a parameter?
         in_stream = self.in_stream
 

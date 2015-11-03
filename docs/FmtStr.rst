@@ -36,8 +36,8 @@ FmtStr - Rationale
 
 If all you need is to print colored text, many other libraries also make `ANSI escape codes <http://en.wikipedia.org/wiki/ANSI_escape_code>`_ easy to use.
 
-* `Blessings <https://github.com/erikrose/blessings>`_ (``pip install blessings``)
-  As of version 0.1.0, Curtsies uses Blessings for terminal capabilities other
+* `Blessed <https://github.com/jquast/blessed>`_ (``pip install blessed``)
+  As of version ?, Curtsies uses Blessed for terminal capabilities other
   than colored output.
 * `termcolor <https://pypi.python.org/pypi/termcolor>`_ (``pip install termcolor``)
 * `Clint <https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py>`_ (``pip install clint``)
@@ -53,8 +53,8 @@ Methods like :py:meth:`center <https://docs.python.org/2/library/stdtypes.html#s
 and :py:meth:`ljust <https://docs.python.org/2/library/stdtypes.html#str.ljust>`
 won't properly format the string for display.
 
->>> import blessings
->>> t = blessings.Terminal()
+>>> import blessed
+>>> t = blessed.Terminal()
 >>> message = term.red_on_green('Red on green?') + ' ' + term.yellow('Ick!')
 >>> len(message)
 41 # ?!

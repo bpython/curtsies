@@ -10,7 +10,7 @@ if sys.version_info[0] == 3:
 else:
     from StringIO import StringIO
 
-import blessings
+import blessed
 import pyte
 from pyte import control as ctrl, Stream, Screen
 
@@ -120,8 +120,8 @@ class TestCursorAwareWindow(unittest.TestCase):
         self.window = CursorAwareWindow(out_stream=stdout,
                                         in_stream=self.screen._report_file)
         self.window.cbreak = NopContext()
-        blessings.Terminal.height = 3
-        blessings.Terminal.width = 6
+        blessed.Terminal.height = 3
+        blessed.Terminal.width = 6
 
     def test_render(self):
         with self.window:
@@ -155,8 +155,8 @@ class TestCursorAwareWindowWithExtraInput(unittest.TestCase):
                                         in_stream=self.screen._report_file,
                                         extra_bytes_callback=self.extra_bytes_callback)
         self.window.cbreak = NopContext()
-        blessings.Terminal.height = 3
-        blessings.Terminal.width = 6
+        blessed.Terminal.height = 3
+        blessed.Terminal.width = 6
 
     def extra_bytes_callback(self, bytes):
         self.extra_bytes.append(bytes)
