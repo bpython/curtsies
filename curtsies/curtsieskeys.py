@@ -67,14 +67,33 @@ CURTSIES_NAMES = dict([
   (b'\x1b\x1b[D', u'<Esc+LEFT>'),
   (b'\x1b',       u'<ESC>'),
   (b'\x1b[1~',    u'<HOME>'),
-  (b'\x1b[2~',    u'<PADENTER>'),  #TODO untested
-  (b'\x1b[3~',    u'<PADDELETE>'), #TODO check this name
   (b'\x1b[4~',    u'<END>'),
-  (b'\x1b[5~',    u'<PAGEUP>'),
-  (b'\x1b[6~',    u'<PAGEDOWN>'),
   (b'\x1b\x1b[5~',u'<Esc+PAGEUP>'),
   (b'\x1b\x1b[6~',u'<Esc+PAGEDOWN>'),
 
   (b'\x1b[H',     u'<HOME>'),    # reported by amorozov in bpython #490
   (b'\x1b[F',     u'<END>'),     # reported by amorozov in bpython #490
+
+  # see curtsies #78 - taken from https://github.com/jquast/blessed/blob/e9ad7b85dfcbbba49010ab8c13e3a5920d81b010/blessed/keyboard.py#L409
+
+  # not fixing for back compat.
+  # (b"\x1b[1~", u'<FIND>'),       # find
+
+  (b"\x1b[2~", u'<INSERT>'),       # insert (0)
+  (b"\x1b[3~", u'<DELETE>'),       # delete (.), "Execute"
+
+  # not fixing for back compat.
+  # (b"\x1b[4~", u'<SELECT>'),       # select
+
+  (b"\x1b[5~", u'<PAGEUP>'),       # pgup   (9)
+  (b"\x1b[6~", u'<PAGEDOWN>'),     # pgdown (3)
+  (b"\x1b[7~", u'<HOME>'),         # home
+  (b"\x1b[8~", u'<END>'),          # end
+  (b"\x1b[OA", u'<UP>'),           # up     (8)
+  (b"\x1b[OB", u'<DOWN>'),         # down   (2)
+  (b"\x1b[OC", u'<RIGHT>'),        # right  (6)
+  (b"\x1b[OD", u'<LEFT>'),         # left   (4)
+  (b"\x1b[OF", u'<END>'),          # end    (1)
+  (b"\x1b[OH", u'<HOME>'),         # home   (7)
+
   ])

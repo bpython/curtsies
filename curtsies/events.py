@@ -46,11 +46,23 @@ CURSES_NAMES[b'\x1b[B'] = u'KEY_DOWN'
 CURSES_NAMES[b'\x1b[C'] = u'KEY_RIGHT'
 CURSES_NAMES[b'\x1b[D'] = u'KEY_LEFT'
 CURSES_NAMES[b'\x08'] = u'KEY_BACKSPACE'
-CURSES_NAMES[b'\x1b[3~'] = u'KEY_DC'
-CURSES_NAMES[b'\x1b[5~'] = u'KEY_PPAGE'
-CURSES_NAMES[b'\x1b[6~'] = u'KEY_NPAGE'
 CURSES_NAMES[b'\x1b[Z'] = u'KEY_BTAB'
-#TODO add home and end? and everything else
+
+# see curtsies #78 - taken from https://github.com/jquast/blessed/blob/e9ad7b85dfcbbba49010ab8c13e3a5920d81b010/blessed/keyboard.py#L409
+CURSES_NAMES[b'\x1b[1~'] = u'KEY_FIND'         # find
+CURSES_NAMES[b'\x1b[2~'] = u'KEY_IC'           # insert (0)
+CURSES_NAMES[b'\x1b[3~'] = u'KEY_DC'           # delete (.), "Execute"
+CURSES_NAMES[b'\x1b[4~'] = u'KEY_SELECT'       # select
+CURSES_NAMES[b'\x1b[5~'] = u'KEY_PPAGE'        # pgup   (9)
+CURSES_NAMES[b'\x1b[6~'] = u'KEY_NPAGE'        # pgdown (3)
+CURSES_NAMES[b'\x1b[7~'] = u'KEY_HOME'         # home
+CURSES_NAMES[b'\x1b[8~'] = u'KEY_END'          # end
+CURSES_NAMES[b'\x1b[OA'] = u'KEY_UP'           # up     (8)
+CURSES_NAMES[b'\x1b[OB'] = u'KEY_DOWN'         # down   (2)
+CURSES_NAMES[b'\x1b[OC'] = u'KEY_RIGHT'        # right  (6)
+CURSES_NAMES[b'\x1b[OD'] = u'KEY_LEFT'         # left   (4)
+CURSES_NAMES[b'\x1b[OF'] = u'KEY_END'          # end    (1)
+CURSES_NAMES[b'\x1b[OH'] = u'KEY_HOME'         # home   (7)
 
 KEYMAP_PREFIXES = set()
 for table in (CURSES_NAMES, CURTSIES_NAMES):
