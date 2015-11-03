@@ -29,7 +29,9 @@ def parse(s):
             stuff.append(front)
         if token:
             try:
-                stuff.append(token_type(token))
+                tok = token_type(token)
+                if tok:
+                    stuff.append(tok)
             except ValueError:
                 raise ValueError("Can't parse escape sequence: %r %r %r %r" % (s, repr(front), token, repr(rest)))
         if not rest:
@@ -83,6 +85,10 @@ def token_type(info):
         if value == RESET_ALL: return dict(dict((k, None) for k in STYLES), **{'fg':None, 'bg':None})
         if value == RESET_FG: return {'fg':None}
         if value == RESET_BG: return {'bg':None}
+
+    elif info['command'] == 'H':  # fix for bpython #76
+        return {}
+
     raise ValueError("Can't parse escape seq %r" % info)
 
 if __name__ == '__main__':
