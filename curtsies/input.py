@@ -13,16 +13,9 @@ logger = logging.getLogger(__name__)
 
 import blessed
 
-from .termhelpers import Nonblocking
 from . import events
 
 PY3 = sys.version_info[0] >= 3
-
-READ_SIZE = 1024
-assert READ_SIZE >= events.MAX_KEYPRESS_SIZE
-# if a keypress could require more bytes than we read to be identified,
-# the paste logic that reads more data as needed might not work.
-
 
 class ReplacedSigIntHandler(object):
     def __init__(self, handler):
@@ -38,8 +31,7 @@ class ReplacedSigIntHandler(object):
 
 class Input(object):
     """Keypress and control event generator"""
-    def __init__(self, in_stream=None, keynames='curtsies',
-                 paste_threshold=events.MAX_KEYPRESS_SIZE+1, sigint_event=False):
+    def __init__(self, in_stream=None, keynames='curtsies', sigint_event=False):
         """Returns an Input instance.
 
         Args:
@@ -57,7 +49,6 @@ class Input(object):
         if not keynames in ('curtsies', 'curses'):
             raise ValueError("keynames must be 'curses' or 'curtsies'")
         self.keynames = keynames
-        self.paste_threshold = paste_threshold
         self.sigint_event = sigint_event
         self.sigints = []
 
@@ -76,7 +67,8 @@ class Input(object):
         self.original_stty = termios.tcgetattr(self.in_stream)
         tty.setcbreak(self.in_stream, termios.TCSANOW)
 
-        if sys.platform == 'darwin':
+        # see http://stackoverflow.com/questions/29024007/disable-dsusp-in-python
+        if any(i in sys.platform for i in ['bsd', 'darwin']):
             attrs = termios.tcgetattr(self.in_stream)
             VDSUSP = termios.VSUSP + 1
             attrs[-1][VDSUSP] = 0
@@ -109,6 +101,9 @@ class Input(object):
         This method is for reporting text from an in_stream read
         not initiated by this Input object"""
         self.term.ungetch(string)
+
+    def unget_bytes(self, bytes):  # TODO
+        self.unget_text(bytes.decode('utf8'))
 
     def _wait_for_read_ready_or_timeout(self, timeout):
         """Returns tuple of whether stdin is ready to read and an event.
@@ -153,19 +148,20 @@ class Input(object):
         else:
             return self._send(timeout)
 
-    def _send(self, timeout):
-        def keyname(e):
-            """Translate from a Blessed Keystroke to the correct name"""
-            if e == u'':
-                return None
-            if self.keynames == 'curses':
-                s = e.name if e.name is not None else e
-                return s
-            elif self.keynames == 'curtsies':
-                return events.CURTSIES_NAMES.get(e, e)
-            else:
-                raise ValueError("Invalid keynames")
+    def _keyname(self, e):
+        """Translate from a Blessed Keystroke to the correct name"""
+        if e == u'':
+            return None
+        if self.keynames == 'curses':
+            s = e.name if e.name is not None else e
+            return s
+        elif self.keynames == 'curtsies':
+            return events.CURTSIES_NAMES.get(e, e)
+        else:
+            raise ValueError("Invalid keynames")
 
+
+    def _send(self, timeout):
         if self.sigints:
             return self.sigints.pop()
         if self.queued_events:
@@ -187,13 +183,11 @@ class Input(object):
             time_until_check = timeout
 
         # TODO why was this important? Is it ok to just call inkey with timeout of zero?
-        ## try to find an already pressed key from prev input
-        #e = find_key()
-        #if e is not None:
-        #    return e
+        # code here used to return keystrokes already read into memory
+        ## try to find an already read from stdin
         e = self.term.inkey(timeout=0)
         if e != u'':
-            return keyname(e)
+            return self._keyname(e)
 
         stdin_ready_for_read, event = self._wait_for_read_ready_or_timeout(time_until_check)
         if event:
@@ -208,7 +202,7 @@ class Input(object):
 
         #TODO check for SIGTSTP: if stdin ready for read by no byte there
         e = self.term.inkey()
-        return keyname(e)
+        return self._keyname(e)
 
     def event_trigger(self, event_type):
         """Returns a callback that creates events.

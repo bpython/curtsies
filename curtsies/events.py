@@ -64,15 +64,6 @@ CURSES_NAMES[b'\x1b[OD'] = u'KEY_LEFT'         # left   (4)
 CURSES_NAMES[b'\x1b[OF'] = u'KEY_END'          # end    (1)
 CURSES_NAMES[b'\x1b[OH'] = u'KEY_HOME'         # home   (7)
 
-KEYMAP_PREFIXES = set()
-for table in (CURSES_NAMES, CURTSIES_NAMES):
-    for k in table:
-        if k.startswith(b'\x1b'):
-            for i in range(1, len(k)):
-                KEYMAP_PREFIXES.add(k[:i])
-
-MAX_KEYPRESS_SIZE = max(len(seq) for seq in (list(CURSES_NAMES.keys()) + list(CURTSIES_NAMES.keys())))
-
 class Event(object):
     pass
 
