@@ -17,6 +17,19 @@ from pyte import control as ctrl, Stream, Screen
 from curtsies.window import BaseWindow, FullscreenWindow, CursorAwareWindow
 
 
+try:
+    from unittest import skipIf
+except ImportError:
+    def skipIf(condition, reason):
+        if condition:
+            return lambda x: x
+        else:
+            return lambda x: None
+
+
+fds_closed = sys.stdin.closed or sys.stdout.closed
+
+
 class FakeStdin(StringIO):
     encoding = 'ascii'
 
@@ -85,6 +98,7 @@ class ScreenStdout(object):
     def flush(self): pass
 
 
+@skipIf(fds_closed, 'blessings Terminal needs streams open')
 class TestFullscreenWindow(unittest.TestCase):
     def setUp(self):
         self.screen = pyte.Screen(10, 3)
@@ -110,6 +124,7 @@ class NopContext(object):
     def __exit__(*args): pass
 
 
+@skipIf(fds_closed, 'blessings Terminal needs streams open')
 class TestCursorAwareWindow(unittest.TestCase):
     def setUp(self):
         self.screen = ReportingScreen(6, 3)
@@ -142,6 +157,7 @@ class TestCursorAwareWindow(unittest.TestCase):
             self.assertEqual(self.screen.display, [u'      ', u'hi    ', u'there '])
 
 
+@skipIf(fds_closed, 'blessings Terminal needs streams open')
 class TestCursorAwareWindowWithExtraInput(unittest.TestCase):
     def setUp(self):
         self.screen = ReportingScreenWithExtra(6, 3)
