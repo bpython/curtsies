@@ -10,10 +10,24 @@ if sys.version_info[0] == 3:
 else:
     from cStringIO import StringIO
 
+try:
+    from unittest import skipIf
+except ImportError:
+    def skipIf(condition, reason):
+        if condition:
+            return lambda x: x
+        else:
+            return lambda x: None
+
+
+fds_closed = sys.stdin.closed or sys.stdout.closed
+
+
 class FakeFullscreenWindow(FullscreenWindow):
     width = property(lambda self: 10)
     height = property(lambda self: 4)
 
+@skipIf(fds_closed, "blessings Terminal needs streams open")
 class TestBaseWindow(unittest.TestCase):
     """Pretty pathetic tests for window"""
     def test_window(self):
