@@ -352,7 +352,9 @@ class FmtStr(object):
         return '+'.join(repr(fs) for fs in self.basefmtstrs)
 
     def __eq__(self, other):
-        return str(self) == str(other)
+        if isinstance(other, (unicode, bytes, FmtStr)):
+            return str(self) == str(other)
+        return False
     # TODO corresponding hash method
 
     def __add__(self, other):
