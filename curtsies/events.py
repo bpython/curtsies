@@ -45,8 +45,8 @@ CURSES_NAMES[b'\x1b[A'] = u'KEY_UP'
 CURSES_NAMES[b'\x1b[B'] = u'KEY_DOWN'
 CURSES_NAMES[b'\x1b[C'] = u'KEY_RIGHT'
 CURSES_NAMES[b'\x1b[D'] = u'KEY_LEFT'
-CURSES_NAMES['\x1b[F'] = u'KEY_END'           # https://github.com/bpython/bpython/issues/490#issuecomment-167734902
-CURSES_NAMES['\x1b[H'] = u'KEY_HOME'          # https://github.com/bpython/bpython/issues/490#issuecomment-167734902
+CURSES_NAMES['\x1b[F'] = u'KEY_END'           # https://github.com/bpython/bpython/issues/490
+CURSES_NAMES['\x1b[H'] = u'KEY_HOME'          # https://github.com/bpython/bpython/issues/490
 CURSES_NAMES[b'\x08'] = u'KEY_BACKSPACE'
 CURSES_NAMES[b'\x1b[Z'] = u'KEY_BTAB'
 
