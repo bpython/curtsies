@@ -7,23 +7,20 @@ import unittest
 from mock import Mock
 
 try:
-    from unittest import skip, skipIf
+    from unittest import skip, skipUnless
 except ImportError:
 
     def skip(f):
         return lambda self: None
 
-    def skipIf(condition, reason):
+    def skipUnless(condition, reason):
         if condition:
             return lambda x: x
         else:
             return lambda x: None
 
 from curtsies import events
-
 from curtsies.input import Input
-
-fds_closed = sys.stdin.closed or sys.stdout.closed
 
 
 class CustomEvent(events.Event):
@@ -34,7 +31,7 @@ class CustomScheduledEvent(events.ScheduledEvent):
     pass
 
 
-@skipIf(fds_closed, "need open file descriptors to test")
+@skipUnless(sys.stdin.isatty(), "stdin must be a tty")
 class TestInput(unittest.TestCase):
     def test_create(self):
         Input()
