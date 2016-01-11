@@ -20,7 +20,7 @@ except ImportError:
             return lambda x: None
 
 
-fds_closed = sys.stdin.closed or sys.stdout.closed
+fds_closed = not sys.stdin.isatty() or not sys.stdout.isatty()
 
 
 class FakeFullscreenWindow(FullscreenWindow):
