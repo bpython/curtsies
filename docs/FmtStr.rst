@@ -175,7 +175,7 @@ In Python 2, you might run into something like this:
 FmtStr - len vs width
 ---------------------
 
-The amound of horizontal space a string takes up in a terminal may differ from the length of the string returned by ``len()``.
+The amount of horizontal space a string takes up in a terminal may differ from the length of the string returned by ``len()``.
 :py:class:`FmtStr` objects have a width property useful when writing layout code:
 
 >>> #encoding: utf8
