@@ -54,7 +54,7 @@ and :py:meth:`ljust <https://docs.python.org/2/library/stdtypes.html#str.ljust>`
 won't properly format the string for display.
 
 >>> import blessings
->>> t = blessings.Terminal()
+>>> term = blessings.Terminal()
 >>> message = term.red_on_green('Red on green?') + ' ' + term.yellow('Ick!')
 >>> len(message)
 41 # ?!
