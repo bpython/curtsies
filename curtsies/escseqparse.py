@@ -86,7 +86,9 @@ def token_type(info):
     """
     """
     if info['command'] == 'm':
-        value, = info['numbers']
+        # The default action for ESC[m is to act like ESC[0m
+        # Ref: https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
+        value, = info['numbers'] if len(info['numbers']) else [0]
         if value in FG_NUMBER_TO_COLOR: return {'fg':FG_NUMBER_TO_COLOR[value]}
         if value in BG_NUMBER_TO_COLOR: return {'bg':BG_NUMBER_TO_COLOR[value]}
         if value in NUMBER_TO_STYLE: return {NUMBER_TO_STYLE[value]:True}
