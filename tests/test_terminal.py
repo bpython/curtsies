@@ -17,10 +17,20 @@ from pyte import control as ctrl, Stream, Screen
 from curtsies.window import BaseWindow, FullscreenWindow, CursorAwareWindow
 
 
+# a few tests fail on TravisCI that have something to do with
+# stdin not being able to be set to nonblocking
+# (and still reporting isatty as True)
+IS_TRAVIS = bool(os.environ.get("TRAVIS"))
+
 try:
-    from unittest import skipUnless
+    from unittest import skipUnless, skipIf
 except ImportError:
     def skipUnless(condition, reason):
+        if condition:
+            return lambda x: x
+        else:
+            return lambda x: None
+    def skipIf(condition, reason):
         if condition:
             return lambda x: None
         else:
@@ -121,6 +131,7 @@ class NopContext(object):
     def __exit__(*args): pass
 
 
+@skipIf(IS_TRAVIS, 'Travis stdin behaves strangely, see issue 89')
 @skipUnless(sys.stdin.isatty(), 'blessings Terminal needs streams open')
 class TestCursorAwareWindow(unittest.TestCase):
     def setUp(self):
@@ -155,6 +166,7 @@ class TestCursorAwareWindow(unittest.TestCase):
             self.assertEqual(self.screen.display, [u'      ', u'hi    ', u'there '])
 
 
+@skipIf(IS_TRAVIS, 'Travis stdin behaves strangely, see issue 89')
 @skipUnless(sys.stdin.isatty(), 'blessings Terminal needs streams open')
 class TestCursorAwareWindowWithExtraInput(unittest.TestCase):
     def setUp(self):
