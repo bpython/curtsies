@@ -9,14 +9,23 @@ True
 True
 """
 
+import re
+
 from .termformatconstants import (FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR,
                                   NUMBER_TO_STYLE, RESET_ALL, RESET_FG,
                                   RESET_BG, STYLES)
-import re
+
+
+def remove_ansi(s):
+    return re.sub(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]', '', s)
 
 
 def parse(s):
     r"""
+    Returns a list of strings or format dictionaries to describe the strings.
+
+    May raise a ValueError if it can't be parsed.
+
     >>> parse(">>> []")
     ['>>> []']
     >>> #parse("\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m")

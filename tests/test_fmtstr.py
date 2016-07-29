@@ -67,8 +67,10 @@ class TestFmtStrParsing(unittest.TestCase):
 
     def test_noncurtsies_output(self):
         fmtstr('\x1b[35mx\x1b[m')
-        #fmtstr('\x1b[1m\x1b[31m-\x1b[m')
-        #fmtstr('\x1b[41mERROR\x1b[m')
+        self.assertEqual(fmtstr('\x1b[Ahello'), 'hello')
+        self.assertEqual(fmtstr('\x1b[20Ahello'), 'hello')
+        self.assertEqual(fmtstr('\x1b[20mhello'), 'hello')
+
 
 class TestImmutability(unittest.TestCase):
 

@@ -26,7 +26,7 @@ import re
 import sys
 import wcwidth
 
-from .escseqparse import parse
+from .escseqparse import parse, remove_ansi
 from .termformatconstants import (FG_COLORS, BG_COLORS, STYLES,
                                   FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR,
                                   RESET_ALL, RESET_BG, RESET_FG,
@@ -158,18 +158,24 @@ class FmtStr(object):
         """
 
         if '\x1b[' in s:
-            tokens_and_strings = parse(s)
-            bases = []
-            cur_fmt = {}
-            for x in tokens_and_strings:
-                if isinstance(x, dict):
-                    cur_fmt.update(x)
-                elif isinstance(x, (bytes, unicode)):
-                    atts = parse_args('', dict((k, v) for k,v in cur_fmt.items() if v is not None))
-                    bases.append(Chunk(x, atts=atts))
-                else:
-                    raise Exception("logic error")
-            return FmtStr(*bases)
+            try:
+                tokens_and_strings = parse(s)
+            except ValueError:
+                return FmtStr(Chunk(remove_ansi(s)))
+            else:
+                bases = []
+                cur_fmt = {}
+                for x in tokens_and_strings:
+                    if isinstance(x, dict):
+                        cur_fmt.update(x)
+                    elif isinstance(x, (bytes, unicode)):
+                        atts = parse_args('', dict((k, v)
+                                          for k, v in cur_fmt.items()
+                                          if v is not None))
+                        bases.append(Chunk(x, atts=atts))
+                    else:
+                        raise Exception("logic error")
+                return FmtStr(*bases)
         else:
             return FmtStr(Chunk(s))
 
