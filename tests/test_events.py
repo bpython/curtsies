@@ -65,6 +65,7 @@ class TestGetKey(unittest.TestCase):
         self.assertEqual(get_utf([b'\xc3'], full=True, keynames='curses'), 'xC3')
 
     def test_key_names(self):
+        "Every key sequence with a Curses name should have a Curtsies name too."
         self.assertTrue(set(events.CURTSIES_NAMES).issuperset(set(events.CURSES_NAMES)), set(events.CURSES_NAMES) - set(events.CURTSIES_NAMES))
 
 class TestGetKeyAscii(unittest.TestCase):

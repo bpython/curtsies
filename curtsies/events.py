@@ -41,6 +41,13 @@ CURSES_NAMES[b'\x1b[20~'] = u'KEY_F(9)'
 CURSES_NAMES[b'\x1b[21~'] = u'KEY_F(10)'
 CURSES_NAMES[b'\x1b[23~'] = u'KEY_F(11)'
 CURSES_NAMES[b'\x1b[24~'] = u'KEY_F(12)'
+
+# see bpython #626
+CURSES_NAMES[b'\x1b[11~'] = u'KEY_F(1)'
+CURSES_NAMES[b'\x1b[12~'] = u'KEY_F(2)'
+CURSES_NAMES[b'\x1b[13~'] = u'KEY_F(3)'
+CURSES_NAMES[b'\x1b[14~'] = u'KEY_F(4)'
+
 CURSES_NAMES[b'\x1b[A'] = u'KEY_UP'
 CURSES_NAMES[b'\x1b[B'] = u'KEY_DOWN'
 CURSES_NAMES[b'\x1b[C'] = u'KEY_RIGHT'
