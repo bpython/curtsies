@@ -86,4 +86,5 @@ About
 * `#bpython` on irc is a good place to talk about Curtsies, but feel free
   to open an issue if you're having a problem!
 * Thanks to the many contributors!
-* If all you need are colored strings, consider one of these [other libraries](http://curtsies.readthedocs.org/en/latest/FmtStr.html#rationale)!
+* If all you need are colored strings, consider one of these [other
+  libraries](http://curtsies.readthedocs.io/en/latest/FmtStr.html#fmtstr-rationale)!
