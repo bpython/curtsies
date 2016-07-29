@@ -146,6 +146,11 @@ class FmtStr(object):
     @classmethod
     def from_str(cls, s):
         r"""
+        Return a FmtStr representing input.
+
+        The str() of a FmtStr is guaranteed to produced the same FmtStr.
+        Other input with escape sequences may not be preserved.
+
         >>> fmtstr("|"+fmtstr("hey", fg='red', bg='blue')+"|")
         '|'+on_blue(red('hey'))+'|'
         >>> fmtstr('|\x1b[31m\x1b[44mhey\x1b[49m\x1b[39m|')

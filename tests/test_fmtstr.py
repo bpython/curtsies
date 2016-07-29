@@ -47,6 +47,29 @@ class TestFmtStrInitialization(unittest.TestCase):
         FmtStr()
 
 
+class TestFmtStrParsing(unittest.TestCase):
+    def test_no_escapes(self):
+        self.assertEqual(str(fmtstr('abc')), 'abc')
+
+    def test_simple_escapes(self):
+        self.assertEqual(str(fmtstr('\x1b[33mhello\x1b[0m')), '\x1b[33mhello\x1b[39m')
+        self.assertEqual(str(fmtstr('\x1b[33mhello\x1b[39m')), '\x1b[33mhello\x1b[39m')
+        self.assertEqual(str(fmtstr('\x1b[33mhello')), '\x1b[33mhello\x1b[39m')
+        self.assertEqual(str(fmtstr('\x1b[43mhello\x1b[49m')), '\x1b[43mhello\x1b[49m')
+        self.assertEqual(str(fmtstr('\x1b[43mhello\x1b[0m')), '\x1b[43mhello\x1b[49m')
+        self.assertEqual(str(fmtstr('\x1b[43mhello')), '\x1b[43mhello\x1b[49m')
+        self.assertEqual(str(fmtstr('\x1b[33m\x1b[43mhello\x1b[0m')),
+                         '\x1b[33m\x1b[43mhello\x1b[49m\x1b[39m')
+
+    def test_out_of_order(self):
+        self.assertEqual(str(fmtstr('\x1b[33m\x1b[43mhello\x1b[39m\x1b[49m')),
+                         '\x1b[33m\x1b[43mhello\x1b[49m\x1b[39m')
+
+    def test_noncurtsies_output(self):
+        fmtstr('\x1b[35mx\x1b[m')
+        #fmtstr('\x1b[1m\x1b[31m-\x1b[m')
+        #fmtstr('\x1b[41mERROR\x1b[m')
+
 class TestImmutability(unittest.TestCase):
 
     def test_fmt_strings_remain_unchanged_when_used_to_construct_other_ones(self):
