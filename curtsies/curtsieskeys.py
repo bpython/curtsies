@@ -16,10 +16,10 @@ CURTSIES_NAMES = dict([
   (b'\x1b[B',     u'<DOWN>'),
   (b'\x1b[C',     u'<RIGHT>'),
   (b'\x1b[D',     u'<LEFT>'),
-  (b'\x1bOA',     u'<Ctrl-UP>'),
-  (b'\x1bOB',     u'<Ctrl-DOWN>'),
-  (b'\x1bOC',     u'<Ctrl-RIGHT>'),
-  (b'\x1bOD',     u'<Ctrl-LEFT>'),
+  (b'\x1bOA',     u'<UP>'),         # in issue 92 its shown these should be normal arrows,
+  (b'\x1bOB',     u'<DOWN>'),       # not ctrl-arrows as we previously had them.
+  (b'\x1bOC',     u'<RIGHT>'),
+  (b'\x1bOD',     u'<LEFT>'),
 
   (b'\x1b[1;5A',  u'<Ctrl-UP>'),
   (b'\x1b[1;5B',  u'<Ctrl-DOWN>'),
