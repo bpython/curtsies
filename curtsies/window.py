@@ -448,8 +448,8 @@ class CursorAwareWindow(BaseWindow):
         logger.debug(
             'lines in current lines by row: %r' % current_lines_by_row.keys()
         )
-        self._last_cursor_row = (
-            cursor_pos[0] - offscreen_scrolls + self.top_usable_row
+        self._last_cursor_row = max(
+            0, cursor_pos[0] - offscreen_scrolls + self.top_usable_row
         )
         self._last_cursor_column = cursor_pos[1]
         self.write(
