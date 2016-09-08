@@ -45,6 +45,7 @@ Primer
 colors and styles displayable in a terminal with [ANSI escape sequences](http://en.wikipedia.org/wiki/ANSI_escape_code>`_).
 
 (the import statement shown below is outdated)
+
 ![fmtstr example screenshot](http://i.imgur.com/7lFaxsz.png)
 
 [FSArray](http://curtsies.readthedocs.org/en/latest/FSArray.html) objects contain multiple such strings
@@ -53,6 +54,7 @@ objects can be superimposed on each other
 to build complex grids of colored and styled characters through composition.
 
 (the import statement shown below is outdated)
+
 ![fsarray example screenshot](http://i.imgur.com/rvTRPv1.png)
 
 Such grids of characters can be rendered to the terminal in alternate screen mode
@@ -66,15 +68,15 @@ Examples
 
 * [Tic-Tac-Toe](/examples/tictactoeexample.py)
 
-![screenshot](http://i.imgur.com/AucB55B.png)
+![](http://i.imgur.com/AucB55B.png)
 
 * [Avoid the X's game](/examples/gameexample.py)
 
-![screenshot](http://i.imgur.com/nv1RQd3.png)
+![](http://i.imgur.com/nv1RQd3.png)
 
 * [Bpython-curtsies uses curtsies](http://ballingt.com/2013/12/21/bpython-curtsies.html)
 
-[![ScreenShot](http://i.imgur.com/r7rZiBS.png)](http://www.youtube.com/watch?v=lwbpC4IJlyA)
+[![](http://i.imgur.com/r7rZiBS.png)](http://www.youtube.com/watch?v=lwbpC4IJlyA)
 
 * [More examples](/examples)
 
