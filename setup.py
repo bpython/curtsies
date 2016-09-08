@@ -11,7 +11,7 @@ def version():
                 return ast.parse(line).body[0].value.s
 
 def get_long_description():
-    with io.open('README.md', encoding="utf-8") as f:
+    with io.open('readme.md', encoding="utf-8") as f:
         long_description = f.read()
 
     try:
@@ -21,7 +21,7 @@ def get_long_description():
         return long_description
 
     try:
-        long_description = pypandoc.convert('README.md', 'rst')
+        long_description = pypandoc.convert('readme.md', 'rst')
     except OSError:
         print("Pandoc not found. Long_description conversion failure.")
         return long_description
