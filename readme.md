@@ -46,7 +46,7 @@ colors and styles displayable in a terminal with [ANSI escape sequences](http://
 
 (the import statement shown below is outdated)
 
-![fmtstr example screenshot](http://i.imgur.com/7lFaxsz.png)
+![](http://i.imgur.com/7lFaxsz.png)
 
 [FSArray](http://curtsies.readthedocs.org/en/latest/FSArray.html) objects contain multiple such strings
 with each formatted string on its own row, and FSArray
@@ -55,7 +55,7 @@ to build complex grids of colored and styled characters through composition.
 
 (the import statement shown below is outdated)
 
-![fsarray example screenshot](http://i.imgur.com/rvTRPv1.png)
+![](http://i.imgur.com/rvTRPv1.png)
 
 Such grids of characters can be rendered to the terminal in alternate screen mode
 (no history, like `Vim`, `top` etc.) by [FullscreenWindow](http://curtsies.readthedocs.org/en/latest/window.html#curtsies.window.FullscreenWindow) objects
