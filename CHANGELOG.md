@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+## [0.2.10] - 2016-10-10
+- Add sequences for home and end (fixes Curtsies #78)
+
 ## [0.2.9] - 2016-09-07
 - fix #90 again
 - strip ansi escape sequences if parsing fmtstr input fails
