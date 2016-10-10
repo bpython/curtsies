@@ -81,7 +81,8 @@ CURTSIES_NAMES = dict([
   (b'\x1b[H',     u'<HOME>'),    # reported by amorozov in bpython #490
   (b'\x1b[F',     u'<END>'),     # reported by amorozov in bpython #490
 
-  # see curtsies #78 - taken from https://github.com/jquast/blessed/blob/e9ad7b85dfcbbba49010ab8c13e3a5920d81b010/blessed/keyboard.py#L409
+  (b'\x1bOH',     u'<HOME>'),    # reported by mixmastamyk in curtsies #78
+  (b'\x1bOF',     u'<END>'),     # reported by mixmastamyk in curtsies #78
 
   # not fixing for back compat.
   # (b"\x1b[1~", u'<FIND>'),       # find
