@@ -20,15 +20,15 @@ FmtStr - Example
    str(full)
    print(full)
 
-We start here with such a complicated example because it you only need something simple like
+We start here with such a complicated example because it you only need something simple like:
 
 .. python_terminal_session::
 
    from curtsies.fmtfuncs import *
    print(blue(bold(u'Deep blue sea')))
 
-another library may be a better fit than Curtsies.
-Unlink other libraries, Curtsies allows these colored strings to be further manipulated after
+then, another library may be a better fit than Curtsies.
+Unlike other libraries, Curtsies allows these colored strings to be further manipulated after
 they are created.
 
 FmtStr - Rationale
@@ -46,7 +46,7 @@ If all you need is to print colored text, many other libraries also make `ANSI e
 In all of the libraries listed above the expression ``blue('hi') + ' ' + green('there)``
 or equivalent
 evaluates to a Python string, not a colored string object. If all you plan
-to do with this string is print it, this is great. But if you need to
+to do with this string is print it, this is great but if you need to
 do more formatting with this colored string later, the length will be
 something like 29 instead of 9; structured formatting information is lost.
 Methods like :py:meth:`center <https://docs.python.org/2/library/stdtypes.html#str.center>`
@@ -90,7 +90,7 @@ A :py:class:`FmtStr` can be sliced to produce a new :py:class:`FmtStr` object:
     >>> f.splice('something longer', 2)
     blue("h")+"something longer"+blue("ot")+blue(" there")+on_red(" Tom!")
 
-:py:class:`FmtStr` greedily absorb strings, but no formatting is applied to this added text
+:py:class:`FmtStr` greedily absorbs strings, but no formatting is applied to this added text.
 
     >>> from curtsies.fmtfuncs import *
     >>> f = blue("The story so far:") + "In the beginning..."
@@ -201,5 +201,5 @@ FmtStr - API Docs
 
 .. automodule:: curtsies.fmtfuncs
 
-:py:class:`FmtStr` instances respond to most :class:`str` methods as you might expect, but the result
-of these methods sometimes loses its formatting.
+:py:class:`FmtStr` instances respond to most :class:`str` methods as expected, but the result
+of these methods sometimes loose formatting.
