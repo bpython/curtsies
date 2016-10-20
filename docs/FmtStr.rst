@@ -74,7 +74,7 @@ blue("asdf")+on_red("adsf")
 FmtStr - Using
 ==============
 
-A :py:class:`FmtStr` can be sliced to produce a new :py:class:`FmtStr` object:
+A :py:class:`FmtStr` can be sliced to produce a new :py:class:`FmtStr` objects:
 
     >>> from curtsies.fmtfuncs import *
     >>> (blue('asdf') + on_red('adsf'))[3:7]
@@ -90,7 +90,7 @@ A :py:class:`FmtStr` can be sliced to produce a new :py:class:`FmtStr` object:
     >>> f.splice('something longer', 2)
     blue("h")+"something longer"+blue("ot")+blue(" there")+on_red(" Tom!")
 
-:py:class:`FmtStr` greedily absorbs strings, but no formatting is applied to this added text.
+:py:class:`FmtStr` greedily absorb strings, but no formatting is applied to this added text:
 
     >>> from curtsies.fmtfuncs import *
     >>> f = blue("The story so far:") + "In the beginning..."
@@ -99,7 +99,7 @@ A :py:class:`FmtStr` can be sliced to produce a new :py:class:`FmtStr` object:
     >>> f
     blue("The story so far:")+"In the beginning..."
 
-It's easy to turn ANSI terminal formatted strings into :py:class:`FmtStr`
+It's easy to turn ANSI terminal formatted strings into :py:class:`FmtStr`:
 
     >>> from curtsies.fmtfuncs import *
     >>> from curtsies import FmtStr
