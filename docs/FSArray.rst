@@ -16,12 +16,12 @@ FSArray - Example
                           blue(on_green(u'hey!'))])
    a.dumb_display()
 
-`fsarray` is a convenience function returning a FSArray constructed from its arguments.
+:py:class:`curtsies.formatstringarray.fsarray` is a convenience function returning a :py:class:`~curtsies.formatstringarray.FSArray` constructed from its arguments.
 
 FSArray - Using
 ===============
 
-Arrays can be composed to build up complex text interfaces::
+:py:class:`~curtsies.formatstringarray.FSArray` objects can be composed to build up complex text interfaces::
 
     >>> import time
     >>> from curtsies import FSArray, fsarray, fmtstr
@@ -54,15 +54,14 @@ Arrays can be composed to build up complex text interfaces::
 
 An array like shown above might be repeatedly constructed and rendered with a :py:mod:`curtsies.window` object.
 
-Slicing works like it does with FmtStrs, but in two dimensions.
-FSArrays are *mutable*, so array assignment syntax can be used for natural
+Slicing works like it does with a :py:class:`FmtStr`, but in two dimensions.
+:py:class:`~curtsies.formatstringarray.FSArray`s are *mutable*, so array assignment syntax can be used for natural
 compositing as in the above exaple.
 
 If you're dealing with terminal output, the *width* of a string becomes more
 important than it's *length* (see :ref:`len-vs-width`).
 
-In the future FSArrays will do slicing and array assignment based on width
-instead of number of characters, but this is not currently implemented.
+In the future :py:class:`~curtsies.formatstringarray.FSArray`s will do slicing and array assignment based on width instead of number of characters, but this is not currently implemented.
 
 FSArray - API docs
 ==================
