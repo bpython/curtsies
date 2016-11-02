@@ -63,9 +63,9 @@ must be used within the context of that :class:`~curtsies.input.Input` object.
 
 Within the (context-manager) context of an Input generator, an in-stream
 is put in raw mode or cbreak mode, and keypresses are stored to be reported
-later. Original tty attribute are recorded to be restored on exiting
+later. Original tty attributes are recorded to be restored on exiting
 the context. The SigInt signal handler may be replaced if this behavior was
-specified on creation of the :class:`~curtsies.input.Input` object
+specified on creation of the :class:`~curtsies.input.Input` object.
 
 Input - Notes
 =============
@@ -98,7 +98,7 @@ Input - Events
 
 To see what a given keypress is called (what unicode string is returned
 by ``Terminal.next()``), try
-``python -m curtsies.terminal`` and play around.
+``python -m curtsies.events`` and play around.
 Events returned by :py:class:`~curtsies.input.Input` fall into two categories:
 instances of subclasses of :class:`curtsies.event.Event` and
 Keypress strings.
