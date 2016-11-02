@@ -5,7 +5,7 @@ Curtsies documentation
 
 |curtsiestitle|
 
-Curtsies is a library for interacting with the terminal.
+Curtsies is a Python 2.6+ & 3.3+ compatible library for interacting with the terminal.
 
 :py:class:`~curtsies.formatstring.FmtStr` objects are strings formatted with
 colors and styles displayable in a terminal with `ANSI escape sequences <http://en.wikipedia.org/wiki/ANSI_escape_code>`_.
