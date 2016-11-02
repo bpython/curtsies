@@ -43,10 +43,10 @@ If all you need is to print colored text, many other libraries also make `ANSI e
 * `Clint <https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py>`_ (``pip install clint``)
 * `colors <https://github.com/verigak/colors/>`_ (``pip install colors``)
 
-In all of the libraries listed above the expression ``blue('hi') + ' ' + green('there)``
+In all of the libraries listed above, the expression ``blue('hi') + ' ' + green('there)``
 or equivalent
 evaluates to a Python string, not a colored string object. If all you plan
-to do with this string is print it, this is great but if you need to
+to do with this string is print it, this is great. But, if you need to
 do more formatting with this colored string later, the length will be
 something like 29 instead of 9; structured formatting information is lost.
 Methods like :py:meth:`center <https://docs.python.org/2/library/stdtypes.html#str.center>`
@@ -62,9 +62,9 @@ won't properly format the string for display.
 u'    \x1b[31m\x1b[42mRed on green?\x1b[m\x0f \x1b[33mIck!\x1b[m\x0f     '
 
 :py:class:`FmtStr` objects can be combined and composited to create more complicated
-:py:class:`FmtStr` object,
+:py:class:`FmtStr` objects,
 useful for building flashy terminal interfaces with overlapping
-windows/widgets than can change size and depend on each others sizes.
+windows/widgets that can change size and depend on each other's sizes.
 One :py:class:`FmtStr` can have several kinds of formatting applied to different parts of it.
 
 >>> from curtsies.fmtfuncs import *
@@ -176,7 +176,7 @@ FmtStr - len vs width
 ---------------------
 
 The amount of horizontal space a string takes up in a terminal may differ from the length of the string returned by ``len()``.
-:py:class:`FmtStr` objects have a width property useful when writing layout code:
+:py:class:`FmtStr` objects have a :py:class:`FmtStr.width` property useful when writing layout code:
 
 >>> #encoding: utf8
 ... 
