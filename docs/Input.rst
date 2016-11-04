@@ -30,7 +30,7 @@ that no keypress or other event occured within the timeout.
 
 Key events are unicode strings, but sometimes event objects
 (see :class:`~curtsies.events.Event`) are returned instead.
-Built-in events signal :py:class:`~curtsies.events.SigIntEvent`
+Built-in events signal :py:class:`~curtsies.events.SigIntEvent` 
 events from the OS and :py:class:`~curtsies.events.PasteEvent` consisting
 of multiple keypress events if reporting of these types of events was enabled
 in instantiation of the :py:class:`~curtsies.Input` object.
@@ -76,10 +76,10 @@ keypress events, which is ``'curtsies'`` by default.
 For compatibility with curses code, you can use ``'curses'`` names,
 but note that curses doesn't have nice key names for many key combinations
 so you'll be putting up with names like ``u'\xe1'`` for
-option-j and ``'\x86'`` for ctrl-option-f.
-Pass 'plain' for this parameter to return a simple unicode representation.
+``option-j`` and ``'\x86'`` for ``ctrl-option-f``.
+Pass ``'plain'`` for this parameter to return a simple unicode representation.
 
-:py:class:`~curtsies.events.PasteEvent` objects representing multiple
+:py:class:`~curtsies.events.PasteEvent` objects representing multiple 
 keystrokes in very rapid succession
 (typically because the user pasted in text, but possibly because they typed
 two keys simultaneously). How many bytes must occur together to trigger such
@@ -92,7 +92,7 @@ operating system (which usually raise a ``KeyboardInterrupt`` exception)
 will be returned as :py:class:`~curtsies.events.SigIntEvent` instances.
 
 To set a timeout on the blocking get, treat it like a generator and call
-``.send(timeout)``. The call will return None if no event is available.
+``.send(timeout)``. The call will return ``None`` if no event is available.
 
 Input - Events
 ==============
