@@ -133,7 +133,7 @@ Keypress events are Unicode strings in both Python 2 and 3 like:
 Likely points of confusion for keypress strings:
 
 * Enter is ``<Ctrl-j>``
-* Modern meta (the escape-prepending version) key is ``<Esc+a>`` while control and shift keys are is ``<Ctrl-a>`` (note the + vs -)
+* Modern meta (the escape-prepending version) key is ``<Esc+a>`` while control and shift keys are ``<Ctrl-a>`` (note the + vs -)
 * Letter keys are capitalized in ``<Esc+Ctrl-A>`` while they are lowercase in ``<Ctrl-a>``
   (this should be fixed in the next api-breaking release)
 * Some special characters lose their special names when used with modifier keys, for example:
