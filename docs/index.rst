@@ -15,8 +15,8 @@ can be superimposed onto each other
 to build complex grids of colored and styled characters.
 
 Such grids of characters can be efficiently rendered to the terminal in alternate screen mode
-(no scrollback history, like ``Vim``, ``top`` etc.) by :py:class:`~curtsies.window.FullscreenWindow` objects
-or to the normal history-preserving screen by :py:class:`~curtsies.window.CursorAwareWindow` objects.
+(no scrollback history, like ``Vim``, ``top`` etc.) by :py:class:`~curtsies.FullscreenWindow` objects
+or to the normal history-preserving screen by :py:class:`~curtsies.CursorAwareWindow` objects.
 User keyboard input events like pressing the up arrow key are detected by an
 :py:class:`~curtsies.input.Input` object. See the :doc:`quickstart` to get started using
 all of these classes.
