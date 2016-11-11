@@ -1,7 +1,7 @@
 FmtStr
 ^^^^^^
 
-:py:class:`~curtsies.formatstring.FmtStr` is a string with each character colored
+:py:class:`~curtsies.FmtStr` is a string with each character colored
 and styled in ways representable by `ANSI escape codes <http://en.wikipedia.org/wiki/ANSI_escape_code>`_.
 
 .. automodule:: curtsies.formatstring
@@ -43,10 +43,10 @@ If all you need is to print colored text, many other libraries also make `ANSI e
 * `Clint <https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py>`_ (``pip install clint``)
 * `colors <https://github.com/verigak/colors/>`_ (``pip install colors``)
 
-In all of the libraries listed above the expression ``blue('hi') + ' ' + green('there)``
+In all of the libraries listed above, the expression ``blue('hi') + ' ' + green('there)``
 or equivalent
 evaluates to a Python string, not a colored string object. If all you plan
-to do with this string is print it, this is great but if you need to
+to do with this string is print it, this is great. But, if you need to
 do more formatting with this colored string later, the length will be
 something like 29 instead of 9; structured formatting information is lost.
 Methods like :py:meth:`center <https://docs.python.org/2/library/stdtypes.html#str.center>`
@@ -61,11 +61,11 @@ won't properly format the string for display.
 >>> message.center(50)
 u'    \x1b[31m\x1b[42mRed on green?\x1b[m\x0f \x1b[33mIck!\x1b[m\x0f     '
 
-:py:class:`FmtStr` objects can be combined and composited to create more complicated
-:py:class:`FmtStr` object,
+:py:class:`~curtsies.FmtStr` objects can be combined and composited to create more complicated
+:py:class:`~curtsies.FmtStr` objects,
 useful for building flashy terminal interfaces with overlapping
-windows/widgets than can change size and depend on each others sizes.
-One :py:class:`FmtStr` can have several kinds of formatting applied to different parts of it.
+windows/widgets that can change size and depend on each other's sizes.
+One :py:class:`~curtsies.FmtStr` can have several kinds of formatting applied to different parts of it.
 
 >>> from curtsies.fmtfuncs import *
 >>> blue('asdf') + on_red('adsf')
@@ -74,13 +74,13 @@ blue("asdf")+on_red("adsf")
 FmtStr - Using
 ==============
 
-A :py:class:`FmtStr` can be sliced to produce a new :py:class:`FmtStr` object:
+A :py:class:`~curtsies.FmtStr` can be sliced to produce a new :py:class:`~curtsies.FmtStr` objects:
 
     >>> from curtsies.fmtfuncs import *
     >>> (blue('asdf') + on_red('adsf'))[3:7]
     blue("f")+on_red("ads")
 
-:py:class:`FmtStr` are *immutable* - but you can create new ones with :py:meth:`FmtStr.splice`:
+:py:class:`~curtsies.FmtStr` are *immutable* - but you can create new ones with :py:meth:`~curtsies.FmtStr.splice`:
 
     >>> from curtsies.fmtfuncs import *
     >>> f = blue('hey there') + on_red(' Tom!')
@@ -90,7 +90,7 @@ A :py:class:`FmtStr` can be sliced to produce a new :py:class:`FmtStr` object:
     >>> f.splice('something longer', 2)
     blue("h")+"something longer"+blue("ot")+blue(" there")+on_red(" Tom!")
 
-:py:class:`FmtStr` greedily absorbs strings, but no formatting is applied to this added text.
+:py:class:`~curtsies.FmtStr` greedily absorb strings, but no formatting is applied to this added text:
 
     >>> from curtsies.fmtfuncs import *
     >>> f = blue("The story so far:") + "In the beginning..."
@@ -99,7 +99,7 @@ A :py:class:`FmtStr` can be sliced to produce a new :py:class:`FmtStr` object:
     >>> f
     blue("The story so far:")+"In the beginning..."
 
-It's easy to turn ANSI terminal formatted strings into :py:class:`FmtStr`
+It's easy to turn ANSI terminal formatted strings into :py:class:`~curtsies.FmtStr`:
 
     >>> from curtsies.fmtfuncs import *
     >>> from curtsies import FmtStr
@@ -113,8 +113,8 @@ FmtStr - Using str methods
 --------------------------
 
 All sorts of `string methods <https://docs.python.org/2/library/stdtypes.html#string-methods>`_
-can be used on a :py:class:`FmtStr`, so you can often
-use :py:class:`FmtStr` objects where you had strings in your program before::
+can be used on a :py:class:`~curtsies.FmtStr`, so you can often
+use :py:class:`~curtsies.FmtStr` objects where you had strings in your program before::
 
     >>> from curtsies.fmtfuncs import *
     >>> f = blue(underline('As you like it'))
@@ -125,7 +125,7 @@ use :py:class:`FmtStr` objects where you had strings in your program before::
     >>> blue(', ').join(['a', red('b')])
     "a"+blue(", ")+red("b")
 
-If :py:class:`FmtStr` doesn't implement a method, it tries its best to use the string
+If :py:class:`~curtsies.FmtStr` doesn't implement a method, it tries its best to use the string
 method, which often works pretty well::
 
     >>> from curtsies.fmtfuncs import *
@@ -163,7 +163,7 @@ In Python 2, you might run into something like this:
    >>> red('hi')
    ValueError: unicode string required, got 'hi'
 
-:py:class:`FmtStr` requires unicode strings, so in Python 2 it is convenient to use the unicode_literals compiler directive:
+:py:class:`~curtsies.FmtStr` requires unicode strings, so in Python 2 it is convenient to use the unicode_literals compiler directive:
 
     >>> from __future__ import unicode_literals
     >>> from curtsies.fmtfuncs import *
@@ -176,7 +176,7 @@ FmtStr - len vs width
 ---------------------
 
 The amount of horizontal space a string takes up in a terminal may differ from the length of the string returned by ``len()``.
-:py:class:`FmtStr` objects have a width property useful when writing layout code:
+:py:class:`~curtsies.FmtStr` objects have a :py:class:`~curtsies.FmtStr.width` property useful when writing layout code:
 
 >>> #encoding: utf8
 ... 
@@ -193,13 +193,12 @@ As shown above, `full width characters <http://en.wikipedia.org/wiki/Halfwidth_a
 FmtStr - API Docs
 =================
 
-.. automodule:: curtsies.formatstring
-   :members: fmtstr
+.. autofunction:: curtsies.fmtstr
 
-.. autoclass:: FmtStr
+.. autoclass:: curtsies.FmtStr
    :members: width, splice, copy_with_new_atts, copy_with_new_str, join, split, width_aware_slice
 
 .. automodule:: curtsies.fmtfuncs
 
-:py:class:`FmtStr` instances respond to most :class:`str` methods, but some
-of these methods will return strings with their formatting missing.
+:py:class:`~curtsies.FmtStr` instances respond to most :class:`str` methods as you might expect, but the result
+of these methods sometimes loses its formatting.
