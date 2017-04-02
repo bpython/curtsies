@@ -40,7 +40,7 @@ def parse(s):
             try:
                 tok = token_type(token)
                 if tok:
-                    stuff.append(tok)
+                    stuff.extend(tok)
             except ValueError:
                 raise ValueError("Can't parse escape sequence: %r %r %r %r" % (s, repr(front), token, repr(rest)))
         if not rest:
@@ -97,18 +97,22 @@ def token_type(info):
     if info['command'] == 'm':
         # The default action for ESC[m is to act like ESC[0m
         # Ref: https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
-        value, = info['numbers'] if len(info['numbers']) else [0]
-        if value in FG_NUMBER_TO_COLOR: return {'fg':FG_NUMBER_TO_COLOR[value]}
-        if value in BG_NUMBER_TO_COLOR: return {'bg':BG_NUMBER_TO_COLOR[value]}
-        if value in NUMBER_TO_STYLE: return {NUMBER_TO_STYLE[value]:True}
-        if value == RESET_ALL: return dict(dict((k, None) for k in STYLES), **{'fg':None, 'bg':None})
-        if value == RESET_FG: return {'fg':None}
-        if value == RESET_BG: return {'bg':None}
+        values = info['numbers'] if len(info['numbers']) else [0]
+        tokens = []
+        for value in values:
+            if value in FG_NUMBER_TO_COLOR: tokens.append({'fg':FG_NUMBER_TO_COLOR[value]})
+            if value in BG_NUMBER_TO_COLOR: tokens.append({'bg':BG_NUMBER_TO_COLOR[value]})
+            if value in NUMBER_TO_STYLE: tokens.append({NUMBER_TO_STYLE[value]:True})
+            if value == RESET_ALL: tokens.append(dict(dict((k, None) for k in STYLES), **{'fg':None, 'bg':None}))
+            if value == RESET_FG: tokens.append({'fg':None})
+            if value == RESET_BG: tokens.append({'bg':None})
 
+        if tokens:
+            return tokens
+        else:
+            raise ValueError("Can't parse escape seq %r" % info)
     elif info['command'] == 'H':  # fix for bpython #76
-        return {}
-
-    raise ValueError("Can't parse escape seq %r" % info)
+        return [{}]
 
 if __name__ == '__main__':
     import doctest; doctest.testmod()
