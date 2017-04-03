@@ -93,8 +93,10 @@ class Chunk(object):
         s = self.s
         for k, v in sorted(self.atts.items()):
             # (self.atts sorted for the sake of always acting the same.)
-            assert k in xforms, "XXX Do we actually get cases like this?"
-            if v is False:
+            if k not in xforms:
+                # Unsupported SGR code
+                continue
+            elif v is False:
                 continue
             elif v is True:
                 s = xforms[k](s)
