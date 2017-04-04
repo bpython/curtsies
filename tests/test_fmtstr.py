@@ -59,6 +59,8 @@ class TestFmtStrParsing(unittest.TestCase):
         self.assertEqual(str(fmtstr('\x1b[43mhello\x1b[0m')), '\x1b[43mhello\x1b[49m')
         self.assertEqual(str(fmtstr('\x1b[43mhello')), '\x1b[43mhello\x1b[49m')
         self.assertEqual(str(fmtstr('\x1b[32;1mhello')), '\x1b[32m\x1b[1mhello\x1b[0m\x1b[39m')
+        self.assertEqual(str(fmtstr('\x1b[2mhello')), 'hello')
+        self.assertEqual(str(fmtstr('\x1b[32;2mhello')), '\x1b[32mhello\x1b[39m')
         self.assertEqual(str(fmtstr('\x1b[33m\x1b[43mhello\x1b[0m')),
                          '\x1b[33m\x1b[43mhello\x1b[49m\x1b[39m')
 
