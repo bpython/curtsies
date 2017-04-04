@@ -104,4 +104,6 @@ CURTSIES_NAMES = dict([
   (b"\x1b[OF", u'<END>'),          # end    (1)
   (b"\x1b[OH", u'<HOME>'),         # home   (7)
 
+  # reported by cool-RR
+  (b"\x1b[[C", u'<F3>'),
   ])
