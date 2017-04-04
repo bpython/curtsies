@@ -105,5 +105,10 @@ CURTSIES_NAMES = dict([
   (b"\x1b[OH", u'<HOME>'),         # home   (7)
 
   # reported by cool-RR
+  (b"\x1b[[A", u'<F1>'),
+  (b"\x1b[[B", u'<F2>'),
   (b"\x1b[[C", u'<F3>'),
-  ])
+  (b"\x1b[[D", u'<F4>'),
+  (b"\x1b[[E", u'<F5>'),
+  # cool-RR says the rest were good, see issue #99
+])
