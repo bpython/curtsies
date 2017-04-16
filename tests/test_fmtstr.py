@@ -496,6 +496,12 @@ class TestFSArrayWithDiff(FormatStringTest):
         b = fsarray([blue('abc'), red('def')])
         self.assertFSArraysEqual(a, b)
 
+class TestBpythonIssues(FormatStringTest):
+
+    def test_bpython_bug_340(self):
+        crasher = "\x1b[31m\x1b[1mAttributeError\x1b[0m\x1b[39m: \x1b[36m'Game' object has no attribute 'bodies'\x1b["
+        FmtStr.from_str(crasher)
+
 if __name__ == '__main__':
     import fmtstr.fmtstr
     unittest.main()
