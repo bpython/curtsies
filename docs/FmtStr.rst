@@ -196,7 +196,7 @@ FmtStr - API Docs
 .. autofunction:: curtsies.fmtstr
 
 .. autoclass:: curtsies.FmtStr
-   :members: width, splice, copy_with_new_atts, copy_with_new_str, join, split, width_aware_slice
+   :members: width, splice, copy_with_new_atts, copy_with_new_str, join, split, splitlines, width_aware_slice
 
 .. automodule:: curtsies.fmtfuncs
 
