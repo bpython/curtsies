@@ -292,6 +292,13 @@ class FmtStr(object):
             [0] + [m.end() for m in matches],
             [m.start() for m in matches] + [len(s)])]
 
+    def splitlines(self, keepends=False):
+        """Return a list of lines, split on newline characters,
+        include line boundaries, if keepends is true."""
+        lines = self.split('\n')
+        return [line+'\n' for line in lines] if keepends else (
+               lines if lines[-1] else lines[:-1])
+
     # proxying to the string via __getattr__ is insufficient
     # because we shouldn't drop foreground or formatting info
     def ljust(self, width, fillchar=None):
