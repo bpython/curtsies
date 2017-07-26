@@ -5,6 +5,7 @@ import signal
 import select
 import sys
 import termios
+import threading
 import time
 import tty
 
@@ -23,6 +24,10 @@ assert READ_SIZE >= events.MAX_KEYPRESS_SIZE
 # the paste logic that reads more data as needed might not work.
 
 
+def is_main_thread():
+    return isinstance(threading.current_thread(), threading._MainThread)
+
+
 class ReplacedSigIntHandler(object):
     def __init__(self, handler):
         self.handler = handler
@@ -38,7 +43,8 @@ class ReplacedSigIntHandler(object):
 class Input(object):
     """Keypress and control event generator"""
     def __init__(self, in_stream=None, keynames='curtsies',
-                 paste_threshold=events.MAX_KEYPRESS_SIZE+1, sigint_event=False):
+                 paste_threshold=events.MAX_KEYPRESS_SIZE+1, sigint_event=False,
+                 signint_callback_provider=None):
         """Returns an Input instance.
 
         Args:
@@ -79,13 +85,13 @@ class Input(object):
             attrs[-1][VDSUSP] = 0
             termios.tcsetattr(self.in_stream, termios.TCSANOW, attrs)
 
-        if self.sigint_event:
+        if self.sigint_event and is_main_thread():
             self.orig_sigint_handler = signal.getsignal(signal.SIGINT)
             signal.signal(signal.SIGINT, self.sigint_handler)
         return self
 
     def __exit__(self, type, value, traceback):
-        if self.sigint_event:
+        if self.sigint_event and is_main_thread():
             signal.signal(signal.SIGINT, self.orig_sigint_handler)
         termios.tcsetattr(self.in_stream, termios.TCSANOW, self.original_stty)
 
@@ -146,7 +152,7 @@ class Input(object):
 
     def send(self, timeout=None):
         """Returns an event or None if no events occur before timeout."""
-        if self.sigint_event:
+        if self.sigint_event and is_main_thread():
             with ReplacedSigIntHandler(self.sigint_handler):
                 return self._send(timeout)
         else:

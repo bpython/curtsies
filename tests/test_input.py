@@ -132,3 +132,22 @@ class TestInput(unittest.TestCase):
             self.assertEqual(type(inp.send(1)), events.SigIntEvent)
             self.assertEqual(inp.send(0), None)
             t.join()
+
+    def test_create_in_thread_with_sigint_event(self):
+        def create():
+            inp = Input(sigint_event=True)
+
+        t = threading.Thread(target=create)
+        t.start()
+        t.join()
+
+    def test_use_in_thread_with_sigint_event(self):
+        inp = Input(sigint_event=True)
+        def use():
+            with inp:
+                pass
+
+        t = threading.Thread(target=use)
+        t.start()
+        t.join()
+
