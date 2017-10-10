@@ -54,5 +54,6 @@ setup(name='curtsies',
           'License :: OSI Approved :: MIT License',
           'Operating System :: POSIX',
           'Programming Language :: Python',
+          'Programming Language :: Python :: 3',
           ],
       zip_safe=False)
