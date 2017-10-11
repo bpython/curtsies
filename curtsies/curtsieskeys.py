@@ -89,6 +89,7 @@ CURTSIES_NAMES = dict([
 
   (b"\x1b[2~", u'<INSERT>'),       # insert (0)
   (b"\x1b[3~", u'<DELETE>'),       # delete (.), "Execute"
+  (b"\x1b[3;5~", u'<Ctrl-DELETE>'),
 
   # not fixing for back compat.
   # (b"\x1b[4~", u'<SELECT>'),       # select
