@@ -523,7 +523,9 @@ def interval_overlap(a, b, x, y):
 
 
 def width_aware_slice(s, start, end, replacement_char=u' '):
-    divides = [wcwidth.wcswidth(s, i) for i in range(len(s)+1)]
+    divides = [0]
+    for c in s:
+        divides.append(divides[-1] + wcwidth.wcswidth(c))
 
     new_chunk_chars = []
     for char, char_start, char_end in zip(s, divides[:-1], divides[1:]):
