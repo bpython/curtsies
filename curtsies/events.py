@@ -288,7 +288,7 @@ def try_keys():
             f = open('keylog.txt', 'a')
             f.write("%r is called %s\n" % (seq, name))
             f.close()
-            print('Thanks! Please open an issue at https://github.com/thomasballinger/curtsies/issues')
+            print('Thanks! Please open an issue at https://github.com/bpython/curtsies/issues')
             print('or email thomasballinger@gmail.com. Include this terminal history or keylog.txt.')
             print('You can keep pressing keys')
 

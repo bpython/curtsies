@@ -6,7 +6,7 @@ Resources
 
 I've written a little bit about Curtsies on `my blog <http://ballingt.com/2014/05/13/bpython-curtsies-release.html>`_.
 
-The source and issue tracker for Curtsies are on `Github <https://github.com/thomasballinger/curtsies>`_.
+The source and issue tracker for Curtsies are on `Github <https://github.com/bpython/curtsies>`_.
 
 A good place to ask questions about Curtsies is `#bpython on irc.freenode.net <http://webchat.freenode.net/?channels=bpython>`_.
 

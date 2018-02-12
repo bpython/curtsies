@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/thomasballinger/curtsies.svg?branch=master)](https://travis-ci.org/thomasballinger/curtsies)
+[![Build Status](https://travis-ci.org/bpython/curtsies.svg?branch=master)](https://travis-ci.org/bpython/curtsies)
 [![Documentation Status](https://readthedocs.org/projects/curtsies/badge/?version=latest)](https://readthedocs.org/projects/curtsies/?badge=latest)
 ![Curtsies Logo](http://ballingt.com/assets/curtsiestitle.png)
 
