@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Drop support for Python 2.6 and 3.3
 
 ## [0.2.12] - 2018-02-12
 - fix accidentally quadratic `width_aware_slice` behavior (fixes bpython #729)
