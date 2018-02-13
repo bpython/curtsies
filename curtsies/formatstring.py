@@ -22,7 +22,6 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 >>> fmtstr(u'hello', u'red', bold=False)
 red('hello')
 """
-#TODO add a way to composite text without losing original formatting information
 
 import itertools
 import re
@@ -141,6 +140,7 @@ class Chunk(object):
 
 class ChunkSplitter(object):
     """
+    View of a Chunk for breaking it into smaller Chunks.
     """
 
     def __init__(self, chunk):
@@ -201,7 +201,7 @@ class ChunkSplitter(object):
 
 
 class FmtStr(object):
-    """ A string whose substrings carry attributes (which may be different from one to the next).  """
+    """A string whose substrings carry attributes."""
     def __init__(self, *components):
         # These assertions below could be useful for debugging, but slow things down considerably
         #assert all([len(x) > 0 for x in components])
@@ -631,8 +631,8 @@ def interval_overlap(a, b, x, y):
 def width_aware_slice(s, start, end, replacement_char=u' '):
     # type: (Text, int, int, Text)
     """
-    >>> width_aware_slice('aＥiou', 0, 2)
-    'a '
+    >>> width_aware_slice(u'a\uff25iou', 0, 2)[1] == u' '
+    True
     """
     divides = [0]
     for c in s:
@@ -756,12 +756,3 @@ def fmtstr(string, *args, **kwargs):
     else:
         raise ValueError("Bad Args: %r (of type %s), %r, %r" % (string, type(string), args, kwargs))
     return string.copy_with_new_atts(**atts)
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod(verbose=True)
-    #f = FmtStr.from_str(str(fmtstr('tom', 'blue')))
-    #print((repr(f)))
-    #f = fmtstr('stuff', fg='blue', bold=True)
-    #print((repr(f)))
-
