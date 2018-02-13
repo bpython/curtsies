@@ -2,9 +2,16 @@
 from __future__ import unicode_literals
 import sys
 import unittest
-from curtsies.formatstring import (FmtStr, fmtstr, Chunk, linesplit,
-                                   normalize_slice, width_aware_slice)
-from curtsies.fmtfuncs import *
+from curtsies.formatstring import (
+    FmtStr,
+    fmtstr,
+    Chunk,
+    ChunkSplitter,
+    linesplit,
+    normalize_slice,
+    width_aware_slice,
+)
+from curtsies.fmtfuncs import (blue, red, green, on_blue, on_red, on_green, underline, blink, bold)
 from curtsies.termformatconstants import FG_COLORS
 from curtsies.formatstringarray import fsarray, FSArray, FormatStringTest
 
@@ -422,6 +429,19 @@ class TestCharacterWidth(unittest.TestCase):
         self.assertEqual(fmtstr('HＥ!', 'blue').width_aware_slice(slice(1, 2, None)), fmtstr(' ', 'blue'))
         self.assertEqual(fmtstr('HＥ!', 'blue').width_aware_slice(slice(1, 3, None)), fmtstr('Ｅ', 'blue'))
 
+    def test_width_aware_splitlines(self):
+        s = fmtstr('abcd')
+        self.assertEqual(list(s.width_aware_splitlines(2)), [fmtstr('ab'), fmtstr('cd')])
+
+        s = fmtstr('HＥ!')
+        self.assertEqual(list(s.width_aware_splitlines(2)), [fmtstr('H '), fmtstr('Ｅ'), fmtstr('!')])
+
+        s = fmtstr('He\u0300llo')
+        self.assertEqual(list(s.width_aware_splitlines(2)), [fmtstr('He\u0300'), fmtstr('ll'), fmtstr('o')])
+
+        with self.assertRaises(ValueError):
+            s.width_aware_splitlines(1)
+
     def test_width_at_offset(self):
         self.assertEqual(fmtstr('abＥcdef').width_at_offset(0), 0)
         self.assertEqual(fmtstr('abＥcdef').width_at_offset(2), 2)
@@ -443,6 +463,8 @@ class TestWidthHelpers(unittest.TestCase):
         self.assertEqual(width_aware_slice('ab\u0300c', 0, 2), 'ab\u0300')
         self.assertEqual(width_aware_slice('ab\u0300c', 1, 3), 'b\u0300c')
         self.assertEqual(width_aware_slice('ab\u0300\u0300c', 1, 3), 'b\u0300\u0300c')
+        self.assertEqual(width_aware_slice('ab\u0300\u0300c', 0, 2), 'ab\u0300\u0300')
+        self.assertEqual(width_aware_slice('ab\u0300\u0300c', 2, 3), 'c')
 
     def test_char_width_aware_slice(self):
         self.assertEqual(width_aware_slice('abc', 1, 2), 'b')
@@ -450,6 +472,45 @@ class TestWidthHelpers(unittest.TestCase):
         self.assertEqual(width_aware_slice('aＥbc', 1, 4), 'Ｅb')
         self.assertEqual(width_aware_slice('aＥbc', 2, 4), ' b')
         self.assertEqual(width_aware_slice('aＥbc', 0, 2), 'a ')
+
+class TestChunkSplitter(unittest.TestCase):
+    def test_chunk_splitter(self):
+        splitter = Chunk('asdf', {'fg': 32}).splitter()
+        self.assertEqual(splitter.request(1), (1, Chunk('a', {'fg': 32})))
+        self.assertEqual(splitter.request(4), (3, Chunk('sdf', {'fg': 32})))
+        self.assertEqual(splitter.request(4), None)
+
+    def test_reusing_same_splitter(self):
+        c = Chunk('asdf', {'fg': 32})
+        s1 = c.splitter()
+        self.assertEqual(s1.request(3), (3, Chunk('asd', {'fg': 32})))
+        s1.reinit(c)
+        self.assertEqual(s1.request(3), (3, Chunk('asd', {'fg': 32})))
+        s1.reinit(c)
+        self.assertEqual(s1.request(3), (3, Chunk('asd', {'fg': 32})))
+
+        c2 = Chunk('abcdef', {})
+        s1.reinit(c2)
+        self.assertEqual(s1.request(3), (3, Chunk('abc')))
+
+    def test_width_awareness(self):
+        s = Chunk('asdf')
+        self.assertEqual(Chunk('ab\u0300c').splitter().request(3), (3, Chunk('ab\u0300c')))
+        self.assertEqual(Chunk('ab\u0300c').splitter().request(2), (2, Chunk('ab\u0300')))
+
+        s = Chunk('ab\u0300c').splitter()
+        self.assertEqual(s.request(1), (1, Chunk('a')))
+        self.assertEqual(s.request(2), (2, Chunk('b\u0300c')))
+
+        c = Chunk('aＥbc')
+        self.assertEqual(c.splitter().request(4), (4, Chunk('aＥb')))
+        s = c.splitter()
+        self.assertEqual(s.request(2), (2, Chunk('a ')))
+        self.assertEqual(s.request(2), (2, Chunk('Ｅ')))
+        self.assertEqual(s.request(2), (2, Chunk('bc')))
+        self.assertEqual(s.request(2), None)
+
+
 
 
 class TestFSArray(unittest.TestCase):
