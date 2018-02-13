@@ -205,8 +205,8 @@ class FmtStr(object):
     def __init__(self, *components):
         # These assertions below could be useful for debugging, but slow things down considerably
         #assert all([len(x) > 0 for x in components])
-        #self.basefmtstrs = [x for x in components if len(x) > 0]
-        self.basefmtstrs = list(components)
+        #self.chunks = [x for x in components if len(x) > 0]
+        self.chunks = list(components)
 
         # caching these leads tom a significant speedup
         self._str = None
@@ -236,7 +236,7 @@ class FmtStr(object):
             except ValueError:
                 return FmtStr(Chunk(remove_ansi(s)))
             else:
-                bases = []
+                chunks = []
                 cur_fmt = {}
                 for x in tokens_and_strings:
                     if isinstance(x, dict):
@@ -245,17 +245,17 @@ class FmtStr(object):
                         atts = parse_args('', dict((k, v)
                                           for k, v in cur_fmt.items()
                                           if v is not None))
-                        bases.append(Chunk(x, atts=atts))
+                        chunks.append(Chunk(x, atts=atts))
                     else:
                         raise Exception("logic error")
-                return FmtStr(*bases)
+                return FmtStr(*chunks)
         else:
             return FmtStr(Chunk(s))
 
     def copy_with_new_str(self, new_str):
         """Copies the current FmtStr's attributes while changing its string."""
         # What to do when there are multiple Chunks with conflicting atts?
-        old_atts = dict((att, value) for bfs in self.basefmtstrs
+        old_atts = dict((att, value) for bfs in self.chunks
                     for (att, value) in bfs.atts.items())
         return FmtStr(Chunk(new_str, old_atts))
 
@@ -282,18 +282,18 @@ class FmtStr(object):
         if len(new_str) == 0:
             return self
         new_fs = new_str if isinstance(new_str, FmtStr) else fmtstr(new_str)
-        assert len(new_fs.basefmtstrs) > 0, (new_fs.basefmtstrs, new_fs)
+        assert len(new_fs.chunks) > 0, (new_fs.chunks, new_fs)
         new_components = []
         inserted = False
         if end is None:
             end = start
         tail = None
 
-        for bfs, bfs_start, bfs_end in zip(self.basefmtstrs,
+        for bfs, bfs_start, bfs_end in zip(self.chunks,
                                            self.divides[:-1],
                                            self.divides[1:]):
             if end == bfs_start == 0:
-                new_components.extend(new_fs.basefmtstrs)
+                new_components.extend(new_fs.chunks)
                 new_components.append(bfs)
                 inserted = True
 
@@ -301,7 +301,7 @@ class FmtStr(object):
                 divide = start - bfs_start
                 head = Chunk(bfs.s[:divide], atts=bfs.atts)
                 tail = Chunk(bfs.s[end - bfs_start:], atts=bfs.atts)
-                new_components.extend([head] + new_fs.basefmtstrs)
+                new_components.extend([head] + new_fs.chunks)
                 inserted = True
 
                 if bfs_start < end < bfs_end:
@@ -317,7 +317,7 @@ class FmtStr(object):
                 new_components.append(bfs)
 
         if not inserted:
-            new_components.extend(new_fs.basefmtstrs)
+            new_components.extend(new_fs.chunks)
             inserted = True
 
         return FmtStr(*[s for s in new_components if s.s])
@@ -328,22 +328,22 @@ class FmtStr(object):
     def copy_with_new_atts(self, **attributes):
         """Returns a new FmtStr with the same content but new formatting"""
         return FmtStr(*[Chunk(bfs.s, bfs.atts.extend(attributes))
-                        for bfs in self.basefmtstrs])
+                        for bfs in self.chunks])
 
     def join(self, iterable):
         """Joins an iterable yielding strings or FmtStrs with self as separator"""
         before = []
-        basefmtstrs = []
+        chunks = []
         for i, s in enumerate(iterable):
-            basefmtstrs.extend(before)
-            before = self.basefmtstrs
+            chunks.extend(before)
+            before = self.chunks
             if isinstance(s, FmtStr):
-                basefmtstrs.extend(s.basefmtstrs)
+                chunks.extend(s.chunks)
             elif isinstance(s, (bytes, unicode)):
-                basefmtstrs.extend(fmtstr(s).basefmtstrs) #TODO just make a basefmtstr directly
+                chunks.extend(fmtstr(s).chunks) #TODO just make a chunk directly
             else:
                 raise TypeError("expected str or FmtStr, %r found" % type(s))
-        return FmtStr(*basefmtstrs)
+        return FmtStr(*chunks)
 
     # TODO make this split work like str.split
     def split(self, sep=None, maxsplit=None, regex=False):
@@ -405,7 +405,7 @@ class FmtStr(object):
     def __unicode__(self):
         if self._unicode is not None:
             return self._unicode
-        self._unicode = ''.join(unicode(fs) for fs in self.basefmtstrs)
+        self._unicode = ''.join(unicode(fs) for fs in self.chunks)
         return self._unicode
 
     if PY3:
@@ -414,13 +414,13 @@ class FmtStr(object):
         def __str__(self):
             if self._str is not None:
                 return self._str
-            self._str = str('').join(str(fs) for fs in self.basefmtstrs)
+            self._str = str('').join(str(fs) for fs in self.chunks)
             return self._str
 
     def __len__(self):
         if self._len is not None:
             return self._len
-        self._len = sum(len(fs) for fs in self.basefmtstrs)
+        self._len = sum(len(fs) for fs in self.chunks)
         return self._len
 
     @property
@@ -428,7 +428,7 @@ class FmtStr(object):
         """The number of columns it would take to display this string"""
         if self._width is not None:
             return self._width
-        self._width = sum(fs.width for fs in self.basefmtstrs)
+        self._width = sum(fs.width for fs in self.chunks)
         return self._width
 
     def width_at_offset(self, n):
@@ -440,7 +440,7 @@ class FmtStr(object):
 
 
     def __repr__(self):
-        return '+'.join(repr(fs) for fs in self.basefmtstrs)
+        return '+'.join(repr(fs) for fs in self.chunks)
 
     def __eq__(self, other):
         if isinstance(other, (unicode, bytes, FmtStr)):
@@ -450,17 +450,17 @@ class FmtStr(object):
 
     def __add__(self, other):
         if isinstance(other, FmtStr):
-            return FmtStr(*(self.basefmtstrs + other.basefmtstrs))
+            return FmtStr(*(self.chunks + other.chunks))
         elif isinstance(other, (bytes, unicode)):
-            return FmtStr(*(self.basefmtstrs + [Chunk(other)]))
+            return FmtStr(*(self.chunks + [Chunk(other)]))
         else:
             raise TypeError('Can\'t add %r and %r' % (self, other))
 
     def __radd__(self, other):
         if isinstance(other, FmtStr):
-            return FmtStr(*(x for x in (other.basefmtstrs + self.basefmtstrs)))
+            return FmtStr(*(x for x in (other.chunks + self.chunks)))
         elif isinstance(other, (bytes, unicode)):
-            return FmtStr(*(x for x in ([Chunk(other)] + self.basefmtstrs)))
+            return FmtStr(*(x for x in ([Chunk(other)] + self.chunks)))
         else:
             raise TypeError('Can\'t add those')
 
@@ -475,17 +475,17 @@ class FmtStr(object):
         """Gets atts shared among all nonzero length component Chunk"""
         #TODO cache this, could get ugly for large FmtStrs
         atts = {}
-        first = self.basefmtstrs[0]
+        first = self.chunks[0]
         for att in sorted(first.atts):
             #TODO how to write this without the '???'?
-            if all(fs.atts.get(att, '???') == first.atts[att] for fs in self.basefmtstrs if len(fs) > 0):
+            if all(fs.atts.get(att, '???') == first.atts[att] for fs in self.chunks if len(fs) > 0):
                 atts[att] = first.atts[att]
         return atts
 
     def new_with_atts_removed(self, *attributes):
         """Returns a new FmtStr with the same content but some attributes removed"""
         return FmtStr(*[Chunk(bfs.s, bfs.atts.remove(*attributes))
-                        for bfs in self.basefmtstrs])
+                        for bfs in self.chunks])
 
     def __getattr__(self, att):
         # thanks to @aerenchyma/@jczett
@@ -503,9 +503,9 @@ class FmtStr(object):
 
     @property
     def divides(self):
-        """List of indices of divisions between the constituent basefmtstrs"""
+        """List of indices of divisions between the constituent chunks."""
         acc = [0]
-        for s in self.basefmtstrs:
+        for s in self.chunks:
             acc.append(acc[-1] + len(s))
         return acc
 
@@ -513,14 +513,14 @@ class FmtStr(object):
     def s(self):
         if self._s is not None:
             return self._s
-        self._s = "".join(fs.s for fs in self.basefmtstrs)
+        self._s = "".join(fs.s for fs in self.chunks)
         return self._s
 
     def __getitem__(self, index):
         index = normalize_slice(len(self), index)
         counter = 0
         parts = []
-        for chunk in self.basefmtstrs:
+        for chunk in self.chunks:
             if index.start < counter + len(chunk) and index.stop > counter:
                 start = max(0, index.start - counter)
                 end = min(index.stop - counter, len(chunk))
@@ -541,7 +541,7 @@ class FmtStr(object):
         index = normalize_slice(self.width, index)
         counter = 0
         parts = []
-        for chunk in self.basefmtstrs:
+        for chunk in self.chunks:
             if index.start < counter + chunk.width and index.stop > counter:
                 start = max(0, index.start - counter)
                 end = min(index.stop - counter, chunk.width)
@@ -569,10 +569,10 @@ class FmtStr(object):
 
     def _width_aware_splitlines(self, columns):
         # type: (int) -> Iterator[FmtStr]
-        splitter = self.basefmtstrs[0].splitter()
+        splitter = self.chunks[0].splitter()
         chunks_of_line = []
         width_of_line = 0
-        for source_chunk in self.basefmtstrs:
+        for source_chunk in self.chunks:
             splitter.reinit(source_chunk)
             while True:
                 request = splitter.request(columns - width_of_line)
@@ -595,7 +595,7 @@ class FmtStr(object):
         index = normalize_slice(len(self), index)
         counter = 0
         output = ''
-        for fs in self.basefmtstrs:
+        for fs in self.chunks:
             if index.start < counter + len(fs) and index.stop > counter:
                 s_part = fs.s[max(0, index.start - counter):index.stop - counter]
                 piece = Chunk(s_part, fs.atts).color_str
@@ -609,7 +609,7 @@ class FmtStr(object):
         raise Exception("No!")
 
     def copy(self):
-        return FmtStr(*self.basefmtstrs)
+        return FmtStr(*self.chunks)
 
 
 def interval_overlap(a, b, x, y):

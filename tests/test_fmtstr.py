@@ -6,7 +6,6 @@ from curtsies.formatstring import (
     FmtStr,
     fmtstr,
     Chunk,
-    ChunkSplitter,
     linesplit,
     normalize_slice,
     width_aware_slice,
@@ -119,7 +118,7 @@ class TestFmtStrSplice(unittest.TestCase):
     def test_splice_of_empty_fmtstr(self):
         self.assertEqual(fmtstr('ab').splice('', 1), fmtstr('ab'))
 
-    def test_splice_with_multiple_basefmtstrs(self):
+    def test_splice_with_multiple_chunks(self):
         a = fmtstr('notion')
         b = a.splice('te', 2, 6)
         c = b.splice('de', 0)
@@ -127,7 +126,7 @@ class TestFmtStrSplice(unittest.TestCase):
         self.assertEqual(a.s, "notion")
         self.assertEqual(b.s, "note")
         self.assertEqual(c.s, "denote")
-        self.assertEqual(len(c.basefmtstrs), 3)
+        self.assertEqual(len(c.chunks), 3)
 
     def test_splice_fmtstr_with_end_without_atts(self):
         a = fmtstr('notion')
@@ -135,36 +134,36 @@ class TestFmtStrSplice(unittest.TestCase):
 
         self.assertEqual(a.s, "notion")
         self.assertEqual(b.s, "note")
-        self.assertEqual(len(b.basefmtstrs), 2)
+        self.assertEqual(len(b.chunks), 2)
 
     def test_splice_fmtstr_with_end_with_atts(self):
-        # Need to test with fmtstr consisting of multiple basefmtstrs
+        # Need to test with fmtstr consisting of multiple chunks
         # and with attributes
         a = fmtstr('notion', 'blue')
         b = a.splice('te', 2, 6)
 
         self.assertEqual(a.s, "notion")
-        self.assertEqual(a.basefmtstrs[0].atts, {'fg': 34})
-        self.assertEqual(len(a.basefmtstrs), 1)
+        self.assertEqual(a.chunks[0].atts, {'fg': 34})
+        self.assertEqual(len(a.chunks), 1)
 
         self.assertEqual(b.s, 'note')
-        self.assertEqual(b.basefmtstrs[0].atts, {'fg': 34})
-        self.assertEqual(b.basefmtstrs[1].atts, {})
-        self.assertEqual(len(b.basefmtstrs), 2)
+        self.assertEqual(b.chunks[0].atts, {'fg': 34})
+        self.assertEqual(b.chunks[1].atts, {})
+        self.assertEqual(len(b.chunks), 2)
 
     def test_splice_fmtstr_without_end(self):
         a = fmtstr('notion')
         b = a.splice(fmtstr('ta'), 2)
         self.assertEqual(a.s, 'notion')
         self.assertEqual(b.s, 'notation')
-        self.assertEqual(len(b.basefmtstrs), 3)
+        self.assertEqual(len(b.chunks), 3)
 
     def test_splice_string_without_end(self):
         a = fmtstr('notion')
         b = a.splice('ta', 2)
         self.assertEqual(a.s, 'notion')
         self.assertEqual(b.s, 'notation')
-        self.assertEqual(len(b.basefmtstrs), 3)
+        self.assertEqual(len(b.chunks), 3)
 
     def test_multiple_bfs_splice(self):
         self.assertEqual(fmtstr('a') + blue('b'),
@@ -192,14 +191,14 @@ class TestFmtStr(unittest.TestCase):
         b = a.copy_with_new_str('bye')
         self.assertEqual(a.s, 'hello')
         self.assertEqual(b.s, 'bye')
-        self.assertEqual(a.basefmtstrs[0].atts, b.basefmtstrs[0].atts)
+        self.assertEqual(a.chunks[0].atts, b.chunks[0].atts)
 
     def test_append_without_atts(self):
         a = fmtstr('no')
         b = a.append('te')
         self.assertEqual(a.s, 'no')
         self.assertEqual(b.s, 'note')
-        self.assertEqual(len(b.basefmtstrs), 2)
+        self.assertEqual(len(b.chunks), 2)
 
     def test_shared_atts(self):
         a = fmtstr('hi', 'blue')
@@ -225,9 +224,9 @@ class TestFmtStr(unittest.TestCase):
         s = blue('hello there')
         self.assertEqual(s.split(' '), [s[:5], s[6:]])
 
-        # split shouldn't create fmtstrs without basefmtstrs
-        self.assertEqual(fmtstr('a').split('a')[0].basefmtstrs, fmtstr('').basefmtstrs)
-        self.assertEqual(fmtstr('a').split('a')[1].basefmtstrs, fmtstr('').basefmtstrs)
+        # split shouldn't create fmtstrs without chunks
+        self.assertEqual(fmtstr('a').split('a')[0].chunks, fmtstr('').chunks)
+        self.assertEqual(fmtstr('a').split('a')[1].chunks, fmtstr('').chunks)
 
         self.assertEqual((fmtstr('imp') + ' ').split('i'), [fmtstr(''), fmtstr('mp') + ' '])
         self.assertEqual(blue('abcbd').split('b'), [blue('a'), blue('c'), blue('d')])
