@@ -63,6 +63,18 @@ class FrozenDict(dict):
         return FrozenDict((k, v) for k, v in self.items() if k not in keys)
 
 
+def stable_format_dict(d):
+    """A sorted, python2/3 stable formatting of a dictionary.
+
+    Does not work for dicts with unicode strings as values."""
+    inner = ', '.join('{}: {}'.format(repr(k)[1:]
+                                      if repr(k).startswith(u"u'") or repr(k).startswith(u'u"')
+                                      else repr(k),
+                                      v)
+                      for k, v in sorted(d.items()))
+    return '{%s}' % inner
+
+
 class Chunk(object):
     """A string with a single set of formatting attributes
 
@@ -123,6 +135,13 @@ class Chunk(object):
             return unicode(self).encode('utf8')
 
     def __repr__(self):
+        return 'Chunk({s}{sep}{atts})'.format(
+            s=repr(self.s),
+            sep=', ' if self.atts else '',
+            atts = stable_format_dict(self.atts) if self.atts else '')
+
+    def repr_part(self):
+        """FmtStr repr is build by concatenating these."""
         def pp_att(att):
             if att == 'fg': return FG_NUMBER_TO_COLOR[self.atts[att]]
             elif att == 'bg': return 'on_' + BG_NUMBER_TO_COLOR[self.atts[att]]
@@ -440,7 +459,7 @@ class FmtStr(object):
 
 
     def __repr__(self):
-        return '+'.join(repr(fs) for fs in self.chunks)
+        return '+'.join(fs.repr_part() for fs in self.chunks)
 
     def __eq__(self, other):
         if isinstance(other, (unicode, bytes, FmtStr)):

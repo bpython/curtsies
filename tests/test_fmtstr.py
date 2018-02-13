@@ -452,6 +452,7 @@ class TestCharacterWidth(unittest.TestCase):
         self.assertEqual(len(fmtstr('a\u0300')), 2)
         self.assertEqual(fmtstr('a\u0300').width, 1)
 
+
 class TestWidthHelpers(unittest.TestCase):
 
     def test_combining_char_aware_slice(self):
@@ -471,6 +472,16 @@ class TestWidthHelpers(unittest.TestCase):
         self.assertEqual(width_aware_slice('aＥbc', 1, 4), 'Ｅb')
         self.assertEqual(width_aware_slice('aＥbc', 2, 4), ' b')
         self.assertEqual(width_aware_slice('aＥbc', 0, 2), 'a ')
+
+
+class TestChunk(unittest.TestCase):
+    def test_repr(self):
+        c = Chunk('a', {'fg': 32})
+        if PY2:
+            self.assertEqual(repr(c), """Chunk(u'a', {'fg': 32})""")
+        else:
+            self.assertEqual(repr(c), """Chunk('a', {'fg': 32})""")
+
 
 class TestChunkSplitter(unittest.TestCase):
     def test_chunk_splitter(self):
@@ -508,8 +519,6 @@ class TestChunkSplitter(unittest.TestCase):
         self.assertEqual(s.request(2), (2, Chunk('Ｅ')))
         self.assertEqual(s.request(2), (2, Chunk('bc')))
         self.assertEqual(s.request(2), None)
-
-
 
 
 class TestFSArray(unittest.TestCase):
