@@ -1,4 +1,7 @@
 from __future__ import unicode_literals
+
+from typing import Iterator, Text, Tuple, List, Union, Optional
+
 r"""Colored strings that behave mostly like strings
 
 >>> s = fmtstr("Hey there!", 'red')
@@ -24,7 +27,7 @@ red('hello')
 import itertools
 import re
 import sys
-import wcwidth
+from wcwidth import wcswidth
 
 from .escseqparse import parse, remove_ansi
 from .termformatconstants import (FG_COLORS, BG_COLORS, STYLES,
@@ -81,7 +84,7 @@ class Chunk(object):
 
     @property
     def width(self):
-        width = wcwidth.wcswidth(self._s)
+        width = wcswidth(self._s)
         if len(self._s) > 0 and width < 1:
             raise ValueError("Can't calculate width of string %r" % self._s)
         return width
@@ -129,6 +132,73 @@ class Chunk(object):
         return (''.join(pp_att(att)+'(' for att in sorted(atts_out))
                 + (repr(self.s) if PY3 else repr(self.s)[1:]) + ')'*len(atts_out))
 
+    def splitter(self):
+        """
+        Returns a view of this Chunk from which new Chunks can be requested.
+        """
+        return ChunkSplitter(self)
+
+
+class ChunkSplitter(object):
+    """
+    """
+
+    def __init__(self, chunk):
+        self.chunk = chunk
+        self.internal_offset = 0  # index into chunk.s
+        self.internal_width = 0  # width of chunks.s[:self.internal_offset]
+        divides = [0]
+        for c in self.chunk.s:
+            divides.append(divides[-1] + wcswidth(c))
+        self.divides = divides
+
+    def reinit(self, chunk):
+        """Reuse an existing Splitter instance for speed."""
+        # TODO benchmark to prove this is worthwhile
+        self.__init__(chunk)
+
+    def request(self, max_width):
+        # type: (int) -> Optional[Tuple[int, Chunk]]
+        """Requests a sub-chunk of max_width or shorter. Returns None if no chunks left."""
+        if max_width < 1:
+            raise ValueError('requires positive integer max_width')
+
+        s = self.chunk.s
+        length = len(s)
+
+        if self.internal_offset == len(s):
+            return None
+
+        width = 0
+        start_offset = i = self.internal_offset
+        replacement_char = u' '
+
+        while True:
+            w = wcswidth(s[i])
+
+            # If adding a character puts us over the requested width, return what we've got so far
+            if width + w > max_width:
+                self.internal_offset = i  # does not include ith character
+                self.internal_width += width
+
+                # if not adding it us makes us short, this must have been a double-width character
+                if width < max_width:
+                    assert width + 1 == max_width, 'unicode character width of more than 2!?!'
+                    assert w == 2, 'unicode character of width other than 2?'
+                    return (width + 1, Chunk(s[start_offset:self.internal_offset] + replacement_char,
+                                             atts=self.chunk.atts))
+                return (width, Chunk(s[start_offset:self.internal_offset], atts=self.chunk.atts))
+            # otherwise add this width
+            width += w
+
+            # If one more char would put us over, return whatever we've got
+            if i + 1 == length:
+                self.internal_offset = i + 1  # beware the fencepost, i is an index not an offset
+                self.internal_width += width
+                return (width, Chunk(s[start_offset:self.internal_offset], atts=self.chunk.atts))
+            # otherwise attempt to add the next character
+            i += 1
+
 
 class FmtStr(object):
     """ A string whose substrings carry attributes (which may be different from one to the next).  """
@@ -147,6 +217,7 @@ class FmtStr(object):
 
     @classmethod
     def from_str(cls, s):
+        # type: (Union[Text, bytes]) -> FmtStr
         r"""
         Return a FmtStr representing input.
 
@@ -363,7 +434,7 @@ class FmtStr(object):
     def width_at_offset(self, n):
         """Returns the horizontal position of character n of the string"""
         #TODO make more efficient?
-        width = wcwidth.wcswidth(self.s[:n])
+        width = wcswidth(self.s[:n])
         assert width != -1
         return width
 
@@ -464,8 +535,8 @@ class FmtStr(object):
         return FmtStr(*parts) if parts else fmtstr('')
 
     def width_aware_slice(self, index):
-        """Slice based on the number of columns it would take to display the substring"""
-        if wcwidth.wcswidth(self.s) == -1:
+        """Slice based on the number of columns it would take to display the substring."""
+        if wcswidth(self.s) == -1:
             raise ValueError('bad values for width aware slicing')
         index = normalize_slice(self.width, index)
         counter = 0
@@ -483,6 +554,41 @@ class FmtStr(object):
             if index.stop < counter:
                 break
         return FmtStr(*parts) if parts else fmtstr('')
+
+    def width_aware_splitlines(self, columns):
+        # type: (int) -> Iterator[FmtStr]
+        """Split into lines, pushing doublewidth characters at the end of a line to the next line.
+
+        When a double-width character is pushed to the next line, a space is added to pad out the line.
+        """
+        if columns < 2:
+            raise ValueError("Column width %s is too narrow." % columns)
+        if wcswidth(self.s) == -1:
+            raise ValueError('bad values for width aware slicing')
+        return self._width_aware_splitlines(columns)
+
+    def _width_aware_splitlines(self, columns):
+        # type: (int) -> Iterator[FmtStr]
+        splitter = self.basefmtstrs[0].splitter()
+        chunks_of_line = []
+        width_of_line = 0
+        for source_chunk in self.basefmtstrs:
+            splitter.reinit(source_chunk)
+            while True:
+                request = splitter.request(columns - width_of_line)
+                if request is None:
+                    break  # done with this source_chunk
+                w, new_chunk = request
+                chunks_of_line.append(new_chunk)
+                width_of_line += w
+
+                if width_of_line == columns:
+                    yield FmtStr(*chunks_of_line)
+                    del chunks_of_line[:]
+                    width_of_line = 0
+
+        if chunks_of_line:
+            yield FmtStr(*chunks_of_line)
 
     def _getitem_normalized(self, index):
         """Builds the more compact fmtstrs by using fromstr( of the control sequences)"""
@@ -523,13 +629,21 @@ def interval_overlap(a, b, x, y):
 
 
 def width_aware_slice(s, start, end, replacement_char=u' '):
+    # type: (Text, int, int, Text)
+    """
+    >>> width_aware_slice('aＥiou', 0, 2)
+    'a '
+    """
     divides = [0]
     for c in s:
-        divides.append(divides[-1] + wcwidth.wcswidth(c))
+        divides.append(divides[-1] + wcswidth(c))
 
     new_chunk_chars = []
     for char, char_start, char_end in zip(s, divides[:-1], divides[1:]):
-        if char_start >= start and char_end <= end:
+        if char_start == start and char_end == start:
+            continue  # don't use zero-width characters at the beginning of a slice
+                      # (combining characters combine with the chars before themselves)
+        elif char_start >= start and char_end <= end:
             new_chunk_chars.append(char)
         else:
             new_chunk_chars.extend(replacement_char * interval_overlap(char_start, char_end, start, end))
@@ -538,6 +652,7 @@ def width_aware_slice(s, start, end, replacement_char=u' '):
 
 
 def linesplit(string, columns):
+    # type: (Union[Text, FmtStr], int) -> List[FmtStr]
     """Returns a list of lines, split on the last possible space of each line.
 
     Split spaces will be removed. Whitespaces will be normalized to one space.
@@ -624,6 +739,7 @@ def parse_args(args, kwargs):
     return kwargs
 
 def fmtstr(string, *args, **kwargs):
+    # type: (Union[Text, bytes, FmtStr], *Any, **Any) -> FmtStr
     """
     Convenience function for creating a FmtStr
 
