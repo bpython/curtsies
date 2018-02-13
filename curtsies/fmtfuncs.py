@@ -1,26 +1,28 @@
 from functools import partial as _partial
-from itertools import chain as _chain
-from .termformatconstants import FG_COLORS, BG_COLORS, STYLES
 from .formatstring import fmtstr
 
-for att in _chain(FG_COLORS, ('on_'+x for x in BG_COLORS), STYLES):
-    locals()[att] = _partial(fmtstr, style=att)
-plain = _partial(fmtstr)
+dark = _partial(fmtstr, style='dark')
+red = _partial(fmtstr, style='red')
+green = _partial(fmtstr, style='green')
+yellow = _partial(fmtstr, style='yello')
+blue = _partial(fmtstr, style='blue')
+magenta = _partial(fmtstr, style='magenta')
+cyan = _partial(fmtstr, style='cyan')
+gray = _partial(fmtstr, style='gray')
 
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-    print((blue('adf')))
-    print((blue(on_red('ad'))))
-    print((blue('asdf') + on_red('adsf')))
-    print(((blue('asdf') + on_red('adsf'))[3:7]))
-    f = blue('hey there') + on_red(' Tom!')
-    print(f)
-    f[1:3] = 'ot'
-    print((repr(f)))
-    print(f)
-    f = on_blue(red('stuff'))
-    print((repr(f)))
-    print((repr(str(f))))
-    print(f)
-    print(((f + '!')[0:6] + '?'))
+on_dark = _partial(fmtstr, style='on_dark')
+on_red = _partial(fmtstr, style='on_red')
+on_green = _partial(fmtstr, style='on_green')
+on_yellow = _partial(fmtstr, style='on_yello')
+on_blue = _partial(fmtstr, style='on_blue')
+on_magenta = _partial(fmtstr, style='on_magenta')
+on_cyan = _partial(fmtstr, style='on_cyan')
+on_gray = _partial(fmtstr, style='on_gray')
+
+bold = _partial(fmtstr, style='bold')
+dark = _partial(fmtstr, style='dark')
+underline = _partial(fmtstr, style='underline')
+blink = _partial(fmtstr, style='blink')
+invert = _partial(fmtstr, style='invert')
+
+plain = _partial(fmtstr)
