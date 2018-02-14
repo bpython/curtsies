@@ -1,7 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.3.0] - 2018-02-13
+- Change name of "dark" color to "black"
 - Drop support for Python 2.6 and 3.3
+- New FmtStr method width_aware_splitlines which cuts up a FmtStr in linear time
 
 ## [0.2.12] - 2018-02-12
 - fix accidentally quadratic `width_aware_slice` behavior (fixes bpython #729)
