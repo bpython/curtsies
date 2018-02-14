@@ -41,7 +41,7 @@ setup(name='curtsies',
       install_requires = [
           'blessings>=1.5',
           'wcwidth>=0.1.4',
-          'typing',
+          'typing; python_version<"3.5"',
       ],
       tests_require = [
           'mock',
