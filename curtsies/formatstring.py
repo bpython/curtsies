@@ -43,6 +43,7 @@ xforms = {
     'fg' :        lambda s, v: '%s%s%s' % (seq(v), s, seq(RESET_FG)),
     'bg' :        lambda s, v: seq(v)+s+seq(RESET_BG),
     'bold' :      lambda s: seq(STYLES['bold'])     +s+seq(RESET_ALL),
+    'dark' :      lambda s: seq(STYLES['dark'])     +s+seq(RESET_ALL),
     'underline' : lambda s: seq(STYLES['underline'])+s+seq(RESET_ALL),
     'blink' :     lambda s: seq(STYLES['blink'])    +s+seq(RESET_ALL),
     'invert' :    lambda s: seq(STYLES['invert'])   +s+seq(RESET_ALL),
