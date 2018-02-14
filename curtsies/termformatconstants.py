@@ -1,6 +1,6 @@
 """Constants for terminal formatting"""
 
-colors = 'dark', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'gray'
+colors = 'black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'gray'
 FG_COLORS = dict(list(zip(colors, list(range(30, 38)))))
 BG_COLORS = dict(list(zip(colors, list(range(40, 48)))))
 STYLES = dict(list(zip(('bold', 'dark', 'underline', 'blink', 'invert'), [1,2,4,5,7])))

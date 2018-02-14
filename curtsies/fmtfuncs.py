@@ -1,7 +1,7 @@
 from functools import partial as _partial
 from .formatstring import fmtstr
 
-dark = _partial(fmtstr, style='dark')
+black = _partial(fmtstr, style='black')
 red = _partial(fmtstr, style='red')
 green = _partial(fmtstr, style='green')
 yellow = _partial(fmtstr, style='yellow')
@@ -10,7 +10,8 @@ magenta = _partial(fmtstr, style='magenta')
 cyan = _partial(fmtstr, style='cyan')
 gray = _partial(fmtstr, style='gray')
 
-on_dark = _partial(fmtstr, style='on_dark')
+on_black = _partial(fmtstr, style='on_black')
+on_dark = on_black  # deprecated, old name of on_black
 on_red = _partial(fmtstr, style='on_red')
 on_green = _partial(fmtstr, style='on_green')
 on_yellow = _partial(fmtstr, style='on_yellow')
