@@ -2,11 +2,11 @@
 [![Documentation Status](https://readthedocs.org/projects/curtsies/badge/?version=latest)](https://readthedocs.org/projects/curtsies/?badge=latest)
 ![Curtsies Logo](http://ballingt.com/assets/curtsiestitle.png)
 
-Curtsies is a Python 2.6+ & 3.3+ compatible library for interacting with the terminal.
+Curtsies is a Python 2.7 & 3.4+ compatible library for interacting with the terminal.
 This is what using (nearly every feature of) curtsies looks like:
 
 ```python
-from __future__ import unicode_literals # convenient for Python 2
+from __future__ import unicode_literals  # convenient for Python 2
 import random
 
 from curtsies import FullscreenWindow, Input, FSArray
