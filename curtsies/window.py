@@ -62,7 +62,7 @@ class BaseWindow(object):
         self._last_rendered_height = height
 
     def render_to_terminal(self, array, cursor_pos=(0, 0)):
-        raise NotImplemented
+        raise NotImplementedError
 
     def get_term_hw(self):
         """Returns current terminal height and width"""
