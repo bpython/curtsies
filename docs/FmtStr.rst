@@ -31,8 +31,38 @@ then another library may be a better fit than Curtsies.
 Unlike other libraries, Curtsies allows these colored strings to be further manipulated after
 they are created.
 
+Available colours and styles
+----------------------------
+
+The following colours are available with corresponding foreground and background functions:
+
+=======  =============  ================
+Name     Foreground     Background
+=======  =============  ================
+black    ``black()``    ``on_black()``
+red      ``red()``      ``on_red()``
+green    ``green()``    ``on_green()``
+yellow   ``yellow()``   ``on_yellow()``
+blue     ``blue()``     ``on_blue()``
+magenta  ``magenta()``  ``on_magenta()``
+cyan     ``cyan()``     ``on_cyan()``
+gray     ``gray()``     ``on_gray()``
+=======  =============  ================
+
+And the following styles with their corresponding functions:
+
+=========  ===============
+Style      Function
+=========  ===============
+bold       ``bold()``
+dark       ``dark()``
+underline  ``underline()``
+blink      ``blink()``
+invert     ``invert()``
+=========  ===============
+
 FmtStr - Rationale
-================
+==================
 
 If all you need is to print colored text, many other libraries also make `ANSI escape codes <http://en.wikipedia.org/wiki/ANSI_escape_code>`_ easy to use.
 
