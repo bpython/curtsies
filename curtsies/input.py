@@ -44,7 +44,8 @@ class Input(object):
     """Keypress and control event generator"""
     def __init__(self, in_stream=None, keynames='curtsies',
                  paste_threshold=events.MAX_KEYPRESS_SIZE+1, sigint_event=False,
-                 signint_callback_provider=None):
+                 signint_callback_provider=None,
+                 disable_terminal_start_stop=False):
         """Returns an Input instance.
 
         Args:
@@ -56,6 +57,9 @@ class Input(object):
               represent to be combined into a single paste event
             sigint_event (bool): Whether SIGINT signals from the OS
               should be intercepted and returned as SigIntEvent objects
+            disable_terminal_start_stop (bool): If True, disable terminal
+              start/stop using Ctrl-s/Ctrl-q, thus enabling these keys
+              to be read as input by curtsies
         """
         if in_stream is None:
             in_stream = sys.__stdin__
@@ -64,6 +68,7 @@ class Input(object):
         self.keynames = keynames
         self.paste_threshold = paste_threshold
         self.sigint_event = sigint_event
+        self.disable_terminal_start_stop = disable_terminal_start_stop
         self.sigints = []
 
         self.readers = []
@@ -78,6 +83,12 @@ class Input(object):
     def __enter__(self):
         self.original_stty = termios.tcgetattr(self.in_stream)
         tty.setcbreak(self.in_stream, termios.TCSANOW)
+
+        if self.disable_terminal_start_stop:
+            attrs = termios.tcgetattr(self.in_stream)
+            attrs[-1][termios.VSTOP] = 0   # Ctrl-s
+            attrs[-1][termios.VSTART] = 0  # Ctrl-q
+            termios.tcsetattr(self.in_stream, termios.TCSANOW, attrs)
 
         if sys.platform == 'darwin':
             attrs = termios.tcgetattr(self.in_stream)
