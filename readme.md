@@ -8,6 +8,7 @@ This is what using (nearly every feature of) curtsies looks like:
 ```python
 from __future__ import unicode_literals  # convenient for Python 2
 import random
+import sys
 
 from curtsies import FullscreenWindow, Input, FSArray
 from curtsies.fmtfuncs import red, bold, green, on_blue, yellow
@@ -24,7 +25,10 @@ with FullscreenWindow() as window:
             elif c == '<SPACE>':
                 a = FSArray(window.height, window.width)
             else:
-                s = repr(c).decode()
+			    if sys.version_info[0] == 2:
+				    s = repr(c).decode()
+				else:
+				    s = repr(c)
                 row = random.choice(range(window.height))
                 column = random.choice(range(window.width-len(s)))
                 color = random.choice([red, green, on_blue, yellow])
