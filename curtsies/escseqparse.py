@@ -9,6 +9,8 @@ True
 True
 """
 
+from typing import Text, List, Mapping, Union, Tuple, Match, cast, Dict, Any, Optional, NewType
+
 import re
 
 from .termformatconstants import (FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR,
@@ -16,11 +18,15 @@ from .termformatconstants import (FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR,
                                   RESET_BG, STYLES)
 
 
+Token = Dict[str, Union[Text, List[int]]]
+
 def remove_ansi(s):
+    # type: (Text) -> Text
     return re.sub(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]', '', s)
 
 
 def parse(s):
+    # type: (Text) -> List[Union[Text, Dict[str, Union[str, bool, None]]]]
     r"""
     Returns a list of strings or format dictionaries to describe the strings.
 
@@ -30,7 +36,7 @@ def parse(s):
     ['>>> []']
     >>> #parse("\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m")
     """
-    stuff = []
+    stuff = []  # type: List[Union[Text, Dict[str, Union[str, bool, None]]]]
     rest = s
     while True:
         front, token, rest = peel_off_esc_code(rest)
@@ -49,6 +55,7 @@ def parse(s):
 
 
 def peel_off_esc_code(s):
+    # type: (Text) -> Tuple[Text, Optional[Token], Text]
     r"""Returns processed text, the next token, and unprocessed text
 
     >>> front, d, rest = peel_off_esc_code('some[2Astuff')
@@ -72,6 +79,7 @@ def peel_off_esc_code(s):
             (?P<rest>.*)"""
     m1 = re.match(p, s, re.VERBOSE)  # multibyte esc seq
     m2 = re.match('(?P<front>.*?)(?P<seq>(?P<csi>)(?P<command>[\x40-\x5f]))(?P<rest>.*)', s)  # 2 byte escape sequence
+    m = None  # Optional[Match[str]]
     if m1 and m2:
         m = m1 if len(m1.groupdict()['front']) <= len(m2.groupdict()['front']) else m2
         # choose the match which has less processed text in order to get the
@@ -81,24 +89,25 @@ def peel_off_esc_code(s):
     else: m = None
 
     if m:
-        d = m.groupdict()
+        d = m.groupdict()  # type: Dict[str, Any]
         del d['front']
         del d['rest']
         if 'numbers' in d and all(d['numbers'].split(';')):
             d['numbers'] = [int(x) for x in d['numbers'].split(';')]
 
-        return m.groupdict()['front'], d, m.groupdict()['rest']
+        return m.groupdict()['front'], cast(Token, d), m.groupdict()['rest']
     else:
         return s, None, ''
 
 def token_type(info):
+    # type: (Token) -> Optional[List[Dict[Text, Union[Text, bool, None]]]]
     """
     """
     if info['command'] == 'm':
         # The default action for ESC[m is to act like ESC[0m
         # Ref: https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
-        values = info['numbers'] if len(info['numbers']) else [0]
-        tokens = []
+        values = cast(List[int], info['numbers']) if len(info['numbers']) else [0]
+        tokens = []  # type: List[Dict[str, Union[Text, bool, None]]]
         for value in values:
             if value in FG_NUMBER_TO_COLOR: tokens.append({'fg':FG_NUMBER_TO_COLOR[value]})
             if value in BG_NUMBER_TO_COLOR: tokens.append({'bg':BG_NUMBER_TO_COLOR[value]})
@@ -113,6 +122,7 @@ def token_type(info):
             raise ValueError("Can't parse escape seq %r" % info)
     elif info['command'] == 'H':  # fix for bpython #76
         return [{}]
+    return None
 
 if __name__ == '__main__':
     import doctest; doctest.testmod()

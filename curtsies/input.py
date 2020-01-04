@@ -16,6 +16,9 @@ logger = logging.getLogger(__name__)
 from .termhelpers import Nonblocking
 from . import events
 
+from typing import Callable, Type, TextIO, Optional, List, Union, Text, cast, Tuple, Any
+from types import TracebackType, FrameType
+
 PY3 = sys.version_info[0] >= 3
 
 READ_SIZE = 1024
@@ -25,18 +28,22 @@ assert READ_SIZE >= events.MAX_KEYPRESS_SIZE
 
 
 def is_main_thread():
-    return isinstance(threading.current_thread(), threading._MainThread)
+    # type: () -> bool
+    return isinstance(threading.current_thread(), threading._MainThread) # type: ignore
 
 
 class ReplacedSigIntHandler(object):
     def __init__(self, handler):
+        # type: (Callable) -> None
         self.handler = handler
 
     def __enter__(self):
+        # type: () -> None
         self.orig_sigint_handler = signal.getsignal(signal.SIGINT)
         signal.signal(signal.SIGINT, self.handler)
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, type=None, value=None, traceback=None):
+        # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
         signal.signal(signal.SIGINT, self.orig_sigint_handler)
 
 
@@ -46,6 +53,7 @@ class Input(object):
                  paste_threshold=events.MAX_KEYPRESS_SIZE+1, sigint_event=False,
                  signint_callback_provider=None,
                  disable_terminal_start_stop=False):
+        # type: (TextIO, str, int, bool, None, bool) -> None
         """Returns an Input instance.
 
         Args:
@@ -64,36 +72,40 @@ class Input(object):
         if in_stream is None:
             in_stream = sys.__stdin__
         self.in_stream = in_stream
-        self.unprocessed_bytes = []  # leftover from stdin, unprocessed yet
+        self.unprocessed_bytes = []  # type: List[bytes]  # leftover from stdin, unprocessed yet
         self.keynames = keynames
         self.paste_threshold = paste_threshold
         self.sigint_event = sigint_event
         self.disable_terminal_start_stop = disable_terminal_start_stop
-        self.sigints = []
+        self.sigints = []  # type: List[events.SigIntEvent]
 
-        self.readers = []
-        self.queued_interrupting_events = []
-        self.queued_events = []
-        self.queued_scheduled_events = []
+        self.readers = []  # type: List[int]
+        self.queued_interrupting_events = []  # type: List[Union[events.Event, Text]]
+        self.queued_events = []  # type: List[events.Event]
+        self.queued_scheduled_events = []  # type: List[Tuple[float, events.ScheduledEvent]]
 
     # prospective: this could be useful for an external select loop
     def fileno(self):
+        # type: () -> int
         return self.in_stream.fileno()
 
     def __enter__(self):
+        # type: () -> Input
         self.original_stty = termios.tcgetattr(self.in_stream)
         tty.setcbreak(self.in_stream, termios.TCSANOW)
 
         if self.disable_terminal_start_stop:
             attrs = termios.tcgetattr(self.in_stream)
-            attrs[-1][termios.VSTOP] = 0   # Ctrl-s
-            attrs[-1][termios.VSTART] = 0  # Ctrl-q
+            tty_cc = cast(List[Union[bytes, int]], attrs[-1])
+            tty_cc[termios.VSTOP] = 0   # Ctrl-s
+            tty_cc[termios.VSTART] = 0  # Ctrl-q
             termios.tcsetattr(self.in_stream, termios.TCSANOW, attrs)
 
         if sys.platform == 'darwin':
             attrs = termios.tcgetattr(self.in_stream)
             VDSUSP = termios.VSUSP + 1
-            attrs[-1][VDSUSP] = 0
+            tty_cc = cast(List[Union[bytes, int]], attrs[-1])
+            tty_cc[VDSUSP] = 0
             termios.tcsetattr(self.in_stream, termios.TCSANOW, attrs)
 
         if self.sigint_event and is_main_thread():
@@ -101,23 +113,28 @@ class Input(object):
             signal.signal(signal.SIGINT, self.sigint_handler)
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, type=None, value=None, traceback=None):
+        # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
         if self.sigint_event and is_main_thread():
             signal.signal(signal.SIGINT, self.orig_sigint_handler)
         termios.tcsetattr(self.in_stream, termios.TCSANOW, self.original_stty)
 
     def sigint_handler(self, signum, frame):
+        # type: (Union[signal.Signals, int], FrameType) -> None
         self.sigints.append(events.SigIntEvent())
 
     def __iter__(self):
+        # type: () -> Input
         return self
 
     def next(self):
+        # type: () -> Union[None, Text, events.Event]
         return self.send(None)
 
     __next__ = next
 
     def unget_bytes(self, string):
+        # type: (bytes) -> None
         """Adds bytes to be internal buffer to be read
 
         This method is for reporting bytes from an in_stream read
@@ -127,6 +144,7 @@ class Input(object):
                                       for i in range(len(string)))
 
     def _wait_for_read_ready_or_timeout(self, timeout):
+        # type: (Union[float, int, None]) -> Tuple[bool, Optional[Union[events.Event, Text]]]
         """Returns tuple of whether stdin is ready to read and an event.
 
         If an event is returned, that event is more pressing than reading
@@ -150,7 +168,7 @@ class Input(object):
                     if self.queued_interrupting_events:
                         return False, self.queued_interrupting_events.pop(0)
                     elif remaining_timeout is not None:
-                        remaining_timeout = max(0, t0 + timeout - time.time())
+                        remaining_timeout = max(0, t0 + remaining_timeout - time.time())
                         continue
                     else:
                         continue
@@ -159,9 +177,10 @@ class Input(object):
                 if self.sigints:
                     return False, self.sigints.pop()
                 if remaining_timeout is not None:
-                    remaining_timeout = max(timeout - (time.time() - t0), 0)
+                    remaining_timeout = max(remaining_timeout - (time.time() - t0), 0)
 
     def send(self, timeout=None):
+        # type: (Union[float, int, None]) -> Union[None, Text, events.Event]
         """Returns an event or None if no events occur before timeout."""
         if self.sigint_event and is_main_thread():
             with ReplacedSigIntHandler(self.sigint_handler):
@@ -170,7 +189,9 @@ class Input(object):
             return self._send(timeout)
 
     def _send(self, timeout):
+        # type: (Union[float, int, None]) -> Union[None, Text, events.Event]
         def find_key():
+            # type: () -> Optional[Text]
             """Returns keypress identified by adding unprocessed bytes or None"""
             current_bytes = []
             while self.unprocessed_bytes:
@@ -180,10 +201,11 @@ class Input(object):
                                    keynames=self.keynames,
                                    full=len(self.unprocessed_bytes)==0)
                 if e is not None:
-                    self.current_bytes = []
+                    current_bytes = []
                     return e
             if current_bytes:  # incomplete keys shouldn't happen
-                raise ValueError("Couldn't identify key sequence: %r" % self.current_bytes)
+                raise ValueError("Couldn't identify key sequence: %r" % current_bytes)
+            return None
 
         if self.sigints:
             return self.sigints.pop()
@@ -201,7 +223,7 @@ class Input(object):
                                self.queued_scheduled_events[1:])
                 return self.queued_scheduled_events.pop(0)[1]
             else:
-                time_until_check = min(max(0, when - time.time()), timeout if timeout is not None else sys.maxsize)
+                time_until_check = min(max(0, when - time.time()), timeout if timeout is not None else sys.maxsize)  # type: Union[float, int, None]
         else:
             time_until_check = timeout
 
@@ -243,6 +265,7 @@ class Input(object):
             return e
 
     def _nonblocking_read(self):
+        # type: () -> int
         """Returns the number of characters read and adds them to self.unprocessed_bytes"""
         with Nonblocking(self.in_stream):
             if PY3:
@@ -265,24 +288,29 @@ class Input(object):
                     return len(data)
 
     def event_trigger(self, event_type):
+        # type: (Type[events.Event]) -> Callable
         """Returns a callback that creates events.
 
         Returned callback function will add an event of type event_type
         to a queue which will be checked the next time an event is requested."""
         def callback(**kwargs):
-            self.queued_events.append(event_type(**kwargs))
+            # type: (**Any) -> None
+            self.queued_events.append(event_type(**kwargs))  # type: ignore
         return callback
 
     def scheduled_event_trigger(self, event_type):
+        # type: (Type[events.ScheduledEvent]) -> Callable
         """Returns a callback that schedules events for the future.
 
         Returned callback function will add an event of type event_type
         to a queue which will be checked the next time an event is requested."""
-        def callback(when, **kwargs):
-            self.queued_scheduled_events.append((when, event_type(when=when, **kwargs)))
+        def callback(when):
+            # type: (float) -> None
+            self.queued_scheduled_events.append((when, event_type(when=when)))
         return callback
 
     def threadsafe_event_trigger(self, event_type):
+        # type: (Type[events.Event]) -> Callable
         """Returns a callback to creates events, interrupting current event requests.
 
         Returned callback function will create an event of type event_type
@@ -293,17 +321,21 @@ class Input(object):
         self.readers.append(readfd)
 
         def callback(**kwargs):
-            self.queued_interrupting_events.append(event_type(**kwargs))  #TODO use a threadsafe queue for this
+            # type: (**Any) -> None
+            #TODO use a threadsafe queue for this
+            self.queued_interrupting_events.append(event_type(**kwargs))  # type: ignore
             logger.warning('added event to events list %r', self.queued_interrupting_events)
             os.write(writefd, b'interrupting event!')
         return callback
 
 
 def getpreferredencoding():
+    # type: () -> str
     return locale.getpreferredencoding() or sys.getdefaultencoding()
 
 
 def main():
+    # type: () -> None
     with Input() as input_generator:
         print(repr(input_generator.send(2)))
         print(repr(input_generator.send(1)))
