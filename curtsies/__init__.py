@@ -1,5 +1,5 @@
 """Terminal-formatted strings"""
-__version__='0.3.0'
+__version__='0.3.1'
 
 from .window import FullscreenWindow, CursorAwareWindow
 from .input import Input

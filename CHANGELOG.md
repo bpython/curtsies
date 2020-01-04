@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.3.1] - 2020-01-03
+- Add "dark" format function
+- Add Input option to disable terminal start/stop. Thanks George Kettleborough!
+- Fix Py3.6 compatibility. Thanks Po-Chuan Hsieh!
+- Assorted fixes, thanks Jakub Wilk and Manuel Mendez!
+
 ## [0.3.0] - 2018-02-13
 - Change name of "dark" color to "black"
 - Drop support for Python 2.6 and 3.3
