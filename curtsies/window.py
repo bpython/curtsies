@@ -3,6 +3,9 @@
 
 from __future__ import unicode_literals
 
+from typing import Optional, Text, IO, Dict, Generic, TypeVar, Type, Tuple, Callable, Any, ByteString, cast, TextIO, Union, List
+from types import TracebackType
+
 import locale
 import logging
 import re
@@ -10,7 +13,7 @@ import sys
 
 import blessings
 
-from .formatstring import fmtstr
+from .formatstring import fmtstr, FmtStr
 from .formatstringarray import FSArray
 from .termhelpers import Cbreak
 
@@ -20,19 +23,24 @@ SCROLL_DOWN = u"\x1bD"
 FIRST_COLUMN = u"\x1b[1G"
 
 
+T = TypeVar('T', bound='BaseWindow')
+
+
 class BaseWindow(object):
     def __init__(self, out_stream=None, hide_cursor=True):
+        # type: (IO, bool) -> None
         logger.debug('-------initializing Window object %r------' % self)
         if out_stream is None:
             out_stream = sys.__stdout__
         self.t = blessings.Terminal(stream=out_stream, force_styling=True)
         self.out_stream = out_stream
         self.hide_cursor = hide_cursor
-        self._last_lines_by_row = {}
-        self._last_rendered_width = None
-        self._last_rendered_height = None
+        self._last_lines_by_row = {}  # type: Dict[int, Optional[FmtStr]]
+        self._last_rendered_width = None  # type: Optional[int]
+        self._last_rendered_height = None  # type: Optional[int]
 
     def scroll_down(self):
+        # type: () -> None
         logger.debug('sending scroll down message w/ cursor on bottom line')
 
         # since scroll-down only moves the screen if cursor is at bottom
@@ -40,21 +48,25 @@ class BaseWindow(object):
             self.write(SCROLL_DOWN)  # TODO will blessings do this?
 
     def write(self, msg):
+        # type: (Text) -> None
         self.out_stream.write(msg)
         self.out_stream.flush()
 
     def __enter__(self):
+        # type: (T) -> T
         logger.debug("running BaseWindow.__enter__")
         if self.hide_cursor:
             self.write(self.t.hide_cursor)
         return self
 
     def __exit__(self, type, value, traceback):
+        # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
         logger.debug("running BaseWindow.__exit__")
         if self.hide_cursor:
             self.write(self.t.normal_cursor)
 
     def on_terminal_size_change(self, height, width):
+        # type: (int, int) -> None
         # Changing the terminal size breaks the cache, because it
         # is unknown how the window size change affected scrolling / the cursor
         self._last_lines_by_row = {}
@@ -62,24 +74,35 @@ class BaseWindow(object):
         self._last_rendered_height = height
 
     def render_to_terminal(self, array, cursor_pos=(0, 0)):
+        # type: (Union[FSArray, List[FmtStr]], Tuple[int, int]) -> Optional[int]
         raise NotImplementedError
 
     def get_term_hw(self):
+        # type: () -> Tuple[int, int]
         """Returns current terminal height and width"""
         return self.t.height, self.t.width
 
-    width = property(lambda self: self.t.width, None, None,
-                     "The current width of the terminal window")
-    height = property(lambda self: self.t.height, None, None,
-                      "The current height of the terminal window")
+    @property
+    def width(self):
+        # type: () -> int
+        "The current width of the terminal window"
+        return self.t.width
+
+    @property
+    def height(self):
+        # type: () -> int
+        "The current width of the terminal window"
+        return self.t.height
 
     def array_from_text(self, msg):
+        # type: (Text) -> FSArray
         """Returns a FSArray of the size of the window containing msg"""
         rows, columns = self.t.height, self.t.width
         return self.array_from_text_rc(msg, rows, columns)
 
     @classmethod
     def array_from_text_rc(cls, msg, rows, columns):
+        # type: (Text, int, int) -> FSArray
         arr = FSArray(0, columns)
         i = 0
         for c in msg:
@@ -93,6 +116,7 @@ class BaseWindow(object):
         return arr
 
     def fmtstr_to_stdout_xform(self):
+        # type: () -> Callable[[FmtStr], Text]
         if sys.version_info[0] == 2:
             if hasattr(self.out_stream, 'encoding'):
                 encoding = self.out_stream.encoding
@@ -100,9 +124,11 @@ class BaseWindow(object):
                 encoding = locale.getpreferredencoding()
 
             def for_stdout(s):
+                # type: (FmtStr) -> Text
                 return unicode(s).encode(encoding, 'replace')
         else:
             def for_stdout(s):
+                # type: (FmtStr) -> Text
                 return str(s)
         return for_stdout
 
@@ -123,6 +149,7 @@ class FullscreenWindow(BaseWindow):
         its out_stream; cached writes will be inaccurate.
     """
     def __init__(self, out_stream=None, hide_cursor=True):
+        # type: (IO, bool) -> None
         """Constructs a FullscreenWindow
 
         Args:
@@ -134,14 +161,17 @@ class FullscreenWindow(BaseWindow):
         self.fullscreen_ctx = self.t.fullscreen()
 
     def __enter__(self):
+        # type: () -> FullscreenWindow
         self.fullscreen_ctx.__enter__()
         return BaseWindow.__enter__(self)
 
     def __exit__(self, type, value, traceback):
+        # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
         self.fullscreen_ctx.__exit__(type, value, traceback)
         BaseWindow.__exit__(self, type, value, traceback)
 
     def render_to_terminal(self, array, cursor_pos=(0, 0)):
+        # type: (Union[FSArray, List[FmtStr]], Tuple[int, int]) -> None
         """Renders array to terminal and places (0-indexed) cursor
 
         Args:
@@ -168,7 +198,7 @@ class FullscreenWindow(BaseWindow):
                 width != self._last_rendered_width):
             self.on_terminal_size_change(height, width)
 
-        current_lines_by_row = {}
+        current_lines_by_row = {}  # type: Dict[int, Optional[FmtStr]]
         rows = list(range(height))
         rows_for_use = rows[:len(array)]
         rest_of_rows = rows[len(array):]
@@ -221,6 +251,7 @@ class CursorAwareWindow(BaseWindow):
     def __init__(self, out_stream=None, in_stream=None,
                  keep_last_line=False, hide_cursor=True,
                  extra_bytes_callback=None):
+        # type: (IO, IO, bool, bool, Callable[[ByteString], None]) -> None
         """Constructs a CursorAwareWindow
 
         Args:
@@ -238,8 +269,8 @@ class CursorAwareWindow(BaseWindow):
         if in_stream is None:
             in_stream = sys.__stdin__
         self.in_stream = in_stream
-        self._last_cursor_column = None
-        self._last_cursor_row = None
+        self._last_cursor_column = None  # type: Optional[int]
+        self._last_cursor_row = None  # type: Optional[int]
         self.keep_last_line = keep_last_line
         self.cbreak = Cbreak(self.in_stream)
         self.extra_bytes_callback = extra_bytes_callback
@@ -251,6 +282,7 @@ class CursorAwareWindow(BaseWindow):
         self.in_get_cursor_diff = False
 
     def __enter__(self):
+        # type: () -> CursorAwareWindow
         self.cbreak.__enter__()
         self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
@@ -258,6 +290,7 @@ class CursorAwareWindow(BaseWindow):
         return BaseWindow.__enter__(self)
 
     def __exit__(self, type, value, traceback):
+        # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
         if self.keep_last_line:
             # just moves cursor down if not on last line
             self.write(SCROLL_DOWN)
@@ -269,6 +302,7 @@ class CursorAwareWindow(BaseWindow):
         BaseWindow.__exit__(self, type, value, traceback)
 
     def get_cursor_position(self):
+        # type: () -> Tuple[int, int]
         """Returns the terminal (row, column) of the cursor
 
         0-indexed, like blessings cursor positions"""
@@ -279,6 +313,7 @@ class CursorAwareWindow(BaseWindow):
         self.write(query_cursor_position)
 
         def retrying_read():
+            # type: () -> str
             while True:
                 try:
                     c = in_stream.read(1)
@@ -307,7 +342,8 @@ class CursorAwareWindow(BaseWindow):
                 if extra:
                     if self.extra_bytes_callback:
                         self.extra_bytes_callback(
-                            extra.encode(in_stream.encoding)
+                            # TODO how do we know that this works?
+                            extra.encode(cast(TextIO, in_stream).encoding)
                         )
                     else:
                         raise ValueError(("Bytes preceding cursor position "
@@ -318,6 +354,7 @@ class CursorAwareWindow(BaseWindow):
                 return (row - 1, col - 1)
 
     def get_cursor_vertical_diff(self):
+        # type: () -> int
         """Returns the how far down the cursor moved since last render.
 
         Note:
@@ -347,6 +384,7 @@ class CursorAwareWindow(BaseWindow):
                 return cursor_dy
 
     def _get_cursor_vertical_diff_once(self):
+        # type: () -> int
         """Returns the how far down the cursor moved."""
         old_top_usable_row = self.top_usable_row
         row, col = self.get_cursor_position()
@@ -368,6 +406,7 @@ class CursorAwareWindow(BaseWindow):
         return cursor_dy
 
     def render_to_terminal(self, array, cursor_pos=(0, 0)):
+        # type: (Union[FSArray, List[FmtStr]], Tuple[int, int]) -> int
         """Renders array to terminal, returns the number of lines scrolled offscreen
 
         Returns:
@@ -398,7 +437,7 @@ class CursorAwareWindow(BaseWindow):
                 width != self._last_rendered_width):
             self.on_terminal_size_change(height, width)
 
-        current_lines_by_row = {}
+        current_lines_by_row = {}  # type: Dict[int, Optional[FmtStr]]
         rows_for_use = list(range(self.top_usable_row, height))
 
         # rows which we have content for and don't require scrolling
@@ -462,6 +501,7 @@ class CursorAwareWindow(BaseWindow):
 
 
 def demo():
+    # type: () -> None
     handler = logging.FileHandler(filename='display.log')
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(__name__).addHandler(handler)
@@ -471,10 +511,11 @@ def demo():
             rows, columns = w.t.height, w.t.width
             while True:
                 c = input_generator.next()
+                assert isinstance(c, Text)
                 if c == "":
                     sys.exit()  # same as raise SystemExit()
                 elif c == "h":
-                    a = w.array_from_text("a for small array")
+                    a = w.array_from_text("a for small array")  # type: Union[List[FmtStr], FSArray]
                 elif c == "a":
                     a = [fmtstr(c * columns) for _ in range(rows)]
                 elif c == "s":
@@ -490,7 +531,8 @@ def demo():
                 elif c == "e":
                     a = [fmtstr(c * columns) for _ in range(1)]
                 elif c == '\x0c':  # ctrl-L
-                    [w.write('\n') for _ in range(rows)]
+                    for _ in range(rows):
+                        w.write('\n')
                     continue
                 else:
                     a = w.array_from_text("unknown command")
@@ -498,7 +540,8 @@ def demo():
 
 
 def main():
-    handler = logging.FileHandler(filename='display.log', level=logging.DEBUG)
+    # type: () -> None
+    handler = logging.FileHandler(filename='display.log')
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(__name__).addHandler(handler)
     print('this should be just off-screen')

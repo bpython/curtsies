@@ -8,6 +8,7 @@ venv*
 .coverage
 cover
 tox.ini
+.mypy_cache
 
 keylog
 

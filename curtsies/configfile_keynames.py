@@ -2,6 +2,8 @@
 
 In the style of bpython config files and keymap"""
 
+from typing import Tuple
+
 SPECIALS = {
         'C-[': u'<ESC>',
         'C-^': u'<Ctrl-6>',
@@ -12,6 +14,7 @@ SPECIALS = {
 class KeyMap(object):
     """Maps config file key syntax to Curtsies names"""
     def __getitem__(self, key):
+        # type: (str) -> Tuple[str, ...]
         if not key: # Unbound key
             return ()
         elif key in SPECIALS:
