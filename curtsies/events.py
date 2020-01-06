@@ -1,9 +1,7 @@
 """Events for keystrokes and other input events"""
 import sys
-import time
 import encodings
 import codecs
-from functools import wraps
 
 from .termhelpers import Termmode
 
