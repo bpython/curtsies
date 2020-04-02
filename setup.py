@@ -11,9 +11,11 @@ def version():
             if line.startswith("__version__"):
                 return ast.parse(line).body[0].value.s
 
+
 def long_description():
     with open("readme.md", encoding="utf-8") as f:
         return f.read()
+
 
 setup(
     name="curtsies",
@@ -28,9 +30,12 @@ setup(
     packages=["curtsies"],
     install_requires=[
         "blessings>=1.5",
-        "wcwidth>=0.1.4"
+        "wcwidth>=0.1.4",
     ],
-    tests_require=["pyte", "nose",],
+    tests_require=[
+        "pyte",
+        "pytest",
+    ],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
