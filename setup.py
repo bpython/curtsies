@@ -47,7 +47,6 @@ setup(name='curtsies',
       tests_require = [
           'mock',
           'pyte',
-          'nose',
       ],
       classifiers=[
           'Development Status :: 3 - Alpha',

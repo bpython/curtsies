@@ -37,8 +37,6 @@ except ImportError:
         else:
             return lambda x: x
 
-    import nose
-
     def skipFailure(reason):
         def dec(func):
             @functools.wraps(func)
@@ -46,7 +44,7 @@ except ImportError:
                 try:
                     func(*args, **kwargs)
                 except Exception:
-                    raise nose.SkipTest
+                    raise unittest.SkipTest
                 else:
                     raise AssertionError('Failure expected')
             return inner

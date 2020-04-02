@@ -22,5 +22,3 @@ install:
     - "python setup.py install"
     - "pip install pyte coverage mock"
 
-script:
-    - nosetests tests
