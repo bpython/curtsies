@@ -218,7 +218,7 @@ class Input(object):
             self.queued_scheduled_events.sort()  #TODO use a data structure that inserts sorted
             when, _ = self.queued_scheduled_events[0]
             if when < time.time():
-                logger.warning('popping an event! %r %r',
+                logger.debug('popping an event! %r %r',
                                self.queued_scheduled_events[0],
                                self.queued_scheduled_events[1:])
                 return self.queued_scheduled_events.pop(0)[1]
@@ -237,7 +237,7 @@ class Input(object):
             return event
         if self.queued_scheduled_events and when < time.time():  # when should always be defined
             # because queued_scheduled_events should not be modified during this time
-            logger.warning('popping an event! %r %r', self.queued_scheduled_events[0],
+            logger.debug('popping an event! %r %r', self.queued_scheduled_events[0],
                            self.queued_scheduled_events[1:])
             return self.queued_scheduled_events.pop(0)[1]
         if not stdin_ready_for_read:
@@ -324,7 +324,7 @@ class Input(object):
             # type: (**Any) -> None
             #TODO use a threadsafe queue for this
             self.queued_interrupting_events.append(event_type(**kwargs))  # type: ignore
-            logger.warning('added event to events list %r', self.queued_interrupting_events)
+            logger.debug('added event to events list %r', self.queued_interrupting_events)
             os.write(writefd, b'interrupting event!')
         return callback
 
