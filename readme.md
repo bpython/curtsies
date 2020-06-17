@@ -44,9 +44,7 @@ Primer
 [FmtStr](http://curtsies.readthedocs.org/en/latest/FmtStr.html) objects are strings formatted with
 colors and styles displayable in a terminal with [ANSI escape sequences](http://en.wikipedia.org/wiki/ANSI_escape_code>`_).
 
-(the import statement shown below is outdated)
-
-![](http://i.imgur.com/7lFaxsz.png)
+![](https://i.imgur.com/bRLI134.png)
 
 [FSArray](http://curtsies.readthedocs.org/en/latest/FSArray.html) objects contain multiple such strings
 with each formatted string on its own row, and FSArray
