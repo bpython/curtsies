@@ -121,7 +121,7 @@ class FSArray(Sequence):
     @property
     def shape(self):
         # type: () -> Tuple[int, int]
-        """tuple of (len(rows, len(num_columns)) numpy-style shape"""
+        """Tuple of (len(rows, len(num_columns)) numpy-style shape"""
         return len(self.rows), self.num_columns
 
     @property

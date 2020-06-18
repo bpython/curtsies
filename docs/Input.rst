@@ -88,7 +88,7 @@ object - by default it's one greater than the maximum possible keypress
 length in bytes.
 
 If ``sigint_event=True`` is passed to :py:class:`~curtsies.Input`, ``SIGINT`` signals from the
-operating system (which usually raise a ``KeyboardInterrupt`` exception)
+operating system (which usually raises a ``KeyboardInterrupt`` exception)
 will be returned as :py:class:`~curtsies.events.SigIntEvent` instances.
 
 To set a timeout on the blocking get, treat it like a generator and call

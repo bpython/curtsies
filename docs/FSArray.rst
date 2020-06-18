@@ -52,7 +52,7 @@ FSArray - Using
     ++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++++++++++++++++++++
 
-An array like shown above might be repeatedly constructed and rendered with a :py:mod:`curtsies.window` object.
+An array like the above might be repeatedly constructed and rendered with a :py:mod:`curtsies.window` object.
 
 Slicing works like it does with a :py:class:`~curtsies.FmtStr`, but in two dimensions.
 :py:class:`~curtsies.FSArray` are *mutable*, so array assignment syntax can be used for natural

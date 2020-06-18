@@ -20,7 +20,7 @@ FmtStr - Example
    str(full)
    print(full)
 
-We start here with such a complicated example because it you only need something simple like:
+We start here with such a complicated example because if you only need something simple like:
 
 .. python_terminal_session::
 
@@ -206,7 +206,7 @@ FmtStr - len vs width
 ---------------------
 
 The amount of horizontal space a string takes up in a terminal may differ from the length of the string returned by ``len()``.
-:py:class:`~curtsies.FmtStr` objects have a :py:class:`~curtsies.FmtStr.width` property useful when writing layout code:
+To access this information, :py:class:`~curtsies.FmtStr` objects have a :py:class:`~curtsies.FmtStr.width` property, which can be useful when writing layout code:
 
 >>> #encoding: utf8
 ... 

@@ -413,7 +413,7 @@ class FmtStr(object):
     # TODO make this split work like str.split
     def split(self, sep=None, maxsplit=None, regex=False):
         # type: (Text, int, bool) -> List[FmtStr]
-        """Split based on seperator, optionally using a regex
+        """Split based on seperator, optionally using a regex.
 
         Capture groups are ignored in regex, the whole pattern is matched
         and used to split the original FmtStr."""
@@ -498,7 +498,7 @@ class FmtStr(object):
     @property
     def width(self):
         # type: () -> int
-        """The number of columns it would take to display this string"""
+        """The number of columns it would take to display this string."""
         if self._width is not None:
             return self._width
         value = sum(fs.width for fs in self.chunks)
