@@ -6,7 +6,7 @@ Input
 and other control events.
 
 Input - Example
-=======
+===============
 
     >>> from curtsies import Input
     >>> with Input(keynames='curtsies') as input_generator:

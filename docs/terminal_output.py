@@ -9,9 +9,10 @@ import sys
 from textwrap import dedent
 
 try:
-    from StringIO import StringIO
+    # python2
+    from StringIO import StringIO as BytesIO
 except ImportError:
-    from io import StringIO
+    from io import BytesIO
 
 from docutils.parsers.rst import Directive
 from docutils import nodes
@@ -49,11 +50,11 @@ class ANSIHTMLParser(object):
 
 def default_colors_to_resets(s):
     """Hack to make sphinxcontrib.ansi recognized sequences"""
-    return s.replace('[39m', '[0m').replace('[49m', '[0m')
+    return s.replace(b'[39m', b'[0m').replace(b'[49m', b'[0m')
 
 def run_lines(lines):
     child = pexpect.spawn(sys.executable + ' -i')
-    out = StringIO()
+    out = BytesIO() #TODO make this a string?
     child.logfile_read = out
     #TODO make this detect `...` when it shouldn't be there, forgot a )
     for line in lines:
@@ -63,7 +64,7 @@ def run_lines(lines):
     child.read()
     out.seek(0)
     output = out.read()
-    return output[output.index('>>>'):output.rindex('>>>')]
+    return output[output.index(b'>>>'):output.rindex(b'>>>')]
 
 def get_lines(multiline_string):
     lines = dedent(multiline_string).split('\n')
@@ -86,9 +87,9 @@ def setup(app):
     app.connect('doctree-resolved', ANSIHTMLParser())
 
 if __name__ == '__main__':
-    print htmlize(run_lines(get_lines("""
+    print(htmlize(run_lines(get_lines("""
         from curtsies.fmtfuncs import blue
         blue('hello')
         print blue('hello')
-        """)))
+        """))))
 
