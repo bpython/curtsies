@@ -112,4 +112,26 @@ CURTSIES_NAMES = dict([
   (b"\x1b[[D", u'<F4>'),
   (b"\x1b[[E", u'<F5>'),
   # cool-RR says the rest were good, see issue #99
+
+  #reported by alethiophile see issue #119
+  (b"\x1b[1;3C", u'<Alt-RIGHT>'),      #alt-right
+  (b"\x1b[1;3B", u'<Alt-DOWN>'),       #alt-down
+  (b"\x1b[1;3D", u'<Alt-LEFT>'),       #alt-left
+  (b"\x1b[1;3A", u'<Alt-UP>'),         #alt-up
+  (b"\x1b[5;3~", u'<Alt-PAGEUP>'),     #alt-pageup
+  (b"\x1b[6;3~", u'<Alt-PAGEDOWN>'),   #alt-pagedown
+  (b"\x1b[1;3H", u'<Alt-HOME>'),       #alt-home
+  (b"\x1b[1;3F", u'<Alt-END>'),        #alt-end
+
+  (b"\x1b[1;2C", u'<Shift-RIGHT>'),    #shift-right
+  (b"\x1b[1;2B", u'<Shift-RIGHT>'),    #shift-down
+  (b"\x1b[1;2D", u'<Shift-RIGHT>'),    #shift-left
+  (b"\x1b[1;2A", u'<Shift-RIGHT>'),    #shift-up
+  (b"\x1b[3;2~", u'<Shift-DELETE>'),   #shift-delete
+  (b"\x1b[5;2~", u'<Shift-PAGEUP>'),   #shift-pageup
+  (b"\x1b[6;2~", u'<Shift-PAGEDOWN>'), #shift-pagedown
+  (b"\x1b[1;2H", u'<Shift-HOME>'),     #shift-home
+  (b"\x1b[1;2F", u'<Shift-END>'),      #shift-end
+  #end of keys reported by alethiophile
+
 ])
