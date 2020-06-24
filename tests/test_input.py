@@ -19,6 +19,7 @@ except ImportError:
         else:
             return lambda x: None
 
+
 from curtsies import events
 from curtsies.input import Input
 
@@ -46,8 +47,8 @@ class TestInput(unittest.TestCase):
 
     def test_send(self):
         inp = Input()
-        inp.unprocessed_bytes = [b'a']
-        self.assertEqual(inp.send('nonsensical value'), u'a')
+        inp.unprocessed_bytes = [b"a"]
+        self.assertEqual(inp.send("nonsensical value"), u"a")
 
     def test_send_nonblocking_no_event(self):
         inp = Input()
@@ -70,16 +71,17 @@ class TestInput(unittest.TestCase):
 
         def side_effect():
             if first_time:
-                inp.unprocessed_bytes.extend([b'a']*n)
+                inp.unprocessed_bytes.extend([b"a"] * n)
                 first_time.pop()
                 return n
             else:
                 return None
+
         inp._nonblocking_read.side_effect = side_effect
 
         r = inp.send(0)
         self.assertEqual(type(r), events.PasteEvent)
-        self.assertEqual(r.events, [u'a'] * n)
+        self.assertEqual(r.events, [u"a"] * n)
 
     def test_event_trigger(self):
         inp = Input()
@@ -96,7 +98,7 @@ class TestInput(unittest.TestCase):
         f(when=time.time())
         self.assertEqual(type(inp.send(0)), CustomScheduledEvent)
         self.assertEqual(inp.send(0), None)
-        f(when=time.time()+0.01)
+        f(when=time.time() + 0.01)
         self.assertEqual(inp.send(0), None)
         time.sleep(0.01)
         self.assertEqual(type(inp.send(0)), CustomScheduledEvent)
@@ -105,12 +107,13 @@ class TestInput(unittest.TestCase):
     def test_schedule_event_trigger_blocking(self):
         inp = Input()
         f = inp.scheduled_event_trigger(CustomScheduledEvent)
-        f(when=time.time()+0.05)
+        f(when=time.time() + 0.05)
         self.assertEqual(type(next(inp)), CustomScheduledEvent)
 
     def test_threadsafe_event_trigger(self):
         inp = Input()
         f = inp.threadsafe_event_trigger(CustomEvent)
+
         def check_event():
             self.assertEqual(type(inp.send(1)), CustomEvent)
             self.assertEqual(inp.send(0), None)
@@ -143,6 +146,7 @@ class TestInput(unittest.TestCase):
 
     def test_use_in_thread_with_sigint_event(self):
         inp = Input(sigint_event=True)
+
         def use():
             with inp:
                 pass
@@ -150,4 +154,3 @@ class TestInput(unittest.TestCase):
         t = threading.Thread(target=use)
         t.start()
         t.join()
-

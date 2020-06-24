@@ -12,7 +12,7 @@ PY2 = sys.version_info[0] == 2
 def unicode_str(obj):
     """Get unicode str in Python 2 or 3"""
     if PY2:
-        return str(obj).decode('utf8')
+        return str(obj).decode("utf8")
     return str(obj)
 
 
@@ -29,37 +29,48 @@ class Entity(object):
 
     def die(self):
         self.speed = 0
-        self.display = on_red(bold(yellow('o')))
+        self.display = on_red(bold(yellow("o")))
+
 
 def sign(n):
     return -1 if n < 0 else 0 if n == 0 else 1
 
+
 def vscale(c, v):
-    return tuple(c*x for x in v)
+    return tuple(c * x for x in v)
+
 
 class World(object):
     def __init__(self, width, height):
         self.width = width
         self.height = height
         n = 5
-        self.player = Entity(on_blue(green(bold(u'5'))), width // 2, height // 2 - 2, speed=5)
-        self.npcs = [Entity(on_blue(red(u'X')), i * width // (n * 2), j * height // (n * 2))
-                     for i in range(1, 2*n, 2)
-                     for j in range(1, 2*n, 2)]
+        self.player = Entity(
+            on_blue(green(bold("5"))), width // 2, height // 2 - 2, speed=5
+        )
+        self.npcs = [
+            Entity(
+                on_blue(red("X")), i * width // (n * 2), j * height // (n * 2)
+            )
+            for i in range(1, 2 * n, 2)
+            for j in range(1, 2 * n, 2)
+        ]
         self.turn = 0
 
     entities = property(lambda self: self.npcs + [self.player])
 
     def move_entity(self, entity, dx, dy):
-        entity.x = max(0, min(self.width-1, entity.x + dx))
-        entity.y = max(0, min(self.height-1, entity.y + dy))
+        entity.x = max(0, min(self.width - 1, entity.x + dx))
+        entity.y = max(0, min(self.height - 1, entity.y + dy))
 
     def process_event(self, c):
         """Returns a message from tick() to be displayed if game is over"""
         if c == "":
             sys.exit()
         elif c in key_directions:
-            self.move_entity(self.player, *vscale(self.player.speed, key_directions[c]))
+            self.move_entity(
+                self.player, *vscale(self.player.speed, key_directions[c])
+            )
         else:
             return "try arrow keys, w, a, s, d, or ctrl-D (you pressed %r)" % c
         return self.tick()
@@ -71,16 +82,18 @@ class World(object):
         for entity1, entity2 in itertools.combinations(self.entities, 2):
             if (entity1.x, entity1.y) == (entity2.x, entity2.y):
                 if self.player in (entity1, entity2):
-                    return 'you lost on turn %d' % self.turn
+                    return "you lost on turn %d" % self.turn
                 entity1.die()
                 entity2.die()
 
         if all(npc.speed == 0 for npc in self.npcs):
-            return 'you won on turn %d' % self.turn
+            return "you won on turn %d" % self.turn
         self.turn += 1
         if self.turn % 20 == 0:
             self.player.speed = max(1, self.player.speed - 1)
-            self.player.display = on_blue(green(bold(unicode_str(self.player.speed))))
+            self.player.display = on_blue(
+                green(bold(unicode_str(self.player.speed)))
+            )
 
     def get_array(self):
         a = FSArray(self.height, self.width)
@@ -88,14 +101,18 @@ class World(object):
             a[self.height - 1 - entity.y, entity.x] = entity.display
         return a
 
-key_directions = {'<UP>':    (0, 1),
-                  '<LEFT>': (-1, 0),
-                  '<DOWN>':  (0,-1),
-                  '<RIGHT>': (1, 0),
-                  'w':       (0, 1),
-                  'a':       (-1, 0),
-                  's':       (0,-1),
-                  'd':       (1, 0)}
+
+key_directions = {
+    "<UP>": (0, 1),
+    "<LEFT>": (-1, 0),
+    "<DOWN>": (0, -1),
+    "<RIGHT>": (1, 0),
+    "w": (0, 1),
+    "a": (-1, 0),
+    "s": (0, -1),
+    "d": (1, 0),
+}
+
 
 def main():
     with FullscreenWindow(sys.stdout) as window:
@@ -109,5 +126,6 @@ def main():
                 window.render_to_terminal(world.get_array())
     print(msg)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

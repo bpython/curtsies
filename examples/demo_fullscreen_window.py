@@ -7,6 +7,6 @@ from curtsies import events
 
 from demo_window import array_size_test
 
-if __name__ == '__main__':
-    logging.basicConfig(filename='display.log',level=logging.DEBUG)
+if __name__ == "__main__":
+    logging.basicConfig(filename="display.log", level=logging.DEBUG)
     array_size_test(FullscreenWindow(sys.stdout))
