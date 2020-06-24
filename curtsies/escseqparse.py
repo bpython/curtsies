@@ -34,7 +34,8 @@ def parse(s):
 
     >>> parse(">>> []")
     ['>>> []']
-    >>> #parse("\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m")
+    >>> parse("\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m")
+    [{'fg': 'yellow'}, '[', {'fg': None}, {'fg': 'yellow'}, ']', {'fg': None}, {'fg': 'yellow'}, '[', {'fg': None}, {'fg': 'yellow'}, ']', {'fg': None}, {'fg': 'yellow'}, '[', {'fg': None}, {'fg': 'yellow'}, ']', {'fg': None}, {'fg': 'yellow'}, '[', {'fg': None}]
     """
     stuff = []  # type: List[Union[Text, Dict[str, Union[str, bool, None]]]]
     rest = s
