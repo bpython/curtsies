@@ -2,6 +2,7 @@
 
 from typing import Mapping
 
+# fmt: off
 colors = 'black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'gray'
 FG_COLORS = dict(list(zip(colors, list(range(30, 38)))))  # type: Mapping[str, int]
 BG_COLORS = dict(list(zip(colors, list(range(40, 48)))))  # type: Mapping[str, int]
@@ -12,6 +13,8 @@ NUMBER_TO_STYLE = dict(zip(STYLES.values(), STYLES.keys()))
 RESET_ALL = 0
 RESET_FG = 39
 RESET_BG = 49
+# fmt: on
+
 
 def seq(num):
     # type: (int) -> str

@@ -7,6 +7,7 @@
 
 #TODO add PAD keys hack as in bpython.cli
 
+# fmt: off
 CURTSIES_NAMES = dict([
   (b' ',          u'<SPACE>'),
   (b'\x1b ',      u'<Esc+SPACE>'),
@@ -113,3 +114,4 @@ CURTSIES_NAMES = dict([
   (b"\x1b[[E", u'<F5>'),
   # cool-RR says the rest were good, see issue #99
 ])
+# fmt: on

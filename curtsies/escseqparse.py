@@ -65,6 +65,7 @@ def peel_off_esc_code(s):
     >>> d == {'numbers': [2], 'command': 'A', 'intermed': '', 'private': '', 'csi': '\x1b[', 'seq': '\x1b[2A'}
     True
     """
+    # fmt: off
     p = r"""(?P<front>.*?)
             (?P<seq>
                 (?P<csi>
@@ -78,6 +79,7 @@ def peel_off_esc_code(s):
                 (?P<intermed>""" + '[\x20-\x2f]*)' + r"""
                 (?P<command>""" + '[\x40-\x7e]))' + r"""
             (?P<rest>.*)"""
+    # fmt: on
     m1 = re.match(p, s, re.VERBOSE)  # multibyte esc seq
     m2 = re.match('(?P<front>.*?)(?P<seq>(?P<csi>)(?P<command>[\x40-\x5f]))(?P<rest>.*)', s)  # 2 byte escape sequence
     m = None  # Optional[Match[str]]
@@ -109,6 +111,7 @@ def token_type(info):
         # Ref: https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
         values = cast(List[int], info['numbers']) if len(info['numbers']) else [0]
         tokens = []  # type: List[Dict[str, Union[Text, bool, None]]]
+        # fmt: off
         for value in values:
             if value in FG_NUMBER_TO_COLOR: tokens.append({'fg':FG_NUMBER_TO_COLOR[value]})
             if value in BG_NUMBER_TO_COLOR: tokens.append({'bg':BG_NUMBER_TO_COLOR[value]})
@@ -116,6 +119,7 @@ def token_type(info):
             if value == RESET_ALL: tokens.append(dict(dict((k, None) for k in STYLES), **{'fg':None, 'bg':None}))
             if value == RESET_FG: tokens.append({'fg':None})
             if value == RESET_BG: tokens.append({'bg':None})
+        # fmt: on
 
         if tokens:
             return tokens
