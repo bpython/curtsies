@@ -9,20 +9,39 @@ True
 True
 """
 
-from typing import Text, List, Mapping, Union, Tuple, Match, cast, Dict, Any, Optional, NewType
+from typing import (
+    Text,
+    List,
+    Mapping,
+    Union,
+    Tuple,
+    Match,
+    cast,
+    Dict,
+    Any,
+    Optional,
+    NewType,
+)
 
 import re
 
-from .termformatconstants import (FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR,
-                                  NUMBER_TO_STYLE, RESET_ALL, RESET_FG,
-                                  RESET_BG, STYLES)
+from .termformatconstants import (
+    FG_NUMBER_TO_COLOR,
+    BG_NUMBER_TO_COLOR,
+    NUMBER_TO_STYLE,
+    RESET_ALL,
+    RESET_FG,
+    RESET_BG,
+    STYLES,
+)
 
 
 Token = Dict[str, Union[Text, List[int]]]
 
+
 def remove_ansi(s):
     # type: (Text) -> Text
-    return re.sub(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]', '', s)
+    return re.sub(r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]", "", s)
 
 
 def parse(s):
@@ -49,7 +68,10 @@ def parse(s):
                 if tok:
                     stuff.extend(tok)
             except ValueError:
-                raise ValueError("Can't parse escape sequence: %r %r %r %r" % (s, repr(front), token, repr(rest)))
+                raise ValueError(
+                    "Can't parse escape sequence: %r %r %r %r"
+                    % (s, repr(front), token, repr(rest))
+                )
         if not rest:
             break
     return stuff
@@ -81,35 +103,41 @@ def peel_off_esc_code(s):
             (?P<rest>.*)"""
     # fmt: on
     m1 = re.match(p, s, re.VERBOSE)  # multibyte esc seq
-    m2 = re.match('(?P<front>.*?)(?P<seq>(?P<csi>)(?P<command>[\x40-\x5f]))(?P<rest>.*)', s)  # 2 byte escape sequence
+    m2 = re.match(
+        "(?P<front>.*?)(?P<seq>(?P<csi>)(?P<command>[\x40-\x5f]))(?P<rest>.*)", s
+    )  # 2 byte escape sequence
     m = None  # Optional[Match[str]]
     if m1 and m2:
-        m = m1 if len(m1.groupdict()['front']) <= len(m2.groupdict()['front']) else m2
+        m = m1 if len(m1.groupdict()["front"]) <= len(m2.groupdict()["front"]) else m2
         # choose the match which has less processed text in order to get the
         # first escape sequence
-    elif m1: m = m1
-    elif m2: m = m2
-    else: m = None
+    elif m1:
+        m = m1
+    elif m2:
+        m = m2
+    else:
+        m = None
 
     if m:
         d = m.groupdict()  # type: Dict[str, Any]
-        del d['front']
-        del d['rest']
-        if 'numbers' in d and all(d['numbers'].split(';')):
-            d['numbers'] = [int(x) for x in d['numbers'].split(';')]
+        del d["front"]
+        del d["rest"]
+        if "numbers" in d and all(d["numbers"].split(";")):
+            d["numbers"] = [int(x) for x in d["numbers"].split(";")]
 
-        return m.groupdict()['front'], cast(Token, d), m.groupdict()['rest']
+        return m.groupdict()["front"], cast(Token, d), m.groupdict()["rest"]
     else:
-        return s, None, ''
+        return s, None, ""
+
 
 def token_type(info):
     # type: (Token) -> Optional[List[Dict[Text, Union[Text, bool, None]]]]
     """
     """
-    if info['command'] == 'm':
+    if info["command"] == "m":
         # The default action for ESC[m is to act like ESC[0m
         # Ref: https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
-        values = cast(List[int], info['numbers']) if len(info['numbers']) else [0]
+        values = cast(List[int], info["numbers"]) if len(info["numbers"]) else [0]
         tokens = []  # type: List[Dict[str, Union[Text, bool, None]]]
         # fmt: off
         for value in values:
@@ -125,13 +153,15 @@ def token_type(info):
             return tokens
         else:
             raise ValueError("Can't parse escape seq %r" % info)
-    elif info['command'] == 'H':  # fix for bpython #76
+    elif info["command"] == "H":  # fix for bpython #76
         return [{}]
     return None
 
-if __name__ == '__main__':
-    import doctest; doctest.testmod()
-    #print(peel_off_esc_code('[2Astuff'))
-    #print(peel_off_esc_code('Amore'))
-    print((repr(parse('[31mstuff is the best[32myay'))))
 
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod()
+    # print(peel_off_esc_code('[2Astuff'))
+    # print(peel_off_esc_code('Amore'))
+    print((repr(parse("[31mstuff is the best[32myay"))))

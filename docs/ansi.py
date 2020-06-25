@@ -48,33 +48,34 @@ class ansi_literal_block(nodes.literal_block):
     """
     Represent a literal block, that contains ANSI color codes.
     """
+
     pass
 
 
 #: the pattern to find ANSI color codes
-COLOR_PATTERN = re.compile('\x1b\\[([^m]+)m')
+COLOR_PATTERN = re.compile("\x1b\\[([^m]+)m")
 
 #: map ANSI color codes to class names
 CODE_CLASS_MAP = {
-    1: 'bold',
-    4: 'underscore',
-    30: 'black',
-    31: 'red',
-    32: 'green',
-    33: 'yellow',
-    34: 'blue',
-    35: 'magenta',
-    36: 'cyan',
-    37: 'white',
-    40: 'bg_black',
-    41: 'bg_red',
-    42: 'bg_green',
-    43: 'bg_yellow',
-    44: 'bg_blue',
-    45: 'bg_magenta',
-    46: 'bg_cyan',
-    47: 'bg_white',
-    }
+    1: "bold",
+    4: "underscore",
+    30: "black",
+    31: "red",
+    32: "green",
+    33: "yellow",
+    34: "blue",
+    35: "magenta",
+    36: "cyan",
+    37: "white",
+    40: "bg_black",
+    41: "bg_red",
+    42: "bg_green",
+    43: "bg_yellow",
+    44: "bg_blue",
+    45: "bg_magenta",
+    46: "bg_cyan",
+    47: "bg_white",
+}
 
 
 class ANSIColorParser(object):
@@ -110,7 +111,7 @@ class ANSIColorParser(object):
         # create the "super" node, which contains to while block and all it
         # sub nodes, and replace the old block with it
         literal_node = nodes.literal_block()
-        literal_node['classes'].append('ansi-block')
+        literal_node["classes"].append("ansi-block")
         block.replace_self(literal_node)
 
         # this contains "pending" nodes.  A node representing an ANSI
@@ -124,12 +125,12 @@ class ANSIColorParser(object):
         # iterate over all color codes
         for match in COLOR_PATTERN.finditer(raw):
             # add any text preceeding this match
-            head = raw[last_end:match.start()]
+            head = raw[last_end : match.start()]
             self._add_text(head)
             # update the match end
             last_end = match.end()
             # get the single format codes
-            codes = [int(c) for c in match.group(1).split(';')]
+            codes = [int(c) for c in match.group(1).split(";")]
             if codes[-1] == 0:
                 # the last code is a reset, so finalize all pending
                 # nodes.
@@ -140,8 +141,7 @@ class ANSIColorParser(object):
                 self.pending_nodes.append(code_node)
                 # and set the classes for its colors
                 for code in codes:
-                    code_node['classes'].append(
-                        'ansi-%s' % CODE_CLASS_MAP[code])
+                    code_node["classes"].append("ansi-%s" % CODE_CLASS_MAP[code])
         # add any trailing text
         tail = raw[last_end:]
         self._add_text(tail)
@@ -151,7 +151,7 @@ class ANSIColorParser(object):
         literal_node.extend(self.new_nodes)
 
     def _strip_color_from_block_content(self, block):
-        content = COLOR_PATTERN.sub('', block.rawsource)
+        content = COLOR_PATTERN.sub("", block.rawsource)
         literal_node = nodes.literal_block(content, content)
         block.replace_self(literal_node)
 
@@ -160,7 +160,7 @@ class ANSIColorParser(object):
         Extract and parse all ansi escapes in ansi_literal_block nodes.
         """
         handler = self._colorize_block_contents
-        if app.builder.name != 'html':
+        if app.builder.name != "html":
             # strip all color codes in non-html output
             handler = self._strip_color_from_block_content
         for ansi_block in doctree.traverse(ansi_literal_block):
@@ -169,19 +169,19 @@ class ANSIColorParser(object):
 
 def add_stylesheet(app):
     if app.config.html_ansi_stylesheet:
-        app.add_stylesheet('ansi.css')
+        app.add_stylesheet("ansi.css")
 
 
 def copy_stylesheet(app, exception):
-    if app.builder.name != 'html' or exception:
+    if app.builder.name != "html" or exception:
         return
     stylesheet = app.config.html_ansi_stylesheet
     if stylesheet:
-        app.info(bold('Copying ansi stylesheet... '), nonl=True)
-        dest = path.join(app.builder.outdir, '_static', 'ansi.css')
+        app.info(bold("Copying ansi stylesheet... "), nonl=True)
+        dest = path.join(app.builder.outdir, "_static", "ansi.css")
         source = path.abspath(path.dirname(__file__))
         copyfile(path.join(source, stylesheet), dest)
-        app.info('done')
+        app.info("done")
 
 
 class ANSIBlockDirective(rst.Directive):
@@ -198,16 +198,16 @@ class ANSIBlockDirective(rst.Directive):
     option_spec = dict(string_escape=flag)
 
     def run(self):
-        text = '\n'.join(self.content)
-        if 'string_escape' in self.options:
-            text = text.decode('string-escape')
+        text = "\n".join(self.content)
+        if "string_escape" in self.options:
+            text = text.decode("string-escape")
         return [ansi_literal_block(text, text)]
 
 
 def setup(app):
-    app.require_sphinx('1.0')
-    app.add_config_value('html_ansi_stylesheet', None, 'env')
-    app.add_directive('ansi-block', ANSIBlockDirective)
-    app.connect('builder-inited', add_stylesheet)
-    app.connect('build-finished', copy_stylesheet)
-    app.connect('doctree-resolved', ANSIColorParser())
+    app.require_sphinx("1.0")
+    app.add_config_value("html_ansi_stylesheet", None, "env")
+    app.add_directive("ansi-block", ANSIBlockDirective)
+    app.connect("builder-inited", add_stylesheet)
+    app.connect("build-finished", copy_stylesheet)
+    app.connect("doctree-resolved", ANSIColorParser())
