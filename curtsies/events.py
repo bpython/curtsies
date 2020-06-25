@@ -66,6 +66,7 @@ CURSES_NAMES[b'\x08'] = u'KEY_BACKSPACE'
 CURSES_NAMES[b'\x1b[Z'] = u'KEY_BTAB'
 
 # see curtsies #78 - taken from https://github.com/jquast/blessed/blob/e9ad7b85dfcbbba49010ab8c13e3a5920d81b010/blessed/keyboard.py#L409
+# fmt: off
 CURSES_NAMES[b'\x1b[1~'] = u'KEY_FIND'         # find
 CURSES_NAMES[b'\x1b[2~'] = u'KEY_IC'           # insert (0)
 CURSES_NAMES[b'\x1b[3~'] = u'KEY_DC'           # delete (.), "Execute"
@@ -80,6 +81,7 @@ CURSES_NAMES[b'\x1b[OC'] = u'KEY_RIGHT'        # right  (6)
 CURSES_NAMES[b'\x1b[OD'] = u'KEY_LEFT'         # left   (4)
 CURSES_NAMES[b'\x1b[OF'] = u'KEY_END'          # end    (1)
 CURSES_NAMES[b'\x1b[OH'] = u'KEY_HOME'         # home   (7)
+# fmt: on
 
 KEYMAP_PREFIXES = set()
 for table in (CURSES_NAMES, CURTSIES_NAMES):
@@ -202,12 +204,14 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
     def key_name():
         # type: () -> Union[Text]
         if keynames == 'curses':
-            if seq in CURSES_NAMES: # may not be here (and still not decodable) curses names incomplete
+            # may not be here (and still not decodable) curses names incomplete
+            if seq in CURSES_NAMES: 
                 return CURSES_NAMES[seq]
 
             # Otherwise, there's no special curses name for this
             try:
-                return seq.decode(encoding) # for normal decodable text or a special curtsies sequence with bytes that can be decoded
+                # for normal decodable text or a special curtsies sequence with bytes that can be decoded
+                return seq.decode(encoding) 
             except UnicodeDecodeError:
                 # this sequence can't be decoded with this encoding, so we need to represent the bytes
                 if len(seq) == 1:
@@ -234,7 +238,8 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
     elif key_known:
         return key_name()
     else:
-        seq.decode(encoding) # this will raise a unicode error (they're annoying to raise ourselves)
+        # this will raise a unicode error (they're annoying to raise ourselves)
+        seq.decode(encoding) 
         assert False, 'should have raised an unicode decode error'
 
 def could_be_unfinished_char(seq, encoding):
@@ -254,6 +259,8 @@ def could_be_unfinished_char(seq, encoding):
 def could_be_unfinished_utf8(seq):
     # type: (bytes) -> bool
     # http://en.wikipedia.org/wiki/UTF-8#Description
+    
+    # fmt: off
     if   ord(seq[0:1]) & 0b10000000 == 0b10000000 and len(seq) < 1: return True
     elif ord(seq[0:1]) & 0b11100000 == 0b11000000 and len(seq) < 2: return True
     elif ord(seq[0:1]) & 0b11110000 == 0b11100000 and len(seq) < 3: return True
@@ -261,6 +268,7 @@ def could_be_unfinished_utf8(seq):
     elif ord(seq[0:1]) & 0b11111100 == 0b11111000 and len(seq) < 5: return True
     elif ord(seq[0:1]) & 0b11111110 == 0b11111100 and len(seq) < 6: return True
     else: return False
+    # fmt: on
 
 def pp_event(seq):
     # type: (Text) -> Union[Text, bytes]
