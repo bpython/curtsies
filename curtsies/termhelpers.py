@@ -8,6 +8,9 @@ from types import TracebackType
 _Attr = List[Union[int, List[bytes]]]
 
 class Nonblocking(object):
+    """
+    A context manager for making an input stream nonblocking.
+    """
     def __init__(self, stream):
         # type: (IO) -> None
         self.stream = stream
