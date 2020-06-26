@@ -333,7 +333,7 @@ class CursorAwareWindow(BaseWindow):
             c = retrying_read()
             resp += c
             m = re.search('(?P<extra>.*)'
-                          '(?P<CSI>\x1b\[|\x9b)'
+                          '(?P<CSI>\x1b[|\x9b)'
                           '(?P<row>\\d+);(?P<column>\\d+)R', resp, re.DOTALL)
             if m:
                 row = int(m.groupdict()['row'])
