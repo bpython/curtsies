@@ -16,6 +16,9 @@ def fullscreen_winch_with_input():
                 a = [fmtstr((('.%sx%s.%r.' % (rows, columns, e)) * rows)[:columns]) for row in range(rows)]
                 w.render_to_terminal(a)
 
+                if e == u'<ESC>':
+                    break
+
 if __name__ == '__main__':
     fullscreen_winch_with_input()
 

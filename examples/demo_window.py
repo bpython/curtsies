@@ -38,6 +38,8 @@ def array_size_test(window):
                     w.scroll_down()
                 elif isinstance(c, events.WindowChangeEvent):
                     a = w.array_from_text("window just changed to %d rows and %d columns" % (c.rows, c.columns))
+                elif c == u'<ESC>': # allows exit without keyboard interrupt
+                    break
                 elif c == '\x0c': # ctrl-L
                     [w.write('\n') for _ in range(rows)]
                     continue
