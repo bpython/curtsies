@@ -7,5 +7,8 @@ def paste():
             print(repr(e))
             time.sleep(1)
 
+            if e == u'<ESC>':
+                break
+
 if __name__ == '__main__':
     paste()

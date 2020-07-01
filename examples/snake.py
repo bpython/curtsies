@@ -55,8 +55,9 @@ class Snake(object):
             self.snake_parts.pop()
 
 def main():
-    MAX_FPS = 20
+    MAX_FPS = 4 
     time_per_frame = lambda: 1. / MAX_FPS
+    input("Press enter to start")
 
     with FullscreenWindow() as window:
         with Input() as input_generator:
