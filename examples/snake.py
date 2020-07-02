@@ -13,6 +13,7 @@ key_directions = {
                  }
 
 class Snake(object):
+    """Creates a Snake (game) object"""
     def __init__(self, height, width):
         self.height = height
         self.width = width
@@ -21,18 +22,22 @@ class Snake(object):
         self.new_apple()
 
     def random_spot(self):
+        """Creates a random spot for characters"""
         return random.choice(range(self.height)), random.choice(range(self.width))
 
     def new_apple(self):
+        """Places a new apple in the window randomly for the snake to find"""
         while True:
             self.apple = self.random_spot()
             if self.apple not in self.snake_parts:
                 break
 
     def advance_snake(self):
+        """Adds to snake once it obtains an apple"""
         self.snake_parts.insert(0, (self.snake_parts[0][0]+self.direction[0], self.snake_parts[0][1]+self.direction[1]))
 
     def render(self):
+
         a = FSArray(self.height, self.width)
         for row, col in self.snake_parts:
             a[row, col] = u'x'
@@ -40,6 +45,7 @@ class Snake(object):
         return a
 
     def tick(self, e):
+  
         if (e in key_directions and
             abs(key_directions[e][0]) + abs(self.direction[0]) < 2 and
             abs(key_directions[e][1]) + abs(self.direction[1]) < 2):
@@ -55,6 +61,7 @@ class Snake(object):
             self.snake_parts.pop()
 
 def main():
+    """Sets speed for snake and begins game upon receiving input from user"""
     MAX_FPS = 4 
     time_per_frame = lambda: 1. / MAX_FPS
     input("Press enter to start")
