@@ -3,6 +3,7 @@ import random
 from curtsies import FullscreenWindow, Input, FSArray
 
 def main():
+    """Returns user input placed randomly on the screen"""
     with FullscreenWindow() as window:
         print('Press escape to exit')
         with Input() as input_generator:
