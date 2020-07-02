@@ -4,6 +4,9 @@ import signal
 from curtsies import input, Cbreak, FullscreenWindow, fmtstr
 
 def fullscreen_winch_with_input():
+    """
+    Monitors user input as well as screen size and acknowledges changes to both.
+    """
     print('this should be just off-screen')
     w = FullscreenWindow(sys.stdout)
     def sigwinch_handler(signum, frame):

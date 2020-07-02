@@ -5,6 +5,10 @@ from curtsies import CursorAwareWindow, input, fmtstr
 
 rows, columns = '??'
 def cursor_winch():
+    """
+    Reports (signals) change in window dimensions; reports change in position
+    of cursor
+    """
     global rows, columns # instead of closure for Python 2 compatibility
     print('this should be just off-screen')
     w = CursorAwareWindow(sys.stdout, sys.stdin, keep_last_line=False, hide_cursor=False)

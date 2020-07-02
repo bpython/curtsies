@@ -8,7 +8,7 @@ from curtsies import input, fmtstr, events, FullscreenWindow, CursorAwareWindow
 from curtsies import events
 
 def array_size_test(window):
-    """Tests arrays one row to small or too large"""
+    """Tests arrays one row too small or too large"""
     with window as w:
         print('a displays a screen worth of input, s one line less, and d one line more')
         with input.Input(sys.stdin) as input_generator:
