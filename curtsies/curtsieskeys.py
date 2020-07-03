@@ -5,8 +5,9 @@
 # Special names are for multi-character keys, or key names
 # that would be hard to write in a config file
 
-#TODO add PAD keys hack as in bpython.cli
+# TODO add PAD keys hack as in bpython.cli
 
+# fmt: off
 CURTSIES_NAMES = dict([
   (b' ',          u'<SPACE>'),
   (b'\x1b ',      u'<Esc+SPACE>'),
@@ -112,4 +113,26 @@ CURTSIES_NAMES = dict([
   (b"\x1b[[D", u'<F4>'),
   (b"\x1b[[E", u'<F5>'),
   # cool-RR says the rest were good, see issue #99
+
+  #reported by alethiophile see issue #119
+  (b"\x1b[1;3C", u'<Meta-RIGHT>'),      #alt-right
+  (b"\x1b[1;3B", u'<Meta-DOWN>'),       #alt-down
+  (b"\x1b[1;3D", u'<Meta-LEFT>'),       #alt-left
+  (b"\x1b[1;3A", u'<Meta-UP>'),         #alt-up
+  (b"\x1b[5;3~", u'<Meta-PAGEUP>'),     #alt-pageup
+  (b"\x1b[6;3~", u'<Meta-PAGEDOWN>'),   #alt-pagedown
+  (b"\x1b[1;3H", u'<Meta-HOME>'),       #alt-home
+  (b"\x1b[1;3F", u'<Meta-END>'),        #alt-end
+  (b"\x1b[1;2C", u'<Shift-RIGHT>'),
+  (b"\x1b[1;2B", u'<Shift-RIGHT>'),
+  (b"\x1b[1;2D", u'<Shift-RIGHT>'),
+  (b"\x1b[1;2A", u'<Shift-RIGHT>'),
+  (b"\x1b[3;2~", u'<Shift-DELETE>'),
+  (b"\x1b[5;2~", u'<Shift-PAGEUP>'),
+  (b"\x1b[6;2~", u'<Shift-PAGEDOWN>'),
+  (b"\x1b[1;2H", u'<Shift-HOME>'),
+  (b"\x1b[1;2F", u'<Shift-END>'),
+  #end of keys reported by alethiophile
+
 ])
+# fmt: on

@@ -40,4 +40,5 @@ def realtime(fps=15):
             else:
                 world.process_event(e)
 
-realtime()
+if __name__ == "__main__":
+    realtime()

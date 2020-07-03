@@ -3,7 +3,23 @@
 
 from __future__ import unicode_literals
 
-from typing import Optional, Text, IO, Dict, Generic, TypeVar, Type, Tuple, Callable, Any, ByteString, cast, TextIO, Union, List
+from typing import (
+    Optional,
+    Text,
+    IO,
+    Dict,
+    Generic,
+    TypeVar,
+    Type,
+    Tuple,
+    Callable,
+    Any,
+    ByteString,
+    cast,
+    TextIO,
+    Union,
+    List,
+)
 from types import TracebackType
 
 import locale
@@ -19,17 +35,17 @@ from .termhelpers import Cbreak
 
 logger = logging.getLogger(__name__)
 
-SCROLL_DOWN = u"\x1bD"
-FIRST_COLUMN = u"\x1b[1G"
+SCROLL_DOWN = "\x1bD"
+FIRST_COLUMN = "\x1b[1G"
 
 
-T = TypeVar('T', bound='BaseWindow')
+T = TypeVar("T", bound="BaseWindow")
 
 
 class BaseWindow(object):
     def __init__(self, out_stream=None, hide_cursor=True):
         # type: (IO, bool) -> None
-        logger.debug('-------initializing Window object %r------' % self)
+        logger.debug("-------initializing Window object %r------" % self)
         if out_stream is None:
             out_stream = sys.__stdout__
         self.t = blessings.Terminal(stream=out_stream, force_styling=True)
@@ -41,7 +57,7 @@ class BaseWindow(object):
 
     def scroll_down(self):
         # type: () -> None
-        logger.debug('sending scroll down message w/ cursor on bottom line')
+        logger.debug("sending scroll down message w/ cursor on bottom line")
 
         # since scroll-down only moves the screen if cursor is at bottom
         with self.t.location(x=0, y=1000000):
@@ -108,7 +124,7 @@ class BaseWindow(object):
         for c in msg:
             if i >= rows * columns:
                 return arr
-            elif c in '\r\n':
+            elif c in "\r\n":
                 i = ((i // columns) + 1) * columns - 1
             else:
                 arr[i // arr.width, i % arr.width] = [fmtstr(c)]
@@ -118,18 +134,21 @@ class BaseWindow(object):
     def fmtstr_to_stdout_xform(self):
         # type: () -> Callable[[FmtStr], Text]
         if sys.version_info[0] == 2:
-            if hasattr(self.out_stream, 'encoding'):
+            if hasattr(self.out_stream, "encoding"):
                 encoding = self.out_stream.encoding
             else:
                 encoding = locale.getpreferredencoding()
 
             def for_stdout(s):
                 # type: (FmtStr) -> Text
-                return unicode(s).encode(encoding, 'replace')
+                return unicode(s).encode(encoding, "replace")
+
         else:
+
             def for_stdout(s):
                 # type: (FmtStr) -> Text
                 return str(s)
+
         return for_stdout
 
 
@@ -148,6 +167,7 @@ class FullscreenWindow(BaseWindow):
         Within the context of CursorAwareWindow, refrain from writing to
         its out_stream; cached writes will be inaccurate.
     """
+
     def __init__(self, out_stream=None, hide_cursor=True):
         # type: (IO, bool) -> None
         """Constructs a FullscreenWindow
@@ -156,8 +176,7 @@ class FullscreenWindow(BaseWindow):
             out_stream (file): Defaults to sys.__stdout__
             hide_cursor (bool): Hides cursor while in context
         """
-        BaseWindow.__init__(self, out_stream=out_stream,
-                            hide_cursor=hide_cursor)
+        BaseWindow.__init__(self, out_stream=out_stream, hide_cursor=hide_cursor)
         self.fullscreen_ctx = self.t.fullscreen()
 
     def __enter__(self):
@@ -194,14 +213,13 @@ class FullscreenWindow(BaseWindow):
         for_stdout = self.fmtstr_to_stdout_xform()
         if not self.hide_cursor:
             self.write(self.t.hide_cursor)
-        if (height != self._last_rendered_height or
-                width != self._last_rendered_width):
+        if height != self._last_rendered_height or width != self._last_rendered_width:
             self.on_terminal_size_change(height, width)
 
         current_lines_by_row = {}  # type: Dict[int, Optional[FmtStr]]
         rows = list(range(height))
-        rows_for_use = rows[:len(array)]
-        rest_of_rows = rows[len(array):]
+        rows_for_use = rows[: len(array)]
+        rest_of_rows = rows[len(array) :]
 
         # rows which we have content for and don't require scrolling
         for row, line in zip(rows_for_use, array):
@@ -222,12 +240,8 @@ class FullscreenWindow(BaseWindow):
             self.write(self.t.clear_bol)
             current_lines_by_row[row] = None
 
-        logger.debug(
-            'lines in last lines by row: %r' % self._last_lines_by_row.keys()
-        )
-        logger.debug(
-            'lines in current lines by row: %r' % current_lines_by_row.keys()
-        )
+        logger.debug("lines in last lines by row: %r" % self._last_lines_by_row.keys())
+        logger.debug("lines in current lines by row: %r" % current_lines_by_row.keys())
         self.write(self.t.move(*cursor_pos))
         self._last_lines_by_row = current_lines_by_row
         if not self.hide_cursor:
@@ -248,9 +262,15 @@ class CursorAwareWindow(BaseWindow):
         cursor depends on cursor not having moved since the last render.
         Only use the render_to_terminal interface for moving the cursor.
     """
-    def __init__(self, out_stream=None, in_stream=None,
-                 keep_last_line=False, hide_cursor=True,
-                 extra_bytes_callback=None):
+
+    def __init__(
+        self,
+        out_stream=None,
+        in_stream=None,
+        keep_last_line=False,
+        hide_cursor=True,
+        extra_bytes_callback=None,
+    ):
         # type: (IO, IO, bool, bool, Callable[[ByteString], None]) -> None
         """Constructs a CursorAwareWindow
 
@@ -264,8 +284,7 @@ class CursorAwareWindow(BaseWindow):
                 bytes inadvertantly read in get_cursor_position(). If not
                 provided, a ValueError will be raised when this occurs.
         """
-        BaseWindow.__init__(self, out_stream=out_stream,
-                            hide_cursor=hide_cursor)
+        BaseWindow.__init__(self, out_stream=out_stream, hide_cursor=hide_cursor)
         if in_stream is None:
             in_stream = sys.__stdin__
         self.in_stream = in_stream
@@ -286,7 +305,7 @@ class CursorAwareWindow(BaseWindow):
         self.cbreak.__enter__()
         self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
-        logger.debug('initial top_usable_row: %d' % self.top_usable_row)
+        logger.debug("initial top_usable_row: %d" % self.top_usable_row)
         return BaseWindow.__enter__(self)
 
     def __exit__(self, type, value, traceback):
@@ -309,7 +328,7 @@ class CursorAwareWindow(BaseWindow):
         # TODO would this be cleaner as a parameter?
         in_stream = self.in_stream
 
-        query_cursor_position = u"\x1b[6n"
+        query_cursor_position = "\x1b[6n"
         self.write(query_cursor_position)
 
         def retrying_read():
@@ -317,28 +336,32 @@ class CursorAwareWindow(BaseWindow):
             while True:
                 try:
                     c = in_stream.read(1)
-                    if c == '':
-                        raise ValueError("Stream should be blocking - should't"
-                                         " return ''. Returned %r so far",
-                                         (resp,))
+                    if c == "":
+                        raise ValueError(
+                            "Stream should be blocking - should't"
+                            " return ''. Returned %r so far",
+                            (resp,),
+                        )
                     return c
                 except IOError:
-                    raise ValueError(
-                        'cursor get pos response read interrupted'
-                    )
+                    raise ValueError("cursor get pos response read interrupted")
                     # find out if this ever really happens - if so, continue
 
-        resp = ''
+        resp = ""
         while True:
             c = retrying_read()
             resp += c
-            m = re.search('(?P<extra>.*)'
-                          '(?P<CSI>\x1b\[|\x9b)'
-                          '(?P<row>\\d+);(?P<column>\\d+)R', resp, re.DOTALL)
+            m = re.search(
+                "(?P<extra>.*)"
+                "(?P<CSI>\x1b[|\x9b)"
+                "(?P<row>\\d+);(?P<column>\\d+)R",
+                resp,
+                re.DOTALL,
+            )
             if m:
-                row = int(m.groupdict()['row'])
-                col = int(m.groupdict()['column'])
-                extra = m.groupdict()['extra']
+                row = int(m.groupdict()["row"])
+                col = int(m.groupdict()["column"])
+                extra = m.groupdict()["extra"]
                 if extra:
                     if self.extra_bytes_callback:
                         self.extra_bytes_callback(
@@ -346,11 +369,15 @@ class CursorAwareWindow(BaseWindow):
                             extra.encode(cast(TextIO, in_stream).encoding)
                         )
                     else:
-                        raise ValueError(("Bytes preceding cursor position "
-                                          "query response thrown out:\n%r\n"
-                                          "Pass an extra_bytes_callback to "
-                                          "CursorAwareWindow to prevent this")
-                                         % (extra,))
+                        raise ValueError(
+                            (
+                                "Bytes preceding cursor position "
+                                "query response thrown out:\n%r\n"
+                                "Pass an extra_bytes_callback to "
+                                "CursorAwareWindow to prevent this"
+                            )
+                            % (extra,)
+                        )
                 return (row - 1, col - 1)
 
     def get_cursor_vertical_diff(self):
@@ -392,16 +419,19 @@ class CursorAwareWindow(BaseWindow):
             cursor_dy = 0
         else:
             cursor_dy = row - self._last_cursor_row
-            logger.info('cursor moved %d lines down' % cursor_dy)
+            logger.info("cursor moved %d lines down" % cursor_dy)
             while self.top_usable_row > -1 and cursor_dy > 0:
                 self.top_usable_row += 1
                 cursor_dy -= 1
             while self.top_usable_row > 1 and cursor_dy < 0:
                 self.top_usable_row -= 1
                 cursor_dy += 1
-        logger.info('top usable row changed from %d to %d', old_top_usable_row,
-                    self.top_usable_row)
-        logger.info('returning cursor dy of %d from curtsies' % cursor_dy)
+        logger.info(
+            "top usable row changed from %d to %d",
+            old_top_usable_row,
+            self.top_usable_row,
+        )
+        logger.info("returning cursor dy of %d from curtsies" % cursor_dy)
         self._last_cursor_row = row
         return cursor_dy
 
@@ -433,8 +463,7 @@ class CursorAwareWindow(BaseWindow):
 
         # TODO race condition here?
         height, width = self.t.height, self.t.width
-        if (height != self._last_rendered_height or
-                width != self._last_rendered_width):
+        if height != self._last_rendered_height or width != self._last_rendered_width:
             self.on_terminal_size_change(height, width)
 
         current_lines_by_row = {}  # type: Dict[int, Optional[FmtStr]]
@@ -475,25 +504,19 @@ class CursorAwareWindow(BaseWindow):
             current_lines_by_row = dict(
                 (k - 1, v) for k, v in current_lines_by_row.items()
             )
-            logger.debug('new top_usable_row: %d' % self.top_usable_row)
+            logger.debug("new top_usable_row: %d" % self.top_usable_row)
             # since scrolling moves the cursor
             self.write(self.t.move(height - 1, 0))
             self.write(for_stdout(line))
             current_lines_by_row[height - 1] = line
 
-        logger.debug(
-            'lines in last lines by row: %r' % self._last_lines_by_row.keys()
-        )
-        logger.debug(
-            'lines in current lines by row: %r' % current_lines_by_row.keys()
-        )
+        logger.debug("lines in last lines by row: %r" % self._last_lines_by_row.keys())
+        logger.debug("lines in current lines by row: %r" % current_lines_by_row.keys())
         self._last_cursor_row = max(
             0, cursor_pos[0] - offscreen_scrolls + self.top_usable_row
         )
         self._last_cursor_column = cursor_pos[1]
-        self.write(
-            self.t.move(self._last_cursor_row, self._last_cursor_column)
-        )
+        self.write(self.t.move(self._last_cursor_row, self._last_cursor_column))
         self._last_lines_by_row = current_lines_by_row
         if not self.hide_cursor:
             self.write(self.t.normal_cursor)
@@ -502,10 +525,11 @@ class CursorAwareWindow(BaseWindow):
 
 def demo():
     # type: () -> None
-    handler = logging.FileHandler(filename='display.log')
+    handler = logging.FileHandler(filename="display.log")
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(__name__).addHandler(handler)
     from . import input
+
     with FullscreenWindow(sys.stdout) as w:
         with input.Input(sys.stdin) as input_generator:
             rows, columns = w.t.height, w.t.width
@@ -515,7 +539,9 @@ def demo():
                 if c == "":
                     sys.exit()  # same as raise SystemExit()
                 elif c == "h":
-                    a = w.array_from_text("a for small array")  # type: Union[List[FmtStr], FSArray]
+                    a = w.array_from_text(
+                        "a for small array"
+                    )  # type: Union[List[FmtStr], FSArray]
                 elif c == "a":
                     a = [fmtstr(c * columns) for _ in range(rows)]
                 elif c == "s":
@@ -530,9 +556,9 @@ def demo():
                     a = [fmtstr(c * columns) for _ in range(1)]
                 elif c == "e":
                     a = [fmtstr(c * columns) for _ in range(1)]
-                elif c == '\x0c':  # ctrl-L
+                elif c == "\x0c":  # ctrl-L
                     for _ in range(rows):
-                        w.write('\n')
+                        w.write("\n")
                     continue
                 else:
                     a = w.array_from_text("unknown command")
@@ -541,17 +567,16 @@ def demo():
 
 def main():
     # type: () -> None
-    handler = logging.FileHandler(filename='display.log')
+    handler = logging.FileHandler(filename="display.log")
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(__name__).addHandler(handler)
-    print('this should be just off-screen')
+    print("this should be just off-screen")
     w = FullscreenWindow(sys.stdout)
     rows, columns = w.t.height, w.t.width
     with w:
-        a = [fmtstr(
-            (('.row%r.' % (row,)) * rows)[:columns]
-        ) for row in range(rows)]
+        a = [fmtstr(((".row%r." % (row,)) * rows)[:columns]) for row in range(rows)]
         w.render_to_terminal(a)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     demo()
