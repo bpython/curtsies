@@ -88,3 +88,25 @@ About
 * Thanks to the many contributors!
 * If all you need are colored strings, consider one of these [other
   libraries](http://curtsies.readthedocs.io/en/latest/FmtStr.html#fmtstr-rationale)!
+
+Auto-formatting for Contributors
+--------------------------------
+
+* If you are using Visual Studio Code follow these steps
+    1. Male sure the python extension is installed
+    2. Then got to File → Preferences → Settings
+    3. Search for “python.formatting.provider”
+    4. Change it to black
+    5. Optional Format onSave
+        1. Still in settings search for “editor.formatOnSave” and check the box
+        2. This will auto format your code whenever you save
+    8. If you choose not to auto-format on save 
+        1. Use Command+Shift+P (on Mac) or Ctrl+Shift+P (Windows and Linux) to open the command palette.
+        2. Type in Format Document and select it to run the auto-formatter
+
+* Else, in the terminal (note this requires python 3.6.0+):
+    1. pip install black (first time only)
+    If you want to format a single file call this in the terminal:
+        black filename.py (formats the file)
+    If you want to format an entire file call this in the terminal:
+        black folder/ (formats all the files in a folder)
