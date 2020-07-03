@@ -1,9 +1,7 @@
 """Events for keystrokes and other input events"""
 import sys
-import time
 import encodings
 import codecs
-from functools import wraps
 
 from .termhelpers import Termmode
 
@@ -14,58 +12,62 @@ PY3 = sys.version_info[0] >= 3
 if PY3:
     raw_input = input
     unicode = str
-    chr_byte = lambda i: chr(i).encode('latin-1')
+    chr_byte = lambda i: chr(i).encode("latin-1")
     chr_uni = chr
 else:
     chr_byte = chr
-    chr_uni = lambda i: chr(i).decode('latin-1')
+    chr_uni = lambda i: chr(i).decode("latin-1")
 
 
 CURTSIES_NAMES = {}
-control_chars = dict((chr_byte(i), u'<Ctrl-%s>' % chr(i + 0x60)) for i in range(0x00, 0x1b))
+control_chars = dict(
+    (chr_byte(i), u"<Ctrl-%s>" % chr(i + 0x60)) for i in range(0x00, 0x1B)
+)
 CURTSIES_NAMES.update(control_chars)
 for i in range(0x00, 0x80):
-    CURTSIES_NAMES[b'\x1b'+chr_byte(i)] = u'<Esc+%s>' % chr(i)
-for i in range(0x00, 0x1b): # Overwrite the control keys with better labels
-    CURTSIES_NAMES[b'\x1b'+chr_byte(i)] = u'<Esc+Ctrl-%s>' % chr(i + 0x40)
+    CURTSIES_NAMES[b"\x1b" + chr_byte(i)] = u"<Esc+%s>" % chr(i)
+for i in range(0x00, 0x1B):  # Overwrite the control keys with better labels
+    CURTSIES_NAMES[b"\x1b" + chr_byte(i)] = u"<Esc+Ctrl-%s>" % chr(i + 0x40)
 for i in range(0x00, 0x80):
-    CURTSIES_NAMES[chr_byte(i + 0x80)] = u'<Meta-%s>' % chr(i)
-for i in range(0x00, 0x1b): # Overwrite the control keys with better labels
-    CURTSIES_NAMES[chr_byte(i + 0x80)] = u'<Meta-Ctrl-%s>' % chr(i + 0x40)
+    CURTSIES_NAMES[chr_byte(i + 0x80)] = u"<Meta-%s>" % chr(i)
+for i in range(0x00, 0x1B):  # Overwrite the control keys with better labels
+    CURTSIES_NAMES[chr_byte(i + 0x80)] = u"<Meta-Ctrl-%s>" % chr(i + 0x40)
 
 from .curtsieskeys import CURTSIES_NAMES as special_curtsies_names
+
 CURTSIES_NAMES.update(special_curtsies_names)
 
 CURSES_NAMES = {}
-CURSES_NAMES[b'\x1bOP'] = u'KEY_F(1)'
-CURSES_NAMES[b'\x1bOQ'] = u'KEY_F(2)'
-CURSES_NAMES[b'\x1bOR'] = u'KEY_F(3)'
-CURSES_NAMES[b'\x1bOS'] = u'KEY_F(4)'
-CURSES_NAMES[b'\x1b[15~'] = u'KEY_F(5)'
-CURSES_NAMES[b'\x1b[17~'] = u'KEY_F(6)'
-CURSES_NAMES[b'\x1b[18~'] = u'KEY_F(7)'
-CURSES_NAMES[b'\x1b[19~'] = u'KEY_F(8)'
-CURSES_NAMES[b'\x1b[20~'] = u'KEY_F(9)'
-CURSES_NAMES[b'\x1b[21~'] = u'KEY_F(10)'
-CURSES_NAMES[b'\x1b[23~'] = u'KEY_F(11)'
-CURSES_NAMES[b'\x1b[24~'] = u'KEY_F(12)'
+CURSES_NAMES[b"\x1bOP"] = u"KEY_F(1)"
+CURSES_NAMES[b"\x1bOQ"] = u"KEY_F(2)"
+CURSES_NAMES[b"\x1bOR"] = u"KEY_F(3)"
+CURSES_NAMES[b"\x1bOS"] = u"KEY_F(4)"
+CURSES_NAMES[b"\x1b[15~"] = u"KEY_F(5)"
+CURSES_NAMES[b"\x1b[17~"] = u"KEY_F(6)"
+CURSES_NAMES[b"\x1b[18~"] = u"KEY_F(7)"
+CURSES_NAMES[b"\x1b[19~"] = u"KEY_F(8)"
+CURSES_NAMES[b"\x1b[20~"] = u"KEY_F(9)"
+CURSES_NAMES[b"\x1b[21~"] = u"KEY_F(10)"
+CURSES_NAMES[b"\x1b[23~"] = u"KEY_F(11)"
+CURSES_NAMES[b"\x1b[24~"] = u"KEY_F(12)"
 
 # see bpython #626
-CURSES_NAMES[b'\x1b[11~'] = u'KEY_F(1)'
-CURSES_NAMES[b'\x1b[12~'] = u'KEY_F(2)'
-CURSES_NAMES[b'\x1b[13~'] = u'KEY_F(3)'
-CURSES_NAMES[b'\x1b[14~'] = u'KEY_F(4)'
+CURSES_NAMES[b"\x1b[11~"] = u"KEY_F(1)"
+CURSES_NAMES[b"\x1b[12~"] = u"KEY_F(2)"
+CURSES_NAMES[b"\x1b[13~"] = u"KEY_F(3)"
+CURSES_NAMES[b"\x1b[14~"] = u"KEY_F(4)"
 
-CURSES_NAMES[b'\x1b[A'] = u'KEY_UP'
-CURSES_NAMES[b'\x1b[B'] = u'KEY_DOWN'
-CURSES_NAMES[b'\x1b[C'] = u'KEY_RIGHT'
-CURSES_NAMES[b'\x1b[D'] = u'KEY_LEFT'
-CURSES_NAMES[b'\x1b[F'] = u'KEY_END'           # https://github.com/bpython/bpython/issues/490
-CURSES_NAMES[b'\x1b[H'] = u'KEY_HOME'          # https://github.com/bpython/bpython/issues/490
-CURSES_NAMES[b'\x08'] = u'KEY_BACKSPACE'
-CURSES_NAMES[b'\x1b[Z'] = u'KEY_BTAB'
+CURSES_NAMES[b"\x1b[A"] = u"KEY_UP"
+CURSES_NAMES[b"\x1b[B"] = u"KEY_DOWN"
+CURSES_NAMES[b"\x1b[C"] = u"KEY_RIGHT"
+CURSES_NAMES[b"\x1b[D"] = u"KEY_LEFT"
+CURSES_NAMES[b"\x1b[F"] = u"KEY_END"  # https://github.com/bpython/bpython/issues/490
+CURSES_NAMES[b"\x1b[H"] = u"KEY_HOME"  # https://github.com/bpython/bpython/issues/490
+CURSES_NAMES[b"\x08"] = u"KEY_BACKSPACE"
+CURSES_NAMES[b"\x1b[Z"] = u"KEY_BTAB"
 
 # see curtsies #78 - taken from https://github.com/jquast/blessed/blob/e9ad7b85dfcbbba49010ab8c13e3a5920d81b010/blessed/keyboard.py#L409
+# fmt: off
 CURSES_NAMES[b'\x1b[1~'] = u'KEY_FIND'         # find
 CURSES_NAMES[b'\x1b[2~'] = u'KEY_IC'           # insert (0)
 CURSES_NAMES[b'\x1b[3~'] = u'KEY_DC'           # delete (.), "Execute"
@@ -80,18 +82,23 @@ CURSES_NAMES[b'\x1b[OC'] = u'KEY_RIGHT'        # right  (6)
 CURSES_NAMES[b'\x1b[OD'] = u'KEY_LEFT'         # left   (4)
 CURSES_NAMES[b'\x1b[OF'] = u'KEY_END'          # end    (1)
 CURSES_NAMES[b'\x1b[OH'] = u'KEY_HOME'         # home   (7)
+# fmt: on
 
 KEYMAP_PREFIXES = set()
 for table in (CURSES_NAMES, CURTSIES_NAMES):
     for k in table:
-        if k.startswith(b'\x1b'):
+        if k.startswith(b"\x1b"):
             for i in range(1, len(k)):
                 KEYMAP_PREFIXES.add(k[:i])
 
-MAX_KEYPRESS_SIZE = max(len(seq) for seq in (list(CURSES_NAMES.keys()) + list(CURTSIES_NAMES.keys())))
+MAX_KEYPRESS_SIZE = max(
+    len(seq) for seq in (list(CURSES_NAMES.keys()) + list(CURTSIES_NAMES.keys()))
+)
+
 
 class Event(object):
     pass
+
 
 class ScheduledEvent(Event):
     """Event scheduled for a future time.
@@ -101,9 +108,11 @@ class ScheduledEvent(Event):
 
     Custom events that occur at a specific time in the future should
     be subclassed from ScheduledEvent."""
+
     def __init__(self, when):
         # type: (float) -> None
         self.when = when
+
 
 class WindowChangeEvent(Event):
     def __init__(self, rows, columns, cursor_dy=None):
@@ -111,42 +120,56 @@ class WindowChangeEvent(Event):
         self.rows = rows
         self.columns = columns
         self.cursor_dy = cursor_dy
+
     x = width = property(lambda self: self.columns)
     y = height = property(lambda self: self.rows)
+
     def __repr__(self):
         # type: () -> str
-        return "<WindowChangeEvent (%d, %d)%s>" % (self.rows, self.columns,
-                '' if self.cursor_dy is None else " cursor_dy: %d" % self.cursor_dy)
+        return "<WindowChangeEvent (%d, %d)%s>" % (
+            self.rows,
+            self.columns,
+            "" if self.cursor_dy is None else " cursor_dy: %d" % self.cursor_dy,
+        )
+
     @property
     def name(self):
         # type: () -> str
-        return '<WindowChangeEvent>'
+        return "<WindowChangeEvent>"
+
 
 class SigIntEvent(Event):
     """Event signifying a SIGINT"""
+
     def __repr__(self):
         # type: () -> str
         return "<SigInt Event>"
+
     @property
     def name(self):
         # type: () -> str
         return repr(self)
+
 
 class PasteEvent(Event):
     """Multiple keypress events combined, likely from copy/paste.
 
     The events attribute contains a list of keypress event strings.
     """
+
     def __init__(self):
         # type: () -> None
         self.events = []  # type: List[Union[Event, str]]
+
     def __repr__(self):
         # type: () -> str
         return "<Paste Event with data: %r>" % self.events
+
     @property
     def name(self):
         # type: () -> str
         return repr(self)
+
 
 def decodable(seq, encoding):
     # type: (bytes, str) -> bool
@@ -157,7 +180,8 @@ def decodable(seq, encoding):
     else:
         return True
 
-def get_key(bytes_, encoding, keynames='curtsies', full=False):
+
+def get_key(bytes_, encoding, keynames="curtsies", full=False):
     # type: (List[bytes], str, str, bool) -> Optional[Text]
     """Return key pressed from bytes_ or None
 
@@ -191,38 +215,46 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
     (for 'asdf', first on 'a', then on 'as', then on 'asd' - until a non-None
     value is returned)
     """
-    if not all(isinstance(c, type(b'')) for c in bytes_):
-        raise ValueError("get key expects bytes, got %r" % bytes_) # expects raw bytes
-    if keynames not in ['curtsies', 'curses', 'bytes']:
+    if not all(isinstance(c, type(b"")) for c in bytes_):
+        raise ValueError("get key expects bytes, got %r" % bytes_)  # expects raw bytes
+    if keynames not in ["curtsies", "curses", "bytes"]:
         raise ValueError("keynames must be one of 'curtsies', 'curses' or 'bytes'")
-    seq = b''.join(bytes_)
+    seq = b"".join(bytes_)
     if len(seq) > MAX_KEYPRESS_SIZE:
-        raise ValueError('unable to decode bytes %r' % seq)
+        raise ValueError("unable to decode bytes %r" % seq)
 
     def key_name():
         # type: () -> Union[Text]
-        if keynames == 'curses':
-            if seq in CURSES_NAMES: # may not be here (and still not decodable) curses names incomplete
+        if keynames == "curses":
+            # may not be here (and still not decodable) curses names incomplete
+            if seq in CURSES_NAMES:
                 return CURSES_NAMES[seq]
 
             # Otherwise, there's no special curses name for this
             try:
-                return seq.decode(encoding) # for normal decodable text or a special curtsies sequence with bytes that can be decoded
+                # for normal decodable text or a special curtsies sequence with bytes that can be decoded
+                return seq.decode(encoding)
             except UnicodeDecodeError:
                 # this sequence can't be decoded with this encoding, so we need to represent the bytes
                 if len(seq) == 1:
-                    return u'x%02X' % ord(seq)
-                    #TODO figure out a better thing to return here
+                    return u"x%02X" % ord(seq)
+                    # TODO figure out a better thing to return here
                 else:
-                    raise NotImplementedError("are multibyte unnameable sequences possible?")
-                    return u'bytes: ' + u'-'.join(u'x%02X' % ord(seq[i:i+1]) for i in range(len(seq)))
-                    #TODO if this isn't possible, return multiple meta keys as a paste event if paste events enabled
-        elif keynames == 'curtsies':
+                    raise NotImplementedError(
+                        "are multibyte unnameable sequences possible?"
+                    )
+                    return u"bytes: " + u"-".join(
+                        u"x%02X" % ord(seq[i : i + 1]) for i in range(len(seq))
+                    )
+                    # TODO if this isn't possible, return multiple meta keys as a paste event if paste events enabled
+        elif keynames == "curtsies":
             if seq in CURTSIES_NAMES:
                 return CURTSIES_NAMES[seq]
-            return seq.decode(encoding) #assumes that curtsies names are a subset of curses ones
+            return seq.decode(
+                encoding
+            )  # assumes that curtsies names are a subset of curses ones
         else:
-            assert keynames == 'bytes'
+            assert keynames == "bytes"
             return seq  # type: ignore
 
     key_known = seq in CURTSIES_NAMES or seq in CURSES_NAMES or decodable(seq, encoding)
@@ -230,30 +262,35 @@ def get_key(bytes_, encoding, keynames='curtsies', full=False):
     if full and key_known:
         return key_name()
     elif seq in KEYMAP_PREFIXES or could_be_unfinished_char(seq, encoding):
-        return None # need more input to make up a full keypress
+        return None  # need more input to make up a full keypress
     elif key_known:
         return key_name()
     else:
-        seq.decode(encoding) # this will raise a unicode error (they're annoying to raise ourselves)
-        assert False, 'should have raised an unicode decode error'
+        # this will raise a unicode error (they're annoying to raise ourselves)
+        seq.decode(encoding)
+        assert False, "should have raised an unicode decode error"
+
 
 def could_be_unfinished_char(seq, encoding):
     # type: (bytes, Text) -> bool
     """Whether seq bytes might create a char in encoding if more bytes were added"""
     if decodable(seq, encoding):
-        return False # any sensible encoding surely doesn't require lookahead (right?)
+        return False  # any sensible encoding surely doesn't require lookahead (right?)
         # (if seq bytes encoding a character, adding another byte shouldn't also encode something)
 
-    if codecs.getdecoder('utf8') is codecs.getdecoder(encoding):
+    if codecs.getdecoder("utf8") is codecs.getdecoder(encoding):
         return could_be_unfinished_utf8(seq)
-    elif codecs.getdecoder('ascii') is codecs.getdecoder(encoding):
+    elif codecs.getdecoder("ascii") is codecs.getdecoder(encoding):
         return False
     else:
-        return True # We don't know, it could be
+        return True  # We don't know, it could be
+
 
 def could_be_unfinished_utf8(seq):
     # type: (bytes) -> bool
     # http://en.wikipedia.org/wiki/UTF-8#Description
+
+    # fmt: off
     if   ord(seq[0:1]) & 0b10000000 == 0b10000000 and len(seq) < 1: return True
     elif ord(seq[0:1]) & 0b11100000 == 0b11000000 and len(seq) < 2: return True
     elif ord(seq[0:1]) & 0b11110000 == 0b11100000 and len(seq) < 3: return True
@@ -261,6 +298,8 @@ def could_be_unfinished_utf8(seq):
     elif ord(seq[0:1]) & 0b11111100 == 0b11111000 and len(seq) < 5: return True
     elif ord(seq[0:1]) & 0b11111110 == 0b11111100 and len(seq) < 6: return True
     else: return False
+    # fmt: on
+
 
 def pp_event(seq):
     # type: (Text) -> Union[Text, bytes]
@@ -282,15 +321,19 @@ def pp_event(seq):
         pretty = curtsies_name(bytes_seq)
         if pretty != seq:
             return pretty
-    return repr(seq).lstrip('u')[1:-1]
+    return repr(seq).lstrip("u")[1:-1]
+
 
 def curtsies_name(seq):
     # type: (bytes) -> Union[Text, bytes]
     return CURTSIES_NAMES.get(seq, seq)
 
+
 def try_keys():
     # type: () -> None
-    print('press a bunch of keys (not at the same time, but you can hit them pretty quickly)')
+    print(
+        "press a bunch of keys (not at the same time, but you can hit them pretty quickly)"
+    )
     import tty
     import termios
     import fcntl
@@ -299,42 +342,47 @@ def try_keys():
 
     def ask_what_they_pressed(seq, Normal):
         # type: (bytes, Termmode) -> None
-        print('Unidentified character sequence!')
+        print("Unidentified character sequence!")
         with Normal:
             while True:
                 r = raw_input("type 'ok' to prove you're not pounding keys ")
-                if r.lower().strip() == 'ok':
+                if r.lower().strip() == "ok":
                     break
         while True:
-            print('Press the key that produced %r again please' % (seq,))
+            print("Press the key that produced %r again please" % (seq,))
             retry = os.read(sys.stdin.fileno(), 1000)
             if seq == retry:
                 break
             print("nope, that wasn't it")
         with Normal:
-            name = raw_input('Describe in English what key you pressed: ')
-            f = open('keylog.txt', 'a')
+            name = raw_input("Describe in English what key you pressed: ")
+            f = open("keylog.txt", "a")
             f.write("%r is called %s\n" % (seq, name))
             f.close()
-            print('Thanks! Please open an issue at https://github.com/bpython/curtsies/issues')
-            print('or email thomasballinger@gmail.com. Include this terminal history or keylog.txt.')
-            print('You can keep pressing keys')
+            print(
+                "Thanks! Please open an issue at https://github.com/bpython/curtsies/issues"
+            )
+            print(
+                "or email thomasballinger@gmail.com. Include this terminal history or keylog.txt."
+            )
+            print("You can keep pressing keys")
 
     with Cbreak(sys.stdin) as NoCbreak:
         while True:
             try:
                 chars = os.read(sys.stdin.fileno(), 1000)
-                print('---')
+                print("---")
                 print(repr(chars))
                 if chars in CURTSIES_NAMES:
                     print(CURTSIES_NAMES[chars])
                 elif len(chars) == 1:
-                    print('literal')
+                    print("literal")
                 else:
-                    print('unknown!!!')
+                    print("unknown!!!")
                     ask_what_they_pressed(chars, NoCbreak)
             except OSError:
                 pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     try_keys()

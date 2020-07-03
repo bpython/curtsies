@@ -1,4 +1,3 @@
-
 import locale
 import os
 import signal
@@ -10,6 +9,7 @@ import time
 import tty
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +29,7 @@ assert READ_SIZE >= events.MAX_KEYPRESS_SIZE
 
 def is_main_thread():
     # type: () -> bool
-    return isinstance(threading.current_thread(), threading._MainThread) # type: ignore
+    return isinstance(threading.current_thread(), threading._MainThread)  # type: ignore
 
 
 class ReplacedSigIntHandler(object):
@@ -49,10 +49,16 @@ class ReplacedSigIntHandler(object):
 
 class Input(object):
     """Keypress and control event generator"""
-    def __init__(self, in_stream=None, keynames='curtsies',
-                 paste_threshold=events.MAX_KEYPRESS_SIZE+1, sigint_event=False,
-                 signint_callback_provider=None,
-                 disable_terminal_start_stop=False):
+
+    def __init__(
+        self,
+        in_stream=None,
+        keynames="curtsies",
+        paste_threshold=events.MAX_KEYPRESS_SIZE + 1,
+        sigint_event=False,
+        signint_callback_provider=None,
+        disable_terminal_start_stop=False,
+    ):
         # type: (TextIO, str, int, bool, None, bool) -> None
         """Returns an Input instance.
 
@@ -72,7 +78,9 @@ class Input(object):
         if in_stream is None:
             in_stream = sys.__stdin__
         self.in_stream = in_stream
-        self.unprocessed_bytes = []  # type: List[bytes]  # leftover from stdin, unprocessed yet
+        self.unprocessed_bytes = (
+            []
+        )  # type: List[bytes]  # leftover from stdin, unprocessed yet
         self.keynames = keynames
         self.paste_threshold = paste_threshold
         self.sigint_event = sigint_event
@@ -82,7 +90,9 @@ class Input(object):
         self.readers = []  # type: List[int]
         self.queued_interrupting_events = []  # type: List[Union[events.Event, Text]]
         self.queued_events = []  # type: List[events.Event]
-        self.queued_scheduled_events = []  # type: List[Tuple[float, events.ScheduledEvent]]
+        self.queued_scheduled_events = (
+            []
+        )  # type: List[Tuple[float, events.ScheduledEvent]]
 
     # prospective: this could be useful for an external select loop
     def fileno(self):
@@ -97,11 +107,11 @@ class Input(object):
         if self.disable_terminal_start_stop:
             attrs = termios.tcgetattr(self.in_stream)
             tty_cc = cast(List[Union[bytes, int]], attrs[-1])
-            tty_cc[termios.VSTOP] = 0   # Ctrl-s
+            tty_cc[termios.VSTOP] = 0  # Ctrl-s
             tty_cc[termios.VSTART] = 0  # Ctrl-q
             termios.tcsetattr(self.in_stream, termios.TCSANOW, attrs)
 
-        if sys.platform == 'darwin':
+        if sys.platform == "darwin":
             attrs = termios.tcgetattr(self.in_stream)
             VDSUSP = termios.VSUSP + 1
             tty_cc = cast(List[Union[bytes, int]], attrs[-1])
@@ -140,8 +150,7 @@ class Input(object):
         This method is for reporting bytes from an in_stream read
         not initiated by this Input object"""
 
-        self.unprocessed_bytes.extend(string[i:i + 1]
-                                      for i in range(len(string)))
+        self.unprocessed_bytes.extend(string[i : i + 1] for i in range(len(string)))
 
     def _wait_for_read_ready_or_timeout(self, timeout):
         # type: (Union[float, int, None]) -> Tuple[bool, Optional[Union[events.Event, Text]]]
@@ -156,8 +165,8 @@ class Input(object):
         while True:
             try:
                 (rs, _, _) = select.select(
-                    [self.in_stream.fileno()] + self.readers,
-                    [], [], remaining_timeout)
+                    [self.in_stream.fileno()] + self.readers, [], [], remaining_timeout
+                )
                 if not rs:
                     return False, None
                 r = rs[0]  # if there's more than one, get it in the next loop
@@ -196,10 +205,12 @@ class Input(object):
             current_bytes = []
             while self.unprocessed_bytes:
                 current_bytes.append(self.unprocessed_bytes.pop(0))
-                e = events.get_key(current_bytes,
-                                   getpreferredencoding(),
-                                   keynames=self.keynames,
-                                   full=len(self.unprocessed_bytes)==0)
+                e = events.get_key(
+                    current_bytes,
+                    getpreferredencoding(),
+                    keynames=self.keynames,
+                    full=len(self.unprocessed_bytes) == 0,
+                )
                 if e is not None:
                     current_bytes = []
                     return e
@@ -215,15 +226,20 @@ class Input(object):
             return self.queued_interrupting_events.pop(0)
 
         if self.queued_scheduled_events:
-            self.queued_scheduled_events.sort()  #TODO use a data structure that inserts sorted
+            self.queued_scheduled_events.sort()  # TODO use a data structure that inserts sorted
             when, _ = self.queued_scheduled_events[0]
             if when < time.time():
-                logger.debug('popping an event! %r %r',
-                               self.queued_scheduled_events[0],
-                               self.queued_scheduled_events[1:])
+                logger.debug(
+                    "popping an event! %r %r",
+                    self.queued_scheduled_events[0],
+                    self.queued_scheduled_events[1:],
+                )
                 return self.queued_scheduled_events.pop(0)[1]
             else:
-                time_until_check = min(max(0, when - time.time()), timeout if timeout is not None else sys.maxsize)  # type: Union[float, int, None]
+                time_until_check = min(
+                    max(0, when - time.time()),
+                    timeout if timeout is not None else sys.maxsize,
+                )  # type: Union[float, int, None]
         else:
             time_until_check = timeout
 
@@ -232,13 +248,20 @@ class Input(object):
         if e is not None:
             return e
 
-        stdin_ready_for_read, event = self._wait_for_read_ready_or_timeout(time_until_check)
+        stdin_ready_for_read, event = self._wait_for_read_ready_or_timeout(
+            time_until_check
+        )
         if event:
             return event
-        if self.queued_scheduled_events and when < time.time():  # when should always be defined
+        if (
+            self.queued_scheduled_events and when < time.time()
+        ):  # when should always be defined
             # because queued_scheduled_events should not be modified during this time
-            logger.debug('popping an event! %r %r', self.queued_scheduled_events[0],
-                           self.queued_scheduled_events[1:])
+            logger.debug(
+                "popping an event! %r %r",
+                self.queued_scheduled_events[0],
+                self.queued_scheduled_events[1:],
+            )
             return self.queued_scheduled_events.pop(0)[1]
         if not stdin_ready_for_read:
             return None
@@ -274,7 +297,9 @@ class Input(object):
                 except BlockingIOError:
                     return 0
                 if data:
-                    self.unprocessed_bytes.extend(data[i:i+1] for i in range(len(data)))
+                    self.unprocessed_bytes.extend(
+                        data[i : i + 1] for i in range(len(data))
+                    )
                     return len(data)
                 else:
                     return 0
@@ -293,9 +318,11 @@ class Input(object):
 
         Returned callback function will add an event of type event_type
         to a queue which will be checked the next time an event is requested."""
+
         def callback(**kwargs):
             # type: (**Any) -> None
             self.queued_events.append(event_type(**kwargs))  # type: ignore
+
         return callback
 
     def scheduled_event_trigger(self, event_type):
@@ -304,9 +331,11 @@ class Input(object):
 
         Returned callback function will add an event of type event_type
         to a queue which will be checked the next time an event is requested."""
+
         def callback(when):
             # type: (float) -> None
             self.queued_scheduled_events.append((when, event_type(when=when)))
+
         return callback
 
     def threadsafe_event_trigger(self, event_type):
@@ -322,10 +351,13 @@ class Input(object):
 
         def callback(**kwargs):
             # type: (**Any) -> None
-            #TODO use a threadsafe queue for this
+            # TODO use a threadsafe queue for this
             self.queued_interrupting_events.append(event_type(**kwargs))  # type: ignore
-            logger.debug('added event to events list %r', self.queued_interrupting_events)
-            os.write(writefd, b'interrupting event!')
+            logger.debug(
+                "added event to events list %r", self.queued_interrupting_events
+            )
+            os.write(writefd, b"interrupting event!")
+
         return callback
 
 
@@ -339,10 +371,11 @@ def main():
     with Input() as input_generator:
         print(repr(input_generator.send(2)))
         print(repr(input_generator.send(1)))
-        print(repr(input_generator.send(.5)))
-        print(repr(input_generator.send(.2)))
+        print(repr(input_generator.send(0.5)))
+        print(repr(input_generator.send(0.2)))
         for e in input_generator:
             print(repr(e))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

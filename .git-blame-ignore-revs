@@ -1,0 +1,16 @@
+# This file contains a list of commits that are not likely what you
+# are looking for in a blame, such as mass reformatting or renaming.
+#
+# Use case:
+#   $ git blame --ignore-revs-file .git-blame-ignore-revs <file>
+#
+# You can also set this file as the default ignore file for blame
+# by running:
+#   $ git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# When adding commits, write a comment describing its contents
+# followed by the 40-character commit ID on a new line.
+
+
+# Initial formatting with Black
+dbbff8f74453a878fce0de7c7716efbf11e4586c
