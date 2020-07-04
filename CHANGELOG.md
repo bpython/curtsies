@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [0.3.2] - 2020-07-02
+## [0.3.2] - 2020-07-04
 - Migrate doc generation to Python 3
 - Add MyPy typing
 - Remove logging level message. Thanks Jack Rybarczyk!
