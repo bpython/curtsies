@@ -26,11 +26,11 @@ If you are working on VS code, follow these steps to auto format from inside VS 
     3. Search for “python.formatting.provider”  
     4. Change it to 'black'  
     5. Optional - Format onSave  
-        1. Still in settings search for “editor.formatOnSave” and check the box  
-        2. This will auto format your code whenever you save  
+        - Still in settings search for “editor.formatOnSave” and check the box  
+        - This will auto format your code whenever you save  
     6. If you choose not to auto-format on save  
-        1. Use Command+Shift+P (on Mac) or Ctrl+Shift+P (Windows and Linux) to open the command palette.  
-        2. Type in Format Document and select it to run the auto-formatter  
+        - Use Command+Shift+P (on Mac) or Ctrl+Shift+P (Windows and Linux) to open the command palette.  
+        - Type in Format Document and select it to run the auto-formatter  
     
 ## Migrating format changes without ruining git blame
 So as to not pollute `git blame` history, for large reformatting or renaming commits, place the 40-character commit ID into the `.git-blame-ignore-revs` file underneath a comment describing the its contents.
