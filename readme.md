@@ -6,7 +6,6 @@ Curtsies is a Python 2.7 & 3.4+ compatible library for interacting with the term
 This is what using (nearly every feature of) curtsies looks like:
 
 ```python
-from __future__ import unicode_literals  # convenient for Python 2
 import random
 
 from curtsies import FullscreenWindow, Input, FSArray

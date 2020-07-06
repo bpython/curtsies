@@ -5,8 +5,9 @@
 # Special names are for multi-character keys, or key names
 # that would be hard to write in a config file
 
-#TODO add PAD keys hack as in bpython.cli
+# TODO add PAD keys hack as in bpython.cli
 
+# fmt: off
 CURTSIES_NAMES = dict([
   (b' ',          u'<SPACE>'),
   (b'\x1b ',      u'<Esc+SPACE>'),
@@ -134,3 +135,4 @@ CURTSIES_NAMES = dict([
   #end of keys reported by alethiophile
 
 ])
+# fmt: on

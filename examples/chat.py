@@ -65,6 +65,6 @@ if __name__ == '__main__':
         print('usage: python chat.py google.com 80')
         print('(if you use this example, try typing')
         print('GET /')
-        print('and then hitting enter)')
+        print('and then hitting enter twice.)')
     else:
         main(host, int(port))

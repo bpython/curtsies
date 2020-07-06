@@ -1,0 +1,21 @@
+[tool.black]
+line-length = 88
+target_version = ["py27"]
+exclude = '''
+(
+    /(
+          \.git
+        | build
+        | curtsies.egg-info
+        | dist
+        | examples
+        | notes
+        | stubs
+    )/
+    | bootstrap.py
+    | curtsies/formatstring.py
+    | curtsies/formatstringarray.py
+    | docs/conf.py
+    
+)
+'''

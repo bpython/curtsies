@@ -13,6 +13,7 @@ def timeit(n):
     print(n, ':', t1 - t0)
     return (t1 - t0)
 
-ns = range(100, 2000, 100)
+if __name__ == '__main__':
+    ns = range(100, 2000, 100)
 
-times = [timeit(i) for i in ns]
+    times = [timeit(i) for i in ns]
