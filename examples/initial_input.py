@@ -8,5 +8,7 @@ def main():
     with Input() as input_generator:
         for e in input_generator:
             print(repr(e))
+            if e == '<ESC>':
+                break
 if __name__ == '__main__':
     main()

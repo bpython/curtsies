@@ -14,6 +14,8 @@ def main():
             window.get_cursor_position()
             for e in input_generator:
                 print(repr(e))
+                if e == '<ESC>':
+                    break
 
 if __name__ == '__main__':
     main()
