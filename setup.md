@@ -20,7 +20,7 @@ To auto-format a modified file to curtsies' formatting specifications (which are
     $ pip install black
     $ black {source_file_or_directory}
     
-If you are working on VS code, follow these steps to auto format from inside VS code:
+If you are working on VS code, follow these steps to auto format from inside VS code:  
     1. Make sure the python extension is installed  
     2. Then got to File → Preferences → Settings  
     3. Search for “python.formatting.provider”  
