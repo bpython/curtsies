@@ -13,6 +13,7 @@ class Nonblocking(object):
     """
     A context manager for making an input stream nonblocking.
     """
+
     def __init__(self, stream):
         # type: (IO) -> None
         self.stream = stream
