@@ -13,6 +13,11 @@ def version():
 
 
 def get_long_description():
+    try:
+        return open('readme.md').read()
+    except:
+        pass
+    
     with io.open("readme.md", encoding="utf-8") as f:
         long_description = f.read()
 
