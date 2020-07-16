@@ -11,12 +11,15 @@ def version():
             if line.startswith("__version__"):
                 return ast.parse(line).body[0].value.s
 
+def long_description():
+    with io.open("readme.md", encoding="utf-8") as f:	
+        return f.read()
 
 setup(
     name="curtsies",
     version=version(),
     description="Curses-like terminal wrapper, with colored strings!",
-    long_description=open("readme.md", encoding="utf-8").read(),
+    long_description=long_description(),
     long_description_content_type="text/markdown",
     url="https://github.com/bpython/curtsies",
     author="Thomas Ballinger",
