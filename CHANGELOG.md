@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.3.4] - 2020-07-15
+- Prevent crash when embedding in situations including the lldb debugger. Thanks Nathan Lanza!
+
+## [0.3.3] - 2020-07-06
+- Revert backslash removal, since this broke bpython in 0.3.2
+
 ## [0.3.2] - 2020-07-04
 - Migrate doc generation to Python 3
 - Add MyPy typing
