@@ -195,10 +195,17 @@ class FSArray(Sequence):
         colslice = normalize_slice(self.num_columns, colslice)
         if slicesize(colslice) == 0 or slicesize(rowslice) == 0:
             return
+        if slicesize(colslice) > 1 and isinstance(value, str):
+            raise ValueError(
+                """You cannot replace a multi column slice with a 
+                string please use a list [] with strings for the 
+                contents of each row""")
         if slicesize(rowslice) != len(value):
-            area = slicesize(rowslice)
-            val_len = len(value)
-            grid_value = fmtstr(" ", bg="cyan") * area
+            area = slicesize(rowslice) * slicesize(colslice)
+            val_len = 0
+            for i in value:
+                val_len += len(i)
+            grid_value = [fmtstr(" ", bg="cyan") * slicesize(colslice)] * slicesize(rowslice)
             grid_fsarray = (
                 self.rows[: rowslice.start]
                 + [
@@ -209,8 +216,8 @@ class FSArray(Sequence):
                 ]
                 + self.rows[rowslice.stop :]
             )
-            bad_value = fmtstr(value, bg="cyan")
-            msg = "You are trying to fit this value {0} into the region {1}:".format(bad_value, grid_value)
+            bad_value = fmtstr("".join(value), bg="cyan")
+            msg = "You are trying to fit this value {0} into the region {1}:".format(bad_value, fmtstr("").join(grid_value))
             for x in range(len(self.rows)):
                 msg = "{0} \n {1}".format(msg, grid_fsarray[x])
             raise ValueError(
