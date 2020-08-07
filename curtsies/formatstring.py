@@ -331,7 +331,8 @@ class FmtStr(object):
             fs = fs + ' '*(endindex - startindex - len(fs))
             assert len(fs) == endindex - startindex, (len(fs), startindex, endindex)
         result = self.splice(fs, startindex, endindex)
-        assert len(result) <= length
+        if len(result) > length:
+            raise ValueError("Your change is resulting in a longer fmtstr than the original length and this is not supported.")
         return result
 
     def splice(self, new_str, start, end=None):
