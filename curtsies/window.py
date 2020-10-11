@@ -356,7 +356,7 @@ class CursorAwareWindow(BaseWindow):
             resp += c
             m = re.search(
                 "(?P<extra>.*)"
-                "(?P<CSI>\x1b\[|\x9b)"
+                "(?P<CSI>\x1b\\[|\x9b)"
                 "(?P<row>\\d+);(?P<column>\\d+)R",
                 resp,
                 re.DOTALL,
