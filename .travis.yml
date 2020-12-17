@@ -14,6 +14,13 @@ python:
     - "3.6"
     - "pypy"
     - "pypy3"
+ jobs:
+  exclude:
+   - arch: ppc64le
+     python: "pypy"
+   - arch: ppc64le
+     python: "pypy3"
+       
 
 matrix:
     include:
