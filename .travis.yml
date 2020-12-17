@@ -1,6 +1,7 @@
 arch:
    - amd64
    - ppc64le
+
 notifications:
     webhooks:
         - secure: "SWXDWxa1mNV6Wr6fPP8MxYO69rOiMMilp475Z9a3V9B3S/xds+d0ye8msUD+D1W9lzhwrw9NSMUjuBrm0llAvBV2MVCjYeuZ4ACLuK7fqhh4+2V9OrhYCKQrjNmEicmqwe1H5Z09JGKnMEJGUxrqApkCucoY8xOJu1/jfS7R63I="
@@ -14,6 +15,7 @@ python:
     - "3.6"
     - "pypy"
     - "pypy3"
+ 
  jobs:
   exclude:
    - arch: ppc64le
