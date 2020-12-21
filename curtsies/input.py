@@ -27,7 +27,7 @@ assert READ_SIZE >= events.MAX_KEYPRESS_SIZE
 
 def is_main_thread():
     # type: () -> bool
-    return isinstance(threading.current_thread(), threading._MainThread)  # type: ignore
+    return threading.current_thread() == threading.main_thread()
 
 
 class ReplacedSigIntHandler:
