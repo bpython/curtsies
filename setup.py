@@ -30,7 +30,7 @@ setup(
         "blessings>=1.5",
         "wcwidth>=0.1.4"
     ],
-    tests_require=["mock", "pyte", "nose",],
+    tests_require=["pyte", "nose",],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

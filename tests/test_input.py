@@ -4,7 +4,7 @@ import sys
 import threading
 import time
 import unittest
-from mock import Mock
+from unittest.mock import Mock
 
 try:
     from unittest import skip, skipUnless

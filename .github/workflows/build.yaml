@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install "blessings>=1.5" "wcwidth>=0.1.4" mock pyte nose
+        pip install "blessings>=1.5" "wcwidth>=0.1.4" pyte nose
     - name: Build with Python ${{ matrix.python-version }}
       run: |
         python setup.py build
