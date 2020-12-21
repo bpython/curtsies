@@ -199,11 +199,14 @@ class FSArray(Sequence):
             raise ValueError(
                 """You cannot replace a multi column slice with a 
                 string please use a list [] with strings for the 
-                contents of each row""")
+                contents of each row"""
+            )
         if slicesize(rowslice) != len(value):
             area = slicesize(rowslice) * slicesize(colslice)
             val_len = sum(len(i) for i in value)
-            grid_value = [fmtstr(" ", bg="cyan") * slicesize(colslice)] * slicesize(rowslice)
+            grid_value = [fmtstr(" ", bg="cyan") * slicesize(colslice)] * slicesize(
+                rowslice
+            )
             grid_fsarray = (
                 self.rows[: rowslice.start]
                 + [
@@ -231,7 +234,7 @@ class FSArray(Sequence):
                     colslice.stop - colslice.start,
                     area,
                     val_len,
-                    msg
+                    msg,
                 )
             )
         self.rows = (
@@ -353,4 +356,3 @@ if __name__ == "__main__":
     a = fsarray(["hey", "there"], bg="cyan")
     a.dumb_display()
     print(FSArray.diff(a, fsarray(["hey", "there "]), ignore_formatting=True))
-
