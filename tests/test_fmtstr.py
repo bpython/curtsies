@@ -579,8 +579,8 @@ class TestFSArray(unittest.TestCase):
 class FormatStringTest(unittest.TestCase):
     def assertFSArraysEqual(self, a, b):
         # type: (FSArray, FSArray) -> None
-        self.assertEqual(type(a), FSArray)
-        self.assertEqual(type(b), FSArray)
+        self.assertIsInstance(a, FSArray)
+        self.assertIsInstance(b, FSArray)
         self.assertEqual(
             (a.width, b.height),
             (a.width, b.height),
