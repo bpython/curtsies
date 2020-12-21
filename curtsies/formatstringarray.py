@@ -64,8 +64,8 @@ def fsarray(strings, *args, **kwargs):
     if "width" in kwargs:
         width = kwargs["width"]
         del kwargs["width"]
-        if strings and max(len(s) for s in strings) > width:
-            raise ValueError("Those strings won't fit for width %d" % width)
+        if strings and any(len(s) > width for s in strings):
+            raise ValueError(f"Those strings won't fit for width {width}")
     else:
         width = max(len(s) for s in strings) if strings else 0
     fstrings = [
