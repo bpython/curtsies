@@ -123,7 +123,11 @@ class Input:
 
     def __exit__(self, type=None, value=None, traceback=None):
         # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
-        if self.sigint_event and is_main_thread() and self.orig_sigint_handler is not None:
+        if (
+            self.sigint_event
+            and is_main_thread()
+            and self.orig_sigint_handler is not None
+        ):
             signal.signal(signal.SIGINT, self.orig_sigint_handler)
         termios.tcsetattr(self.in_stream, termios.TCSANOW, self.original_stty)
 

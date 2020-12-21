@@ -12,9 +12,7 @@ chr_uni = chr
 
 
 CURTSIES_NAMES = {}
-control_chars = {
-    chr_byte(i): "<Ctrl-%s>" % chr(i + 0x60) for i in range(0x00, 0x1B)
-}
+control_chars = {chr_byte(i): "<Ctrl-%s>" % chr(i + 0x60) for i in range(0x00, 0x1B)}
 CURTSIES_NAMES.update(control_chars)
 for i in range(0x00, 0x80):
     CURTSIES_NAMES[b"\x1b" + chr_byte(i)] = "<Esc+%s>" % chr(i)

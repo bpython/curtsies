@@ -19,7 +19,23 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 red('hello')
 """
 
-from typing import Iterator, Text, Tuple, List, Union, Optional, Any, Mapping, cast, MutableMapping, no_type_check, Type, cast, Callable, Iterable
+from typing import (
+    Iterator,
+    Text,
+    Tuple,
+    List,
+    Union,
+    Optional,
+    Any,
+    Mapping,
+    cast,
+    MutableMapping,
+    no_type_check,
+    Type,
+    cast,
+    Callable,
+    Iterable,
+)
 
 
 import itertools
@@ -28,11 +44,17 @@ import sys
 from wcwidth import wcswidth
 
 from .escseqparse import parse, remove_ansi
-from .termformatconstants import (FG_COLORS, BG_COLORS, STYLES,
-                                  FG_NUMBER_TO_COLOR, BG_NUMBER_TO_COLOR,
-                                  RESET_ALL, RESET_BG, RESET_FG,
-                                  seq)
-
+from .termformatconstants import (
+    FG_COLORS,
+    BG_COLORS,
+    STYLES,
+    FG_NUMBER_TO_COLOR,
+    BG_NUMBER_TO_COLOR,
+    RESET_ALL,
+    RESET_BG,
+    RESET_FG,
+    seq,
+)
 
 one_arg_xforms = {
     'bold' :      lambda s: seq(STYLES['bold'])     +s+seq(RESET_ALL),
@@ -55,6 +77,7 @@ xforms.update(two_arg_xforms)
 
 class FrozenDict(dict):
     """Immutable dictionary class"""
+
     @no_type_check
     def __setitem__(self, key, value):
         raise Exception("Cannot change value.")
@@ -77,18 +100,23 @@ def stable_format_dict(d):
     """A sorted, python2/3 stable formatting of a dictionary.
 
     Does not work for dicts with unicode strings as values."""
-    inner = ', '.join('{}: {}'.format(repr(k)[1:]
-                                      if repr(k).startswith("u'") or repr(k).startswith('u"')
-                                      else repr(k),
-                                      v)
-                      for k, v in sorted(d.items()))
-    return '{%s}' % inner
+    inner = ", ".join(
+        "{}: {}".format(
+            repr(k)[1:]
+            if repr(k).startswith("u'") or repr(k).startswith('u"')
+            else repr(k),
+            v,
+        )
+        for k, v in sorted(d.items())
+    )
+    return "{%s}" % inner
 
 
 class Chunk:
     """A string with a single set of formatting attributes
 
     Subject to change, not part of the API"""
+
     def __init__(self, string, atts=None):
         # type: (Text, Mapping[str, Union[int, bool]]) -> None
         if atts is None:
@@ -121,7 +149,7 @@ class Chunk:
             raise ValueError("Can't calculate width of string %r" % self._s)
         return width
 
-    #TODO cache this
+    # TODO cache this
     @property
     def color_str(self):
         # type: () -> Text
@@ -159,22 +187,31 @@ class Chunk:
 
     def __repr__(self):
         # type: () -> str
-        return 'Chunk({s}{sep}{atts})'.format(
+        return "Chunk({s}{sep}{atts})".format(
             s=repr(self.s),
-            sep=', ' if self.atts else '',
-            atts = stable_format_dict(self.atts) if self.atts else '')
+            sep=", " if self.atts else "",
+            atts=stable_format_dict(self.atts) if self.atts else "",
+        )
 
     def repr_part(self):
         # type: () -> str
         """FmtStr repr is build by concatenating these."""
+
         def pp_att(att):
             # type: (str) -> str
-            if att == 'fg': return FG_NUMBER_TO_COLOR[self.atts[att]]
-            elif att == 'bg': return 'on_' + BG_NUMBER_TO_COLOR[self.atts[att]]
-            else: return att
+            if att == "fg":
+                return FG_NUMBER_TO_COLOR[self.atts[att]]
+            elif att == "bg":
+                return "on_" + BG_NUMBER_TO_COLOR[self.atts[att]]
+            else:
+                return att
+
         atts_out = {k: v for (k, v) in self.atts.items() if v}
-        return (''.join(pp_att(att)+'(' for att in sorted(atts_out))
-                + (repr(self.s) if PY3 else repr(self.s)[1:]) + ')'*len(atts_out))
+        return (
+            "".join(pp_att(att) + "(" for att in sorted(atts_out))
+            + repr(self.s)
+            + ")" * len(atts_out)
+        )
 
     def splitter(self):
         # type: () -> ChunkSplitter
@@ -209,7 +246,7 @@ class ChunkSplitter:
         # type: (int) -> Optional[Tuple[int, Chunk]]
         """Requests a sub-chunk of max_width or shorter. Returns None if no chunks left."""
         if max_width < 1:
-            raise ValueError('requires positive integer max_width')
+            raise ValueError("requires positive integer max_width")
 
         s = self.chunk.s
         length = len(s)
@@ -219,7 +256,7 @@ class ChunkSplitter:
 
         width = 0
         start_offset = i = self.internal_offset
-        replacement_char = ' '
+        replacement_char = " "
 
         while True:
             w = wcswidth(s[i])
@@ -231,30 +268,46 @@ class ChunkSplitter:
 
                 # if not adding it us makes us short, this must have been a double-width character
                 if width < max_width:
-                    assert width + 1 == max_width, 'unicode character width of more than 2!?!'
-                    assert w == 2, 'unicode character of width other than 2?'
-                    return (width + 1, Chunk(s[start_offset:self.internal_offset] + replacement_char,
-                                             atts=self.chunk.atts))
-                return (width, Chunk(s[start_offset:self.internal_offset], atts=self.chunk.atts))
+                    assert (
+                        width + 1 == max_width
+                    ), "unicode character width of more than 2!?!"
+                    assert w == 2, "unicode character of width other than 2?"
+                    return (
+                        width + 1,
+                        Chunk(
+                            s[start_offset : self.internal_offset] + replacement_char,
+                            atts=self.chunk.atts,
+                        ),
+                    )
+                return (
+                    width,
+                    Chunk(s[start_offset : self.internal_offset], atts=self.chunk.atts),
+                )
             # otherwise add this width
             width += w
 
             # If one more char would put us over, return whatever we've got
             if i + 1 == length:
-                self.internal_offset = i + 1  # beware the fencepost, i is an index not an offset
+                self.internal_offset = (
+                    i + 1
+                )  # beware the fencepost, i is an index not an offset
                 self.internal_width += width
-                return (width, Chunk(s[start_offset:self.internal_offset], atts=self.chunk.atts))
+                return (
+                    width,
+                    Chunk(s[start_offset : self.internal_offset], atts=self.chunk.atts),
+                )
             # otherwise attempt to add the next character
             i += 1
 
 
 class FmtStr:
     """A string whose substrings carry attributes."""
+
     def __init__(self, *components):
         # type: (*Chunk) -> None
         # These assertions below could be useful for debugging, but slow things down considerably
-        #assert all([len(x) > 0 for x in components])
-        #self.chunks = [x for x in components if len(x) > 0]
+        # assert all([len(x) > 0 for x in components])
+        # self.chunks = [x for x in components if len(x) > 0]
         self.chunks = list(components)
 
         # caching these leads to a significant speedup
@@ -278,7 +331,7 @@ class FmtStr:
         '|'+on_blue(red('hey'))+'|'
         """
 
-        if '\x1b[' in s:
+        if "\x1b[" in s:
             try:
                 tokens_and_strings = parse(s)
             except ValueError:
@@ -290,9 +343,9 @@ class FmtStr:
                     if isinstance(x, dict):
                         cur_fmt.update(x)
                     elif isinstance(x, str):
-                        atts = parse_args((), {k: v
-                                          for k, v in cur_fmt.items()
-                                          if v is not None})
+                        atts = parse_args(
+                            (), {k: v for k, v in cur_fmt.items() if v is not None}
+                        )
                         chunks.append(Chunk(x, atts=atts))
                     else:
                         raise Exception("logic error")
@@ -304,26 +357,29 @@ class FmtStr:
         # type: (Text) -> FmtStr
         """Copies the current FmtStr's attributes while changing its string."""
         # What to do when there are multiple Chunks with conflicting atts?
-        old_atts = {att: value for bfs in self.chunks
-                    for (att, value) in bfs.atts.items()}
+        old_atts = {
+            att: value for bfs in self.chunks for (att, value) in bfs.atts.items()
+        }
         return FmtStr(Chunk(new_str, old_atts))
 
     def setitem(self, startindex, fs):
         # type: (int, Union[Text, FmtStr]) -> FmtStr
         """Shim for easily converting old __setitem__ calls"""
-        return self.setslice_with_length(startindex, startindex+1, fs, len(self))
+        return self.setslice_with_length(startindex, startindex + 1, fs, len(self))
 
     def setslice_with_length(self, startindex, endindex, fs, length):
         # type: (int, int, Union[Text, FmtStr], int) -> FmtStr
         """Shim for easily converting old __setitem__ calls"""
         if len(self) < startindex:
-            fs = ' '*(startindex - len(self)) + fs
+            fs = " " * (startindex - len(self)) + fs
         if len(self) > endindex:
-            fs = fs + ' '*(endindex - startindex - len(fs))
+            fs = fs + " " * (endindex - startindex - len(fs))
             assert len(fs) == endindex - startindex, (len(fs), startindex, endindex)
         result = self.splice(fs, startindex, endindex)
         if len(result) > length:
-            raise ValueError("Your change is resulting in a longer fmtstr than the original length and this is not supported.")
+            raise ValueError(
+                "Your change is resulting in a longer fmtstr than the original length and this is not supported."
+            )
         return result
 
     def splice(self, new_str, start, end=None):
@@ -342,9 +398,9 @@ class FmtStr:
             end = start
         tail = None
 
-        for bfs, bfs_start, bfs_end in zip(self.chunks,
-                                           self.divides[:-1],
-                                           self.divides[1:]):
+        for bfs, bfs_start, bfs_end in zip(
+            self.chunks, self.divides[:-1], self.divides[1:]
+        ):
             if end == bfs_start == 0:
                 new_components.extend(new_fs.chunks)
                 new_components.append(bfs)
@@ -353,17 +409,17 @@ class FmtStr:
             elif bfs_start <= start < bfs_end:
                 divide = start - bfs_start
                 head = Chunk(bfs.s[:divide], atts=bfs.atts)
-                tail = Chunk(bfs.s[end - bfs_start:], atts=bfs.atts)
+                tail = Chunk(bfs.s[end - bfs_start :], atts=bfs.atts)
                 new_components.extend([head] + new_fs.chunks)
                 inserted = True
 
                 if bfs_start < end < bfs_end:
-                    tail = Chunk(bfs.s[end - bfs_start:], atts=bfs.atts)
+                    tail = Chunk(bfs.s[end - bfs_start :], atts=bfs.atts)
                     new_components.append(tail)
 
             elif bfs_start < end < bfs_end:
                 divide = start - bfs_start
-                tail = Chunk(bfs.s[end - bfs_start:], atts=bfs.atts)
+                tail = Chunk(bfs.s[end - bfs_start :], atts=bfs.atts)
                 new_components.append(tail)
 
             elif bfs_start >= end or bfs_end <= start:
@@ -398,8 +454,6 @@ class FmtStr:
                 chunks.extend(s.chunks)
             elif isinstance(s, (bytes, str)):
                 chunks.extend(fmtstr(s).chunks)  # TODO just make a chunk directly
-            elif isinstance(s, (bytes, unicode)):
-                chunks.extend(fmtstr(s).chunks) #TODO just make a chunk directly
             else:
                 raise TypeError("expected str or FmtStr, %r found" % type(s))
         return FmtStr(*chunks)
@@ -412,24 +466,31 @@ class FmtStr:
         Capture groups are ignored in regex, the whole pattern is matched
         and used to split the original FmtStr."""
         if maxsplit is not None:
-            raise NotImplementedError('no maxsplit yet')
+            raise NotImplementedError("no maxsplit yet")
         s = self.s
         if sep is None:
-            sep = r'\s+'
+            sep = r"\s+"
         elif not regex:
             sep = re.escape(sep)
         matches = list(re.finditer(sep, s))
-        return [self[start:end] for start, end in zip(
-            [0] + [m.end() for m in matches],
-            [m.start() for m in matches] + [len(s)])]
+        return [
+            self[start:end]
+            for start, end in zip(
+                [0] + [m.end() for m in matches],
+                [m.start() for m in matches] + [len(s)],
+            )
+        ]
 
     def splitlines(self, keepends=False):
         # type: (bool) -> List[FmtStr]
         """Return a list of lines, split on newline characters,
         include line boundaries, if keepends is true."""
-        lines = self.split('\n')
-        return [line+'\n' for line in lines] if keepends else (
-               lines if lines[-1] else lines[:-1])
+        lines = self.split("\n")
+        return (
+            [line + "\n" for line in lines]
+            if keepends
+            else (lines if lines[-1] else lines[:-1])
+        )
 
     # proxying to the string via __getattr__ is insufficient
     # because we shouldn't drop foreground or formatting info
@@ -441,12 +502,12 @@ class FmtStr:
         """
         if fillchar is not None:
             return fmtstr(self.s.ljust(width, fillchar), **self.shared_atts)
-        to_add = ' ' * (width - len(self.s))
+        to_add = " " * (width - len(self.s))
         shared = self.shared_atts
-        if 'bg' in shared:
-            return self + fmtstr(to_add, bg=shared['bg']) if to_add else self
+        if "bg" in shared:
+            return self + fmtstr(to_add, bg=shared["bg"]) if to_add else self
         else:
-            uniform = self.new_with_atts_removed('bg')
+            uniform = self.new_with_atts_removed("bg")
             return uniform + fmtstr(to_add, **self.shared_atts) if to_add else uniform
 
     def rjust(self, width, fillchar=None):
@@ -457,12 +518,12 @@ class FmtStr:
         """
         if fillchar is not None:
             return fmtstr(self.s.rjust(width, fillchar), **self.shared_atts)
-        to_add = ' ' * (width - len(self.s))
+        to_add = " " * (width - len(self.s))
         shared = self.shared_atts
-        if 'bg' in shared:
-            return fmtstr(to_add, bg=shared['bg']) + self if to_add else self
+        if "bg" in shared:
+            return fmtstr(to_add, bg=shared["bg"]) + self if to_add else self
         else:
-            uniform = self.new_with_atts_removed('bg')
+            uniform = self.new_with_atts_removed("bg")
             return fmtstr(to_add, **self.shared_atts) + uniform if to_add else uniform
 
     def __str__(self):
@@ -493,15 +554,14 @@ class FmtStr:
     def width_at_offset(self, n):
         # type: (int) -> int
         """Returns the horizontal position of character n of the string"""
-        #TODO make more efficient?
+        # TODO make more efficient?
         width = wcswidth(self.s[:n])
         assert width != -1
         return width
 
-
     def __repr__(self):
         # type: () -> str
-        return '+'.join(fs.repr_part() for fs in self.chunks)
+        return "+".join(fs.repr_part() for fs in self.chunks)
 
     def __eq__(self, other):
         # type: (Any) -> bool
@@ -520,7 +580,7 @@ class FmtStr:
         elif isinstance(other, (bytes, str)):
             return FmtStr(*(self.chunks + [Chunk(other)]))
         else:
-            raise TypeError(f'Can\'t add {self!r} and {other!r}')
+            raise TypeError(f"Can't add {self!r} and {other!r}")
 
     def __radd__(self, other):
         # type: (Union[FmtStr, Text]) -> FmtStr
@@ -529,25 +589,30 @@ class FmtStr:
         elif isinstance(other, (bytes, str)):
             return FmtStr(*(x for x in ([Chunk(other)] + self.chunks)))
         else:
-            raise TypeError('Can\'t add those')
+            raise TypeError("Can't add those")
 
     def __mul__(self, other):
         # type: (int) -> FmtStr
         if isinstance(other, int):
             return sum([self for _ in range(other)], FmtStr())
-        raise TypeError('Can\'t multiply those')
-    #TODO ensure emtpy FmtStr isn't a problem
+        raise TypeError("Can't multiply those")
+
+    # TODO ensure emtpy FmtStr isn't a problem
 
     @property
     def shared_atts(self):
         # type: () -> Mapping[str, Union[int, bool]]
         """Gets atts shared among all nonzero length component Chunks"""
-        #TODO cache this, could get ugly for large FmtStrs
+        # TODO cache this, could get ugly for large FmtStrs
         atts = {}
         first = self.chunks[0]
         for att in sorted(first.atts):
-            #TODO how to write this without the '???'?
-            if all(fs.atts.get(att, '???') == first.atts[att] for fs in self.chunks if len(fs) > 0):
+            # TODO how to write this without the '???'?
+            if all(
+                fs.atts.get(att, "???") == first.atts[att]
+                for fs in self.chunks
+                if len(fs) > 0
+            ):
                 atts[att] = first.atts[att]
         return atts
 
@@ -555,7 +620,7 @@ class FmtStr:
         # type: (*Text) -> FmtStr
         """Returns a new FmtStr with the same content but some attributes removed"""
 
-        result = FmtStr(*[Chunk(bfs.s, bfs.atts.remove(*attributes)) for bfs in self.chunks]) # type: ignore
+        result = FmtStr(*[Chunk(bfs.s, bfs.atts.remove(*attributes)) for bfs in self.chunks])  # type: ignore
         return result
 
     @no_type_check
@@ -605,18 +670,20 @@ class FmtStr:
                 if end - start == len(chunk):
                     parts.append(chunk)
                 else:
-                    s_part = chunk.s[max(0, index.start - counter): index.stop - counter]
+                    s_part = chunk.s[
+                        max(0, index.start - counter) : index.stop - counter
+                    ]
                     parts.append(Chunk(s_part, chunk.atts))
             counter += len(chunk)
             if index.stop < counter:
                 break
-        return FmtStr(*parts) if parts else fmtstr('')
+        return FmtStr(*parts) if parts else fmtstr("")
 
     def width_aware_slice(self, index):
         # type: (Union[int, slice]) -> FmtStr
         """Slice based on the number of columns it would take to display the substring."""
         if wcswidth(self.s) == -1:
-            raise ValueError('bad values for width aware slicing')
+            raise ValueError("bad values for width aware slicing")
         index = normalize_slice(self.width, index)
         counter = 0
         parts = []
@@ -627,12 +694,14 @@ class FmtStr:
                 if end - start == chunk.width:
                     parts.append(chunk)
                 else:
-                    s_part = width_aware_slice(chunk.s, max(0, index.start - counter), index.stop - counter)
+                    s_part = width_aware_slice(
+                        chunk.s, max(0, index.start - counter), index.stop - counter
+                    )
                     parts.append(Chunk(s_part, chunk.atts))
             counter += chunk.width
             if index.stop < counter:
                 break
-        return FmtStr(*parts) if parts else fmtstr('')
+        return FmtStr(*parts) if parts else fmtstr("")
 
     def width_aware_splitlines(self, columns):
         # type: (int) -> Iterator[FmtStr]
@@ -643,7 +712,7 @@ class FmtStr:
         if columns < 2:
             raise ValueError("Column width %s is too narrow." % columns)
         if wcswidth(self.s) == -1:
-            raise ValueError('bad values for width aware slicing')
+            raise ValueError("bad values for width aware slicing")
         return self._width_aware_splitlines(columns)
 
     def _width_aware_splitlines(self, columns):
@@ -674,10 +743,10 @@ class FmtStr:
         """Builds the more compact fmtstrs by using fromstr( of the control sequences)"""
         index = normalize_slice(len(self), index)
         counter = 0
-        output = ''
+        output = ""
         for fs in self.chunks:
             if index.start < counter + len(fs) and index.stop > counter:
-                s_part = fs.s[max(0, index.start - counter):index.stop - counter]
+                s_part = fs.s[max(0, index.start - counter) : index.stop - counter]
                 piece = Chunk(s_part, fs.atts).color_str
                 output += piece
             counter += len(fs)
@@ -711,7 +780,7 @@ def interval_overlap(a, b, x, y):
         assert False
 
 
-def width_aware_slice(s, start, end, replacement_char=' '):
+def width_aware_slice(s, start, end, replacement_char=" "):
     # type: (Text, int, int, Text) -> Text
     """
     >>> width_aware_slice(u'a\uff25iou', 0, 2)[1] == u' '
@@ -725,13 +794,15 @@ def width_aware_slice(s, start, end, replacement_char=' '):
     for char, char_start, char_end in zip(s, divides[:-1], divides[1:]):
         if char_start == start and char_end == start:
             continue  # don't use zero-width characters at the beginning of a slice
-                      # (combining characters combine with the chars before themselves)
+            # (combining characters combine with the chars before themselves)
         elif char_start >= start and char_end <= end:
             new_chunk_chars.append(char)
         else:
-            new_chunk_chars.extend(replacement_char * interval_overlap(char_start, char_end, start, end))
+            new_chunk_chars.extend(
+                replacement_char * interval_overlap(char_start, char_end, start, end)
+            )
 
-    return ''.join(new_chunk_chars)
+    return "".join(new_chunk_chars)
 
 
 def linesplit(string, columns):
@@ -750,22 +821,35 @@ def linesplit(string, columns):
         string = fmtstr(string)
 
     string_s = string.s
-    matches = list(re.finditer(r'\s+', string_s))
-    spaces = [string[m.start():m.end()] for m in matches if m.start() != 0 and m.end() != len(string_s)]
-    words = [string[start:end] for start, end in zip(
+    matches = list(re.finditer(r"\s+", string_s))
+    spaces = [
+        string[m.start() : m.end()]
+        for m in matches
+        if m.start() != 0 and m.end() != len(string_s)
+    ]
+    words = [
+        string[start:end]
+        for start, end in zip(
             [0] + [m.end() for m in matches],
-            [m.start() for m in matches] + [len(string_s)]) if start != end]
+            [m.start() for m in matches] + [len(string_s)],
+        )
+        if start != end
+    ]
 
-    word_to_lines = lambda word: [word[columns*i:columns*(i+1)] for i in range((len(word) - 1) // columns + 1)]
+    word_to_lines = lambda word: [
+        word[columns * i : columns * (i + 1)]
+        for i in range((len(word) - 1) // columns + 1)
+    ]
 
     lines = word_to_lines(words[0])
     for word, space in zip(words[1:], spaces):
         if len(lines[-1]) + len(word) < columns:
-            lines[-1] += fmtstr(' ', **space.shared_atts)
+            lines[-1] += fmtstr(" ", **space.shared_atts)
             lines[-1] += word
         else:
             lines.extend(word_to_lines(word))
     return lines
+
 
 def normalize_slice(length, index):
     # type: (int, Union[int, slice]) -> slice
@@ -773,14 +857,14 @@ def normalize_slice(length, index):
     is_int = False
     if isinstance(index, int):
         is_int = True
-        index = slice(index, index+1)
+        index = slice(index, index + 1)
     if index.start is None:
         index = slice(0, index.stop, index.step)
     if index.stop is None:
         index = slice(index.start, length, index.step)
-    if index.start < -1:         # XXX why must this be -1?
+    if index.start < -1:  # XXX why must this be -1?
         index = slice(length - index.start, index.stop, index.step)
-    if index.stop < -1:          # XXX why must this be -1?
+    if index.stop < -1:  # XXX why must this be -1?
         index = slice(index.start, length - index.stop, index.step)
     if index.step is not None:
         raise NotImplementedError("You can't use steps with slicing yet")
@@ -789,40 +873,44 @@ def normalize_slice(length, index):
             raise IndexError(f"index out of bounds: {index!r} for length {length}")
     return index
 
+
 def parse_args(args, kwargs):
     # type: (Tuple[Union[bytes, str], ...], MutableMapping[str, Union[int, bool, str]]) -> Mapping[str, Union[int, bool]]
     """Returns a kwargs dictionary by turning args into kwargs"""
-    if 'style' in kwargs:
-        args += (cast(str, kwargs['style']),)
-        del kwargs['style']
+    if "style" in kwargs:
+        args += (cast(str, kwargs["style"]),)
+        del kwargs["style"]
     for arg in args:
         arg = cast(str, arg)
         if not isinstance(arg, (bytes, str)):
             raise ValueError("args must be strings:" + repr(args))
         if arg.lower() in FG_COLORS:
-            if 'fg' in kwargs: raise ValueError("fg specified twice")
-            kwargs['fg'] = FG_COLORS[cast(str, arg)]
-        elif arg.lower().startswith('on_') and arg[3:].lower() in BG_COLORS:
-            if 'bg' in kwargs: raise ValueError("fg specified twice")
-            kwargs['bg'] = BG_COLORS[cast(str, arg[3:])]
+            if "fg" in kwargs:
+                raise ValueError("fg specified twice")
+            kwargs["fg"] = FG_COLORS[cast(str, arg)]
+        elif arg.lower().startswith("on_") and arg[3:].lower() in BG_COLORS:
+            if "bg" in kwargs:
+                raise ValueError("fg specified twice")
+            kwargs["bg"] = BG_COLORS[cast(str, arg[3:])]
         elif arg.lower() in STYLES:
             kwargs[arg] = True
         else:
-            raise ValueError("couldn't process arg: "+repr(arg))
+            raise ValueError("couldn't process arg: " + repr(arg))
     for k in kwargs:
-        if k not in ['fg', 'bg'] + list(STYLES.keys()):
+        if k not in ["fg", "bg"] + list(STYLES.keys()):
             raise ValueError("Can't apply that transformation")
-    if 'fg' in kwargs:
-        if kwargs['fg'] in FG_COLORS:
-            kwargs['fg'] = FG_COLORS[cast(str, kwargs['fg'])]
-        if kwargs['fg'] not in list(FG_COLORS.values()):
-            raise ValueError("Bad fg value: %r" % kwargs['fg'])
-    if 'bg' in kwargs:
-        if kwargs['bg'] in BG_COLORS:
-            kwargs['bg'] = BG_COLORS[cast(str, kwargs['bg'])]
-        if kwargs['bg'] not in list(BG_COLORS.values()):
-            raise ValueError("Bad bg value: %r" % kwargs['bg'])
+    if "fg" in kwargs:
+        if kwargs["fg"] in FG_COLORS:
+            kwargs["fg"] = FG_COLORS[cast(str, kwargs["fg"])]
+        if kwargs["fg"] not in list(FG_COLORS.values()):
+            raise ValueError("Bad fg value: %r" % kwargs["fg"])
+    if "bg" in kwargs:
+        if kwargs["bg"] in BG_COLORS:
+            kwargs["bg"] = BG_COLORS[cast(str, kwargs["bg"])]
+        if kwargs["bg"] not in list(BG_COLORS.values()):
+            raise ValueError("Bad bg value: %r" % kwargs["bg"])
     return cast(MutableMapping[str, Union[int, bool]], kwargs)
+
 
 def fmtstr(string, *args, **kwargs):
     # type: (Union[Text, FmtStr], *Any, **Any) -> FmtStr
@@ -840,5 +928,9 @@ def fmtstr(string, *args, **kwargs):
     elif isinstance(string, (bytes, str)):
         string = FmtStr.from_str(string)
     else:
-        raise ValueError("Bad Args: {!r} (of type {}), {!r}, {!r}".format(string, type(string), args, kwargs))
+        raise ValueError(
+            "Bad Args: {!r} (of type {}), {!r}, {!r}".format(
+                string, type(string), args, kwargs
+            )
+        )
     return string.copy_with_new_atts(**atts)
