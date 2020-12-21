@@ -342,7 +342,7 @@ class CursorAwareWindow(BaseWindow):
                             (resp,),
                         )
                     return c
-                except IOError:
+                except OSError:
                     # apparently sometimes this happens: the only documented
                     # case is Terminal on a Ubuntu 17.10 VM on osx 10.13.
                     # see issue #732

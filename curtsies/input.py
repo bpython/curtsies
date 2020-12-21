@@ -182,7 +182,7 @@ class Input:
                     else:
                         continue
 
-            except select.error:
+            except OSError:
                 if self.sigints:
                     return False, self.sigints.pop()
                 if remaining_timeout is not None:
