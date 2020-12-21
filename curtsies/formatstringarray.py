@@ -202,9 +202,7 @@ class FSArray(Sequence):
                 contents of each row""")
         if slicesize(rowslice) != len(value):
             area = slicesize(rowslice) * slicesize(colslice)
-            val_len = 0
-            for i in value:
-                val_len += len(i)
+            val_len = sum(len(i) for i in value)
             grid_value = [fmtstr(" ", bg="cyan") * slicesize(colslice)] * slicesize(rowslice)
             grid_fsarray = (
                 self.rows[: rowslice.start]
@@ -216,10 +214,13 @@ class FSArray(Sequence):
                 ]
                 + self.rows[rowslice.stop :]
             )
-            bad_value = fmtstr("".join(value), bg="cyan")
-            msg = "You are trying to fit this value {0} into the region {1}:".format(bad_value, fmtstr("").join(grid_value))
-            for x in range(len(self.rows)):
-                msg = "{0} \n {1}".format(msg, grid_fsarray[x])
+            msg = (
+                "You are trying to fit this value {0} into the region {1}: {2}".format(
+                    fmtstr("".join(value), bg="cyan"),
+                    fmtstr("").join(grid_value),
+                    "\n ".join(grid_fsarray[x] for x in range(len(self.rows))),
+                )
+            )
             raise ValueError(
                 """Error you are trying to replace a region of {0} rows by {1}
                 columns for and area of {2} with a value of len {3}. The value
