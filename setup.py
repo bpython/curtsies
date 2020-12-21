@@ -12,7 +12,7 @@ def version():
                 return ast.parse(line).body[0].value.s
 
 def long_description():
-    with io.open("readme.md", encoding="utf-8") as f:	
+    with open("readme.md", encoding="utf-8") as f:
         return f.read()
 
 setup(
