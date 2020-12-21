@@ -15,8 +15,8 @@ from curtsies.fmtfuncs import * # XXX boo hiss *
 from curtsies import FullscreenWindow, Input, fsarray
 
 def main(argv):
-    pool = dict((name[:-5], play) for name, play in globals().items()
-                if name.endswith('_play'))
+    pool = {name[:-5]: play for name, play in globals().items()
+                if name.endswith('_play')}
     faceoff = [human_play, max_play]
     try:
         if len(argv) == 1:

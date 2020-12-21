@@ -40,8 +40,8 @@ class World:
         self.width = width
         self.height = height
         n = 5
-        self.player = Entity(on_blue(green(bold(u'5'))), width // 2, height // 2 - 2, speed=5)
-        self.npcs = [Entity(on_blue(red(u'X')), i * width // (n * 2), j * height // (n * 2))
+        self.player = Entity(on_blue(green(bold('5'))), width // 2, height // 2 - 2, speed=5)
+        self.npcs = [Entity(on_blue(red('X')), i * width // (n * 2), j * height // (n * 2))
                      for i in range(1, 2*n, 2)
                      for j in range(1, 2*n, 2)]
         self.turn = 0

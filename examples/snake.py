@@ -40,8 +40,8 @@ class Snake:
 
         a = FSArray(self.height, self.width)
         for row, col in self.snake_parts:
-            a[row, col] = u'x'
-        a[self.apple[0], self.apple[1]] = u'o'
+            a[row, col] = 'x'
+        a[self.apple[0], self.apple[1]] = 'o'
         return a
 
     def tick(self, e):

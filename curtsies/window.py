@@ -503,9 +503,9 @@ class CursorAwareWindow(BaseWindow):
                 self.top_usable_row -= 1
             else:
                 offscreen_scrolls += 1
-            current_lines_by_row = dict(
-                (k - 1, v) for k, v in current_lines_by_row.items()
-            )
+            current_lines_by_row = {
+                k - 1: v for k, v in current_lines_by_row.items()
+            }
             logger.debug("new top_usable_row: %d" % self.top_usable_row)
             # since scrolling moves the cursor
             self.write(self.t.move(height - 1, 0))
@@ -576,7 +576,7 @@ def main():
     w = FullscreenWindow(sys.stdout)
     rows, columns = w.t.height, w.t.width
     with w:
-        a = [fmtstr(((".row%r." % (row,)) * rows)[:columns]) for row in range(rows)]
+        a = [fmtstr(((f".row{row!r}.") * rows)[:columns]) for row in range(rows)]
         w.render_to_terminal(a)
 
 

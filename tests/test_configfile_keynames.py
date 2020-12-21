@@ -18,12 +18,12 @@ class TestKeymap(unittest.TestCase):
         )
 
     def test_simple(self):
-        self.config("M-m", u"<Esc+m>")
-        self.config("M-m", u"<Esc+m>")
-        self.config("C-m", u"<Ctrl-m>")
-        self.config("C-[", u"<ESC>")
-        self.config("C-\\", u"<Ctrl-\\>")
-        self.config("C-]", u"<Ctrl-]>")
-        self.config("C-^", u"<Ctrl-6>")
-        self.config("C-_", u"<Ctrl-/>")  # ??? for bpython compatibility
-        self.config("F1", u"<F1>")
+        self.config("M-m", "<Esc+m>")
+        self.config("M-m", "<Esc+m>")
+        self.config("C-m", "<Ctrl-m>")
+        self.config("C-[", "<ESC>")
+        self.config("C-\\", "<Ctrl-\\>")
+        self.config("C-]", "<Ctrl-]>")
+        self.config("C-^", "<Ctrl-6>")
+        self.config("C-_", "<Ctrl-/>")  # ??? for bpython compatibility
+        self.config("F1", "<F1>")

@@ -33,7 +33,7 @@ def realtime(fps=15):
                 while when < time.time():
                     when += dt
                 schedule_next_frame(when)
-            elif e == u'<ESC>':
+            elif e == '<ESC>':
                 break
             else:
                 world.process_event(e)

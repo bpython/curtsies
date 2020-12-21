@@ -13,7 +13,7 @@ def main():
         print(repr(input_generator.send(.2)))
         for e in input_generator:
             print(repr(e))
-            if e == u'<ESC>':
+            if e == '<ESC>':
                 break
 if __name__ == '__main__':
     main()

@@ -48,7 +48,7 @@ class TestInput(unittest.TestCase):
     def test_send(self):
         inp = Input()
         inp.unprocessed_bytes = [b"a"]
-        self.assertEqual(inp.send("nonsensical value"), u"a")
+        self.assertEqual(inp.send("nonsensical value"), "a")
 
     def test_send_nonblocking_no_event(self):
         inp = Input()
@@ -81,7 +81,7 @@ class TestInput(unittest.TestCase):
 
         r = inp.send(0)
         self.assertEqual(type(r), events.PasteEvent)
-        self.assertEqual(r.events, [u"a"] * n)
+        self.assertEqual(r.events, ["a"] * n)
 
     def test_event_trigger(self):
         inp = Input()

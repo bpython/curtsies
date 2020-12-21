@@ -144,7 +144,7 @@ def token_type(info):
             if value in FG_NUMBER_TO_COLOR: tokens.append({'fg':FG_NUMBER_TO_COLOR[value]})
             if value in BG_NUMBER_TO_COLOR: tokens.append({'bg':BG_NUMBER_TO_COLOR[value]})
             if value in NUMBER_TO_STYLE: tokens.append({NUMBER_TO_STYLE[value]:True})
-            if value == RESET_ALL: tokens.append(dict(dict((k, None) for k in STYLES), **{'fg':None, 'bg':None}))
+            if value == RESET_ALL: tokens.append(dict({k: None for k in STYLES}, **{'fg':None, 'bg':None}))
             if value == RESET_FG: tokens.append({'fg':None})
             if value == RESET_BG: tokens.append({'bg':None})
         # fmt: on
@@ -164,4 +164,4 @@ if __name__ == "__main__":
     doctest.testmod()
     # print(peel_off_esc_code('[2Astuff'))
     # print(peel_off_esc_code('Amore'))
-    print((repr(parse("[31mstuff is the best[32myay"))))
+    print(repr(parse("[31mstuff is the best[32myay")))

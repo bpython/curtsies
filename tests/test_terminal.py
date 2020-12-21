@@ -107,7 +107,7 @@ class Bugger:
             to.write(" ")
             to.write(
                 ", ".join(
-                    "{0}: {1}".format(name, repr(arg)) for name, arg in flags.items()
+                    "{}: {}".format(name, repr(arg)) for name, arg in flags.items()
                 )
             )
             to.write(os.linesep)

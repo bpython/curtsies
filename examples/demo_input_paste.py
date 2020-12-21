@@ -11,7 +11,7 @@ def paste():
         for e in input_generator:
             print(repr(e))
 
-            if e == u'<ESC>':
+            if e == '<ESC>':
                 break
 
             time.sleep(1)

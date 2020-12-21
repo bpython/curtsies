@@ -20,68 +20,68 @@ else:
 
 
 CURTSIES_NAMES = {}
-control_chars = dict(
-    (chr_byte(i), u"<Ctrl-%s>" % chr(i + 0x60)) for i in range(0x00, 0x1B)
-)
+control_chars = {
+    chr_byte(i): "<Ctrl-%s>" % chr(i + 0x60) for i in range(0x00, 0x1B)
+}
 CURTSIES_NAMES.update(control_chars)
 for i in range(0x00, 0x80):
-    CURTSIES_NAMES[b"\x1b" + chr_byte(i)] = u"<Esc+%s>" % chr(i)
+    CURTSIES_NAMES[b"\x1b" + chr_byte(i)] = "<Esc+%s>" % chr(i)
 for i in range(0x00, 0x1B):  # Overwrite the control keys with better labels
-    CURTSIES_NAMES[b"\x1b" + chr_byte(i)] = u"<Esc+Ctrl-%s>" % chr(i + 0x40)
+    CURTSIES_NAMES[b"\x1b" + chr_byte(i)] = "<Esc+Ctrl-%s>" % chr(i + 0x40)
 for i in range(0x00, 0x80):
-    CURTSIES_NAMES[chr_byte(i + 0x80)] = u"<Meta-%s>" % chr(i)
+    CURTSIES_NAMES[chr_byte(i + 0x80)] = "<Meta-%s>" % chr(i)
 for i in range(0x00, 0x1B):  # Overwrite the control keys with better labels
-    CURTSIES_NAMES[chr_byte(i + 0x80)] = u"<Meta-Ctrl-%s>" % chr(i + 0x40)
+    CURTSIES_NAMES[chr_byte(i + 0x80)] = "<Meta-Ctrl-%s>" % chr(i + 0x40)
 
 from .curtsieskeys import CURTSIES_NAMES as special_curtsies_names
 
 CURTSIES_NAMES.update(special_curtsies_names)
 
 CURSES_NAMES = {}
-CURSES_NAMES[b"\x1bOP"] = u"KEY_F(1)"
-CURSES_NAMES[b"\x1bOQ"] = u"KEY_F(2)"
-CURSES_NAMES[b"\x1bOR"] = u"KEY_F(3)"
-CURSES_NAMES[b"\x1bOS"] = u"KEY_F(4)"
-CURSES_NAMES[b"\x1b[15~"] = u"KEY_F(5)"
-CURSES_NAMES[b"\x1b[17~"] = u"KEY_F(6)"
-CURSES_NAMES[b"\x1b[18~"] = u"KEY_F(7)"
-CURSES_NAMES[b"\x1b[19~"] = u"KEY_F(8)"
-CURSES_NAMES[b"\x1b[20~"] = u"KEY_F(9)"
-CURSES_NAMES[b"\x1b[21~"] = u"KEY_F(10)"
-CURSES_NAMES[b"\x1b[23~"] = u"KEY_F(11)"
-CURSES_NAMES[b"\x1b[24~"] = u"KEY_F(12)"
+CURSES_NAMES[b"\x1bOP"] = "KEY_F(1)"
+CURSES_NAMES[b"\x1bOQ"] = "KEY_F(2)"
+CURSES_NAMES[b"\x1bOR"] = "KEY_F(3)"
+CURSES_NAMES[b"\x1bOS"] = "KEY_F(4)"
+CURSES_NAMES[b"\x1b[15~"] = "KEY_F(5)"
+CURSES_NAMES[b"\x1b[17~"] = "KEY_F(6)"
+CURSES_NAMES[b"\x1b[18~"] = "KEY_F(7)"
+CURSES_NAMES[b"\x1b[19~"] = "KEY_F(8)"
+CURSES_NAMES[b"\x1b[20~"] = "KEY_F(9)"
+CURSES_NAMES[b"\x1b[21~"] = "KEY_F(10)"
+CURSES_NAMES[b"\x1b[23~"] = "KEY_F(11)"
+CURSES_NAMES[b"\x1b[24~"] = "KEY_F(12)"
 
 # see bpython #626
-CURSES_NAMES[b"\x1b[11~"] = u"KEY_F(1)"
-CURSES_NAMES[b"\x1b[12~"] = u"KEY_F(2)"
-CURSES_NAMES[b"\x1b[13~"] = u"KEY_F(3)"
-CURSES_NAMES[b"\x1b[14~"] = u"KEY_F(4)"
+CURSES_NAMES[b"\x1b[11~"] = "KEY_F(1)"
+CURSES_NAMES[b"\x1b[12~"] = "KEY_F(2)"
+CURSES_NAMES[b"\x1b[13~"] = "KEY_F(3)"
+CURSES_NAMES[b"\x1b[14~"] = "KEY_F(4)"
 
-CURSES_NAMES[b"\x1b[A"] = u"KEY_UP"
-CURSES_NAMES[b"\x1b[B"] = u"KEY_DOWN"
-CURSES_NAMES[b"\x1b[C"] = u"KEY_RIGHT"
-CURSES_NAMES[b"\x1b[D"] = u"KEY_LEFT"
-CURSES_NAMES[b"\x1b[F"] = u"KEY_END"  # https://github.com/bpython/bpython/issues/490
-CURSES_NAMES[b"\x1b[H"] = u"KEY_HOME"  # https://github.com/bpython/bpython/issues/490
-CURSES_NAMES[b"\x08"] = u"KEY_BACKSPACE"
-CURSES_NAMES[b"\x1b[Z"] = u"KEY_BTAB"
+CURSES_NAMES[b"\x1b[A"] = "KEY_UP"
+CURSES_NAMES[b"\x1b[B"] = "KEY_DOWN"
+CURSES_NAMES[b"\x1b[C"] = "KEY_RIGHT"
+CURSES_NAMES[b"\x1b[D"] = "KEY_LEFT"
+CURSES_NAMES[b"\x1b[F"] = "KEY_END"  # https://github.com/bpython/bpython/issues/490
+CURSES_NAMES[b"\x1b[H"] = "KEY_HOME"  # https://github.com/bpython/bpython/issues/490
+CURSES_NAMES[b"\x08"] = "KEY_BACKSPACE"
+CURSES_NAMES[b"\x1b[Z"] = "KEY_BTAB"
 
 # see curtsies #78 - taken from https://github.com/jquast/blessed/blob/e9ad7b85dfcbbba49010ab8c13e3a5920d81b010/blessed/keyboard.py#L409
 # fmt: off
-CURSES_NAMES[b'\x1b[1~'] = u'KEY_FIND'         # find
-CURSES_NAMES[b'\x1b[2~'] = u'KEY_IC'           # insert (0)
-CURSES_NAMES[b'\x1b[3~'] = u'KEY_DC'           # delete (.), "Execute"
-CURSES_NAMES[b'\x1b[4~'] = u'KEY_SELECT'       # select
-CURSES_NAMES[b'\x1b[5~'] = u'KEY_PPAGE'        # pgup   (9)
-CURSES_NAMES[b'\x1b[6~'] = u'KEY_NPAGE'        # pgdown (3)
-CURSES_NAMES[b'\x1b[7~'] = u'KEY_HOME'         # home
-CURSES_NAMES[b'\x1b[8~'] = u'KEY_END'          # end
-CURSES_NAMES[b'\x1b[OA'] = u'KEY_UP'           # up     (8)
-CURSES_NAMES[b'\x1b[OB'] = u'KEY_DOWN'         # down   (2)
-CURSES_NAMES[b'\x1b[OC'] = u'KEY_RIGHT'        # right  (6)
-CURSES_NAMES[b'\x1b[OD'] = u'KEY_LEFT'         # left   (4)
-CURSES_NAMES[b'\x1b[OF'] = u'KEY_END'          # end    (1)
-CURSES_NAMES[b'\x1b[OH'] = u'KEY_HOME'         # home   (7)
+CURSES_NAMES[b'\x1b[1~'] = 'KEY_FIND'         # find
+CURSES_NAMES[b'\x1b[2~'] = 'KEY_IC'           # insert (0)
+CURSES_NAMES[b'\x1b[3~'] = 'KEY_DC'           # delete (.), "Execute"
+CURSES_NAMES[b'\x1b[4~'] = 'KEY_SELECT'       # select
+CURSES_NAMES[b'\x1b[5~'] = 'KEY_PPAGE'        # pgup   (9)
+CURSES_NAMES[b'\x1b[6~'] = 'KEY_NPAGE'        # pgdown (3)
+CURSES_NAMES[b'\x1b[7~'] = 'KEY_HOME'         # home
+CURSES_NAMES[b'\x1b[8~'] = 'KEY_END'          # end
+CURSES_NAMES[b'\x1b[OA'] = 'KEY_UP'           # up     (8)
+CURSES_NAMES[b'\x1b[OB'] = 'KEY_DOWN'         # down   (2)
+CURSES_NAMES[b'\x1b[OC'] = 'KEY_RIGHT'        # right  (6)
+CURSES_NAMES[b'\x1b[OD'] = 'KEY_LEFT'         # left   (4)
+CURSES_NAMES[b'\x1b[OF'] = 'KEY_END'          # end    (1)
+CURSES_NAMES[b'\x1b[OH'] = 'KEY_HOME'         # home   (7)
 # fmt: on
 
 KEYMAP_PREFIXES = set()
@@ -237,14 +237,14 @@ def get_key(bytes_, encoding, keynames="curtsies", full=False):
             except UnicodeDecodeError:
                 # this sequence can't be decoded with this encoding, so we need to represent the bytes
                 if len(seq) == 1:
-                    return u"x%02X" % ord(seq)
+                    return "x%02X" % ord(seq)
                     # TODO figure out a better thing to return here
                 else:
                     raise NotImplementedError(
                         "are multibyte unnameable sequences possible?"
                     )
-                    return u"bytes: " + u"-".join(
-                        u"x%02X" % ord(seq[i : i + 1]) for i in range(len(seq))
+                    return "bytes: " + "-".join(
+                        "x%02X" % ord(seq[i : i + 1]) for i in range(len(seq))
                     )
                     # TODO if this isn't possible, return multiple meta keys as a paste event if paste events enabled
         elif keynames == "curtsies":
@@ -309,8 +309,8 @@ def pp_event(seq):
         return str(seq)
 
     # Get the original sequence back if seq is a pretty name already
-    rev_curses = dict((v, k) for k, v in CURSES_NAMES.items())
-    rev_curtsies = dict((v, k) for k, v in CURTSIES_NAMES.items())
+    rev_curses = {v: k for k, v in CURSES_NAMES.items()}
+    rev_curtsies = {v: k for k, v in CURTSIES_NAMES.items()}
     bytes_seq = None  # type: Optional[bytes]
     if seq in rev_curses:
         bytes_seq = rev_curses[seq]
@@ -349,7 +349,7 @@ def try_keys():
                 if r.lower().strip() == "ok":
                     break
         while True:
-            print("Press the key that produced %r again please" % (seq,))
+            print(f"Press the key that produced {seq!r} again please")
             retry = os.read(sys.stdin.fileno(), 1000)
             if seq == retry:
                 break
@@ -357,7 +357,7 @@ def try_keys():
         with Normal:
             name = raw_input("Describe in English what key you pressed: ")
             f = open("keylog.txt", "a")
-            f.write("%r is called %s\n" % (seq, name))
+            f.write(f"{seq!r} is called {name}\n")
             f.close()
             print(
                 "Thanks! Please open an issue at https://github.com/bpython/curtsies/issues"

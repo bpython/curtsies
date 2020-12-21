@@ -47,7 +47,7 @@ one_arg_xforms = {
 }  # type: Mapping[Text, Callable[[Text], Text]]
 
 two_arg_xforms = {
-    'fg' :        lambda s, v: '%s%s%s' % (seq(v), s, seq(RESET_FG)),
+    'fg' :        lambda s, v: '{}{}{}'.format(seq(v), s, seq(RESET_FG)),
     'bg' :        lambda s, v: seq(v)+s+seq(RESET_BG),
 }  # type: Mapping[Text, Callable[[Text, int], Text]]
 
@@ -82,7 +82,7 @@ def stable_format_dict(d):
 
     Does not work for dicts with unicode strings as values."""
     inner = ', '.join('{}: {}'.format(repr(k)[1:]
-                                      if repr(k).startswith(u"u'") or repr(k).startswith(u'u"')
+                                      if repr(k).startswith("u'") or repr(k).startswith('u"')
                                       else repr(k),
                                       v)
                       for k, v in sorted(d.items()))
@@ -182,7 +182,7 @@ class Chunk:
             if att == 'fg': return FG_NUMBER_TO_COLOR[self.atts[att]]
             elif att == 'bg': return 'on_' + BG_NUMBER_TO_COLOR[self.atts[att]]
             else: return att
-        atts_out = dict((k, v) for (k, v) in self.atts.items() if v)
+        atts_out = {k: v for (k, v) in self.atts.items() if v}
         return (''.join(pp_att(att)+'(' for att in sorted(atts_out))
                 + (repr(self.s) if PY3 else repr(self.s)[1:]) + ')'*len(atts_out))
 
@@ -229,7 +229,7 @@ class ChunkSplitter:
 
         width = 0
         start_offset = i = self.internal_offset
-        replacement_char = u' '
+        replacement_char = ' '
 
         while True:
             w = wcswidth(s[i])
@@ -301,9 +301,9 @@ class FmtStr:
                     if isinstance(x, dict):
                         cur_fmt.update(x)
                     elif isinstance(x, unicode):
-                        atts = parse_args((), dict((k, v)
+                        atts = parse_args((), {k: v
                                           for k, v in cur_fmt.items()
-                                          if v is not None))
+                                          if v is not None})
                         chunks.append(Chunk(x, atts=atts))
                     else:
                         raise Exception("logic error")
@@ -315,8 +315,8 @@ class FmtStr:
         # type: (Text) -> FmtStr
         """Copies the current FmtStr's attributes while changing its string."""
         # What to do when there are multiple Chunks with conflicting atts?
-        old_atts = dict((att, value) for bfs in self.chunks
-                    for (att, value) in bfs.atts.items())
+        old_atts = {att: value for bfs in self.chunks
+                    for (att, value) in bfs.atts.items()}
         return FmtStr(Chunk(new_str, old_atts))
 
     def setitem(self, startindex, fs):
@@ -453,7 +453,7 @@ class FmtStr:
         to_add = ' ' * (width - len(self.s))
         shared = self.shared_atts
         if 'bg' in shared:
-            return self + fmtstr(to_add, bg=shared[str('bg')]) if to_add else self
+            return self + fmtstr(to_add, bg=shared['bg']) if to_add else self
         else:
             uniform = self.new_with_atts_removed('bg')
             return uniform + fmtstr(to_add, **self.shared_atts) if to_add else uniform
@@ -469,7 +469,7 @@ class FmtStr:
         to_add = ' ' * (width - len(self.s))
         shared = self.shared_atts
         if 'bg' in shared:
-            return fmtstr(to_add, bg=shared[str('bg')]) + self if to_add else self
+            return fmtstr(to_add, bg=shared['bg']) + self if to_add else self
         else:
             uniform = self.new_with_atts_removed('bg')
             return fmtstr(to_add, **self.shared_atts) + uniform if to_add else uniform
@@ -487,7 +487,7 @@ class FmtStr:
         def __str__(self):
             if self._str is not None:
                 return self._str
-            self._str = str('').join(str(fs) for fs in self.chunks)
+            self._str = ''.join(str(fs) for fs in self.chunks)
             return self._str
 
     def __len__(self):
@@ -538,7 +538,7 @@ class FmtStr:
         elif isinstance(other, (bytes, unicode)):
             return FmtStr(*(self.chunks + [Chunk(other)]))
         else:
-            raise TypeError('Can\'t add %r and %r' % (self, other))
+            raise TypeError(f'Can\'t add {self!r} and {other!r}')
 
     def __radd__(self, other):
         # type: (Union[FmtStr, Text]) -> FmtStr
@@ -580,7 +580,7 @@ class FmtStr:
     def __getattr__(self, att):
         # thanks to @aerenchyma/@jczett
         if not hasattr(self.s, att):
-            raise AttributeError("No attribute %r" % (att,))
+            raise AttributeError(f"No attribute {att!r}")
         @no_type_check
         def func_help(*args, **kwargs):
             result = getattr(self.s, att)(*args, **kwargs)
@@ -727,7 +727,7 @@ def interval_overlap(a, b, x, y):
         assert False
 
 
-def width_aware_slice(s, start, end, replacement_char=u' '):
+def width_aware_slice(s, start, end, replacement_char=' '):
     # type: (Text, int, int, Text) -> Text
     """
     >>> width_aware_slice(u'a\uff25iou', 0, 2)[1] == u' '
@@ -802,7 +802,7 @@ def normalize_slice(length, index):
         raise NotImplementedError("You can't use steps with slicing yet")
     if is_int:
         if index.start < 0 or index.start > length:
-            raise IndexError("index out of bounds: %r for length %s" % (index, length))
+            raise IndexError(f"index out of bounds: {index!r} for length {length}")
     return index
 
 def parse_args(args, kwargs):
@@ -857,5 +857,5 @@ def fmtstr(string, *args, **kwargs):
     elif isinstance(string, (bytes, unicode)):
         string = FmtStr.from_str(string)
     else:
-        raise ValueError("Bad Args: %r (of type %s), %r, %r" % (string, type(string), args, kwargs))
+        raise ValueError("Bad Args: {!r} (of type {}), {!r}, {!r}".format(string, type(string), args, kwargs))
     return string.copy_with_new_atts(**atts)
