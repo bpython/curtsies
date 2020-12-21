@@ -210,18 +210,18 @@ class FSArray(Sequence):
                 + self.rows[rowslice.stop :]
             )
             msg = (
-                "You are trying to fit this value {0} into the region {1}: {2}".format(
+                "You are trying to fit this value {} into the region {}: {}".format(
                     fmtstr("".join(value), bg="cyan"),
                     fmtstr("").join(grid_value),
                     "\n ".join(grid_fsarray[x] for x in range(len(self.rows))),
                 )
             )
             raise ValueError(
-                """Error you are trying to replace a region of {0} rows by {1}
-                columns for and area of {2} with a value of len {3}. The value
+                """Error you are trying to replace a region of {} rows by {}
+                columns for and area of {} with a value of len {}. The value
                 used to replace the region must equal the area of the region
                 replace.
-                {4}""".format(
+                {}""".format(
                     rowslice.stop - rowslice.start,
                     colslice.stop - colslice.start,
                     area,
@@ -253,11 +253,11 @@ class FSArray(Sequence):
 
         def underline(x):
             # type: (Text) -> Text
-            return "\x1b[4m%s\x1b[0m" % (x,)
+            return f"\x1b[4m{x}\x1b[0m"
 
         def blink(x):
             # type: (Text) -> Text
-            return "\x1b[5m%s\x1b[0m" % (x,)
+            return f"\x1b[5m{x}\x1b[0m"
 
         a_rows = []
         b_rows = []
@@ -308,13 +308,13 @@ class FormatStringTest(unittest.TestCase):
         self.assertEqual(
             (a.width, b.height),
             (a.width, b.height),
-            "fsarray dimensions do not match: %s %s" % (a.shape, b.shape),
+            f"fsarray dimensions do not match: {a.shape} {b.shape}",
         )
         for i, (a_row, b_row) in enumerate(zip(a, b)):
             self.assertEqual(
                 a_row,
                 b_row,
-                "FSArrays differ first on line %s:\n%s" % (i, FSArray.diff(a, b)),
+                "FSArrays differ first on line {}:\n{}".format(i, FSArray.diff(a, b)),
             )
 
     def assertFSArraysEqualIgnoringFormatting(self, a, b):
