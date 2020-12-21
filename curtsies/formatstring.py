@@ -157,7 +157,10 @@ class Chunk(object):
         if not isinstance(other, Chunk):
             return False
         return self.s == other.s and self.atts == other.atts
-    # TODO: corresponding hash method
+
+    def __hash__(self):
+        # type: () -> int
+        return hash(self.s, self.atts)
 
     if PY3:
         __str__ = __unicode__
@@ -524,7 +527,10 @@ class FmtStr(object):
         if isinstance(other, (unicode, bytes, FmtStr)):
             return str(self) == str(other)
         return False
-    # TODO corresponding hash method
+
+    def __hash__(self):
+        # type: () -> int
+        return hash(str(self))
 
     def __add__(self, other):
         # type: (Union[FmtStr, Text]) -> FmtStr
