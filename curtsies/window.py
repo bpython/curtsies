@@ -1,7 +1,6 @@
 # All windows write only unicode to the terminal -
 # that's what blessings does, so we match it.
 
-from __future__ import unicode_literals
 
 from typing import (
     Optional,

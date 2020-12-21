@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 """
 Format String 2D array
 2d array for compositing term-formated strings

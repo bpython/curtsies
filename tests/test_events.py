@@ -1,4 +1,3 @@
-# -*- coding: UTF8 -*-
 import unittest
 from functools import partial
 

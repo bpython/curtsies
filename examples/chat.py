@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 """A more realtime netcat"""
 import sys
 import select

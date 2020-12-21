@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 r"""Colored strings that behave mostly like strings
 
 >>> s = fmtstr("Hey there!", 'red')

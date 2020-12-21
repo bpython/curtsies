@@ -1,4 +1,3 @@
-from __future__ import unicode_literals # convenient for Python 2
 import random
 
 from curtsies import FullscreenWindow, Input, FSArray

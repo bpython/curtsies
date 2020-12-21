@@ -1,5 +1,3 @@
-from __future__ import unicode_literals, division
-
 import time
 
 from curtsies import FullscreenWindow, Input, FSArray
