@@ -142,13 +142,13 @@ class FSArray(Sequence):
     @property
     def height(self):
         # type: () -> int
-        "The number of rows"
+        """The number of rows"""
         return len(self.rows)
 
     @property
     def width(self):
         # type: () -> int
-        "The number of columns"
+        """The number of columns"""
         return self.num_columns
 
     # TODO rework this next major version bump
