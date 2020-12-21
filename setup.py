@@ -28,8 +28,7 @@ setup(
     packages=["curtsies"],
     install_requires=[
         "blessings>=1.5",
-        "wcwidth>=0.1.4",
-        'typing; python_version<"3.5"',
+        "wcwidth>=0.1.4"
     ],
     tests_require=["mock", "pyte", "nose",],
     classifiers=[

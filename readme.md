@@ -2,7 +2,7 @@
 [![Documentation Status](https://readthedocs.org/projects/curtsies/badge/?version=latest)](https://readthedocs.org/projects/curtsies/?badge=latest)
 ![Curtsies Logo](http://ballingt.com/assets/curtsiestitle.png)
 
-Curtsies is a Python 2.7 & 3.4+ compatible library for interacting with the terminal.
+Curtsies is a Python 3.6+ compatible library for interacting with the terminal.
 This is what using (nearly every feature of) curtsies looks like:
 
 ```python
@@ -24,12 +24,7 @@ with FullscreenWindow() as window:
             elif c == '<SPACE>':
                 a = FSArray(window.height, window.width)
             else:
-                if sys.version_info[0] == 2:
-                    # in Python 2 repr() returns bytes
-                    # but Curtsies always uses unicode
-                    s = repr(c).decode()
-                else:
-                    s = repr(c)
+                s = repr(c)
                 row = random.choice(range(window.height))
                 column = random.choice(range(window.width-len(s)))
                 color = random.choice([red, green, on_blue, yellow])
