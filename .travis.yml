@@ -3,24 +3,21 @@ notifications:
         - secure: "SWXDWxa1mNV6Wr6fPP8MxYO69rOiMMilp475Z9a3V9B3S/xds+d0ye8msUD+D1W9lzhwrw9NSMUjuBrm0llAvBV2MVCjYeuZ4ACLuK7fqhh4+2V9OrhYCKQrjNmEicmqwe1H5Z09JGKnMEJGUxrqApkCucoY8xOJu1/jfS7R63I="
 
 language: python
+sudo: false
+dist: bionic
 
 python:
-    - "2.7"
     - "3.4"
     - "3.5"
     - "3.6"
-    - "pypy"
+    - "3.7"
+    - "3.8"
+    - "3.9"
     - "pypy3"
 
-matrix:
-    include:
-        - python: 3.7
-          dist: xenial
-          sudo: true
-
 install:
-    - "python setup.py install"
     - "pip install pyte coverage mock"
+    - "python setup.py install"
 
 script:
     - nosetests .
