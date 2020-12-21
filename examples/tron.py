@@ -165,14 +165,14 @@ def do_introduction(window):
 
 def mainloop(window, p2_bot=False):
     p1_attrs = {
-        "appearance": on_blue((cyan("1"))),
+        "appearance": on_blue(cyan("1")),
         "x": window.width // 4,
         "y": window.height // 2,
         "keys": {"w": 90, "a": 180, "s": 270, "d": 0},
     }
 
     p2_attrs = {
-        "appearance": on_red((yellow("2"))),
+        "appearance": on_red(yellow("2")),
         "x": 3 * window.width // 4,
         "y": window.height // 2,
         "keys": {"<UP>": 90, "<LEFT>": 180, "<DOWN>": 270, "<RIGHT>": 0},
