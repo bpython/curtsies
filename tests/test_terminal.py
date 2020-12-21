@@ -71,13 +71,13 @@ class ReportingStream(Stream):
             # is wait for the 'n' argument.
             return self.dispatch(self.report_escape[self.current])
         else:
-            return super(ReportingStream, self)._arguments(char)
+            return super()._arguments(char)
 
 
 class ReportingScreen(Screen):
     def __init__(self, *args, **kwargs):
         self._report_file = FakeStdin()
-        super(ReportingScreen, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def report_cursor_position(self):
         # cursor position is 1-indexed in the ANSI escape sequence API
