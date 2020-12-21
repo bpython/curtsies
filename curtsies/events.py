@@ -96,7 +96,7 @@ MAX_KEYPRESS_SIZE = max(
 )
 
 
-class Event(object):
+class Event:
     pass
 
 

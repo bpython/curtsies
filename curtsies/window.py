@@ -42,7 +42,7 @@ FIRST_COLUMN = "\x1b[1G"
 T = TypeVar("T", bound="BaseWindow")
 
 
-class BaseWindow(object):
+class BaseWindow:
     def __init__(self, out_stream=None, hide_cursor=True):
         # type: (IO, bool) -> None
         logger.debug("-------initializing Window object %r------" % self)

@@ -16,7 +16,7 @@ def unicode_str(obj):
     return str(obj)
 
 
-class Entity(object):
+class Entity:
     def __init__(self, display, x, y, speed=1):
         self.display = display
         self.x, self.y = x, y
@@ -37,7 +37,7 @@ def sign(n):
 def vscale(c, v):
     return tuple(c*x for x in v)
 
-class World(object):
+class World:
     def __init__(self, width, height):
         self.width = width
         self.height = height

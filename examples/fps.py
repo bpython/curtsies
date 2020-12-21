@@ -9,7 +9,7 @@ import curtsies.events
 class Frame(curtsies.events.ScheduledEvent):
     pass
 
-class World(object):
+class World:
     def __init__(self):
         self.s = 'Hello'
     def tick(self):

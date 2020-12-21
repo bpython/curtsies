@@ -8,7 +8,7 @@ from curtsies import FullscreenWindow, Input, FSArray
 from curtsies.formatstring import linesplit
 from curtsies.fmtfuncs import blue, red, green
 
-class Connection(object):
+class Connection:
     def __init__(self, sock):
         self.sock = sock
         self.received = []

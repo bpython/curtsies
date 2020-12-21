@@ -32,7 +32,7 @@ def is_main_thread():
     return isinstance(threading.current_thread(), threading._MainThread)  # type: ignore
 
 
-class ReplacedSigIntHandler(object):
+class ReplacedSigIntHandler:
     def __init__(self, handler):
         # type: (Callable) -> None
         self.handler = handler
@@ -47,7 +47,7 @@ class ReplacedSigIntHandler(object):
         signal.signal(signal.SIGINT, self.orig_sigint_handler)
 
 
-class Input(object):
+class Input:
     """Keypress and control event generator"""
 
     def __init__(

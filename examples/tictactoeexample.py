@@ -3,7 +3,7 @@ import sys
 from curtsies.fmtfuncs import *
 from curtsies import FullscreenWindow, Input, fsarray
 
-class Board(object):
+class Board:
     """
     >>> Board().rows
     ((' ', ' ', ' '), (' ', ' ', ' '), (' ', ' ', ' '))

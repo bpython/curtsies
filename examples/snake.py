@@ -12,7 +12,7 @@ key_directions = {
                   '<RIGHT>': (0, 1),
                  }
 
-class Snake(object):
+class Snake:
     """Creates a Snake (game) object"""
     def __init__(self, height, width):
         self.height = height

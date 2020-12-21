@@ -90,7 +90,7 @@ def stable_format_dict(d):
     return '{%s}' % inner
 
 
-class Chunk(object):
+class Chunk:
     """A string with a single set of formatting attributes
 
     Subject to change, not part of the API"""
@@ -195,7 +195,7 @@ class Chunk(object):
         return ChunkSplitter(self)
 
 
-class ChunkSplitter(object):
+class ChunkSplitter:
     """
     View of a Chunk for breaking it into smaller Chunks.
     """
@@ -259,7 +259,7 @@ class ChunkSplitter(object):
             i += 1
 
 
-class FmtStr(object):
+class FmtStr:
     """A string whose substrings carry attributes."""
     def __init__(self, *components):
         # type: (*Chunk) -> None

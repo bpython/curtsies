@@ -587,7 +587,7 @@ class TestFSArray(unittest.TestCase):
         t[2, 2] == "a"
 
     def test_normalize_slice(self):
-        class SliceBuilder(object):
+        class SliceBuilder:
             def __getitem__(self, slice):
                 return slice
 

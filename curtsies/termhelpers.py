@@ -9,7 +9,7 @@ from types import TracebackType
 _Attr = List[Union[int, List[bytes]]]
 
 
-class Nonblocking(object):
+class Nonblocking:
     """
     A context manager for making an input stream nonblocking.
     """
@@ -29,7 +29,7 @@ class Nonblocking(object):
         fcntl.fcntl(self.fd, fcntl.F_SETFL, self.orig_fl)
 
 
-class Cbreak(object):
+class Cbreak:
     def __init__(self, stream):
         # type: (IO) -> None
         self.stream = stream
@@ -45,7 +45,7 @@ class Cbreak(object):
         termios.tcsetattr(self.stream, termios.TCSANOW, self.original_stty)
 
 
-class Termmode(object):
+class Termmode:
     def __init__(self, stream, attrs):
         # type: (IO, _Attr) -> None
         self.stream = stream

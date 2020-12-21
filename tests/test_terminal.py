@@ -97,7 +97,7 @@ class ReportingScreenWithExtra(ReportingScreen):
         self._report_file.seek(0)
 
 
-class Bugger(object):
+class Bugger:
     __before__ = __after__ = lambda *args: None
 
     def __getattr__(self, event):
@@ -117,7 +117,7 @@ class Bugger(object):
         return inner
 
 
-class ScreenStdout(object):
+class ScreenStdout:
     def __init__(self, stream):
         self.stream = stream
 
@@ -156,7 +156,7 @@ class TestFullscreenWindow(unittest.TestCase):
         )
 
 
-class NopContext(object):
+class NopContext:
     def __enter__(*args):
         pass
 

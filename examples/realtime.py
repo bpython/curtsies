@@ -8,7 +8,7 @@ from curtsies.fmtfuncs import red, bold, green, on_blue, yellow, on_red
 MAX_FPS = 1000
 time_per_frame = 1. / MAX_FPS
 
-class FrameCounter(object):
+class FrameCounter:
     def __init__(self):
         self.render_times = []
         self.dt = .5
