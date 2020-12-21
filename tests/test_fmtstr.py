@@ -20,7 +20,7 @@ from curtsies.fmtfuncs import (
     bold,
 )
 from curtsies.termformatconstants import FG_COLORS
-from curtsies.formatstringarray import fsarray, FSArray, FormatStringTest
+from curtsies.formatstringarray import fsarray, FSArray
 
 from unittest import skip
 
@@ -576,6 +576,43 @@ class TestFSArray(unittest.TestCase):
         a[2:-2, 2:-2] = fsarray(["asdf", "zxcv"])
 
 
+class FormatStringTest(unittest.TestCase):
+    def assertFSArraysEqual(self, a, b):
+        # type: (FSArray, FSArray) -> None
+        self.assertEqual(type(a), FSArray)
+        self.assertEqual(type(b), FSArray)
+        self.assertEqual(
+            (a.width, b.height),
+            (a.width, b.height),
+            f"fsarray dimensions do not match: {a.shape} {b.shape}",
+        )
+        for i, (a_row, b_row) in enumerate(zip(a, b)):
+            self.assertEqual(
+                a_row,
+                b_row,
+                "FSArrays differ first on line {}:\n{}".format(i, FSArray.diff(a, b)),
+            )
+
+    def assertFSArraysEqualIgnoringFormatting(self, a, b):
+        # type: (FSArray, FSArray) -> None
+        """Also accepts arrays of strings"""
+        self.assertEqual(
+            len(a),
+            len(b),
+            "fsarray heights do not match: %s %s \n%s \n%s"
+            % (len(a), len(b), simple_format(a), simple_format(b)),
+        )
+        for i, (a_row, b_row) in enumerate(zip(a, b)):
+            a_row = a_row.s if isinstance(a_row, FmtStr) else a_row
+            b_row = b_row.s if isinstance(b_row, FmtStr) else b_row
+            self.assertEqual(
+                a_row,
+                b_row,
+                "FSArrays differ first on line %s:\n%s"
+                % (i, FSArray.diff(a, b, ignore_formatting=True)),
+            )
+
+
 class TestFSArrayWithDiff(FormatStringTest):
     def test_diff_testing(self):
         a = fsarray(["abc", "def"])
@@ -596,6 +633,4 @@ class TestFSArrayWithDiff(FormatStringTest):
 
 
 if __name__ == "__main__":
-    import fmtstr.fmtstr
-
     unittest.main()

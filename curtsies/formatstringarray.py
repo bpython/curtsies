@@ -23,7 +23,6 @@ Format String 2D array
 
 import sys
 import logging
-import unittest
 
 from .formatstring import fmtstr
 from .formatstring import normalize_slice
@@ -209,12 +208,10 @@ class FSArray(Sequence):
                 ]
                 + self.rows[rowslice.stop :]
             )
-            msg = (
-                "You are trying to fit this value {} into the region {}: {}".format(
-                    fmtstr("".join(value), bg="cyan"),
-                    fmtstr("").join(grid_value),
-                    "\n ".join(grid_fsarray[x] for x in range(len(self.rows))),
-                )
+            msg = "You are trying to fit this value {} into the region {}: {}".format(
+                fmtstr("".join(value), bg="cyan"),
+                fmtstr("").join(grid_value),
+                "\n ".join(grid_fsarray[x] for x in range(len(self.rows))),
             )
             raise ValueError(
                 """Error you are trying to replace a region of {} rows by {}
@@ -298,43 +295,6 @@ class FSArray(Sequence):
 def simple_format(x):
     # type: (Union[FSArray, List[FmtStr]]) -> Text
     return "\n".join(actualize(l) for l in x)
-
-
-class FormatStringTest(unittest.TestCase):
-    def assertFSArraysEqual(self, a, b):
-        # type: (FSArray, FSArray) -> None
-        self.assertEqual(type(a), FSArray)
-        self.assertEqual(type(b), FSArray)
-        self.assertEqual(
-            (a.width, b.height),
-            (a.width, b.height),
-            f"fsarray dimensions do not match: {a.shape} {b.shape}",
-        )
-        for i, (a_row, b_row) in enumerate(zip(a, b)):
-            self.assertEqual(
-                a_row,
-                b_row,
-                "FSArrays differ first on line {}:\n{}".format(i, FSArray.diff(a, b)),
-            )
-
-    def assertFSArraysEqualIgnoringFormatting(self, a, b):
-        # type: (FSArray, FSArray) -> None
-        """Also accepts arrays of strings"""
-        self.assertEqual(
-            len(a),
-            len(b),
-            "fsarray heights do not match: %s %s \n%s \n%s"
-            % (len(a), len(b), simple_format(a), simple_format(b)),
-        )
-        for i, (a_row, b_row) in enumerate(zip(a, b)):
-            a_row = a_row.s if isinstance(a_row, FmtStr) else a_row
-            b_row = b_row.s if isinstance(b_row, FmtStr) else b_row
-            self.assertEqual(
-                a_row,
-                b_row,
-                "FSArrays differ first on line %s:\n%s"
-                % (i, FSArray.diff(a, b, ignore_formatting=True)),
-            )
 
 
 if __name__ == "__main__":
