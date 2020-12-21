@@ -5,20 +5,7 @@ import threading
 import time
 import unittest
 from unittest.mock import Mock
-
-try:
-    from unittest import skip, skipUnless
-except ImportError:
-
-    def skip(f):
-        return lambda self: None
-
-    def skipUnless(condition, reason):
-        if condition:
-            return lambda x: x
-        else:
-            return lambda x: None
-
+from unittest import skip, skipUnless
 
 from curtsies import events
 from curtsies.input import Input

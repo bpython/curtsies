@@ -19,8 +19,6 @@ from . import events
 from typing import Callable, Type, TextIO, Optional, List, Union, Text, cast, Tuple, Any
 from types import TracebackType, FrameType
 
-PY3 = sys.version_info[0] >= 3
-
 READ_SIZE = 1024
 assert READ_SIZE >= events.MAX_KEYPRESS_SIZE
 # if a keypress could require more bytes than we read to be identified,
@@ -137,11 +135,9 @@ class Input:
         # type: () -> Input
         return self
 
-    def next(self):
+    def __next__(self):
         # type: () -> Union[None, Text, events.Event]
         return self.send(None)
-
-    __next__ = next
 
     def unget_bytes(self, string):
         # type: (bytes) -> None
@@ -291,26 +287,15 @@ class Input:
         # type: () -> int
         """Returns the number of characters read and adds them to self.unprocessed_bytes"""
         with Nonblocking(self.in_stream):
-            if PY3:
-                try:
-                    data = os.read(self.in_stream.fileno(), READ_SIZE)
-                except BlockingIOError:
-                    return 0
-                if data:
-                    self.unprocessed_bytes.extend(
-                        data[i : i + 1] for i in range(len(data))
-                    )
-                    return len(data)
-                else:
-                    return 0
+            try:
+                data = os.read(self.in_stream.fileno(), READ_SIZE)
+            except BlockingIOError:
+                return 0
+            if data:
+                self.unprocessed_bytes.extend(data[i : i + 1] for i in range(len(data)))
+                return len(data)
             else:
-                try:
-                    data = os.read(self.in_stream.fileno(), READ_SIZE)
-                except OSError:
-                    return 0
-                else:
-                    self.unprocessed_bytes.extend(data)
-                    return len(data)
+                return 0
 
     def event_trigger(self, event_type):
         # type: (Type[events.Event]) -> Callable

@@ -7,16 +7,8 @@ from .termhelpers import Termmode
 
 from typing import Text, Optional, List, Union
 
-PY3 = sys.version_info[0] >= 3
-
-if PY3:
-    raw_input = input
-    unicode = str
-    chr_byte = lambda i: chr(i).encode("latin-1")
-    chr_uni = chr
-else:
-    chr_byte = chr
-    chr_uni = lambda i: chr(i).decode("latin-1")
+chr_byte = lambda i: chr(i).encode("latin-1")
+chr_uni = chr
 
 
 CURTSIES_NAMES = {}
@@ -345,7 +337,7 @@ def try_keys():
         print("Unidentified character sequence!")
         with Normal:
             while True:
-                r = raw_input("type 'ok' to prove you're not pounding keys ")
+                r = input("type 'ok' to prove you're not pounding keys ")
                 if r.lower().strip() == "ok":
                     break
         while True:
@@ -355,7 +347,7 @@ def try_keys():
                 break
             print("nope, that wasn't it")
         with Normal:
-            name = raw_input("Describe in English what key you pressed: ")
+            name = input("Describe in English what key you pressed: ")
             f = open("keylog.txt", "a")
             f.write(f"{seq!r} is called {name}\n")
             f.close()

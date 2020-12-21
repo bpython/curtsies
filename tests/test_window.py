@@ -2,21 +2,8 @@ import unittest
 import sys
 
 from curtsies.window import BaseWindow, FullscreenWindow, CursorAwareWindow
-
-if sys.version_info[0] == 3:
-    from io import StringIO
-else:
-    from cStringIO import StringIO
-
-try:
-    from unittest import skipIf
-except ImportError:
-
-    def skipIf(condition, reason):
-        if condition:
-            return lambda x: x
-        else:
-            return lambda x: None
+from io import StringIO
+from unittest import skipIf
 
 
 fds_closed = not sys.stdin.isatty() or not sys.stdout.isatty()

@@ -41,13 +41,7 @@ from typing import (
     no_type_check,
 )
 
-PY3 = sys.version_info[0] >= 3
-
-if PY3:
-    unicode = str
-
-actualize = str if PY3 else unicode
-
+actualize = str
 logger = logging.getLogger(__name__)
 
 # TODO check that strings used in arrays don't have tabs or spaces in them!
@@ -165,7 +159,7 @@ class FSArray(Sequence):
         logger.debug("slice: %r", slicetuple)
         if isinstance(slicetuple, slice):
             rowslice, colslice = slicetuple, slice(None)
-            if isinstance(value, (bytes, unicode)):
+            if isinstance(value, (bytes, str)):
                 raise ValueError(
                     "if slice is 2D, value must be 2D as in of list type []"
                 )

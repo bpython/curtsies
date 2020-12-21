@@ -22,16 +22,7 @@ from curtsies.fmtfuncs import (
 from curtsies.termformatconstants import FG_COLORS
 from curtsies.formatstringarray import fsarray, FSArray, FormatStringTest
 
-try:
-    from unittest import skip
-except ImportError:
-
-    def skip(f):
-        return lambda self: None
-
-
-PY2 = sys.version_info[0] == 2
-
+from unittest import skip
 
 
 def repr_without_leading_u(s):
@@ -514,10 +505,7 @@ class TestWidthHelpers(unittest.TestCase):
 class TestChunk(unittest.TestCase):
     def test_repr(self):
         c = Chunk("a", {"fg": 32})
-        if PY2:
-            self.assertEqual(repr(c), """Chunk(u'a', {'fg': 32})""")
-        else:
-            self.assertEqual(repr(c), """Chunk('a', {'fg': 32})""")
+        self.assertEqual(repr(c), """Chunk('a', {'fg': 32})""")
 
 
 class TestChunkSplitter(unittest.TestCase):

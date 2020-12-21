@@ -33,10 +33,6 @@ from .termformatconstants import (FG_COLORS, BG_COLORS, STYLES,
                                   RESET_ALL, RESET_BG, RESET_FG,
                                   seq)
 
-PY3 = sys.version_info[0] >= 3
-
-if PY3:
-    unicode = str
 
 one_arg_xforms = {
     'bold' :      lambda s: seq(STYLES['bold'])     +s+seq(RESET_ALL),
@@ -97,7 +93,7 @@ class Chunk:
         # type: (Text, Mapping[str, Union[int, bool]]) -> None
         if atts is None:
             atts = {}
-        if not isinstance(string, unicode):
+        if not isinstance(string, str):
             raise ValueError("unicode string required, got %r" % string)
         self._s = string  # type: Text
         self._atts = FrozenDict(atts)
@@ -144,11 +140,11 @@ class Chunk:
                 s = two_arg_xforms[k](s, v)
         return s
 
-    def __unicode__(self):
+    def __str__(self):
         # type: () -> Text
         value = self.color_str
         if isinstance(value, bytes):
-            return value.decode('utf8', 'replace')
+            return value.decode("utf8", "replace")
         return value
 
     def __eq__(self, other):
@@ -160,12 +156,6 @@ class Chunk:
     def __hash__(self):
         # type: () -> int
         return hash(self.s, self.atts)
-
-    if PY3:
-        __str__ = __unicode__
-    else:
-        def __str__(self):
-            return unicode(self).encode('utf8')
 
     def __repr__(self):
         # type: () -> str
@@ -268,7 +258,6 @@ class FmtStr:
         self.chunks = list(components)
 
         # caching these leads to a significant speedup
-        self._str = None
         self._unicode = None  # type: Optional[Text]
         self._len = None  # type: Optional[int]
         self._s = None  # type: Optional[Text]
@@ -300,7 +289,7 @@ class FmtStr:
                 for x in tokens_and_strings:
                     if isinstance(x, dict):
                         cur_fmt.update(x)
-                    elif isinstance(x, unicode):
+                    elif isinstance(x, str):
                         atts = parse_args((), {k: v
                                           for k, v in cur_fmt.items()
                                           if v is not None})
@@ -407,6 +396,8 @@ class FmtStr:
             before = self.chunks
             if isinstance(s, FmtStr):
                 chunks.extend(s.chunks)
+            elif isinstance(s, (bytes, str)):
+                chunks.extend(fmtstr(s).chunks)  # TODO just make a chunk directly
             elif isinstance(s, (bytes, unicode)):
                 chunks.extend(fmtstr(s).chunks) #TODO just make a chunk directly
             else:
@@ -474,21 +465,12 @@ class FmtStr:
             uniform = self.new_with_atts_removed('bg')
             return fmtstr(to_add, **self.shared_atts) + uniform if to_add else uniform
 
-    def __unicode__(self):
+    def __str__(self):
         # type: () -> Text
         if self._unicode is not None:
             return self._unicode
-        self._unicode = ''.join(unicode(fs) for fs in self.chunks)
+        self._unicode = "".join(str(fs) for fs in self.chunks)
         return self._unicode
-
-    if PY3:
-        __str__ = __unicode__
-    else:
-        def __str__(self):
-            if self._str is not None:
-                return self._str
-            self._str = ''.join(str(fs) for fs in self.chunks)
-            return self._str
 
     def __len__(self):
         # type: () -> int
@@ -523,7 +505,7 @@ class FmtStr:
 
     def __eq__(self, other):
         # type: (Any) -> bool
-        if isinstance(other, (unicode, bytes, FmtStr)):
+        if isinstance(other, (str, bytes, FmtStr)):
             return str(self) == str(other)
         return False
 
@@ -535,7 +517,7 @@ class FmtStr:
         # type: (Union[FmtStr, Text]) -> FmtStr
         if isinstance(other, FmtStr):
             return FmtStr(*(self.chunks + other.chunks))
-        elif isinstance(other, (bytes, unicode)):
+        elif isinstance(other, (bytes, str)):
             return FmtStr(*(self.chunks + [Chunk(other)]))
         else:
             raise TypeError(f'Can\'t add {self!r} and {other!r}')
@@ -544,7 +526,7 @@ class FmtStr:
         # type: (Union[FmtStr, Text]) -> FmtStr
         if isinstance(other, FmtStr):
             return FmtStr(*(x for x in (other.chunks + self.chunks)))
-        elif isinstance(other, (bytes, unicode)):
+        elif isinstance(other, (bytes, str)):
             return FmtStr(*(x for x in ([Chunk(other)] + self.chunks)))
         else:
             raise TypeError('Can\'t add those')
@@ -581,15 +563,17 @@ class FmtStr:
         # thanks to @aerenchyma/@jczett
         if not hasattr(self.s, att):
             raise AttributeError(f"No attribute {att!r}")
+
         @no_type_check
         def func_help(*args, **kwargs):
             result = getattr(self.s, att)(*args, **kwargs)
-            if isinstance(result, (bytes, unicode)):
+            if isinstance(result, (bytes, str)):
                 return fmtstr(result, **self.shared_atts)
             elif isinstance(result, list):
                 return [fmtstr(x, **self.shared_atts) for x in result]
             else:
-                 return result
+                return result
+
         return func_help
 
     @property
@@ -806,15 +790,14 @@ def normalize_slice(length, index):
     return index
 
 def parse_args(args, kwargs):
-    # type: (Tuple[Union[bytes, unicode], ...], MutableMapping[str, Union[int, bool, str]]) -> Mapping[str, Union[int, bool]]
+    # type: (Tuple[Union[bytes, str], ...], MutableMapping[str, Union[int, bool, str]]) -> Mapping[str, Union[int, bool]]
     """Returns a kwargs dictionary by turning args into kwargs"""
     if 'style' in kwargs:
         args += (cast(str, kwargs['style']),)
         del kwargs['style']
     for arg in args:
-        if PY3:
-            arg = cast(str, arg)
-        if not isinstance(arg, (bytes, unicode)):
+        arg = cast(str, arg)
+        if not isinstance(arg, (bytes, str)):
             raise ValueError("args must be strings:" + repr(args))
         if arg.lower() in FG_COLORS:
             if 'fg' in kwargs: raise ValueError("fg specified twice")
@@ -854,7 +837,7 @@ def fmtstr(string, *args, **kwargs):
     atts = parse_args(args, kwargs)
     if isinstance(string, FmtStr):
         pass
-    elif isinstance(string, (bytes, unicode)):
+    elif isinstance(string, (bytes, str)):
         string = FmtStr.from_str(string)
     else:
         raise ValueError("Bad Args: {!r} (of type {}), {!r}, {!r}".format(string, type(string), args, kwargs))
