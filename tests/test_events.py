@@ -28,7 +28,7 @@ class TestCurtsiesNames(unittest.TestCase):
 
     def test_all_keys_bytes(self):
         for seq, e in events.CURTSIES_NAMES.items():
-            self.assertEqual(type(e), type(""))
+            self.assertEqual(type(e), str)
 
 
 class TestDecodable(unittest.TestCase):

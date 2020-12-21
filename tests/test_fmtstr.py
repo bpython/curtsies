@@ -32,20 +32,11 @@ except ImportError:
 
 PY2 = sys.version_info[0] == 2
 
-try:
-    unicode = unicode
-except:
-    unicode = str
 
 
 def repr_without_leading_u(s):
-    assert isinstance(s, type(""))
-    if PY2:
-        r = repr(s)
-        assert r[0] == "u"
-        return r[1:]
-    else:
-        return repr(s)
+    assert isinstance(s, str)
+    return repr(s)
 
 
 class TestFmtStrInitialization(unittest.TestCase):
@@ -381,19 +372,16 @@ class TestComposition(unittest.TestCase):
 class TestUnicode(unittest.TestCase):
     def test_output_type(self):
         self.assertEqual(type(str(fmtstr("hello", "blue"))), str)
-        self.assertEqual(type(unicode(fmtstr("hello", "blue"))), unicode)
 
     def test_normal_chars(self):
         fmtstr("a", "blue")
         str(fmtstr("a", "blue"))
-        unicode(fmtstr("a", "blue"))
         self.assertTrue(True)
 
     def test_funny_chars(self):
         fmtstr("⁇", "blue")
         str(Chunk("⁇", {"fg": "blue"}))
         str(fmtstr("⁇", "blue"))
-        unicode(fmtstr("⁇", "blue"))
         self.assertTrue(True)
 
     def test_right_sequence_in_py3(self):

@@ -4,15 +4,6 @@ import sys
 from curtsies import FullscreenWindow, Input, FSArray
 from curtsies.fmtfuncs import red, bold, green, on_blue, yellow, on_red
 
-PY2 = sys.version_info[0] == 2
-
-
-def unicode_str(obj):
-    """Get unicode str in Python 2 or 3"""
-    if PY2:
-        return str(obj).decode('utf8')
-    return str(obj)
-
 
 class Entity:
     def __init__(self, display, x, y, speed=1):
@@ -78,7 +69,7 @@ class World:
         self.turn += 1
         if self.turn % 20 == 0:
             self.player.speed = max(1, self.player.speed - 1)
-            self.player.display = on_blue(green(bold(unicode_str(self.player.speed))))
+            self.player.display = on_blue(green(bold(str(self.player.speed))))
 
     def get_array(self):
         a = FSArray(self.height, self.width)
