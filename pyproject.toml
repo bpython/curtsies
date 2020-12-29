@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 88
-target_version = ["py27"]
+target_version = ["py36"]
 exclude = '''
 (
     /(
