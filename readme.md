@@ -13,11 +13,13 @@ from curtsies import FullscreenWindow, Input, FSArray
 from curtsies.fmtfuncs import red, bold, green, on_blue, yellow
 
 print(yellow('this prints normally, not to the alternate screen'))
+
 with FullscreenWindow() as window:
+    a = FSArray(window.height, window.width)
+    msg = red(on_blue(bold('Press escape to exit, space to clear.')))
+    a[0:1, 0:msg.width] = [msg]
+    window.render_to_terminal(a)
     with Input() as input_generator:
-        msg = red(on_blue(bold('Press escape to exit')))
-        a = FSArray(window.height, window.width)
-        a[0:1, 0:msg.width] = [msg]
         for c in input_generator:
             if c == '<ESC>':
                 break
