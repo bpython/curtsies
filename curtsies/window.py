@@ -354,9 +354,9 @@ class CursorAwareWindow(BaseWindow):
             c = retrying_read()
             resp += c
             m = re.search(
-                "(?P<extra>.*)"
-                "(?P<CSI>\x1b\\[|\x9b)"
-                "(?P<row>\\d+);(?P<column>\\d+)R",
+                r"(?P<extra>.*)"
+                r"(?P<CSI>\x1b\[|\x9b)"
+                r"(?P<row>\d+);(?P<column>\d+)R",
                 resp,
                 re.DOTALL,
             )
