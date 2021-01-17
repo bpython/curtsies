@@ -152,7 +152,7 @@ class BaseWindow:
 
 
 class FullscreenWindow(BaseWindow):
-    """2D-text rendering window that dissappears when its context is left
+    """2D-text rendering window that disappears when its context is left
 
     FullscreenWindow will only render arrays the size of the terminal
     or smaller, and leaves no trace on exit (like top or vim). It never
@@ -280,7 +280,7 @@ class CursorAwareWindow(BaseWindow):
                 on leaving context
             hide_cursor (bool): Hides cursor while in context
             extra_bytes_callback (f(bytes) -> None): Will be called with extra
-                bytes inadvertantly read in get_cursor_position(). If not
+                bytes inadvertently read in get_cursor_position(). If not
                 provided, a ValueError will be raised when this occurs.
         """
         BaseWindow.__init__(self, out_stream=out_stream, hide_cursor=hide_cursor)
@@ -337,7 +337,7 @@ class CursorAwareWindow(BaseWindow):
                     c = in_stream.read(1)
                     if c == "":
                         raise ValueError(
-                            "Stream should be blocking - should't"
+                            "Stream should be blocking - shouldn't"
                             " return ''. Returned %r so far",
                             (resp,),
                         )

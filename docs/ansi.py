@@ -124,7 +124,7 @@ class ANSIColorParser(object):
         last_end = 0
         # iterate over all color codes
         for match in COLOR_PATTERN.finditer(raw):
-            # add any text preceeding this match
+            # add any text preceding this match
             head = raw[last_end : match.start()]
             self._add_text(head)
             # update the match end

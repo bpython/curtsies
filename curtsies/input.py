@@ -333,7 +333,7 @@ class Input:
 
         Returned callback function will create an event of type event_type
         which will interrupt an event request if one
-        is concurrently occuring, otherwise adding the event to a queue
+        is concurrently occurring, otherwise adding the event to a queue
         that will be checked on the next event request."""
         readfd, writefd = os.pipe()
         self.readers.append(readfd)

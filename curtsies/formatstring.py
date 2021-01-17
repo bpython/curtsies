@@ -461,7 +461,7 @@ class FmtStr:
     # TODO make this split work like str.split
     def split(self, sep=None, maxsplit=None, regex=False):
         # type: (Text, int, bool) -> List[FmtStr]
-        """Split based on seperator, optionally using a regex.
+        """Split based on separator, optionally using a regex.
 
         Capture groups are ignored in regex, the whole pattern is matched
         and used to split the original FmtStr."""
@@ -597,7 +597,7 @@ class FmtStr:
             return sum([self for _ in range(other)], FmtStr())
         raise TypeError("Can't multiply those")
 
-    # TODO ensure emtpy FmtStr isn't a problem
+    # TODO ensure empty FmtStr isn't a problem
 
     @property
     def shared_atts(self):

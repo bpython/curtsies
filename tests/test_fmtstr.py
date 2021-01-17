@@ -347,7 +347,7 @@ class TestSlicing(unittest.TestCase):
         self.assertEqual(s[1:], fmtstr("mp") + " ")
         self.assertEqual(blue("a\nb")[0:1], blue("a"))
 
-        # considering changing behavior so that this doens't work
+        # considering changing behavior so that this doesn't work
         # self.assertEqual(fmtstr('Hi!', 'blue')[15:18], fmtstr('', 'blue'))
 
 

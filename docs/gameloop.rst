@@ -1,7 +1,7 @@
 Gameloop Example
 ^^^^^^^^^^^^^^^^
 
-Use scheduled events for realtime interative programs:
+Use scheduled events for realtime interactive programs:
 
 .. literalinclude:: ../examples/fps.py
 

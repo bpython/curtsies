@@ -56,7 +56,7 @@ An array like the above might be repeatedly constructed and rendered with a :py:
 
 Slicing works like it does with a :py:class:`~curtsies.FmtStr`, but in two dimensions.
 :py:class:`~curtsies.FSArray` are *mutable*, so array assignment syntax can be used for natural
-compositing as in the above exaple.
+compositing as in the above example.
 
 If you're dealing with terminal output, the *width* of a string becomes more
 important than it's *length* (see :ref:`len-vs-width`).

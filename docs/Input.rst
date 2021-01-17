@@ -26,7 +26,7 @@ and can be acted upon.
 Since it's iterable, ``next()`` can be used to wait for a single event.
 :py:meth:`~curtsies.Input.send` works like ``next()`` but takes a timeout
 in seconds, which if reached will cause None to be returned signalling
-that no keypress or other event occured within the timeout.
+that no keypress or other event occurred within the timeout.
 
 Key events are unicode strings, but sometimes event objects
 (see :class:`~curtsies.events.Event`) are returned instead.
