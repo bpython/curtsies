@@ -132,8 +132,7 @@ def peel_off_esc_code(s):
 
 def token_type(info):
     # type: (Token) -> Optional[List[Dict[Text, Union[Text, bool, None]]]]
-    """
-    """
+
     if info["command"] == "m":
         # The default action for ESC[m is to act like ESC[0m
         # Ref: https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
