@@ -183,7 +183,7 @@ class Chunk:
 
     def __hash__(self):
         # type: () -> int
-        return hash(self.s, self.atts)
+        return hash((self.s, self.atts))
 
     def __repr__(self):
         # type: () -> str
