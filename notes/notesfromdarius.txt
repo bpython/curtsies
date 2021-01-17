@@ -78,7 +78,7 @@ MOre thoughts on Curtsies on May 28
 
 
 
-I dont' know why, but it's nice for right consuming other input i guess - though I don't do a good enough job
+I don't know why, but it's nice for right consuming other input i guess - though I don't do a good enough job
 
 the structure is the BaseFmtStrs that are immutable strings with properties like blue, and then FmtStrs are lists of those
 
@@ -185,7 +185,7 @@ keys_in_buffer?
 chars_available
 
 
-sigints that happen in this curtsies cdoe to generate the events, but if we not in that, they dont' have to - specifically for bpython
+sigints that happen in this curtsies cdoe to generate the events, but if we not in that, they don't have to - specifically for bpython
 
 
 in cbreak ctrl-c still causes a handler to happen, so maybe I don't need custon ones at all, just let bpython do thatk
