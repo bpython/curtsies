@@ -57,20 +57,22 @@ from .termformatconstants import (
 )
 
 one_arg_xforms = {
-    'bold' :      lambda s: seq(STYLES['bold'])     +s+seq(RESET_ALL),
-    'dark' :      lambda s: seq(STYLES['dark'])     +s+seq(RESET_ALL),
-    'underline' : lambda s: seq(STYLES['underline'])+s+seq(RESET_ALL),
-    'blink' :     lambda s: seq(STYLES['blink'])    +s+seq(RESET_ALL),
-    'invert' :    lambda s: seq(STYLES['invert'])   +s+seq(RESET_ALL),
+    "bold": lambda s: seq(STYLES["bold"]) + s + seq(RESET_ALL),
+    "dark": lambda s: seq(STYLES["dark"]) + s + seq(RESET_ALL),
+    "underline": lambda s: seq(STYLES["underline"]) + s + seq(RESET_ALL),
+    "blink": lambda s: seq(STYLES["blink"]) + s + seq(RESET_ALL),
+    "invert": lambda s: seq(STYLES["invert"]) + s + seq(RESET_ALL),
 }  # type: Mapping[Text, Callable[[Text], Text]]
 
 two_arg_xforms = {
-    'fg' :        lambda s, v: '{}{}{}'.format(seq(v), s, seq(RESET_FG)),
-    'bg' :        lambda s, v: seq(v)+s+seq(RESET_BG),
+    "fg": lambda s, v: "{}{}{}".format(seq(v), s, seq(RESET_FG)),
+    "bg": lambda s, v: seq(v) + s + seq(RESET_BG),
 }  # type: Mapping[Text, Callable[[Text, int], Text]]
 
 # TODO unused, remove this in next major release
-xforms = {} # type: MutableMapping[Text, Union[Callable[[Text], Text], Callable[[Text, int], Text]]]
+xforms = (
+    {}
+)  # type: MutableMapping[Text, Union[Callable[[Text], Text], Callable[[Text, int], Text]]]
 xforms.update(one_arg_xforms)
 xforms.update(two_arg_xforms)
 

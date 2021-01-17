@@ -13,9 +13,6 @@ exclude = '''
         | stubs
     )/
     | bootstrap.py
-    | curtsies/formatstring.py
-    | curtsies/formatstringarray.py
     | docs/conf.py
-    
 )
 '''
