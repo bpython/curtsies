@@ -533,8 +533,7 @@ def demo():
     with FullscreenWindow(sys.stdout) as w:
         with input.Input(sys.stdin) as input_generator:
             rows, columns = w.t.height, w.t.width
-            while True:
-                c = input_generator.next()
+            for c in input_generator
                 assert isinstance(c, Text)
                 if c == "":
                     sys.exit()  # same as raise SystemExit()
