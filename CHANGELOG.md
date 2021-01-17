@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+- Drop supported for Python 2, 3.4 and 3.5.
+- Migrate to pytest. Thanks to Paolo Stivanin
+- Add new exmples. Thanks to rybarczykj
+- mprove error messages. Thanks to Etienne Richart
 
 ## [0.3.4] - 2020-07-15
 - Prevent crash when embedding in situations including the lldb debugger. Thanks Nathan Lanza!
