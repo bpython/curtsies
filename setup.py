@@ -28,6 +28,7 @@ setup(
     author_email="thomasballinger@gmail.com",
     license="MIT",
     packages=["curtsies"],
+    python_requires=">=3.6",
     install_requires=[
         "blessings>=1.5",
         "wcwidth>=0.1.4",
