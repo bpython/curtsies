@@ -218,7 +218,7 @@ To access this information, :py:class:`~curtsies.FmtStr` objects have a :py:clas
 >>> len(combined), combined.width, combined.s
 (2, 1, u'a\u0324')
 
-As shown above, `full width characters <http://en.wikipedia.org/wiki/Halfwidth_and_fullwidth_forms>`_ can take up two columns, and `combining characters <http://en.wikipedia.org/wiki/Combining_character>`_ may be combined with the previous character to form a single grapheme. Curtsies uses a `Python implementation of wcwidth <https://github.com/jquast/wcwidth>`_ to do this calculation.
+As shown above, `full width characters <http://en.wikipedia.org/wiki/Halfwidth_and_fullwidth_forms>`_ can take up two columns, and `combining characters <http://en.wikipedia.org/wiki/Combining_character>`_ may be combined with the previous character to form a single grapheme. Curtsies uses `Python bindings of wcwidth <https://github.com/sebastinas/cwcwidth>`_ to do this calculation.
 
 FmtStr - API Docs
 =================

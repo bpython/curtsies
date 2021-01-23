@@ -41,7 +41,7 @@ from typing import (
 import itertools
 import re
 import sys
-from wcwidth import wcswidth
+from cwcwidth import wcswidth
 
 from .escseqparse import parse, remove_ansi
 from .termformatconstants import (
