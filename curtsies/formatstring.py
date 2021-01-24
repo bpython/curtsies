@@ -557,7 +557,7 @@ class FmtStr:
         # type: (int) -> int
         """Returns the horizontal position of character n of the string"""
         # TODO make more efficient?
-        width = wcswidth(self.s[:n])
+        width = wcswidth(self.s, n)
         assert width != -1
         return width
 
