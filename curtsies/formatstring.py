@@ -41,7 +41,7 @@ from typing import (
 import itertools
 import re
 import sys
-from cwcwidth import wcswidth
+from cwcwidth import wcswidth, wcwidth
 
 from .escseqparse import parse, remove_ansi
 from .termformatconstants import (
@@ -235,7 +235,7 @@ class ChunkSplitter:
         self.internal_width = 0  # width of chunks.s[:self.internal_offset]
         divides = [0]
         for c in self.chunk.s:
-            divides.append(divides[-1] + wcswidth(c))
+            divides.append(divides[-1] + wcwidth(c))
         self.divides = divides
 
     def reinit(self, chunk):
@@ -790,7 +790,7 @@ def width_aware_slice(s, start, end, replacement_char=" "):
     """
     divides = [0]
     for c in s:
-        divides.append(divides[-1] + wcswidth(c))
+        divides.append(divides[-1] + wcwidth(c))
 
     new_chunk_chars = []
     for char, char_start, char_end in zip(s, divides[:-1], divides[1:]):
