@@ -1,10 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [0.3.5] - 2021-01-24
 - Drop supported for Python 2, 3.4 and 3.5.
 - Migrate to pytest. Thanks to Paolo Stivanin
 - Add new exmples. Thanks to rybarczykj
-- mprove error messages. Thanks to Etienne Richart
+- Improve error messages. Thanks to Etienne Richart
+- Replace wcwidth with cwcwidth
 
 ## [0.3.4] - 2020-07-15
 - Prevent crash when embedding in situations including the lldb debugger. Thanks Nathan Lanza!
