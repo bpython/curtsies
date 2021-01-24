@@ -582,8 +582,8 @@ class FormatStringTest(unittest.TestCase):
         self.assertIsInstance(a, FSArray)
         self.assertIsInstance(b, FSArray)
         self.assertEqual(
-            (a.width, b.height),
-            (a.width, b.height),
+            (a.width, a.height),
+            (b.width, b.height),
             f"fsarray dimensions do not match: {a.shape} {b.shape}",
         )
         for i, (a_row, b_row) in enumerate(zip(a, b)):
