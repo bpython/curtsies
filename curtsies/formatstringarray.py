@@ -302,7 +302,7 @@ def assertFSArraysEqual(a, b):
     assert isinstance(a, FSArray)
     assert isinstance(b, FSArray)
     assert (
-        a.width == b.width and a.hight == b.hight
+        a.width == b.width and a.height == b.height
     ), f"fsarray dimensions do not match: {a.shape} {b.shape}"
     for i, (a_row, b_row) in enumerate(zip(a, b)):
         assert a_row == b_row, "FSArrays differ first on line {}:\n{}".format(
