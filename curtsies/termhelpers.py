@@ -6,7 +6,7 @@ import os
 from typing import IO, Type, List, Union, Optional
 from types import TracebackType
 
-_Attr = List[Union[int, List[bytes]]]
+_Attr = List[Union[int, List[Union[bytes, int]]]]
 
 
 class Nonblocking:
