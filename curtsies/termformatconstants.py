@@ -18,4 +18,4 @@ RESET_BG = 49
 
 def seq(num):
     # type: (int) -> str
-    return "[%sm" % num
+    return f"[{num}m"
