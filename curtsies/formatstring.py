@@ -121,12 +121,10 @@ class Chunk:
 
     def __init__(self, string, atts=None):
         # type: (Text, Mapping[str, Union[int, bool]]) -> None
-        if atts is None:
-            atts = {}
         if not isinstance(string, str):
             raise ValueError("unicode string required, got %r" % string)
         self._s = string  # type: Text
-        self._atts = FrozenDict(atts)
+        self._atts = FrozenDict(atts if atts else {})
 
     @property
     def s(self):
