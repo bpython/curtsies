@@ -212,7 +212,6 @@ class Input:
                     full=len(self.unprocessed_bytes) == 0,
                 )
                 if e is not None:
-                    current_bytes = []
                     return e
             if current_bytes:  # incomplete keys shouldn't happen
                 raise ValueError("Couldn't identify key sequence: %r" % current_bytes)
