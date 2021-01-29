@@ -447,7 +447,7 @@ class FmtStr:
         """Joins an iterable yielding strings or FmtStrs with self as separator"""
         before = []  # type: List[Chunk]
         chunks = []  # type: List[Chunk]
-        for i, s in enumerate(iterable):
+        for s in iterable:
             chunks.extend(before)
             before = self.chunks
             if isinstance(s, FmtStr):
