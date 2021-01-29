@@ -431,7 +431,7 @@ class FmtStr:
             new_components.extend(new_fs.chunks)
             inserted = True
 
-        return FmtStr(*[s for s in new_components if s.s])
+        return FmtStr(*(s for s in new_components if s.s))
 
     def append(self, string):
         # type: (Union[Text, FmtStr]) -> FmtStr
@@ -441,7 +441,7 @@ class FmtStr:
         # type: (**Union[bool, int]) -> FmtStr
         """Returns a new FmtStr with the same content but new formatting"""
 
-        result = FmtStr(*[Chunk(bfs.s, bfs.atts.extend(attributes)) for bfs in self.chunks])  # type: ignore
+        result = FmtStr(*(Chunk(bfs.s, bfs.atts.extend(attributes)) for bfs in self.chunks))  # type: ignore
         return result
 
     def join(self, iterable):
@@ -596,7 +596,7 @@ class FmtStr:
     def __mul__(self, other):
         # type: (int) -> FmtStr
         if isinstance(other, int):
-            return sum([self for _ in range(other)], FmtStr())
+            return sum((self for _ in range(other)), FmtStr())
         raise TypeError("Can't multiply those")
 
     # TODO ensure empty FmtStr isn't a problem
@@ -622,7 +622,7 @@ class FmtStr:
         # type: (*Text) -> FmtStr
         """Returns a new FmtStr with the same content but some attributes removed"""
 
-        result = FmtStr(*[Chunk(bfs.s, bfs.atts.remove(*attributes)) for bfs in self.chunks])  # type: ignore
+        result = FmtStr(*(Chunk(bfs.s, bfs.atts.remove(*attributes)) for bfs in self.chunks))  # type: ignore
         return result
 
     @no_type_check
