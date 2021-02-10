@@ -1,6 +1,7 @@
 """Events for keystrokes and other input events"""
 import codecs
 import encodings
+import itertools
 import sys
 from typing import Text, Optional, List, Union
 
@@ -80,7 +81,7 @@ for table in (CURSES_NAMES, CURTSIES_NAMES):
                 KEYMAP_PREFIXES.add(k[:i])
 
 MAX_KEYPRESS_SIZE = max(
-    len(seq) for seq in (list(CURSES_NAMES.keys()) + list(CURTSIES_NAMES.keys()))
+    len(seq) for seq in itertools.chain(CURSES_NAMES.keys(), CURTSIES_NAMES.keys())
 )
 
 
