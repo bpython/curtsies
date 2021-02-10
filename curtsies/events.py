@@ -1,11 +1,11 @@
 """Events for keystrokes and other input events"""
-import sys
-import encodings
 import codecs
+import encodings
+import sys
+from typing import Text, Optional, List, Union
 
 from .termhelpers import Termmode
-
-from typing import Text, Optional, List, Union
+from .curtsieskeys import CURTSIES_NAMES as special_curtsies_names
 
 chr_byte = lambda i: chr(i).encode("latin-1")
 chr_uni = chr
@@ -22,8 +22,6 @@ for i in range(0x00, 0x80):
     CURTSIES_NAMES[chr_byte(i + 0x80)] = "<Meta-%s>" % chr(i)
 for i in range(0x00, 0x1B):  # Overwrite the control keys with better labels
     CURTSIES_NAMES[chr_byte(i + 0x80)] = "<Meta-Ctrl-%s>" % chr(i + 0x40)
-
-from .curtsieskeys import CURTSIES_NAMES as special_curtsies_names
 
 CURTSIES_NAMES.update(special_curtsies_names)
 
