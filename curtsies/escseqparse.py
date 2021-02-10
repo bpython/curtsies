@@ -10,7 +10,6 @@ True
 """
 
 from typing import (
-    Text,
     List,
     Mapping,
     Union,
@@ -35,16 +34,14 @@ from .termformatconstants import (
 )
 
 
-Token = Dict[str, Union[Text, List[int]]]
+Token = Dict[str, Union[str, List[int]]]
 
 
-def remove_ansi(s):
-    # type: (Text) -> Text
+def remove_ansi(s: str) -> str:
     return re.sub(r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]", "", s)
 
 
-def parse(s):
-    # type: (Text) -> List[Union[Text, Dict[str, Union[str, bool, None]]]]
+def parse(s: str) -> List[Union[str, Dict[str, Union[str, bool, None]]]]:
     r"""
     Returns a list of strings or format dictionaries to describe the strings.
 
@@ -55,7 +52,7 @@ def parse(s):
     >>> parse("\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m")
     [{'fg': 'yellow'}, '[', {'fg': None}, {'fg': 'yellow'}, ']', {'fg': None}, {'fg': 'yellow'}, '[', {'fg': None}, {'fg': 'yellow'}, ']', {'fg': None}, {'fg': 'yellow'}, '[', {'fg': None}, {'fg': 'yellow'}, ']', {'fg': None}, {'fg': 'yellow'}, '[', {'fg': None}]
     """
-    stuff = []  # type: List[Union[Text, Dict[str, Union[str, bool, None]]]]
+    stuff = []  # type: List[Union[str, Dict[str, Union[str, bool, None]]]]
     rest = s
     while True:
         front, token, rest = peel_off_esc_code(rest)
@@ -76,8 +73,7 @@ def parse(s):
     return stuff
 
 
-def peel_off_esc_code(s):
-    # type: (Text) -> Tuple[Text, Optional[Token], Text]
+def peel_off_esc_code(s: str) -> Tuple[str, Optional[Token], str]:
     r"""Returns processed text, the next token, and unprocessed text
 
     >>> front, d, rest = peel_off_esc_code('some[2Astuff')
@@ -129,14 +125,12 @@ def peel_off_esc_code(s):
         return s, None, ""
 
 
-def token_type(info):
-    # type: (Token) -> Optional[List[Dict[Text, Union[Text, bool, None]]]]
-
+def token_type(info: Token) -> Optional[List[Dict[str, Union[str, bool, None]]]]:
     if info["command"] == "m":
         # The default action for ESC[m is to act like ESC[0m
         # Ref: https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
         values = cast(List[int], info["numbers"]) if len(info["numbers"]) else [0]
-        tokens = []  # type: List[Dict[str, Union[Text, bool, None]]]
+        tokens = []  # type: List[Dict[str, Union[str, bool, None]]]
         for value in values:
             if value in FG_NUMBER_TO_COLOR:
                 tokens.append({"fg": FG_NUMBER_TO_COLOR[value]})
