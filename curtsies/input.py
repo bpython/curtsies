@@ -31,17 +31,18 @@ def is_main_thread():
 
 
 class ReplacedSigIntHandler:
-    def __init__(self, handler):
-        # type: (Callable) -> None
+    def __init__(self, handler: Callable) -> None:
         self.handler = handler
 
-    def __enter__(self):
-        # type: () -> None
-        self.orig_sigint_handler = signal.getsignal(signal.SIGINT)
-        signal.signal(signal.SIGINT, self.handler)
+    def __enter__(self) -> None:
+        self.orig_sigint_handler = signal.signal(signal.SIGINT, self.handler)
 
-    def __exit__(self, type=None, value=None, traceback=None):
-        # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
+    def __exit__(
+        self,
+        type: Optional[Type[BaseException]] = None,
+        value: Optional[BaseException] = None,
+        traceback: Optional[TracebackType] = None,
+    ) -> None:
         signal.signal(signal.SIGINT, self.orig_sigint_handler)
 
 
