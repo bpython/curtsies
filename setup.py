@@ -1,7 +1,6 @@
 from setuptools import setup
 import ast
 import os
-import io
 
 
 def version():
@@ -12,39 +11,6 @@ def version():
                 return ast.parse(line).body[0].value.s
 
 
-def long_description():
-    with open("README.md", encoding="utf-8") as f:
-        return f.read()
-
-
 setup(
-    name="curtsies",
     version=version(),
-    description="Curses-like terminal wrapper, with colored strings!",
-    long_description=long_description(),
-    long_description_content_type="text/markdown",
-    url="https://github.com/bpython/curtsies",
-    author="Thomas Ballinger",
-    author_email="thomasballinger@gmail.com",
-    license="MIT",
-    packages=["curtsies"],
-    python_requires=">=3.6",
-    install_requires=[
-        "blessings>=1.5",
-        "cwcwidth",
-    ],
-    tests_require=[
-        "pyte",
-        "pytest",
-    ],
-    classifiers=[
-        "Development Status :: 3 - Alpha",
-        "Environment :: Console",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: POSIX",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-    ],
-    zip_safe=False,
 )
