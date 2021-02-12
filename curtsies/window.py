@@ -130,23 +130,9 @@ class BaseWindow:
             i += 1
         return arr
 
-    def fmtstr_to_stdout_xform(self):
-        # type: () -> Callable[[FmtStr], Text]
-        if sys.version_info[0] == 2:
-            if hasattr(self.out_stream, "encoding"):
-                encoding = self.out_stream.encoding
-            else:
-                encoding = locale.getpreferredencoding()
-
-            def for_stdout(s):
-                # type: (FmtStr) -> Text
-                return unicode(s).encode(encoding, "replace")
-
-        else:
-
-            def for_stdout(s):
-                # type: (FmtStr) -> Text
-                return str(s)
+    def fmtstr_to_stdout_xform(self) -> Callable[[FmtStr], str]:
+        def for_stdout(s: FmtStr) -> str:
+            return str(s)
 
         return for_stdout
 
