@@ -31,14 +31,14 @@ class Nonblocking:
         fcntl.fcntl(self.fd, fcntl.F_SETFL, self.orig_fl)
 
 
-class Cbreak:
-    def __init__(self, stream: IO) -> None:
+class Termmode:
+    def __init__(self, stream: IO, attrs: _Attr) -> None:
         self.stream = stream
+        self.attrs = attrs
 
-    def __enter__(self) -> Termmode:
+    def __enter__(self) -> None:
         self.original_stty = termios.tcgetattr(self.stream)
-        tty.setcbreak(self.stream, termios.TCSANOW)
-        return Termmode(self.stream, self.original_stty)
+        termios.tcsetattr(self.stream, termios.TCSANOW, self.attrs)
 
     def __exit__(
         self,
@@ -49,14 +49,14 @@ class Cbreak:
         termios.tcsetattr(self.stream, termios.TCSANOW, self.original_stty)
 
 
-class Termmode:
-    def __init__(self, stream: IO, attrs: _Attr) -> None:
+class Cbreak:
+    def __init__(self, stream: IO) -> None:
         self.stream = stream
-        self.attrs = attrs
 
-    def __enter__(self) -> None:
+    def __enter__(self) -> Termmode:
         self.original_stty = termios.tcgetattr(self.stream)
-        termios.tcsetattr(self.stream, termios.TCSANOW, self.attrs)
+        tty.setcbreak(self.stream, termios.TCSANOW)
+        return Termmode(self.stream, self.original_stty)
 
     def __exit__(
         self,

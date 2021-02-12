@@ -160,7 +160,7 @@ class FullscreenWindow(BaseWindow):
         super().__init__(out_stream=out_stream, hide_cursor=hide_cursor)
         self.fullscreen_ctx = self.t.fullscreen()
 
-    def __enter__(self) -> FullscreenWindow:
+    def __enter__(self) -> "FullscreenWindow":
         self.fullscreen_ctx.__enter__()
         return super().__enter__()
 
@@ -284,7 +284,7 @@ class CursorAwareWindow(BaseWindow):
         # in the cursor query code of cursor diff
         self.in_get_cursor_diff = False
 
-    def __enter__(self) -> CursorAwareWindow:
+    def __enter__(self) -> "CursorAwareWindow":
         self.cbreak.__enter__()
         self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row

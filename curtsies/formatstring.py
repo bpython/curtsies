@@ -86,10 +86,10 @@ class FrozenDict(dict):
     def update(self, *args, **kwds):
         raise Exception("Cannot change value.")
 
-    def extend(self, dictlike: Mapping[str, Union[int, bool]]) -> FrozenDict:
+    def extend(self, dictlike: Mapping[str, Union[int, bool]]) -> "FrozenDict":
         return FrozenDict(itertools.chain(self.items(), dictlike.items()))
 
-    def remove(self, *keys: str) -> FrozenDict:
+    def remove(self, *keys: str) -> "FrozenDict":
         return FrozenDict((k, v) for k, v in self.items() if k not in keys)
 
 
@@ -198,7 +198,7 @@ class Chunk:
             + ")" * len(atts_out)
         )
 
-    def splitter(self) -> ChunkSplitter:
+    def splitter(self) -> "ChunkSplitter":
         """
         Returns a view of this Chunk from which new Chunks can be requested.
         """
@@ -297,7 +297,7 @@ class FmtStr:
         self._width = None  # type: Optional[int]
 
     @classmethod
-    def from_str(cls, s: str) -> FmtStr:
+    def from_str(cls, s: str) -> "FmtStr":
         r"""
         Return a FmtStr representing input.
 
@@ -332,7 +332,7 @@ class FmtStr:
         else:
             return FmtStr(Chunk(s))
 
-    def copy_with_new_str(self, new_str: str) -> FmtStr:
+    def copy_with_new_str(self, new_str: str) -> "FmtStr":
         """Copies the current FmtStr's attributes while changing its string."""
         # What to do when there are multiple Chunks with conflicting atts?
         old_atts = {
@@ -340,13 +340,13 @@ class FmtStr:
         }
         return FmtStr(Chunk(new_str, old_atts))
 
-    def setitem(self, startindex: int, fs: Union[str, FmtStr]) -> FmtStr:
+    def setitem(self, startindex: int, fs: Union[str, "FmtStr"]) -> "FmtStr":
         """Shim for easily converting old __setitem__ calls"""
         return self.setslice_with_length(startindex, startindex + 1, fs, len(self))
 
     def setslice_with_length(
-        self, startindex: int, endindex: int, fs: Union[str, FmtStr], length: int
-    ) -> FmtStr:
+        self, startindex: int, endindex: int, fs: Union[str, "FmtStr"], length: int
+    ) -> "FmtStr":
         """Shim for easily converting old __setitem__ calls"""
         if len(self) < startindex:
             fs = " " * (startindex - len(self)) + fs
@@ -361,8 +361,8 @@ class FmtStr:
         return result
 
     def splice(
-        self, new_str: Union[str, FmtStr], start: int, end: Optional[int] = None
-    ) -> FmtStr:
+        self, new_str: Union[str, "FmtStr"], start: int, end: Optional[int] = None
+    ) -> "FmtStr":
         """Returns a new FmtStr with the input string spliced into the
         the original FmtStr at start and end.
         If end is provided, new_str will replace the substring self.s[start:end-1].
@@ -410,16 +410,16 @@ class FmtStr:
 
         return FmtStr(*(s for s in new_components if s.s))
 
-    def append(self, string: Union[str, FmtStr]) -> FmtStr:
+    def append(self, string: Union[str, "FmtStr"]) -> "FmtStr":
         return self.splice(string, len(self.s))
 
-    def copy_with_new_atts(self, **attributes: Union[bool, int]) -> FmtStr:
+    def copy_with_new_atts(self, **attributes: Union[bool, int]) -> "FmtStr":
         """Returns a new FmtStr with the same content but new formatting"""
 
         result = FmtStr(*(Chunk(bfs.s, bfs.atts.extend(attributes)) for bfs in self.chunks))  # type: ignore
         return result
 
-    def join(self, iterable: Iterable[Union[str, FmtStr]]) -> FmtStr:
+    def join(self, iterable: Iterable[Union[str, "FmtStr"]]) -> "FmtStr":
         """Joins an iterable yielding strings or FmtStrs with self as separator"""
         before = []  # type: List[Chunk]
         chunks = []  # type: List[Chunk]
@@ -440,7 +440,7 @@ class FmtStr:
         sep: Optional[str] = None,
         maxsplit: Optional[int] = None,
         regex: bool = False,
-    ) -> List[FmtStr]:
+    ) -> List["FmtStr"]:
         """Split based on separator, optionally using a regex.
 
         Capture groups are ignored in regex, the whole pattern is matched
@@ -461,7 +461,7 @@ class FmtStr:
             )
         ]
 
-    def splitlines(self, keepends: bool = False) -> List[FmtStr]:
+    def splitlines(self, keepends: bool = False) -> List["FmtStr"]:
         """Return a list of lines, split on newline characters,
         include line boundaries, if keepends is true."""
         lines = self.split("\n")
@@ -473,7 +473,7 @@ class FmtStr:
 
     # proxying to the string via __getattr__ is insufficient
     # because we shouldn't drop foreground or formatting info
-    def ljust(self, width: int, fillchar: Optional[str] = None) -> FmtStr:
+    def ljust(self, width: int, fillchar: Optional[str] = None) -> "FmtStr":
         """S.ljust(width[, fillchar]) -> string
 
         If a fillchar is provided, less formatting information will be preserved
@@ -488,7 +488,7 @@ class FmtStr:
             uniform = self.new_with_atts_removed("bg")
             return uniform + fmtstr(to_add, **self.shared_atts) if to_add else uniform
 
-    def rjust(self, width: int, fillchar: Optional[str] = None) -> FmtStr:
+    def rjust(self, width: int, fillchar: Optional[str] = None) -> "FmtStr":
         """S.rjust(width[, fillchar]) -> string
 
         If a fillchar is provided, less formatting information will be preserved
@@ -543,7 +543,7 @@ class FmtStr:
     def __hash__(self) -> int:
         return hash(str(self))
 
-    def __add__(self, other: Union[FmtStr, str]) -> FmtStr:
+    def __add__(self, other: Union["FmtStr", str]) -> "FmtStr":
         if isinstance(other, FmtStr):
             return FmtStr(*(self.chunks + other.chunks))
         elif isinstance(other, (bytes, str)):
@@ -551,7 +551,7 @@ class FmtStr:
         else:
             raise TypeError(f"Can't add {self!r} and {other!r}")
 
-    def __radd__(self, other: Union[FmtStr, str]) -> FmtStr:
+    def __radd__(self, other: Union["FmtStr", str]) -> "FmtStr":
         if isinstance(other, FmtStr):
             return FmtStr(*(x for x in (other.chunks + self.chunks)))
         elif isinstance(other, (bytes, str)):
@@ -559,7 +559,7 @@ class FmtStr:
         else:
             raise TypeError("Can't add those")
 
-    def __mul__(self, other: int) -> FmtStr:
+    def __mul__(self, other: int) -> "FmtStr":
         if isinstance(other, int):
             return sum((self for _ in range(other)), FmtStr())
         raise TypeError("Can't multiply those")
@@ -582,7 +582,7 @@ class FmtStr:
                 atts[att] = first.atts[att]
         return atts
 
-    def new_with_atts_removed(self, *attributes: str) -> FmtStr:
+    def new_with_atts_removed(self, *attributes: str) -> "FmtStr":
         """Returns a new FmtStr with the same content but some attributes removed"""
 
         result = FmtStr(*(Chunk(bfs.s, bfs.atts.remove(*attributes)) for bfs in self.chunks))  # type: ignore
@@ -621,7 +621,7 @@ class FmtStr:
         self._s = "".join(fs.s for fs in self.chunks)
         return self._s
 
-    def __getitem__(self, index: Union[int, slice]) -> FmtStr:
+    def __getitem__(self, index: Union[int, slice]) -> "FmtStr":
         index = normalize_slice(len(self), index)
         counter = 0
         parts = []
@@ -641,7 +641,7 @@ class FmtStr:
                 break
         return FmtStr(*parts) if parts else fmtstr("")
 
-    def width_aware_slice(self, index: Union[int, slice]) -> FmtStr:
+    def width_aware_slice(self, index: Union[int, slice]) -> "FmtStr":
         """Slice based on the number of columns it would take to display the substring."""
         if wcswidth(self.s) == -1:
             raise ValueError("bad values for width aware slicing")
@@ -664,7 +664,7 @@ class FmtStr:
                 break
         return FmtStr(*parts) if parts else fmtstr("")
 
-    def width_aware_splitlines(self, columns: int) -> Iterator[FmtStr]:
+    def width_aware_splitlines(self, columns: int) -> Iterator["FmtStr"]:
         """Split into lines, pushing doublewidth characters at the end of a line to the next line.
 
         When a double-width character is pushed to the next line, a space is added to pad out the line.
@@ -675,7 +675,7 @@ class FmtStr:
             raise ValueError("bad values for width aware slicing")
         return self._width_aware_splitlines(columns)
 
-    def _width_aware_splitlines(self, columns: int) -> Iterator[FmtStr]:
+    def _width_aware_splitlines(self, columns: int) -> Iterator["FmtStr"]:
         splitter = self.chunks[0].splitter()
         chunks_of_line = []
         width_of_line = 0
@@ -697,7 +697,7 @@ class FmtStr:
         if chunks_of_line:
             yield FmtStr(*chunks_of_line)
 
-    def _getitem_normalized(self, index: Union[int, slice]) -> FmtStr:
+    def _getitem_normalized(self, index: Union[int, slice]) -> "FmtStr":
         """Builds the more compact fmtstrs by using fromstr( of the control sequences)"""
         index = normalize_slice(len(self), index)
         counter = 0
@@ -715,7 +715,7 @@ class FmtStr:
     def __setitem__(self, index: int, value: Any) -> None:
         raise Exception("No!")
 
-    def copy(self) -> FmtStr:
+    def copy(self) -> "FmtStr":
         return FmtStr(*self.chunks)
 
 
