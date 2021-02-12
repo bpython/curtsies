@@ -175,18 +175,18 @@ class FullscreenWindow(BaseWindow):
             out_stream (file): Defaults to sys.__stdout__
             hide_cursor (bool): Hides cursor while in context
         """
-        BaseWindow.__init__(self, out_stream=out_stream, hide_cursor=hide_cursor)
+        super().__init__(out_stream=out_stream, hide_cursor=hide_cursor)
         self.fullscreen_ctx = self.t.fullscreen()
 
     def __enter__(self):
         # type: () -> FullscreenWindow
         self.fullscreen_ctx.__enter__()
-        return BaseWindow.__enter__(self)
+        return super().__enter__()
 
     def __exit__(self, type, value, traceback):
         # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
         self.fullscreen_ctx.__exit__(type, value, traceback)
-        BaseWindow.__exit__(self, type, value, traceback)
+        super().__exit__(type, value, traceback)
 
     def render_to_terminal(self, array, cursor_pos=(0, 0)):
         # type: (Union[FSArray, List[FmtStr]], Tuple[int, int]) -> None
@@ -283,7 +283,7 @@ class CursorAwareWindow(BaseWindow):
                 bytes inadvertently read in get_cursor_position(). If not
                 provided, a ValueError will be raised when this occurs.
         """
-        BaseWindow.__init__(self, out_stream=out_stream, hide_cursor=hide_cursor)
+        super().__init__(out_stream=out_stream, hide_cursor=hide_cursor)
         if in_stream is None:
             in_stream = sys.__stdin__
         self.in_stream = in_stream
@@ -305,7 +305,7 @@ class CursorAwareWindow(BaseWindow):
         self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
         logger.debug("initial top_usable_row: %d" % self.top_usable_row)
-        return BaseWindow.__enter__(self)
+        return super().__enter__()
 
     def __exit__(self, type, value, traceback):
         # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
@@ -317,7 +317,7 @@ class CursorAwareWindow(BaseWindow):
         self.write(self.t.clear_eos)
         self.write(self.t.clear_eol)
         self.cbreak.__exit__(type, value, traceback)
-        BaseWindow.__exit__(self, type, value, traceback)
+        super().__exit__(type, value, traceback)
 
     def get_cursor_position(self):
         # type: () -> Tuple[int, int]
