@@ -39,7 +39,6 @@ from typing import (
     no_type_check,
 )
 
-actualize = str
 logger = logging.getLogger(__name__)
 
 # TODO check that strings used in arrays don't have tabs or spaces in them!
@@ -266,11 +265,11 @@ class FSArray(Sequence):
                     a_char_for_eval = a_char
                     b_char_for_eval = b_char
                 if a_char_for_eval == b_char_for_eval:
-                    a_line += actualize(a_char)
-                    b_line += actualize(b_char)
+                    a_line += str(a_char)
+                    b_line += str(b_char)
                 else:
-                    a_line += underline(blink(actualize(a_char)))
-                    b_line += underline(blink(actualize(b_char)))
+                    a_line += underline(blink(str(a_char)))
+                    b_line += underline(blink(str(b_char)))
             a_rows.append(a_line)
             b_rows.append(b_line)
         hdiff = "\n".join(
@@ -283,7 +282,7 @@ class FSArray(Sequence):
 
 
 def simple_format(x: Union[FSArray, List[FmtStr]]) -> str:
-    return "\n".join(actualize(l) for l in x)
+    return "\n".join(str(l) for l in x)
 
 
 def assertFSArraysEqual(a: FSArray, b: FSArray) -> None:
