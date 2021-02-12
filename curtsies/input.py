@@ -1,14 +1,13 @@
 import locale
+import logging
 import os
-import signal
 import select
+import signal
 import sys
 import termios
 import threading
 import time
 import tty
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +15,7 @@ logger = logging.getLogger(__name__)
 from .termhelpers import Nonblocking
 from . import events
 
-from typing import Callable, Type, TextIO, Optional, List, Union, Text, cast, Tuple, Any
+from typing import Callable, Type, TextIO, Optional, List, Union, cast, Tuple, Any
 from types import TracebackType, FrameType
 
 READ_SIZE = 1024
@@ -25,8 +24,7 @@ assert READ_SIZE >= events.MAX_KEYPRESS_SIZE
 # the paste logic that reads more data as needed might not work.
 
 
-def is_main_thread():
-    # type: () -> bool
+def is_main_thread() -> bool:
     return threading.current_thread() == threading.main_thread()
 
 
@@ -51,14 +49,13 @@ class Input:
 
     def __init__(
         self,
-        in_stream=None,
-        keynames="curtsies",
-        paste_threshold=events.MAX_KEYPRESS_SIZE + 1,
-        sigint_event=False,
-        signint_callback_provider=None,
-        disable_terminal_start_stop=False,
-    ):
-        # type: (TextIO, str, int, bool, None, bool) -> None
+        in_stream: Optional[TextIO] = None,
+        keynames: str = "curtsies",
+        paste_threshold: int = events.MAX_KEYPRESS_SIZE + 1,
+        sigint_event: bool = False,
+        signint_callback_provider: Optional[Any] = None,
+        disable_terminal_start_stop: bool = False,
+    ) -> None:
         """Returns an Input instance.
 
         Args:
@@ -87,19 +84,17 @@ class Input:
         self.sigints = []  # type: List[events.SigIntEvent]
 
         self.readers = []  # type: List[int]
-        self.queued_interrupting_events = []  # type: List[Union[events.Event, Text]]
+        self.queued_interrupting_events = []  # type: List[Union[events.Event, str]]
         self.queued_events = []  # type: List[events.Event]
         self.queued_scheduled_events = (
             []
         )  # type: List[Tuple[float, events.ScheduledEvent]]
 
     # prospective: this could be useful for an external select loop
-    def fileno(self):
-        # type: () -> int
+    def fileno(self) -> int:
         return self.in_stream.fileno()
 
-    def __enter__(self):
-        # type: () -> Input
+    def __enter__(self) -> Input:
         self.original_stty = termios.tcgetattr(self.in_stream)
         tty.setcbreak(self.in_stream, termios.TCSANOW)
 
@@ -122,8 +117,12 @@ class Input:
             signal.signal(signal.SIGINT, self.sigint_handler)
         return self
 
-    def __exit__(self, type=None, value=None, traceback=None):
-        # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
+    def __exit__(
+        self,
+        type: Optional[Type[BaseException]] = None,
+        value: Optional[BaseException] = None,
+        traceback: Optional[TracebackType] = None,
+    ) -> None:
         if (
             self.sigint_event
             and is_main_thread()
@@ -132,20 +131,18 @@ class Input:
             signal.signal(signal.SIGINT, self.orig_sigint_handler)
         termios.tcsetattr(self.in_stream, termios.TCSANOW, self.original_stty)
 
-    def sigint_handler(self, signum, frame):
-        # type: (Union[signal.Signals, int], FrameType) -> None
+    def sigint_handler(
+        self, signum: Union[signal.Signals, int], frame: FrameType
+    ) -> None:
         self.sigints.append(events.SigIntEvent())
 
-    def __iter__(self):
-        # type: () -> Input
+    def __iter__(self) -> Input:
         return self
 
-    def __next__(self):
-        # type: () -> Union[None, Text, events.Event]
+    def __next__(self) -> Union[None, str, events.Event]:
         return self.send(None)
 
-    def unget_bytes(self, string):
-        # type: (bytes) -> None
+    def unget_bytes(self, string: bytes) -> None:
         """Adds bytes to be internal buffer to be read
 
         This method is for reporting bytes from an in_stream read
@@ -153,8 +150,9 @@ class Input:
 
         self.unprocessed_bytes.extend(string[i : i + 1] for i in range(len(string)))
 
-    def _wait_for_read_ready_or_timeout(self, timeout):
-        # type: (Union[float, int, None]) -> Tuple[bool, Optional[Union[events.Event, Text]]]
+    def _wait_for_read_ready_or_timeout(
+        self, timeout: Union[float, int, None]
+    ) -> Tuple[bool, Optional[Union[events.Event, str]]]:
         """Returns tuple of whether stdin is ready to read and an event.
 
         If an event is returned, that event is more pressing than reading
@@ -189,8 +187,9 @@ class Input:
                 if remaining_timeout is not None:
                     remaining_timeout = max(remaining_timeout - (time.time() - t0), 0)
 
-    def send(self, timeout=None):
-        # type: (Union[float, int, None]) -> Union[None, Text, events.Event]
+    def send(
+        self, timeout: Optional[Union[float, int, None]] = None
+    ) -> Union[None, str, events.Event]:
         """Returns an event or None if no events occur before timeout."""
         if self.sigint_event and is_main_thread():
             with ReplacedSigIntHandler(self.sigint_handler):
@@ -198,10 +197,8 @@ class Input:
         else:
             return self._send(timeout)
 
-    def _send(self, timeout):
-        # type: (Union[float, int, None]) -> Union[None, Text, events.Event]
-        def find_key():
-            # type: () -> Optional[Text]
+    def _send(self, timeout: Union[float, int, None]) -> Union[None, str, events.Event]:
+        def find_key() -> Optional[str]:
             """Returns keypress identified by adding unprocessed bytes or None"""
             current_bytes = []
             while self.unprocessed_bytes:
@@ -301,34 +298,31 @@ class Input:
             else:
                 return 0
 
-    def event_trigger(self, event_type):
-        # type: (Type[events.Event]) -> Callable
+    def event_trigger(self, event_type: Type[events.Event]) -> Callable:
         """Returns a callback that creates events.
 
         Returned callback function will add an event of type event_type
         to a queue which will be checked the next time an event is requested."""
 
-        def callback(**kwargs):
-            # type: (**Any) -> None
+        def callback(**kwargs: Any) -> None:
             self.queued_events.append(event_type(**kwargs))  # type: ignore
 
         return callback
 
-    def scheduled_event_trigger(self, event_type):
-        # type: (Type[events.ScheduledEvent]) -> Callable
+    def scheduled_event_trigger(
+        self, event_type: Type[events.ScheduledEvent]
+    ) -> Callable:
         """Returns a callback that schedules events for the future.
 
         Returned callback function will add an event of type event_type
         to a queue which will be checked the next time an event is requested."""
 
-        def callback(when):
-            # type: (float) -> None
+        def callback(when: float) -> None:
             self.queued_scheduled_events.append((when, event_type(when=when)))
 
         return callback
 
-    def threadsafe_event_trigger(self, event_type):
-        # type: (Type[events.Event]) -> Callable
+    def threadsafe_event_trigger(self, event_type: Type[events.Event]) -> Callable:
         """Returns a callback to creates events, interrupting current event requests.
 
         Returned callback function will create an event of type event_type
@@ -338,8 +332,7 @@ class Input:
         readfd, writefd = os.pipe()
         self.readers.append(readfd)
 
-        def callback(**kwargs):
-            # type: (**Any) -> None
+        def callback(**kwargs: Any) -> None:
             # TODO use a threadsafe queue for this
             self.queued_interrupting_events.append(event_type(**kwargs))  # type: ignore
             logger.debug(
@@ -350,8 +343,7 @@ class Input:
         return callback
 
 
-def getpreferredencoding():
-    # type: () -> str
+def getpreferredencoding() -> str:
     return locale.getpreferredencoding() or sys.getdefaultencoding()
 
 

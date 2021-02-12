@@ -20,6 +20,5 @@ RESET_FG = 39
 RESET_BG = 49
 
 
-def seq(num):
-    # type: (int) -> str
+def seq(num: int) -> str:
     return f"[{num}m"

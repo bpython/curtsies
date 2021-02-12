@@ -31,7 +31,6 @@ from .formatstring import FmtStr
 from typing import (
     Any,
     Union,
-    Text,
     List,
     Sequence,
     overload,
@@ -46,13 +45,11 @@ logger = logging.getLogger(__name__)
 # TODO check that strings used in arrays don't have tabs or spaces in them!
 
 
-def slicesize(s):
-    # type: (slice) -> int
+def slicesize(s: slice) -> int:
     return int((s.stop - s.start) / (s.step if s.step else 1))
 
 
-def fsarray(strings, *args, **kwargs):
-    # type: (List[Union[FmtStr, Text]], *Any, **Any) -> FSArray
+def fsarray(strings: List[Union[FmtStr, str]], *args: Any, **kwargs: Any) -> FSArray:
     """fsarray(list_of_FmtStrs_or_strings, width=None) -> FSArray
 
     Returns a new FSArray of width of the maximum size of the provided
@@ -86,8 +83,9 @@ class FSArray(Sequence):
     Internally represented by a list of FmtStrs of identical size."""
 
     # TODO add constructor that takes fmtstrs instead of dims
-    def __init__(self, num_rows, num_columns, *args, **kwargs):
-        # type: (int, int, *Any, **Any) -> None
+    def __init__(
+        self, num_rows: int, num_columns: int, *args: Any, **kwargs: Any
+    ) -> None:
         self.saved_args, self.saved_kwargs = args, kwargs
         self.rows = [
             fmtstr("", *args, **kwargs) for _ in range(num_rows)
@@ -95,22 +93,22 @@ class FSArray(Sequence):
         self.num_columns = num_columns
 
     @overload
-    def __getitem__(self, slicetuple):
-        # type: (int) -> FmtStr
+    def __getitem__(self, slicetuple: int) -> FmtStr:
         pass
 
     @overload
-    def __getitem__(self, slicetuple):
-        # type: (slice) -> List[FmtStr]
+    def __getitem__(self, slicetuple: slice) -> List[FmtStr]:
         pass
 
     @overload
-    def __getitem__(self, slicetuple):
-        # type: (Tuple[Union[slice, int], Union[slice, int]]) -> List[FmtStr]
+    def __getitem__(
+        self, slicetuple: Tuple[Union[slice, int], Union[slice, int]]
+    ) -> List[FmtStr]:
         pass
 
-    def __getitem__(self, slicetuple):
-        # type: (Union[int, slice, Tuple[Union[int, slice], Union[int, slice]]]) -> Union[FmtStr, List[FmtStr]]
+    def __getitem__(
+        self, slicetuple: Union[int, slice, Tuple[Union[int, slice], Union[int, slice]]]
+    ) -> Union[FmtStr, List[FmtStr]]:
         if isinstance(slicetuple, int):
             if slicetuple < 0:
                 slicetuple = len(self.rows) - slicetuple
@@ -129,25 +127,21 @@ class FSArray(Sequence):
         # TODO clean up slices
         return [fs[colslice] for fs in self.rows[rowslice]]
 
-    def __len__(self):
-        # type: () -> int
+    def __len__(self) -> int:
         return len(self.rows)
 
     @property
-    def shape(self):
-        # type: () -> Tuple[int, int]
+    def shape(self) -> Tuple[int, int]:
         """Tuple of (len(rows, len(num_columns)) numpy-style shape"""
         return len(self.rows), self.num_columns
 
     @property
-    def height(self):
-        # type: () -> int
+    def height(self) -> int:
         """The number of rows"""
         return len(self.rows)
 
     @property
-    def width(self):
-        # type: () -> int
+    def width(self) -> int:
         """The number of columns"""
         return self.num_columns
 
@@ -237,23 +231,19 @@ class FSArray(Sequence):
             + self.rows[rowslice.stop :]
         )
 
-    def dumb_display(self):
-        # type: () -> None
+    def dumb_display(self) -> None:
         """Prints each row followed by a newline without regard for the terminal window size"""
         for line in self.rows:
             print(line)
 
     @classmethod
-    def diff(cls, a, b, ignore_formatting=False):
-        # type: (FSArray, FSArray, bool) -> Text
+    def diff(cls, a: FSArray, b: FSArray, ignore_formatting: bool = False) -> str:
         """Returns two FSArrays with differences underlined"""
 
-        def underline(x):
-            # type: (Text) -> Text
+        def underline(x: str) -> str:
             return f"\x1b[4m{x}\x1b[0m"
 
-        def blink(x):
-            # type: (Text) -> Text
+        def blink(x: str) -> str:
             return f"\x1b[5m{x}\x1b[0m"
 
         a_rows = []
@@ -292,13 +282,11 @@ class FSArray(Sequence):
         return hdiff
 
 
-def simple_format(x):
-    # type: (Union[FSArray, List[FmtStr]]) -> Text
+def simple_format(x: Union[FSArray, List[FmtStr]]) -> str:
     return "\n".join(actualize(l) for l in x)
 
 
-def assertFSArraysEqual(a, b):
-    # type: (FSArray, FSArray) -> None
+def assertFSArraysEqual(a: FSArray, b: FSArray) -> None:
     assert isinstance(a, FSArray)
     assert isinstance(b, FSArray)
     assert (
@@ -310,8 +298,7 @@ def assertFSArraysEqual(a, b):
         )
 
 
-def assertFSArraysEqualIgnoringFormatting(a, b):
-    # type: (FSArray, FSArray) -> None
+def assertFSArraysEqualIgnoringFormatting(a: FSArray, b: FSArray) -> None:
     """Also accepts arrays of strings"""
     assert len(a) == len(b), "fsarray heights do not match: %s %s \n%s \n%s" % (
         len(a),

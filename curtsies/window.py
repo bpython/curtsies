@@ -4,7 +4,6 @@
 
 from typing import (
     Optional,
-    Text,
     IO,
     Dict,
     Generic,
@@ -12,7 +11,6 @@ from typing import (
     Type,
     Tuple,
     Callable,
-    Any,
     ByteString,
     cast,
     TextIO,
@@ -42,8 +40,9 @@ T = TypeVar("T", bound="BaseWindow")
 
 
 class BaseWindow:
-    def __init__(self, out_stream=None, hide_cursor=True):
-        # type: (IO, bool) -> None
+    def __init__(
+        self, out_stream: Optional[IO] = None, hide_cursor: bool = True
+    ) -> None:
         logger.debug("-------initializing Window object %r------" % self)
         if out_stream is None:
             out_stream = sys.__stdout__
@@ -54,70 +53,66 @@ class BaseWindow:
         self._last_rendered_width = None  # type: Optional[int]
         self._last_rendered_height = None  # type: Optional[int]
 
-    def scroll_down(self):
-        # type: () -> None
+    def scroll_down(self) -> None:
         logger.debug("sending scroll down message w/ cursor on bottom line")
 
         # since scroll-down only moves the screen if cursor is at bottom
         with self.t.location(x=0, y=1000000):
             self.write(SCROLL_DOWN)  # TODO will blessings do this?
 
-    def write(self, msg):
-        # type: (Text) -> None
+    def write(self, msg: str) -> None:
         self.out_stream.write(msg)
         self.out_stream.flush()
 
-    def __enter__(self):
-        # type: (T) -> T
+    def __enter__(self: T) -> T:
         logger.debug("running BaseWindow.__enter__")
         if self.hide_cursor:
             self.write(self.t.hide_cursor)
         return self
 
-    def __exit__(self, type, value, traceback):
-        # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
+    def __exit__(
+        self,
+        type: Optional[Type[BaseException]] = None,
+        value: Optional[BaseException] = None,
+        traceback: Optional[TracebackType] = None,
+    ) -> None:
         logger.debug("running BaseWindow.__exit__")
         if self.hide_cursor:
             self.write(self.t.normal_cursor)
 
-    def on_terminal_size_change(self, height, width):
-        # type: (int, int) -> None
+    def on_terminal_size_change(self, height: int, width: int) -> None:
         # Changing the terminal size breaks the cache, because it
         # is unknown how the window size change affected scrolling / the cursor
         self._last_lines_by_row = {}
         self._last_rendered_width = width
         self._last_rendered_height = height
 
-    def render_to_terminal(self, array, cursor_pos=(0, 0)):
-        # type: (Union[FSArray, List[FmtStr]], Tuple[int, int]) -> Optional[int]
+    def render_to_terminal(
+        self, array: Union[FSArray, List[FmtStr]], cursor_pos: Tuple[int, int] = (0, 0)
+    ) -> Optional[int]:
         raise NotImplementedError
 
-    def get_term_hw(self):
-        # type: () -> Tuple[int, int]
+    def get_term_hw(self) -> Tuple[int, int]:
         """Returns current terminal height and width"""
         return self.t.height, self.t.width
 
     @property
-    def width(self):
-        # type: () -> int
+    def width(self) -> int:
         "The current width of the terminal window"
         return self.t.width
 
     @property
-    def height(self):
-        # type: () -> int
+    def height(self) -> int:
         "The current width of the terminal window"
         return self.t.height
 
-    def array_from_text(self, msg):
-        # type: (Text) -> FSArray
+    def array_from_text(self, msg: str) -> FSArray:
         """Returns a FSArray of the size of the window containing msg"""
         rows, columns = self.t.height, self.t.width
         return self.array_from_text_rc(msg, rows, columns)
 
     @classmethod
-    def array_from_text_rc(cls, msg, rows, columns):
-        # type: (Text, int, int) -> FSArray
+    def array_from_text_rc(cls, msg: str, rows: int, columns: int) -> FSArray:
         arr = FSArray(0, columns)
         i = 0
         for c in msg:
@@ -153,8 +148,9 @@ class FullscreenWindow(BaseWindow):
         its out_stream; cached writes will be inaccurate.
     """
 
-    def __init__(self, out_stream=None, hide_cursor=True):
-        # type: (IO, bool) -> None
+    def __init__(
+        self, out_stream: Optional[IO] = None, hide_cursor: bool = True
+    ) -> None:
         """Constructs a FullscreenWindow
 
         Args:
@@ -164,18 +160,22 @@ class FullscreenWindow(BaseWindow):
         super().__init__(out_stream=out_stream, hide_cursor=hide_cursor)
         self.fullscreen_ctx = self.t.fullscreen()
 
-    def __enter__(self):
-        # type: () -> FullscreenWindow
+    def __enter__(self) -> FullscreenWindow:
         self.fullscreen_ctx.__enter__()
         return super().__enter__()
 
-    def __exit__(self, type, value, traceback):
-        # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
+    def __exit__(
+        self,
+        type: Optional[Type[BaseException]] = None,
+        value: Optional[BaseException] = None,
+        traceback: Optional[TracebackType] = None,
+    ) -> None:
         self.fullscreen_ctx.__exit__(type, value, traceback)
         super().__exit__(type, value, traceback)
 
-    def render_to_terminal(self, array, cursor_pos=(0, 0)):
-        # type: (Union[FSArray, List[FmtStr]], Tuple[int, int]) -> None
+    def render_to_terminal(
+        self, array: Union[FSArray, List[FmtStr]], cursor_pos: Tuple[int, int] = (0, 0)
+    ) -> None:
         """Renders array to terminal and places (0-indexed) cursor
 
         Args:
@@ -250,13 +250,12 @@ class CursorAwareWindow(BaseWindow):
 
     def __init__(
         self,
-        out_stream=None,
-        in_stream=None,
-        keep_last_line=False,
-        hide_cursor=True,
-        extra_bytes_callback=None,
+        out_stream: Optional[IO] = None,
+        in_stream: Optional[IO] = None,
+        keep_last_line: bool = False,
+        hide_cursor: bool = True,
+        extra_bytes_callback: Optional[Callable[[ByteString], None]] = None,
     ):
-        # type: (IO, IO, bool, bool, Callable[[ByteString], None]) -> None
         """Constructs a CursorAwareWindow
 
         Args:
@@ -285,16 +284,19 @@ class CursorAwareWindow(BaseWindow):
         # in the cursor query code of cursor diff
         self.in_get_cursor_diff = False
 
-    def __enter__(self):
-        # type: () -> CursorAwareWindow
+    def __enter__(self) -> CursorAwareWindow:
         self.cbreak.__enter__()
         self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
         logger.debug("initial top_usable_row: %d" % self.top_usable_row)
         return super().__enter__()
 
-    def __exit__(self, type, value, traceback):
-        # type: (Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]) -> None
+    def __exit__(
+        self,
+        type: Optional[Type[BaseException]] = None,
+        value: Optional[BaseException] = None,
+        traceback: Optional[TracebackType] = None,
+    ) -> None:
         if self.keep_last_line:
             # just moves cursor down if not on last line
             self.write(SCROLL_DOWN)
@@ -305,8 +307,7 @@ class CursorAwareWindow(BaseWindow):
         self.cbreak.__exit__(type, value, traceback)
         super().__exit__(type, value, traceback)
 
-    def get_cursor_position(self):
-        # type: () -> Tuple[int, int]
+    def get_cursor_position(self) -> Tuple[int, int]:
         """Returns the terminal (row, column) of the cursor
 
         0-indexed, like blessings cursor positions"""
@@ -316,8 +317,7 @@ class CursorAwareWindow(BaseWindow):
         query_cursor_position = "\x1b[6n"
         self.write(query_cursor_position)
 
-        def retrying_read():
-            # type: () -> str
+        def retrying_read() -> str:
             while True:
                 try:
                     c = in_stream.read(1)
@@ -368,8 +368,7 @@ class CursorAwareWindow(BaseWindow):
                         )
                 return (row - 1, col - 1)
 
-    def get_cursor_vertical_diff(self):
-        # type: () -> int
+    def get_cursor_vertical_diff(self) -> int:
         """Returns the how far down the cursor moved since last render.
 
         Note:
@@ -398,8 +397,7 @@ class CursorAwareWindow(BaseWindow):
             if not self.another_sigwinch:
                 return cursor_dy
 
-    def _get_cursor_vertical_diff_once(self):
-        # type: () -> int
+    def _get_cursor_vertical_diff_once(self) -> int:
         """Returns the how far down the cursor moved."""
         old_top_usable_row = self.top_usable_row
         row, col = self.get_cursor_position()
@@ -423,8 +421,9 @@ class CursorAwareWindow(BaseWindow):
         self._last_cursor_row = row
         return cursor_dy
 
-    def render_to_terminal(self, array, cursor_pos=(0, 0)):
-        # type: (Union[FSArray, List[FmtStr]], Tuple[int, int]) -> int
+    def render_to_terminal(
+        self, array: Union[FSArray, List[FmtStr]], cursor_pos: Tuple[int, int] = (0, 0)
+    ) -> int:
         """Renders array to terminal, returns the number of lines scrolled offscreen
 
         Returns:
@@ -509,8 +508,7 @@ class CursorAwareWindow(BaseWindow):
         return offscreen_scrolls
 
 
-def demo():
-    # type: () -> None
+def demo() -> None:
     handler = logging.FileHandler(filename="display.log")
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(__name__).addHandler(handler)
@@ -520,7 +518,7 @@ def demo():
         with input.Input(sys.stdin) as input_generator:
             rows, columns = w.t.height, w.t.width
             for c in input_generator:
-                assert isinstance(c, Text)
+                assert isinstance(c, str)
                 if c == "":
                     sys.exit()  # same as raise SystemExit()
                 elif c == "h":
@@ -550,8 +548,7 @@ def demo():
                 w.render_to_terminal(a)
 
 
-def main():
-    # type: () -> None
+def main() -> None:
     handler = logging.FileHandler(filename="display.log")
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(__name__).addHandler(handler)

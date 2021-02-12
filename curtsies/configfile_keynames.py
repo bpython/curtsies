@@ -14,8 +14,7 @@ SPECIALS = {
 class KeyMap:
     """Maps config file key syntax to Curtsies names"""
 
-    def __getitem__(self, key):
-        # type: (str) -> Tuple[str, ...]
+    def __getitem__(self, key: str) -> Tuple[str, ...]:
         if not key:  # Unbound key
             return ()
         elif key in SPECIALS:

@@ -3,7 +3,7 @@ import codecs
 import encodings
 import itertools
 import sys
-from typing import Text, Optional, List, Union
+from typing import Optional, List, Union
 
 from .termhelpers import Termmode
 from .curtsieskeys import CURTSIES_NAMES as special_curtsies_names
@@ -94,14 +94,14 @@ class ScheduledEvent(Event):
     Custom events that occur at a specific time in the future should
     be subclassed from ScheduledEvent."""
 
-    def __init__(self, when):
-        # type: (float) -> None
+    def __init__(self, when: float) -> None:
         self.when = when
 
 
 class WindowChangeEvent(Event):
-    def __init__(self, rows, columns, cursor_dy=None):
-        # type: (int, int, int) -> None
+    def __init__(
+        self, rows: int, columns: int, cursor_dy: Optional[int] = None
+    ) -> None:
         self.rows = rows
         self.columns = columns
         self.cursor_dy = cursor_dy
@@ -109,8 +109,7 @@ class WindowChangeEvent(Event):
     x = width = property(lambda self: self.columns)
     y = height = property(lambda self: self.rows)
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return "<WindowChangeEvent (%d, %d)%s>" % (
             self.rows,
             self.columns,
@@ -118,21 +117,18 @@ class WindowChangeEvent(Event):
         )
 
     @property
-    def name(self):
-        # type: () -> str
+    def name(self) -> str:
         return "<WindowChangeEvent>"
 
 
 class SigIntEvent(Event):
     """Event signifying a SIGINT"""
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return "<SigInt Event>"
 
     @property
-    def name(self):
-        # type: () -> str
+    def name(self) -> str:
         return repr(self)
 
 
@@ -142,22 +138,18 @@ class PasteEvent(Event):
     The events attribute contains a list of keypress event strings.
     """
 
-    def __init__(self):
-        # type: () -> None
+    def __init__(self) -> None:
         self.events = []  # type: List[Union[Event, str]]
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return "<Paste Event with data: %r>" % self.events
 
     @property
-    def name(self):
-        # type: () -> str
+    def name(self) -> str:
         return repr(self)
 
 
-def decodable(seq, encoding):
-    # type: (bytes, str) -> bool
+def decodable(seq: bytes, encoding: str) -> bool:
     try:
         u = seq.decode(encoding)
     except UnicodeDecodeError:
@@ -166,8 +158,9 @@ def decodable(seq, encoding):
         return True
 
 
-def get_key(bytes_, encoding, keynames="curtsies", full=False):
-    # type: (List[bytes], str, str, bool) -> Optional[Text]
+def get_key(
+    bytes_: List[bytes], encoding: str, keynames: str = "curtsies", full: bool = False
+) -> Optional[str]:
     """Return key pressed from bytes_ or None
 
     Return a key name or None meaning it's an incomplete sequence of bytes
@@ -208,8 +201,7 @@ def get_key(bytes_, encoding, keynames="curtsies", full=False):
     if len(seq) > MAX_KEYPRESS_SIZE:
         raise ValueError("unable to decode bytes %r" % seq)
 
-    def key_name():
-        # type: () -> Union[Text]
+    def key_name() -> str:
         if keynames == "curses":
             # may not be here (and still not decodable) curses names incomplete
             if seq in CURSES_NAMES:
@@ -256,8 +248,7 @@ def get_key(bytes_, encoding, keynames="curtsies", full=False):
         assert False, "should have raised an unicode decode error"
 
 
-def could_be_unfinished_char(seq, encoding):
-    # type: (bytes, Text) -> bool
+def could_be_unfinished_char(seq: bytes, encoding: str) -> bool:
     """Whether seq bytes might create a char in encoding if more bytes were added"""
     if decodable(seq, encoding):
         return False  # any sensible encoding surely doesn't require lookahead (right?)
@@ -271,8 +262,7 @@ def could_be_unfinished_char(seq, encoding):
         return True  # We don't know, it could be
 
 
-def could_be_unfinished_utf8(seq):
-    # type: (bytes) -> bool
+def could_be_unfinished_utf8(seq: bytes) -> bool:
     # http://en.wikipedia.org/wiki/UTF-8#Description
 
     # fmt: off
@@ -286,8 +276,7 @@ def could_be_unfinished_utf8(seq):
     # fmt: on
 
 
-def pp_event(seq):
-    # type: (Text) -> Union[Text, bytes]
+def pp_event(seq: Union[Event, str]) -> Union[str, bytes]:
     """Returns pretty representation of an Event or keypress"""
 
     if isinstance(seq, Event):
@@ -309,13 +298,11 @@ def pp_event(seq):
     return repr(seq).lstrip("u")[1:-1]
 
 
-def curtsies_name(seq):
-    # type: (bytes) -> Union[Text, bytes]
+def curtsies_name(seq: bytes) -> Union[str, bytes]:
     return CURTSIES_NAMES.get(seq, seq)
 
 
-def try_keys():
-    # type: () -> None
+def try_keys() -> None:
     print(
         "press a bunch of keys (not at the same time, but you can hit them pretty quickly)"
     )
@@ -325,8 +312,7 @@ def try_keys():
     import os
     from .termhelpers import Cbreak
 
-    def ask_what_they_pressed(seq, Normal):
-        # type: (bytes, Termmode) -> None
+    def ask_what_they_pressed(seq: bytes, Normal: Termmode) -> None:
         print("Unidentified character sequence!")
         with Normal:
             while True:
