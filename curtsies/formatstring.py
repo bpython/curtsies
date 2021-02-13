@@ -40,6 +40,10 @@ import itertools
 import re
 import sys
 from cwcwidth import wcswidth, wcwidth
+try:
+    from functools import cached_property
+except ImportError:
+    from backports.cached_property import cached_property
 
 from .escseqparse import parse, remove_ansi
 from .termformatconstants import (
@@ -141,8 +145,7 @@ class Chunk:
             raise ValueError("Can't calculate width of string %r" % self._s)
         return width
 
-    # TODO cache this
-    @property
+    @cached_property
     def color_str(self) -> str:
         "Return an escape-coded string to write to the terminal."
         s = self.s
