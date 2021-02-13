@@ -94,7 +94,7 @@ class Input:
     def fileno(self) -> int:
         return self.in_stream.fileno()
 
-    def __enter__(self) -> Input:
+    def __enter__(self) -> "Input":
         self.original_stty = termios.tcgetattr(self.in_stream)
         tty.setcbreak(self.in_stream, termios.TCSANOW)
 
@@ -136,7 +136,7 @@ class Input:
     ) -> None:
         self.sigints.append(events.SigIntEvent())
 
-    def __iter__(self) -> Input:
+    def __iter__(self) -> "Input":
         return self
 
     def __next__(self) -> Union[None, str, events.Event]:
