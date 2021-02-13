@@ -42,7 +42,7 @@ from typing import (
 try:
     from functools import cached_property
 except ImportError:
-    from backports.cached_property import cached_property # type: ignore
+    from backports.cached_property import cached_property  # type: ignore
 
 from .escseqparse import parse, remove_ansi
 from .termformatconstants import (
@@ -329,7 +329,7 @@ class FmtStr:
                         )
                         chunks.append(Chunk(x, atts=atts))
                     else:
-                        raise Exception("logic error")
+                        raise TypeError(f"Expected dict or str, not {type(x)}")
                 return FmtStr(*chunks)
         else:
             return FmtStr(Chunk(s))
