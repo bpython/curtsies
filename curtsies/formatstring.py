@@ -19,6 +19,10 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 red('hello')
 """
 
+import itertools
+import re
+import sys
+from cwcwidth import wcswidth, wcwidth
 from typing import (
     Iterator,
     Tuple,
@@ -35,15 +39,10 @@ from typing import (
     Iterable,
 )
 
-
-import itertools
-import re
-import sys
-from cwcwidth import wcswidth, wcwidth
 try:
     from functools import cached_property
 except ImportError:
-    from backports.cached_property import cached_property
+    from backports.cached_property import cached_property # type: ignore
 
 from .escseqparse import parse, remove_ansi
 from .termformatconstants import (
