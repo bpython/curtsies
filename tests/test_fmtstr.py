@@ -252,7 +252,6 @@ class TestFmtStr(unittest.TestCase):
         )
 
     def test_ljust_rjust(self):
-        """"""
         b = fmtstr("ab", "blue", "on_red", "bold")
         g = fmtstr("cd", "green", "on_red", "bold")
         s = b + g

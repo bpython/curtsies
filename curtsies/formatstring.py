@@ -169,7 +169,7 @@ class Chunk:
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Chunk):
-            return False
+            return NotImplemented
         return self.s == other.s and self.atts == other.atts
 
     def __hash__(self) -> int:
@@ -540,7 +540,7 @@ class FmtStr:
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, (str, bytes, FmtStr)):
             return str(self) == str(other)
-        return False
+        return NotImplemented
 
     def __hash__(self) -> int:
         return hash(str(self))
@@ -550,21 +550,22 @@ class FmtStr:
             return FmtStr(*(self.chunks + other.chunks))
         elif isinstance(other, (bytes, str)):
             return FmtStr(*(self.chunks + [Chunk(other)]))
-        else:
-            raise TypeError(f"Can't add {self!r} and {other!r}")
+
+        return NotImplemented
 
     def __radd__(self, other: Union["FmtStr", str]) -> "FmtStr":
         if isinstance(other, FmtStr):
             return FmtStr(*(x for x in (other.chunks + self.chunks)))
         elif isinstance(other, (bytes, str)):
             return FmtStr(*(x for x in ([Chunk(other)] + self.chunks)))
-        else:
-            raise TypeError("Can't add those")
+
+        return NotImplemented
 
     def __mul__(self, other: int) -> "FmtStr":
         if isinstance(other, int):
             return sum((self for _ in range(other)), FmtStr())
-        raise TypeError("Can't multiply those")
+
+        return NotImplemented
 
     # TODO ensure empty FmtStr isn't a problem
 
