@@ -284,8 +284,7 @@ class Input:
             assert e is not None
             return e
 
-    def _nonblocking_read(self):
-        # type: () -> int
+    def _nonblocking_read(self) -> int:
         """Returns the number of characters read and adds them to self.unprocessed_bytes"""
         with Nonblocking(self.in_stream):
             try:
@@ -311,7 +310,7 @@ class Input:
 
     def scheduled_event_trigger(
         self, event_type: Type[events.ScheduledEvent]
-    ) -> Callable:
+    ) -> Callable[[float], None]:
         """Returns a callback that schedules events for the future.
 
         Returned callback function will add an event of type event_type
