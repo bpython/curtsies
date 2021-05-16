@@ -9,15 +9,14 @@ import threading
 import time
 import tty
 
-logger = logging.getLogger(__name__)
-
-
 from .termhelpers import Nonblocking
 from . import events
 
 from typing import Callable, Type, TextIO, Optional, List, Union, cast, Tuple, Any
 from types import TracebackType, FrameType
 
+
+logger = logging.getLogger(__name__)
 READ_SIZE = 1024
 assert READ_SIZE >= events.MAX_KEYPRESS_SIZE
 # if a keypress could require more bytes than we read to be identified,
