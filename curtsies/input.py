@@ -50,7 +50,7 @@ class Input:
         self,
         in_stream: Optional[TextIO] = None,
         keynames: str = "curtsies",
-        paste_threshold: int = events.MAX_KEYPRESS_SIZE + 1,
+        paste_threshold: Optional[int] = events.MAX_KEYPRESS_SIZE + 1,
         sigint_event: bool = False,
         signint_callback_provider: Optional[Any] = None,
         disable_terminal_start_stop: bool = False,
