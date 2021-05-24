@@ -351,7 +351,7 @@ class CursorAwareWindow(BaseWindow):
                 col = int(m.groupdict()["column"])
                 extra = m.groupdict()["extra"]
                 if extra:
-                    if self.extra_bytes_callback:
+                    if self.extra_bytes_callback is not None:
                         self.extra_bytes_callback(
                             # TODO how do we know that this works?
                             extra.encode(cast(TextIO, in_stream).encoding)
