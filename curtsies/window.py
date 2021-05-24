@@ -49,9 +49,9 @@ class BaseWindow:
         self.t = blessings.Terminal(stream=out_stream, force_styling=True)
         self.out_stream = out_stream
         self.hide_cursor = hide_cursor
-        self._last_lines_by_row = {}  # type: Dict[int, Optional[FmtStr]]
-        self._last_rendered_width = None  # type: Optional[int]
-        self._last_rendered_height = None  # type: Optional[int]
+        self._last_lines_by_row: Dict[int, Optional[FmtStr]] = {}
+        self._last_rendered_width: Optional[int] = None
+        self._last_rendered_height: Optional[int] = None
 
     def scroll_down(self) -> None:
         logger.debug("sending scroll down message w/ cursor on bottom line")
@@ -272,8 +272,8 @@ class CursorAwareWindow(BaseWindow):
         if in_stream is None:
             in_stream = sys.__stdin__
         self.in_stream = in_stream
-        self._last_cursor_column = None  # type: Optional[int]
-        self._last_cursor_row = None  # type: Optional[int]
+        self._last_cursor_column: Optional[int] = None
+        self._last_cursor_row: Optional[int] = None
         self.keep_last_line = keep_last_line
         self.cbreak = Cbreak(self.in_stream)
         self.extra_bytes_callback = extra_bytes_callback
@@ -453,7 +453,7 @@ class CursorAwareWindow(BaseWindow):
         if height != self._last_rendered_height or width != self._last_rendered_width:
             self.on_terminal_size_change(height, width)
 
-        current_lines_by_row = {}  # type: Dict[int, Optional[FmtStr]]
+        current_lines_by_row: Dict[int, Optional[FmtStr]] = {}
         rows_for_use = list(range(self.top_usable_row, height))
 
         # rows which we have content for and don't require scrolling
@@ -522,9 +522,9 @@ def demo() -> None:
                 if c == "":
                     sys.exit()  # same as raise SystemExit()
                 elif c == "h":
-                    a = w.array_from_text(
+                    a: Union[List[FmtStr], FSArray] = w.array_from_text(
                         "a for small array"
-                    )  # type: Union[List[FmtStr], FSArray]
+                    )
                 elif c == "a":
                     a = [fmtstr(c * columns) for _ in range(rows)]
                 elif c == "s":

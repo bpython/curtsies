@@ -73,21 +73,17 @@ class Input:
         if in_stream is None:
             in_stream = sys.__stdin__
         self.in_stream = in_stream
-        self.unprocessed_bytes = (
-            []
-        )  # type: List[bytes]  # leftover from stdin, unprocessed yet
+        self.unprocessed_bytes: List[bytes] = []  # leftover from stdin, unprocessed yet
         self.keynames = keynames
         self.paste_threshold = paste_threshold
         self.sigint_event = sigint_event
         self.disable_terminal_start_stop = disable_terminal_start_stop
-        self.sigints = []  # type: List[events.SigIntEvent]
+        self.sigints: List[events.SigIntEvent] = []
 
-        self.readers = []  # type: List[int]
-        self.queued_interrupting_events = []  # type: List[Union[events.Event, str]]
-        self.queued_events = []  # type: List[events.Event]
-        self.queued_scheduled_events = (
-            []
-        )  # type: List[Tuple[float, events.ScheduledEvent]]
+        self.readers: List[int] = []
+        self.queued_interrupting_events: List[Union[events.Event, str]] = []
+        self.queued_events: List[events.Event] = []
+        self.queued_scheduled_events: List[Tuple[float, events.ScheduledEvent]] = []
 
     # prospective: this could be useful for an external select loop
     def fileno(self) -> int:
