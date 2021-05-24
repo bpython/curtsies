@@ -201,7 +201,7 @@ class FullscreenWindow(BaseWindow):
         if height != self._last_rendered_height or width != self._last_rendered_width:
             self.on_terminal_size_change(height, width)
 
-        current_lines_by_row = {}  # type: Dict[int, Optional[FmtStr]]
+        current_lines_by_row: Dict[int, Optional[FmtStr]] = {}
         rows = list(range(height))
         rows_for_use = rows[: len(array)]
         rest_of_rows = rows[len(array) :]
