@@ -6,12 +6,10 @@ from typing import (
     Optional,
     IO,
     Dict,
-    Generic,
     TypeVar,
     Type,
     Tuple,
     Callable,
-    ByteString,
     cast,
     TextIO,
     Union,
@@ -19,7 +17,6 @@ from typing import (
 )
 from types import TracebackType
 
-import locale
 import logging
 import re
 import sys
