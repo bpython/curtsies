@@ -254,7 +254,7 @@ class CursorAwareWindow(BaseWindow):
         in_stream: Optional[IO] = None,
         keep_last_line: bool = False,
         hide_cursor: bool = True,
-        extra_bytes_callback: Optional[Callable[[ByteString], None]] = None,
+        extra_bytes_callback: Optional[Callable[[bytes], None]] = None,
     ):
         """Constructs a CursorAwareWindow
 
