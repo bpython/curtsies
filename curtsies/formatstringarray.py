@@ -21,6 +21,7 @@ Format String 2D array
 ['i']
 """
 
+import itertools
 import sys
 import logging
 
@@ -217,7 +218,7 @@ class FSArray(Sequence):
 
         a_rows = []
         b_rows = []
-        max_width = max([len(row) for row in a] + [len(row) for row in b])
+        max_width = max(len(row) for row in itertools.chain(a, b))
         a_lengths = []
         b_lengths = []
         for a_row, b_row in zip(a, b):
@@ -242,13 +243,12 @@ class FSArray(Sequence):
                     b_line += underline(blink(str(b_char)))
             a_rows.append(a_line)
             b_rows.append(b_line)
-        hdiff = "\n".join(
-            a_line + " %3d | %3d " % (a_len, b_len) + b_line
+        return "\n".join(
+            f"{a_line} {a_len:3d} | {b_len:3d} {b_line}"
             for a_line, b_line, a_len, b_len in zip(
                 a_rows, b_rows, a_lengths, b_lengths
             )
         )
-        return hdiff
 
 
 def fsarray(strings: List[Union[FmtStr, str]], *args: Any, **kwargs: Any) -> FSArray:
