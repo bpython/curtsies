@@ -58,9 +58,7 @@ class FSArray(Sequence):
         self, num_rows: int, num_columns: int, *args: Any, **kwargs: Any
     ) -> None:
         self.saved_args, self.saved_kwargs = args, kwargs
-        self.rows = [
-            fmtstr("", *args, **kwargs) for _ in range(num_rows)
-        ]  # type: List[FmtStr]
+        self.rows: List[FmtStr] = [fmtstr("", *args, **kwargs) for _ in range(num_rows)]
         self.num_columns = num_columns
 
     @overload

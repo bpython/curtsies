@@ -3,17 +3,13 @@
 from typing import Mapping
 
 colors = "black", "red", "green", "yellow", "blue", "magenta", "cyan", "gray"
-FG_COLORS = dict(zip(colors, range(30, 38)))  # type: Mapping[str, int]
-BG_COLORS = dict(zip(colors, range(40, 48)))  # type: Mapping[str, int]
-STYLES = dict(
+FG_COLORS: Mapping[str, int] = dict(zip(colors, range(30, 38)))
+BG_COLORS: Mapping[str, int] = dict(zip(colors, range(40, 48)))
+STYLES: Mapping[str, int] = dict(
     zip(("bold", "dark", "underline", "blink", "invert"), (1, 2, 4, 5, 7))
-)  # type: Mapping[str, int]
-FG_NUMBER_TO_COLOR = dict(
-    zip(FG_COLORS.values(), FG_COLORS.keys())
-)  # type: Mapping[int, str]
-BG_NUMBER_TO_COLOR = dict(
-    zip(BG_COLORS.values(), BG_COLORS.keys())
-)  # type: Mapping[int, str]
+)
+FG_NUMBER_TO_COLOR: Mapping[int, str] = dict(zip(FG_COLORS.values(), FG_COLORS.keys()))
+BG_NUMBER_TO_COLOR: Mapping[int, str] = dict(zip(BG_COLORS.values(), BG_COLORS.keys()))
 NUMBER_TO_STYLE = dict(zip(STYLES.values(), STYLES.keys()))
 RESET_ALL = 0
 RESET_FG = 39

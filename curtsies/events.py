@@ -139,7 +139,7 @@ class PasteEvent(Event):
     """
 
     def __init__(self) -> None:
-        self.events = []  # type: List[Union[Event, str]]
+        self.events: List[Union[Event, str]] = []
 
     def __repr__(self) -> str:
         return "<Paste Event with data: %r>" % self.events
@@ -285,7 +285,7 @@ def pp_event(seq: Union[Event, str]) -> Union[str, bytes]:
     # Get the original sequence back if seq is a pretty name already
     rev_curses = {v: k for k, v in CURSES_NAMES.items()}
     rev_curtsies = {v: k for k, v in CURTSIES_NAMES.items()}
-    bytes_seq = None  # type: Optional[bytes]
+    bytes_seq: Optional[bytes] = None
     if seq in rev_curses:
         bytes_seq = rev_curses[seq]
     elif seq in rev_curtsies:

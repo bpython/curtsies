@@ -52,7 +52,7 @@ def parse(s: str) -> List[Union[str, Dict[str, Union[str, bool, None]]]]:
     >>> parse("\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m\x1b[33m]\x1b[39m\x1b[33m[\x1b[39m")
     [{'fg': 'yellow'}, '[', {'fg': None}, {'fg': 'yellow'}, ']', {'fg': None}, {'fg': 'yellow'}, '[', {'fg': None}, {'fg': 'yellow'}, ']', {'fg': None}, {'fg': 'yellow'}, '[', {'fg': None}, {'fg': 'yellow'}, ']', {'fg': None}, {'fg': 'yellow'}, '[', {'fg': None}]
     """
-    stuff = []  # type: List[Union[str, Dict[str, Union[str, bool, None]]]]
+    stuff: List[Union[str, Dict[str, Union[str, bool, None]]]] = []
     rest = s
     while True:
         front, token, rest = peel_off_esc_code(rest)
@@ -114,7 +114,7 @@ def peel_off_esc_code(s: str) -> Tuple[str, Optional[Token], str]:
         m = None
 
     if m:
-        d = m.groupdict()  # type: Dict[str, Any]
+        d: Dict[str, Any] = m.groupdict()
         del d["front"]
         del d["rest"]
         if "numbers" in d and all(d["numbers"].split(";")):
@@ -130,7 +130,7 @@ def token_type(info: Token) -> Optional[List[Dict[str, Union[str, bool, None]]]]
         # The default action for ESC[m is to act like ESC[0m
         # Ref: https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
         values = cast(List[int], info["numbers"]) if len(info["numbers"]) else [0]
-        tokens = []  # type: List[Dict[str, Union[str, bool, None]]]
+        tokens: List[Dict[str, Union[str, bool, None]]] = []
         for value in values:
             if value in FG_NUMBER_TO_COLOR:
                 tokens.append({"fg": FG_NUMBER_TO_COLOR[value]})

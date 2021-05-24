@@ -341,8 +341,7 @@ def getpreferredencoding() -> str:
     return locale.getpreferredencoding() or sys.getdefaultencoding()
 
 
-def main():
-    # type: () -> None
+def main() -> None:
     with Input() as input_generator:
         print(repr(input_generator.send(2)))
         print(repr(input_generator.send(1)))

@@ -57,23 +57,21 @@ from .termformatconstants import (
     seq,
 )
 
-one_arg_xforms = {
+one_arg_xforms: Mapping[str, Callable[[str], str]] = {
     "bold": lambda s: seq(STYLES["bold"]) + s + seq(RESET_ALL),
     "dark": lambda s: seq(STYLES["dark"]) + s + seq(RESET_ALL),
     "underline": lambda s: seq(STYLES["underline"]) + s + seq(RESET_ALL),
     "blink": lambda s: seq(STYLES["blink"]) + s + seq(RESET_ALL),
     "invert": lambda s: seq(STYLES["invert"]) + s + seq(RESET_ALL),
-}  # type: Mapping[str, Callable[[str], str]]
+}
 
-two_arg_xforms = {
+two_arg_xforms: Mapping[str, Callable[[str, int], str]] = {
     "fg": lambda s, v: "{}{}{}".format(seq(v), s, seq(RESET_FG)),
     "bg": lambda s, v: seq(v) + s + seq(RESET_BG),
-}  # type: Mapping[str, Callable[[str, int], str]]
+}
 
 # TODO unused, remove this in next major release
-xforms = (
-    {}
-)  # type: MutableMapping[str, Union[Callable[[str], str], Callable[[str, int], str]]]
+xforms: MutableMapping[str, Union[Callable[[str], str], Callable[[str, int], str]]] = {}
 xforms.update(one_arg_xforms)
 xforms.update(two_arg_xforms)
 
@@ -122,7 +120,7 @@ class Chunk:
     ):
         if not isinstance(string, str):
             raise ValueError("unicode string required, got %r" % string)
-        self._s = string  # type: str
+        self._s = string
         self._atts = FrozenDict(atts if atts else {})
 
     @property
@@ -293,10 +291,10 @@ class FmtStr:
         self.chunks = list(components)
 
         # caching these leads to a significant speedup
-        self._unicode = None  # type: Optional[str]
-        self._len = None  # type: Optional[int]
-        self._s = None  # type: Optional[str]
-        self._width = None  # type: Optional[int]
+        self._unicode: Optional[str] = None
+        self._len: Optional[int] = None
+        self._s: Optional[str] = None
+        self._width: Optional[int] = None
 
     @classmethod
     def from_str(cls, s: str) -> "FmtStr":
@@ -423,8 +421,8 @@ class FmtStr:
 
     def join(self, iterable: Iterable[Union[str, "FmtStr"]]) -> "FmtStr":
         """Joins an iterable yielding strings or FmtStrs with self as separator"""
-        before = []  # type: List[Chunk]
-        chunks = []  # type: List[Chunk]
+        before: List[Chunk] = []
+        chunks: List[Chunk] = []
         for s in iterable:
             chunks.extend(before)
             before = self.chunks
