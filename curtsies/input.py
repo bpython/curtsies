@@ -52,7 +52,6 @@ class Input:
         keynames: str = "curtsies",
         paste_threshold: Optional[int] = events.MAX_KEYPRESS_SIZE + 1,
         sigint_event: bool = False,
-        signint_callback_provider: Optional[Any] = None,
         disable_terminal_start_stop: bool = False,
     ) -> None:
         """Returns an Input instance.
