@@ -109,6 +109,12 @@ class Input:
         if self.sigint_event and is_main_thread():
             self.orig_sigint_handler = signal.getsignal(signal.SIGINT)
             signal.signal(signal.SIGINT, self.sigint_handler)
+
+        self.wakeup_read_fd, wfd = os.pipe()
+        os.set_blocking(wfd, False)
+        if sys.version_info[0] == 3 and sys.version_info[1] > 4:
+            signal.set_wakeup_fd(wfd, warn_on_full_buffer=False)
+
         return self
 
     def __exit__(
@@ -123,6 +129,8 @@ class Input:
             and self.orig_sigint_handler is not None
         ):
             signal.signal(signal.SIGINT, self.orig_sigint_handler)
+        if sys.version_info[0] == 3 and sys.version_info[1] > 4:
+            signal.set_wakeup_fd(-1)
         termios.tcsetattr(self.in_stream, termios.TCSANOW, self.original_stty)
 
     def sigint_handler(
@@ -158,13 +166,25 @@ class Input:
         while True:
             try:
                 (rs, _, _) = select.select(
-                    [self.in_stream.fileno()] + self.readers, [], [], remaining_timeout
+                    [
+                        self.in_stream.fileno(),
+                        self.wakeup_read_fd,
+                    ]
+                    + self.readers,
+                    [],
+                    [],
+                    remaining_timeout,
                 )
                 if not rs:
                     return False, None
                 r = rs[0]  # if there's more than one, get it in the next loop
                 if r == self.in_stream.fileno():
                     return True, None
+                elif r == self.wakeup_read_fd:
+                    # In Python >=3.5 select won't raise this signal handler
+                    signal_number = ord(os.read(r, 1))
+                    if signal_number == signal.SIGINT:
+                        raise InterruptedError()
                 else:
                     os.read(r, 1024)
                     if self.queued_interrupting_events:
@@ -217,7 +237,7 @@ class Input:
             return self.queued_interrupting_events.pop(0)
 
         if self.queued_scheduled_events:
-            self.queued_scheduled_events.sort()  # TODO use a data structure that inserts sorted
+            self.queued_scheduled_events.sort()
             when, _ = self.queued_scheduled_events[0]
             if when < time.time():
                 logger.debug(
