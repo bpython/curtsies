@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.3.7] - 2021-09-27
+- Fixed ctrl-c not being reported until another key was pressed in Python 3.5+
+
 ## [0.3.5] - 2021-01-24
 - Drop supported for Python 2, 3.4 and 3.5.
 - Migrate to pytest. Thanks to Paolo Stivanin
