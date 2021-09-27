@@ -112,7 +112,9 @@ class Input:
 
         self.wakeup_read_fd, wfd = os.pipe()
         os.set_blocking(wfd, False)
-        if sys.version_info[0] == 3 and sys.version_info[1] > 4:
+        if sys.version_info[0] == 3 and 5 <= sys.version_info[1] < 7:
+            signal.set_wakeup_fd(wfd)
+        elif sys.version_info[0] == 3 and 7 <= sys.version_info[1]:
             signal.set_wakeup_fd(wfd, warn_on_full_buffer=False)
 
         return self
