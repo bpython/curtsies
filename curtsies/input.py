@@ -339,7 +339,9 @@ class Input:
 
         return callback
 
-    def threadsafe_event_trigger(self, event_type: Type[events.Event]) -> Callable:
+    def threadsafe_event_trigger(
+        self, event_type: Union[Type[events.Event], Callable[..., None]]
+    ) -> Callable:
         """Returns a callback to creates events, interrupting current event requests.
 
         Returned callback function will create an event of type event_type
