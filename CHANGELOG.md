@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.8] - 2021-09-27
+## [0.3.8] - 2021-10-07
 - Change typing of `event_trigger(event_type)` to allow a function that returns None
 
 ## [0.3.7] - 2021-09-27
