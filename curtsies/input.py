@@ -81,7 +81,7 @@ class Input:
 
         self.readers: List[int] = []
         self.queued_interrupting_events: List[Union[events.Event, str]] = []
-        self.queued_events: List[events.Event] = []
+        self.queued_events: List[Union[events.Event, None]] = []
         self.queued_scheduled_events: List[Tuple[float, events.ScheduledEvent]] = []
 
     # prospective: this could be useful for an external select loop
@@ -313,7 +313,7 @@ class Input:
             else:
                 return 0
 
-    def event_trigger(self, event_type: Type[events.Event]) -> Callable:
+    def event_trigger(self, event_type: Union[Type[events.Event], Callable[..., None]]) -> Callable:
         """Returns a callback that creates events.
 
         Returned callback function will add an event of type event_type

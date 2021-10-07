@@ -26,3 +26,17 @@ jobs:
       with:
         skip: '*.po'
         ignore_words_list: te,ot
+
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install mypy
+        pip install -r requirements.txt
+        pip install "blessings>=1.5" cwcwidth "backports.cached-property; python_version < '3.9'" pyte
+    - name: Check with mypy
+      run: python -m mypy
