@@ -137,7 +137,7 @@ class Chunk:
 
     @property
     def width(self) -> int:
-        width = wcswidth(self._s)
+        width = wcswidth(self._s, None)
         if len(self._s) > 0 and width < 1:
             raise ValueError("Can't calculate width of string %r" % self._s)
         return width
@@ -240,7 +240,7 @@ class ChunkSplitter:
         replacement_char = " "
 
         while True:
-            w = wcswidth(s[i])
+            w = wcswidth(s[i], None)
 
             # If adding a character puts us over the requested width, return what we've got so far
             if width + w > max_width:
@@ -644,7 +644,7 @@ class FmtStr:
 
     def width_aware_slice(self, index: Union[int, slice]) -> "FmtStr":
         """Slice based on the number of columns it would take to display the substring."""
-        if wcswidth(self.s) == -1:
+        if wcswidth(self.s, None) == -1:
             raise ValueError("bad values for width aware slicing")
         index = normalize_slice(self.width, index)
         counter = 0
@@ -672,7 +672,7 @@ class FmtStr:
         """
         if columns < 2:
             raise ValueError("Column width %s is too narrow." % columns)
-        if wcswidth(self.s) == -1:
+        if wcswidth(self.s, None) == -1:
             raise ValueError("bad values for width aware slicing")
         return self._width_aware_splitlines(columns)
 

@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.3.8] - 2021-09-27
+- Change typing of `event_trigger(event_type)` to allow a function that returns None
+
 ## [0.3.7] - 2021-09-27
 - Fixed ctrl-c not being reported until another key was pressed in Python 3.5+
 
