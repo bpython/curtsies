@@ -313,7 +313,9 @@ class Input:
             else:
                 return 0
 
-    def event_trigger(self, event_type: Union[Type[events.Event], Callable[..., None]]) -> Callable:
+    def event_trigger(
+        self, event_type: Union[Type[events.Event], Callable[..., None]]
+    ) -> Callable:
         """Returns a callback that creates events.
 
         Returned callback function will add an event of type event_type
