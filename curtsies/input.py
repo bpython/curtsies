@@ -204,7 +204,7 @@ class Input:
                     remaining_timeout = max(remaining_timeout - (time.time() - t0), 0)
 
     def send(
-        self, timeout: Optional[Union[float, int, None]] = None
+        self, timeout: Optional[Union[float, None]] = None
     ) -> Union[None, str, events.Event]:
         """Returns an event or None if no events occur before timeout."""
         if self.sigint_event and is_main_thread():
@@ -315,7 +315,7 @@ class Input:
 
     def event_trigger(
         self, event_type: Union[Type[events.Event], Callable[..., None]]
-    ) -> Callable:
+    ) -> Callable[..., None]:
         """Returns a callback that creates events.
 
         Returned callback function will add an event of type event_type
@@ -341,7 +341,7 @@ class Input:
 
     def threadsafe_event_trigger(
         self, event_type: Union[Type[events.Event], Callable[..., None]]
-    ) -> Callable:
+    ) -> Callable[..., None]:
         """Returns a callback to creates events, interrupting current event requests.
 
         Returned callback function will create an event of type event_type

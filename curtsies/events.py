@@ -139,7 +139,7 @@ class PasteEvent(Event):
     """
 
     def __init__(self) -> None:
-        self.events: List[Union[Event, str]] = []
+        self.events: List[str] = []
 
     def __repr__(self) -> str:
         return "<Paste Event with data: %r>" % self.events
