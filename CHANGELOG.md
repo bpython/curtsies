@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3.10] - 2021-10-08
+- Typing: more specify return types for event triggers
+- Typing: don't allow Event instances in PasteEvent contents
+
 ## [0.3.9] - 2021-10-07
 - Change typing of `event_trigger(event_type)` to allow a function that returns None
 
