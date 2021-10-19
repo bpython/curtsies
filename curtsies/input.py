@@ -78,6 +78,7 @@ class Input:
         self.sigint_event = sigint_event
         self.disable_terminal_start_stop = disable_terminal_start_stop
         self.sigints: List[events.SigIntEvent] = []
+        self.wakeup_read_fd: Optional[int] = None
 
         self.readers: List[int] = []
         self.queued_interrupting_events: List[Union[events.Event, str]] = []
@@ -110,12 +111,14 @@ class Input:
             self.orig_sigint_handler = signal.getsignal(signal.SIGINT)
             signal.signal(signal.SIGINT, self.sigint_handler)
 
-        self.wakeup_read_fd, wfd = os.pipe()
-        os.set_blocking(wfd, False)
-        if sys.version_info[0] == 3 and 5 <= sys.version_info[1] < 7:
-            signal.set_wakeup_fd(wfd)
-        elif sys.version_info[0] == 3 and 7 <= sys.version_info[1]:
-            signal.set_wakeup_fd(wfd, warn_on_full_buffer=False)
+        # Non-main threads don't receive signals
+        if threading.current_thread() is threading.main_thread():
+            self.wakeup_read_fd, wfd = os.pipe()
+            os.set_blocking(wfd, False)
+            if sys.version_info[0] == 3 and 5 <= sys.version_info[1] < 7:
+                signal.set_wakeup_fd(wfd)
+            elif sys.version_info[0] == 3 and 7 <= sys.version_info[1]:
+                signal.set_wakeup_fd(wfd, warn_on_full_buffer=False)
 
         return self
 
@@ -168,10 +171,8 @@ class Input:
         while True:
             try:
                 (rs, _, _) = select.select(
-                    [
-                        self.in_stream.fileno(),
-                        self.wakeup_read_fd,
-                    ]
+                    [self.in_stream.fileno()]
+                    + ([] if self.wakeup_read_fd is None else [self.wakeup_read_fd])
                     + self.readers,
                     [],
                     [],
