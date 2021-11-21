@@ -92,6 +92,10 @@ CURTSIES_NAMES = {
     b"\x1b[3~": '<DELETE>',       # delete (.), "Execute"
     b"\x1b[3;5~": '<Ctrl-DELETE>',
 
+    # st (simple terminal) see issue #169
+    b"\x1b[4h": '<INSERT>',
+    b"\x1b[P": '<DELETE>',
+
     # not fixing for back compat.
     # (b"\x1b[4~": u'<SELECT>',       # select
 
