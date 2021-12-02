@@ -141,3 +141,9 @@ class TestInput(unittest.TestCase):
         t = threading.Thread(target=use)
         t.start()
         t.join()
+
+    def test_cleanup(self):
+        input_generator = Input()
+        for i in range(1000):
+            with input_generator:
+                pass

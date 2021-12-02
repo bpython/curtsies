@@ -79,6 +79,7 @@ class Input:
         self.disable_terminal_start_stop = disable_terminal_start_stop
         self.sigints: List[events.SigIntEvent] = []
         self.wakeup_read_fd: Optional[int] = None
+        self.wakeup_write_fd: Optional[int] = None
 
         self.readers: List[int] = []
         self.queued_interrupting_events: List[Union[events.Event, str]] = []
@@ -113,7 +114,8 @@ class Input:
 
         # Non-main threads don't receive signals
         if threading.current_thread() is threading.main_thread():
-            self.wakeup_read_fd, wfd = os.pipe()
+            self.wakeup_read_fd, self.wakeup_write_fd = os.pipe()
+            wfd = self.wakeup_write_fd
             os.set_blocking(wfd, False)
             if sys.version_info[0] == 3 and 5 <= sys.version_info[1] < 7:
                 signal.set_wakeup_fd(wfd)
@@ -135,7 +137,12 @@ class Input:
         ):
             signal.signal(signal.SIGINT, self.orig_sigint_handler)
         if sys.version_info[0] == 3 and sys.version_info[1] > 4:
-            signal.set_wakeup_fd(-1)
+            if threading.current_thread() is threading.main_thread():
+                signal.set_wakeup_fd(-1)
+                if self.wakeup_read_fd is not None:
+                    os.close(self.wakeup_read_fd)
+                if self.wakeup_write_fd is not None:
+                    os.close(self.wakeup_write_fd)
         termios.tcsetattr(self.in_stream, termios.TCSANOW, self.original_stty)
 
     def sigint_handler(
