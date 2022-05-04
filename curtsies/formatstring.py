@@ -137,7 +137,7 @@ class Chunk:
 
     @property
     def width(self) -> int:
-        width = wcswidth(self._s, None)
+        width = wcswidth(self._s)
         if len(self._s) > 0 and width < 1:
             raise ValueError("Can't calculate width of string %r" % self._s)
         return width
