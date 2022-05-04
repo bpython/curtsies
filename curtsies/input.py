@@ -142,7 +142,7 @@ class Input:
         termios.tcsetattr(self.in_stream, termios.TCSANOW, self.original_stty)
 
     def sigint_handler(
-        self, signum: Union[signal.Signals, int], frame: FrameType
+        self, signum: Union[signal.Signals, int], frame: Optional[FrameType]
     ) -> None:
         self.sigints.append(events.SigIntEvent())
 
