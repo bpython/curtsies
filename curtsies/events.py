@@ -1,6 +1,5 @@
 """Events for keystrokes and other input events"""
 import codecs
-import encodings
 import itertools
 import sys
 from typing import Optional, List, Union
@@ -306,9 +305,6 @@ def try_keys() -> None:
     print(
         "press a bunch of keys (not at the same time, but you can hit them pretty quickly)"
     )
-    import tty
-    import termios
-    import fcntl
     import os
     from .termhelpers import Cbreak
 
