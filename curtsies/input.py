@@ -112,13 +112,10 @@ class Input:
             signal.signal(signal.SIGINT, self.sigint_handler)
 
         # Non-main threads don't receive signals
-        if threading.current_thread() is threading.main_thread():
+        if is_main_thread():
             self.wakeup_read_fd, wfd = os.pipe()
             os.set_blocking(wfd, False)
-            if sys.version_info[0] == 3 and 5 <= sys.version_info[1] < 7:
-                signal.set_wakeup_fd(wfd)
-            elif sys.version_info[0] == 3 and 7 <= sys.version_info[1]:
-                signal.set_wakeup_fd(wfd, warn_on_full_buffer=False)
+            signal.set_wakeup_fd(wfd, warn_on_full_buffer=False)
 
         return self
 
@@ -134,7 +131,7 @@ class Input:
             and self.orig_sigint_handler is not None
         ):
             signal.signal(signal.SIGINT, self.orig_sigint_handler)
-        if sys.version_info[0] == 3 and sys.version_info[1] > 4:
+        if is_main_thread():
             signal.set_wakeup_fd(-1)
         termios.tcsetattr(self.in_stream, termios.TCSANOW, self.original_stty)
 
