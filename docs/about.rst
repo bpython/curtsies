@@ -23,7 +23,7 @@ Thanks so much to the many people that have contributed to it!
 * Fei Dong - work on making FmtStr and Chunk immutable
 * Julia Evans - help with Python 3 compatibility
 * Lea Albaugh - beautiful Curtsies logo
-* Rachel King - several bugfixes on blessings use
+* Rachel King - several bugfixes on blessed use
 * Scott Feeney - inspiration for this project - the original title of the project was "scott was right"
 * Zach Allaun, Mary Rose Cook, Alex Clemmer - early code review of input and window
 * Chase Lambert - API redesign conversation

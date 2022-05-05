@@ -14,7 +14,7 @@ class FakeFullscreenWindow(FullscreenWindow):
     height = property(lambda self: 4)
 
 
-@skipIf(fds_closed, "blessings Terminal needs streams open")
+@skipIf(fds_closed, "blessed Terminal needs streams open")
 class TestBaseWindow(unittest.TestCase):
     """Pretty pathetic tests for window"""
 
