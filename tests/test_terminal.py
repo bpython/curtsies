@@ -7,7 +7,7 @@ import unittest
 from io import StringIO
 from unittest import skipUnless, skipIf, expectedFailure
 
-import blessings
+import blessed
 import pyte
 from pyte import control as ctrl, Stream, Screen
 
@@ -88,7 +88,7 @@ class ScreenStdout:
         pass
 
 
-@skipUnless(sys.stdin.isatty(), "blessings Terminal needs streams open")
+@skipUnless(sys.stdin.isatty(), "blessed Terminal needs streams open")
 class TestFullscreenWindow(unittest.TestCase):
     def setUp(self):
         self.screen = pyte.Screen(10, 3)
@@ -121,7 +121,7 @@ class NopContext:
         pass
 
 
-@skipUnless(sys.stdin.isatty(), "blessings Terminal needs streams open")
+@skipUnless(sys.stdin.isatty(), "blessed Terminal needs streams open")
 class TestCursorAwareWindow(unittest.TestCase):
     def setUp(self):
         self.screen = ReportingScreen(6, 3)
@@ -133,8 +133,8 @@ class TestCursorAwareWindow(unittest.TestCase):
             out_stream=stdout, in_stream=self.screen._report_file
         )
         self.window.cbreak = NopContext()
-        blessings.Terminal.height = 3
-        blessings.Terminal.width = 6
+        blessed.Terminal.height = 3
+        blessed.Terminal.width = 6
 
     # This isn't passing locally for me anymore :/
     @expectedFailure
@@ -162,7 +162,7 @@ class TestCursorAwareWindow(unittest.TestCase):
             self.assertEqual(self.screen.display, ["      ", "hi    ", "there "])
 
 
-@skipUnless(sys.stdin.isatty(), "blessings Terminal needs streams open")
+@skipUnless(sys.stdin.isatty(), "blessed Terminal needs streams open")
 class TestCursorAwareWindowWithExtraInput(unittest.TestCase):
     def setUp(self):
         self.screen = ReportingScreenWithExtra(6, 3)
@@ -177,8 +177,8 @@ class TestCursorAwareWindowWithExtraInput(unittest.TestCase):
             extra_bytes_callback=self.extra_bytes_callback,
         )
         self.window.cbreak = NopContext()
-        blessings.Terminal.height = 3
-        blessings.Terminal.width = 6
+        blessed.Terminal.height = 3
+        blessed.Terminal.width = 6
 
     def extra_bytes_callback(self, bytes):
         self.extra_bytes.append(bytes)
