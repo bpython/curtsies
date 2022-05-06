@@ -19,10 +19,10 @@ on_blue(red('hello'))+' '+on_red(blue('there'))+green('!')
 red('hello')
 """
 
-import itertools
 import re
 import sys
 from cwcwidth import wcswidth, wcwidth
+from itertools import chain
 from typing import (
     Iterator,
     Tuple,
@@ -88,7 +88,7 @@ class FrozenDict(dict):
         raise Exception("Cannot change value.")
 
     def extend(self, dictlike: Mapping[str, Union[int, bool]]) -> "FrozenDict":
-        return FrozenDict(itertools.chain(self.items(), dictlike.items()))
+        return FrozenDict(chain(self.items(), dictlike.items()))
 
     def remove(self, *keys: str) -> "FrozenDict":
         return FrozenDict((k, v) for k, v in self.items() if k not in keys)
@@ -456,8 +456,8 @@ class FmtStr:
         return [
             self[start:end]
             for start, end in zip(
-                [0] + [m.end() for m in matches],
-                [m.start() for m in matches] + [len(s)],
+                chain((0,), (m.end() for m in matches)),
+                chain((m.start() for m in matches), (len(s),)),
             )
         ]
 
