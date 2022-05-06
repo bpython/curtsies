@@ -49,7 +49,7 @@ class Input:
     def __init__(
         self,
         in_stream: Optional[TextIO] = None,
-        keynames: str = "curtsies",
+        keynames: Union[events.Keynames, str] = events.Keynames.CURTSIES,
         paste_threshold: Optional[int] = events.MAX_KEYPRESS_SIZE + 1,
         sigint_event: bool = False,
         disable_terminal_start_stop: bool = False,
@@ -73,7 +73,18 @@ class Input:
             in_stream = sys.__stdin__
         self.in_stream = in_stream
         self.unprocessed_bytes: List[bytes] = []  # leftover from stdin, unprocessed yet
-        self.keynames = keynames
+        if isinstance(keynames, str):
+            # TODO: Remove this block with the next API breaking release.
+            if keynames == "curtsies":
+                self.keynames = events.Keynames.CURTSIES
+            elif keynames == "curses":
+                self.keynames = events.Keynames.CURSES
+            elif keynames == "bytes":
+                self.keynames = events.Keynames.BYTES
+            else:
+                raise ValueError("keyname is invalid")
+        else:
+            self.keynames = keynames
         self.paste_threshold = paste_threshold
         self.sigint_event = sigint_event
         self.disable_terminal_start_stop = disable_terminal_start_stop

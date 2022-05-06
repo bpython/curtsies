@@ -40,7 +40,10 @@ class TestDecodable(unittest.TestCase):
 class TestGetKey(unittest.TestCase):
     def test_utf8_full(self):
         get_utf_full = partial(
-            events.get_key, encoding="utf-8", keynames="curtsies", full=True
+            events.get_key,
+            encoding="utf-8",
+            keynames=events.Keynames.CURTSIES,
+            full=True,
         )
         self.assertEqual(get_utf_full([b"h"]), "h")
         self.assertEqual(get_utf_full([b"\x1b", b"["]), "<Esc+[>")
@@ -49,7 +52,10 @@ class TestGetKey(unittest.TestCase):
 
     def test_utf8(self):
         get_utf = partial(
-            events.get_key, encoding="utf-8", keynames="curtsies", full=False
+            events.get_key,
+            encoding="utf-8",
+            keynames=events.Keynames.CURTSIES,
+            full=False,
         )
         self.assertEqual(get_utf([b"h"]), "h")
         self.assertEqual(get_utf([b"\x1b", b"["]), None)
@@ -58,7 +64,10 @@ class TestGetKey(unittest.TestCase):
 
     def test_multibyte_utf8(self):
         get_utf = partial(
-            events.get_key, encoding="utf-8", keynames="curtsies", full=False
+            events.get_key,
+            encoding="utf-8",
+            keynames=events.Keynames.CURTSIES,
+            full=False,
         )
         self.assertEqual(get_utf([b"\xc3"]), None)
         self.assertEqual(get_utf([b"\xe2"]), None)
@@ -70,10 +79,15 @@ class TestGetKey(unittest.TestCase):
 
     def test_sequences_without_names(self):
         get_utf = partial(
-            events.get_key, encoding="utf-8", keynames="curtsies", full=False
+            events.get_key,
+            encoding="utf-8",
+            keynames=events.Keynames.CURTSIES,
+            full=False,
         )
         self.assertEqual(get_utf([b"\xc3"], full=True), "<Meta-C>")
-        self.assertEqual(get_utf([b"\xc3"], full=True, keynames="curses"), "xC3")
+        self.assertEqual(
+            get_utf([b"\xc3"], full=True, keynames=events.Keynames.CURSES), "xC3"
+        )
 
     def test_key_names(self):
         "Every key sequence with a Curses name should have a Curtsies name too."
@@ -86,22 +100,33 @@ class TestGetKey(unittest.TestCase):
 class TestGetKeyAscii(unittest.TestCase):
     def test_full(self):
         get_ascii_full = partial(
-            events.get_key, encoding="ascii", keynames="curtsies", full=True
+            events.get_key,
+            encoding="ascii",
+            keynames=events.Keynames.CURTSIES,
+            full=True,
         )
         self.assertEqual(get_ascii_full([b"a"]), "a")
         self.assertEqual(get_ascii_full([b"\xe1"]), "<Meta-a>")
-        self.assertEqual(get_ascii_full([b"\xe1"], keynames="curses"), "xE1")
+        self.assertEqual(
+            get_ascii_full([b"\xe1"], keynames=events.Keynames.CURSES), "xE1"
+        )
 
     def test_simple(self):
-        get_ascii_full = partial(events.get_key, encoding="ascii", keynames="curtsies")
+        get_ascii_full = partial(
+            events.get_key, encoding="ascii", keynames=events.Keynames.CURTSIES
+        )
         self.assertEqual(get_ascii_full([b"a"]), "a")
         self.assertEqual(get_ascii_full([b"\xe1"]), "<Meta-a>")
-        self.assertEqual(get_ascii_full([b"\xe1"], keynames="curses"), "xE1")
+        self.assertEqual(
+            get_ascii_full([b"\xe1"], keynames=events.Keynames.CURSES), "xE1"
+        )
 
 
 class TestUnknownEncoding(unittest.TestCase):
     def test_simple(self):
-        get_utf16 = partial(events.get_key, encoding="utf16", keynames="curtsies")
+        get_utf16 = partial(
+            events.get_key, encoding="utf16", keynames=events.Keynames.CURTSIES
+        )
         self.assertEqual(get_utf16([b"a"]), None)
         self.assertEqual(get_utf16([b"a"], full=True), None)
         self.assertEqual(get_utf16([b"\xe1"]), None)

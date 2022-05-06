@@ -2,7 +2,8 @@
 import codecs
 import itertools
 import sys
-from typing import Optional, List, Union
+from enum import Enum, auto
+from typing import Dict, Optional, List, Union
 
 from .termhelpers import Termmode
 from .curtsieskeys import CURTSIES_NAMES as special_curtsies_names
@@ -11,7 +12,7 @@ chr_byte = lambda i: chr(i).encode("latin-1")
 chr_uni = chr
 
 
-CURTSIES_NAMES = {}
+CURTSIES_NAMES: Dict[bytes, str] = {}
 control_chars = {chr_byte(i): "<Ctrl-%s>" % chr(i + 0x60) for i in range(0x00, 0x1B)}
 CURTSIES_NAMES.update(control_chars)
 for i in range(0x00, 0x80):
@@ -78,6 +79,12 @@ for table in (CURSES_NAMES, CURTSIES_NAMES):
 MAX_KEYPRESS_SIZE = max(
     len(seq) for seq in itertools.chain(CURSES_NAMES.keys(), CURTSIES_NAMES.keys())
 )
+
+
+class Keynames(Enum):
+    CURTSIES = auto()
+    CURSES = auto()
+    BYTES = auto()
 
 
 class Event:
@@ -158,7 +165,10 @@ def decodable(seq: bytes, encoding: str) -> bool:
 
 
 def get_key(
-    bytes_: List[bytes], encoding: str, keynames: str = "curtsies", full: bool = False
+    bytes_: List[bytes],
+    encoding: str,
+    keynames: Keynames = Keynames.CURTSIES,
+    full: bool = False,
 ) -> Optional[str]:
     """Return key pressed from bytes_ or None
 
@@ -194,14 +204,12 @@ def get_key(
     """
     if not all(isinstance(c, bytes) for c in bytes_):
         raise TypeError("get key expects bytes, got %r" % bytes_)  # expects raw bytes
-    if keynames not in ["curtsies", "curses", "bytes"]:
-        raise ValueError("keynames must be one of 'curtsies', 'curses' or 'bytes'")
     seq = b"".join(bytes_)
     if len(seq) > MAX_KEYPRESS_SIZE:
         raise ValueError("unable to decode bytes %r" % seq)
 
     def key_name() -> str:
-        if keynames == "curses":
+        if keynames == Keynames.CURSES:
             # may not be here (and still not decodable) curses names incomplete
             if seq in CURSES_NAMES:
                 return CURSES_NAMES[seq]
@@ -223,14 +231,14 @@ def get_key(
                         "x%02X" % ord(seq[i : i + 1]) for i in range(len(seq))
                     )
                     # TODO if this isn't possible, return multiple meta keys as a paste event if paste events enabled
-        elif keynames == "curtsies":
+        elif keynames == Keynames.CURTSIES:
             if seq in CURTSIES_NAMES:
                 return CURTSIES_NAMES[seq]
             return seq.decode(
                 encoding
             )  # assumes that curtsies names are a subset of curses ones
         else:
-            assert keynames == "bytes"
+            assert keynames == Keynames.BYTES
             return seq  # type: ignore
 
     key_known = seq in CURTSIES_NAMES or seq in CURSES_NAMES or decodable(seq, encoding)
