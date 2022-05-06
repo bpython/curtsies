@@ -145,8 +145,8 @@ class Chunk:
     @cached_property
     def color_str(self) -> str:
         "Return an escape-coded string to write to the terminal."
-        s = self.s
-        for k, v in sorted(self.atts.items()):
+        s = self._s
+        for k, v in sorted(self._atts.items()):
             # (self.atts sorted for the sake of always acting the same.)
             if k not in xforms:
                 # Unsupported SGR code
@@ -168,16 +168,16 @@ class Chunk:
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Chunk):
             return NotImplemented
-        return self.s == other.s and self.atts == other.atts
+        return self._s == other._s and self._atts == other._atts
 
     def __hash__(self) -> int:
-        return hash((self.s, self.atts))
+        return hash((self._s, self._atts))
 
     def __repr__(self) -> str:
         return "Chunk({s}{sep}{atts})".format(
-            s=repr(self.s),
-            sep=", " if self.atts else "",
-            atts=stable_format_dict(self.atts) if self.atts else "",
+            s=repr(self._s),
+            sep=", " if self._atts else "",
+            atts=stable_format_dict(self._atts) if self._atts else "",
         )
 
     def repr_part(self) -> str:
@@ -191,10 +191,10 @@ class Chunk:
             else:
                 return att
 
-        atts_out = {k: v for (k, v) in self.atts.items() if v}
+        atts_out = {k: v for (k, v) in self._atts.items() if v}
         return (
             "".join(pp_att(att) + "(" for att in sorted(atts_out))
-            + repr(self.s)
+            + repr(self._s)
             + ")" * len(atts_out)
         )
 
