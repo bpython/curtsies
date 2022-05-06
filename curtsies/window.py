@@ -3,6 +3,7 @@
 
 
 from typing import (
+    ContextManager,
     Optional,
     IO,
     Dict,
@@ -33,7 +34,7 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T", bound="BaseWindow")
 
 
-class BaseWindow:
+class BaseWindow(ContextManager):
     def __init__(
         self, out_stream: Optional[IO] = None, hide_cursor: bool = True
     ) -> None:
@@ -126,7 +127,7 @@ class BaseWindow:
         return for_stdout
 
 
-class FullscreenWindow(BaseWindow):
+class FullscreenWindow(BaseWindow, ContextManager["FullscreenWindow"]):
     """2D-text rendering window that disappears when its context is left
 
     FullscreenWindow will only render arrays the size of the terminal
@@ -227,7 +228,7 @@ class FullscreenWindow(BaseWindow):
             self.write(self.t.normal_cursor)
 
 
-class CursorAwareWindow(BaseWindow):
+class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
     """
     Renders to the normal terminal screen and
     can find the location of the cursor.

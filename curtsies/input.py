@@ -12,7 +12,18 @@ import tty
 from .termhelpers import Nonblocking
 from . import events
 
-from typing import Callable, Type, TextIO, Optional, List, Union, cast, Tuple, Any
+from typing import (
+    Callable,
+    ContextManager,
+    Type,
+    TextIO,
+    Optional,
+    List,
+    Union,
+    cast,
+    Tuple,
+    Any,
+)
 from types import TracebackType, FrameType
 
 
@@ -27,7 +38,7 @@ def is_main_thread() -> bool:
     return threading.current_thread() == threading.main_thread()
 
 
-class ReplacedSigIntHandler:
+class ReplacedSigIntHandler(ContextManager):
     def __init__(self, handler: Callable) -> None:
         self.handler = handler
 
@@ -43,7 +54,7 @@ class ReplacedSigIntHandler:
         signal.signal(signal.SIGINT, self.orig_sigint_handler)
 
 
-class Input:
+class Input(ContextManager["Input"]):
     """Keypress and control event generator"""
 
     def __init__(

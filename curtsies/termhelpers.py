@@ -3,13 +3,13 @@ import termios
 import fcntl
 import os
 
-from typing import IO, Type, List, Union, Optional
+from typing import IO, ContextManager, Type, List, Union, Optional
 from types import TracebackType
 
 _Attr = List[Union[int, List[Union[bytes, int]]]]
 
 
-class Nonblocking:
+class Nonblocking(ContextManager):
     """
     A context manager for making an input stream nonblocking.
     """
@@ -31,7 +31,7 @@ class Nonblocking:
         fcntl.fcntl(self.fd, fcntl.F_SETFL, self.orig_fl)
 
 
-class Termmode:
+class Termmode(ContextManager):
     def __init__(self, stream: IO, attrs: _Attr) -> None:
         self.stream = stream
         self.attrs = attrs
@@ -49,7 +49,7 @@ class Termmode:
         termios.tcsetattr(self.stream, termios.TCSANOW, self.original_stty)
 
 
-class Cbreak:
+class Cbreak(ContextManager[Termmode]):
     def __init__(self, stream: IO) -> None:
         self.stream = stream
 
