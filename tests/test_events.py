@@ -45,7 +45,7 @@ class TestGetKey(unittest.TestCase):
         self.assertEqual(get_utf_full([b"h"]), "h")
         self.assertEqual(get_utf_full([b"\x1b", b"["]), "<Esc+[>")
         self.assertRaises(UnicodeDecodeError, get_utf_full, [b"\xfe\xfe"])
-        self.assertRaises(ValueError, get_utf_full, "a")
+        self.assertRaises(TypeError, get_utf_full, "a")
 
     def test_utf8(self):
         get_utf = partial(
@@ -54,7 +54,7 @@ class TestGetKey(unittest.TestCase):
         self.assertEqual(get_utf([b"h"]), "h")
         self.assertEqual(get_utf([b"\x1b", b"["]), None)
         self.assertEqual(get_utf([b"\xe2"]), None)
-        self.assertRaises(ValueError, get_utf, "a")
+        self.assertRaises(TypeError, get_utf, "a")
 
     def test_multibyte_utf8(self):
         get_utf = partial(

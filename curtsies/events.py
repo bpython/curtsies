@@ -192,8 +192,8 @@ def get_key(
     (for 'asdf', first on 'a', then on 'as', then on 'asd' - until a non-None
     value is returned)
     """
-    if not all(isinstance(c, type(b"")) for c in bytes_):
-        raise ValueError("get key expects bytes, got %r" % bytes_)  # expects raw bytes
+    if not all(isinstance(c, bytes) for c in bytes_):
+        raise TypeError("get key expects bytes, got %r" % bytes_)  # expects raw bytes
     if keynames not in ["curtsies", "curses", "bytes"]:
         raise ValueError("keynames must be one of 'curtsies', 'curses' or 'bytes'")
     seq = b"".join(bytes_)
