@@ -270,7 +270,11 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
         self._last_cursor_column: Optional[int] = None
         self._last_cursor_row: Optional[int] = None
         self.keep_last_line = keep_last_line
-        self.cbreak = Cbreak(self.in_stream)
+        self.cbreak = (
+            Cbreak(self.in_stream)
+            if in_stream != sys.__stdin__ and out_stream != sys.__stdout__
+            else self.t.cbreak()
+        )
         self.extra_bytes_callback = extra_bytes_callback
 
         # whether another SIGWINCH is queued up
