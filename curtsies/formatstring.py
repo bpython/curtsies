@@ -156,6 +156,7 @@ class Chunk:
             elif v is True:
                 s = one_arg_xforms[k](s)
             else:
+                # TODO: What's the purpose of this code? It will never be executed.
                 s = two_arg_xforms[k](s, v)
         return s
 
