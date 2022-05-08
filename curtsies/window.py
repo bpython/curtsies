@@ -29,9 +29,6 @@ from .termhelpers import Cbreak
 
 logger = logging.getLogger(__name__)
 
-SCROLL_DOWN = "\x1bD"
-FIRST_COLUMN = "\x1b[1G"
-
 
 T = TypeVar("T", bound="BaseWindow")
 
@@ -55,7 +52,7 @@ class BaseWindow:
 
         # since scroll-down only moves the screen if cursor is at bottom
         with self.t.location(x=0, y=1000000):
-            self.write(SCROLL_DOWN)  # TODO will blessed do this?
+            self.write(self.t.move_down)
 
     def write(self, msg: str) -> None:
         self.out_stream.write(msg)
@@ -296,9 +293,9 @@ class CursorAwareWindow(BaseWindow):
     ) -> None:
         if self.keep_last_line:
             # just moves cursor down if not on last line
-            self.write(SCROLL_DOWN)
+            self.write(self.t.move_down)
 
-        self.write(FIRST_COLUMN)
+        self.write(self.t.move_x(0))
         self.write(self.t.clear_eos)
         self.write(self.t.clear_eol)
         self.cbreak.__exit__(type, value, traceback)
