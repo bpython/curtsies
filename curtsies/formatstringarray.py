@@ -122,7 +122,7 @@ class FSArray(Sequence):
         logger.debug("slice: %r", slicetuple)
         if isinstance(slicetuple, slice):
             rowslice, colslice = slicetuple, slice(None)
-            if isinstance(value, (bytes, str)):
+            if isinstance(value, str):
                 raise ValueError(
                     "if slice is 2D, value must be 2D as in of list type []"
                 )

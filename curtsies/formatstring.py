@@ -829,7 +829,7 @@ def normalize_slice(length: int, index: Union[int, slice]) -> slice:
 
 
 def parse_args(
-    args: Tuple[Union[bytes, str], ...],
+    args: Tuple[str, ...],
     kwargs: MutableMapping[str, Union[int, bool, str]],
 ) -> Mapping[str, Union[int, bool]]:
     """Returns a kwargs dictionary by turning args into kwargs"""
@@ -837,9 +837,9 @@ def parse_args(
         args += (cast(str, kwargs["style"]),)
         del kwargs["style"]
     for arg in args:
+        if not isinstance(arg, str):
+            raise ValueError(f"args must be strings: {arg!r}")
         arg = cast(str, arg)
-        if not isinstance(arg, (bytes, str)):
-            raise ValueError("args must be strings:" + repr(args))
         if arg.lower() in FG_COLORS:
             if "fg" in kwargs:
                 raise ValueError("fg specified twice")
@@ -851,20 +851,20 @@ def parse_args(
         elif arg.lower() in STYLES:
             kwargs[arg] = True
         else:
-            raise ValueError("couldn't process arg: " + repr(arg))
+            raise ValueError(f"couldn't process arg: {args!r}")
     for k in kwargs:
-        if k not in ["fg", "bg"] + list(STYLES.keys()):
+        if k not in ("fg", "bg") and k not in STYLES.keys():
             raise ValueError("Can't apply that transformation")
     if "fg" in kwargs:
         if kwargs["fg"] in FG_COLORS:
             kwargs["fg"] = FG_COLORS[cast(str, kwargs["fg"])]
         if kwargs["fg"] not in list(FG_COLORS.values()):
-            raise ValueError("Bad fg value: %r" % kwargs["fg"])
+            raise ValueError(f"Bad fg value: {kwargs['fg']!r}")
     if "bg" in kwargs:
         if kwargs["bg"] in BG_COLORS:
             kwargs["bg"] = BG_COLORS[cast(str, kwargs["bg"])]
         if kwargs["bg"] not in list(BG_COLORS.values()):
-            raise ValueError("Bad bg value: %r" % kwargs["bg"])
+            raise ValueError(f"Bad bg value: {kwargs['bg']!r}")
     return cast(MutableMapping[str, Union[int, bool]], kwargs)
 
 
@@ -880,12 +880,10 @@ def fmtstr(string: Union[str, FmtStr], *args: Any, **kwargs: Any) -> FmtStr:
     atts = parse_args(args, kwargs)
     if isinstance(string, FmtStr):
         pass
-    elif isinstance(string, (bytes, str)):
+    elif isinstance(string, str):
         string = FmtStr.from_str(string)
     else:
         raise ValueError(
-            "Bad Args: {!r} (of type {}), {!r}, {!r}".format(
-                string, type(string), args, kwargs
-            )
+            f"Bad Args: {string!r} (of type {type(string)}), {args!r}, {kwargs!r}"
         )
     return string.copy_with_new_atts(**atts)
