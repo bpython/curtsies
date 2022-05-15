@@ -251,7 +251,9 @@ class FSArray(Sequence):
         )
 
 
-def fsarray(strings: List[Union[FmtStr, str]], *args: Any, **kwargs: Any) -> FSArray:
+def fsarray(
+    strings: Sequence[Union[FmtStr, str]], *args: Any, **kwargs: Any
+) -> FSArray:
     """fsarray(list_of_FmtStrs_or_strings, width=None) -> FSArray
 
     Returns a new FSArray of width of the maximum size of the provided
@@ -279,7 +281,7 @@ def fsarray(strings: List[Union[FmtStr, str]], *args: Any, **kwargs: Any) -> FSA
     return arr
 
 
-def simple_format(x: Union[FSArray, List[FmtStr]]) -> str:
+def simple_format(x: Union[FSArray, Sequence[FmtStr]]) -> str:
     return "\n".join(str(l) for l in x)
 
 

@@ -20,23 +20,22 @@ red('hello')
 """
 
 import re
-import sys
 from cwcwidth import wcswidth, wcwidth
 from itertools import chain
 from typing import (
-    Iterator,
-    Tuple,
-    List,
-    Union,
-    Optional,
     Any,
-    Mapping,
-    cast,
-    MutableMapping,
-    no_type_check,
-    Type,
     Callable,
+    Dict,
     Iterable,
+    Iterator,
+    List,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+    no_type_check,
 )
 
 try:
@@ -76,8 +75,8 @@ xforms.update(one_arg_xforms)
 xforms.update(two_arg_xforms)
 
 
-class FrozenDict(dict):
-    """Immutable dictionary class"""
+class FrozenAttributes(Dict[str, Union[int, bool]]):
+    """Immutable dictionary class for format string attributes"""
 
     @no_type_check
     def __setitem__(self, key, value):
@@ -87,11 +86,11 @@ class FrozenDict(dict):
     def update(self, *args, **kwds):
         raise Exception("Cannot change value.")
 
-    def extend(self, dictlike: Mapping[str, Union[int, bool]]) -> "FrozenDict":
-        return FrozenDict(chain(self.items(), dictlike.items()))
+    def extend(self, dictlike: Mapping[str, Union[int, bool]]) -> "FrozenAttributes":
+        return FrozenAttributes(chain(self.items(), dictlike.items()))
 
-    def remove(self, *keys: str) -> "FrozenDict":
-        return FrozenDict((k, v) for k, v in self.items() if k not in keys)
+    def remove(self, *keys: str) -> "FrozenAttributes":
+        return FrozenAttributes((k, v) for k, v in self.items() if k not in keys)
 
 
 def stable_format_dict(d: Mapping) -> str:
@@ -121,14 +120,14 @@ class Chunk:
         if not isinstance(string, str):
             raise ValueError("unicode string required, got %r" % string)
         self._s = string
-        self._atts = FrozenDict(atts if atts else {})
+        self._atts = FrozenAttributes(atts if atts else {})
 
     @property
     def s(self) -> str:
         return self._s
 
     @property
-    def atts(self) -> Mapping[str, Union[int, bool]]:
+    def atts(self) -> FrozenAttributes:
         "Attributes, e.g. {'fg': 34, 'bold': True} where 34 is the escape code for ..."
         return self._atts
 
@@ -417,8 +416,9 @@ class FmtStr:
     def copy_with_new_atts(self, **attributes: Union[bool, int]) -> "FmtStr":
         """Returns a new FmtStr with the same content but new formatting"""
 
-        result = FmtStr(*(Chunk(bfs.s, bfs.atts.extend(attributes)) for bfs in self.chunks))  # type: ignore
-        return result
+        return FmtStr(
+            *(Chunk(bfs.s, bfs.atts.extend(attributes)) for bfs in self.chunks)
+        )
 
     def join(self, iterable: Iterable[Union[str, "FmtStr"]]) -> "FmtStr":
         """Joins an iterable yielding strings or FmtStrs with self as separator"""
