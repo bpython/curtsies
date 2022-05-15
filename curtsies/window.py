@@ -7,6 +7,7 @@ from typing import (
     Optional,
     IO,
     Dict,
+    Sequence,
     TypeVar,
     Type,
     Tuple,
@@ -197,12 +198,9 @@ class FullscreenWindow(BaseWindow, ContextManager["FullscreenWindow"]):
             self.on_terminal_size_change(height, width)
 
         current_lines_by_row: Dict[int, Optional[FmtStr]] = {}
-        rows = list(range(height))
-        rows_for_use = rows[: len(array)]
-        rest_of_rows = rows[len(array) :]
 
         # rows which we have content for and don't require scrolling
-        for row, line in zip(rows_for_use, array):
+        for row, line in enumerate(array):
             current_lines_by_row[row] = line
             if line == self._last_lines_by_row.get(row, None):
                 continue
@@ -212,7 +210,7 @@ class FullscreenWindow(BaseWindow, ContextManager["FullscreenWindow"]):
                 self.write(self.t.clear_eol)
 
         # rows onscreen that we don't have content for
-        for row in rest_of_rows:
+        for row in range(len(array), height):
             if self._last_lines_by_row and row not in self._last_lines_by_row:
                 continue
             self.write(self.t.move(row, 0))
@@ -421,7 +419,9 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
         return cursor_dy
 
     def render_to_terminal(
-        self, array: Union[FSArray, List[FmtStr]], cursor_pos: Tuple[int, int] = (0, 0)
+        self,
+        array: Union[FSArray, Sequence[FmtStr]],
+        cursor_pos: Tuple[int, int] = (0, 0),
     ) -> int:
         """Renders array to terminal, returns the number of lines scrolled offscreen
 

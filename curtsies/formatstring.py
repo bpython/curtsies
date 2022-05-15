@@ -839,7 +839,6 @@ def parse_args(
     for arg in args:
         if not isinstance(arg, str):
             raise ValueError(f"args must be strings: {arg!r}")
-        arg = cast(str, arg)
         if arg.lower() in FG_COLORS:
             if "fg" in kwargs:
                 raise ValueError("fg specified twice")
@@ -878,11 +877,9 @@ def fmtstr(string: Union[str, FmtStr], *args: Any, **kwargs: Any) -> FmtStr:
     on_red(bold(blue('blarg')))
     """
     atts = parse_args(args, kwargs)
-    if isinstance(string, FmtStr):
-        pass
-    elif isinstance(string, str):
+    if isinstance(string, str):
         string = FmtStr.from_str(string)
-    else:
+    elif not isinstance(string, FmtStr):
         raise ValueError(
             f"Bad Args: {string!r} (of type {type(string)}), {args!r}, {kwargs!r}"
         )
