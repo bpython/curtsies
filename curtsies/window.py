@@ -265,13 +265,15 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
         if in_stream is None:
             in_stream = sys.__stdin__
         self.in_stream = in_stream
+        # whether we can use blessed to handle some operations
+        self._use_blessed = (
+            self.out_stream == sys.__stdout__ and self.in_stream == sys.__stdin__
+        )
         self._last_cursor_column: Optional[int] = None
         self._last_cursor_row: Optional[int] = None
         self.keep_last_line = keep_last_line
         self.cbreak = (
-            Cbreak(self.in_stream)
-            if in_stream != sys.__stdin__ and out_stream != sys.__stdout__
-            else self.t.cbreak()
+            Cbreak(self.in_stream) if not self._use_blessed else self.t.cbreak()
         )
         self.extra_bytes_callback = extra_bytes_callback
 
