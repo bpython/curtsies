@@ -310,6 +310,10 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
         """Returns the terminal (row, column) of the cursor
 
         0-indexed, like blessed cursor positions"""
+
+        if self._use_blessed:
+            return self.t.get_location()
+
         # TODO would this be cleaner as a parameter?
         in_stream = self.in_stream
 
