@@ -88,10 +88,7 @@ class FSArray(Sequence):
         if isinstance(slicetuple, slice):
             rowslice = normalize_slice(len(self.rows), slicetuple)
             return self.rows[rowslice]
-        (
-            row_slice_or_int,
-            col_slice_or_int,
-        ) = slicetuple  # type: Tuple[Union[int, slice], Union[int, slice]]
+        row_slice_or_int, col_slice_or_int = slicetuple
         rowslice = normalize_slice(len(self.rows), row_slice_or_int)
         colslice = normalize_slice(self.num_columns, col_slice_or_int)
         # TODO clean up slices
