@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.0] - 2022-08-28
+- Clean up both `wakeup_fds`
+- Drop support for Python 3.6
+- Switch to blessed
+- Typing: add more annotations
+
 ## [0.3.10] - 2021-10-08
 - Typing: more specify return types for event triggers
 - Typing: don't allow Event instances in PasteEvent contents
