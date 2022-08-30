@@ -290,8 +290,8 @@ class FmtStr:
         self._s: Optional[str] = None
         self._width: Optional[int] = None
 
-    @classmethod
-    def from_str(cls, s: str) -> "FmtStr":
+    @staticmethod
+    def from_str(s: str) -> "FmtStr":
         r"""
         Return a FmtStr representing input.
 
