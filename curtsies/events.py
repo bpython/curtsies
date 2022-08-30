@@ -3,7 +3,7 @@ import codecs
 import itertools
 import sys
 from enum import Enum, auto
-from typing import Dict, Optional, List, Union
+from typing import Optional, List, Sequence, Union
 
 from .termhelpers import Termmode
 from .curtsieskeys import CURTSIES_NAMES as special_curtsies_names
@@ -163,7 +163,7 @@ def decodable(seq: bytes, encoding: str) -> bool:
 
 
 def get_key(
-    bytes_: List[bytes],
+    bytes_: Sequence[bytes],
     encoding: str,
     keynames: Keynames = Keynames.CURTSIES,
     full: bool = False,
