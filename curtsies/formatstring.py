@@ -69,11 +69,6 @@ two_arg_xforms: Mapping[str, Callable[[str, int], str]] = {
     "bg": lambda s, v: seq(v) + s + seq(RESET_BG),
 }
 
-# TODO unused, remove this in next major release
-xforms: MutableMapping[str, Union[Callable[[str], str], Callable[[str, int], str]]] = {}
-xforms.update(one_arg_xforms)
-xforms.update(two_arg_xforms)
-
 
 class FrozenAttributes(Dict[str, Union[int, bool]]):
     """Immutable dictionary class for format string attributes"""
@@ -147,7 +142,7 @@ class Chunk:
         s = self._s
         for k, v in sorted(self._atts.items()):
             # (self.atts sorted for the sake of always acting the same.)
-            if k not in xforms:
+            if k not in one_arg_xforms and k not in two_arg_xforms:
                 # Unsupported SGR code
                 continue
             elif v is False:
