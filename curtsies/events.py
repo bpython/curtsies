@@ -162,6 +162,39 @@ def decodable(seq: bytes, encoding: str) -> bool:
         return True
 
 
+def _key_name(seq: bytes, encoding: str, keynames: Keynames) -> str:
+    if keynames == Keynames.CURSES:
+        # may not be here (and still not decodable) curses names incomplete
+        if seq in CURSES_NAMES:
+            return CURSES_NAMES[seq]
+
+        # Otherwise, there's no special curses name for this
+        try:
+            # for normal decodable text or a special curtsies sequence with bytes that can be decoded
+            return seq.decode(encoding)
+        except UnicodeDecodeError:
+            # this sequence can't be decoded with this encoding, so we need to represent the bytes
+            if len(seq) == 1:
+                return "x%02X" % ord(seq)
+                # TODO figure out a better thing to return here
+            else:
+                raise NotImplementedError(
+                    "are multibyte unnameable sequences possible?"
+                )
+                return "bytes: " + "-".join(
+                    "x%02X" % ord(seq[i : i + 1]) for i in range(len(seq))
+                )
+                # TODO if this isn't possible, return multiple meta keys as a paste event if paste events enabled
+    elif keynames == Keynames.CURTSIES:
+        if seq in CURTSIES_NAMES:
+            return CURTSIES_NAMES[seq]
+        # assumes that curtsies names are a subset of curses ones
+        return seq.decode(encoding)
+    else:
+        assert keynames == Keynames.BYTES
+        return seq  # type: ignore
+
+
 def get_key(
     bytes_: Sequence[bytes],
     encoding: str,
@@ -206,47 +239,14 @@ def get_key(
     if len(seq) > MAX_KEYPRESS_SIZE:
         raise ValueError("unable to decode bytes %r" % seq)
 
-    def key_name() -> str:
-        if keynames == Keynames.CURSES:
-            # may not be here (and still not decodable) curses names incomplete
-            if seq in CURSES_NAMES:
-                return CURSES_NAMES[seq]
-
-            # Otherwise, there's no special curses name for this
-            try:
-                # for normal decodable text or a special curtsies sequence with bytes that can be decoded
-                return seq.decode(encoding)
-            except UnicodeDecodeError:
-                # this sequence can't be decoded with this encoding, so we need to represent the bytes
-                if len(seq) == 1:
-                    return "x%02X" % ord(seq)
-                    # TODO figure out a better thing to return here
-                else:
-                    raise NotImplementedError(
-                        "are multibyte unnameable sequences possible?"
-                    )
-                    return "bytes: " + "-".join(
-                        "x%02X" % ord(seq[i : i + 1]) for i in range(len(seq))
-                    )
-                    # TODO if this isn't possible, return multiple meta keys as a paste event if paste events enabled
-        elif keynames == Keynames.CURTSIES:
-            if seq in CURTSIES_NAMES:
-                return CURTSIES_NAMES[seq]
-            return seq.decode(
-                encoding
-            )  # assumes that curtsies names are a subset of curses ones
-        else:
-            assert keynames == Keynames.BYTES
-            return seq  # type: ignore
-
     key_known = seq in CURTSIES_NAMES or seq in CURSES_NAMES or decodable(seq, encoding)
 
     if full and key_known:
-        return key_name()
+        return _key_name(seq, encoding, keynames)
     elif seq in KEYMAP_PREFIXES or could_be_unfinished_char(seq, encoding):
         return None  # need more input to make up a full keypress
     elif key_known:
-        return key_name()
+        return _key_name(seq, encoding, keynames)
     else:
         # this will raise a unicode error (they're annoying to raise ourselves)
         seq.decode(encoding)
