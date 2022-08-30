@@ -12,9 +12,7 @@ chr_byte = lambda i: chr(i).encode("latin-1")
 chr_uni = chr
 
 
-CURTSIES_NAMES: Dict[bytes, str] = {}
-control_chars = {chr_byte(i): "<Ctrl-%s>" % chr(i + 0x60) for i in range(0x00, 0x1B)}
-CURTSIES_NAMES.update(control_chars)
+CURTSIES_NAMES = {chr_byte(i): "<Ctrl-%s>" % chr(i + 0x60) for i in range(0x00, 0x1B)}
 for i in range(0x00, 0x80):
     CURTSIES_NAMES[b"\x1b" + chr_byte(i)] = "<Esc+%s>" % chr(i)
 for i in range(0x00, 0x1B):  # Overwrite the control keys with better labels
