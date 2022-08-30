@@ -271,16 +271,14 @@ def could_be_unfinished_char(seq: bytes, encoding: str) -> bool:
 
 def could_be_unfinished_utf8(seq: bytes) -> bool:
     # http://en.wikipedia.org/wiki/UTF-8#Description
-
-    # fmt: off
-    if   ord(seq[0:1]) & 0b10000000 == 0b10000000 and len(seq) < 1: return True
-    elif ord(seq[0:1]) & 0b11100000 == 0b11000000 and len(seq) < 2: return True
-    elif ord(seq[0:1]) & 0b11110000 == 0b11100000 and len(seq) < 3: return True
-    elif ord(seq[0:1]) & 0b11111000 == 0b11110000 and len(seq) < 4: return True
-    elif ord(seq[0:1]) & 0b11111100 == 0b11111000 and len(seq) < 5: return True
-    elif ord(seq[0:1]) & 0b11111110 == 0b11111100 and len(seq) < 6: return True
-    else: return False
-    # fmt: on
+    o = ord(seq[0:1])
+    return (
+        (o & 0b11100000 == 0b11000000 and len(seq) < 2)
+        or (o & 0b11110000 == 0b11100000 and len(seq) < 3)
+        or (o & 0b11111000 == 0b11110000 and len(seq) < 4)
+        or (o & 0b11111100 == 0b11111000 and len(seq) < 5)
+        or (o & 0b11111110 == 0b11111100 and len(seq) < 6)
+    )
 
 
 def pp_event(seq: Union[Event, str]) -> Union[str, bytes]:
