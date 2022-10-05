@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.1] - 2022-10-05
+- Unbreak process suspension with blessed
+- Remove xforms.
+
 ## [0.4.0] - 2022-08-28
 - Clean up both `wakeup_fds`
 - Drop support for Python 3.6
