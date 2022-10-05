@@ -272,9 +272,6 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
         self._last_cursor_column: Optional[int] = None
         self._last_cursor_row: Optional[int] = None
         self.keep_last_line = keep_last_line
-        self.cbreak = (
-            Cbreak(self.in_stream) if not self._use_blessed else self.t.cbreak()
-        )
         self.extra_bytes_callback = extra_bytes_callback
 
         # whether another SIGWINCH is queued up
@@ -284,6 +281,9 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
         self.in_get_cursor_diff = False
 
     def __enter__(self) -> "CursorAwareWindow":
+        self.cbreak = (
+            Cbreak(self.in_stream) if not self._use_blessed else self.t.cbreak()
+        )
         self.cbreak.__enter__()
         self.top_usable_row, _ = self.get_cursor_position()
         self._orig_top_usable_row = self.top_usable_row
