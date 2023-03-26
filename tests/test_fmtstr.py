@@ -1,4 +1,3 @@
-import sys
 import unittest
 from curtsies.formatstring import (
     FmtStr,
@@ -372,7 +371,7 @@ class TestUnicode(unittest.TestCase):
 
     def test_funny_chars(self) -> None:
         fmtstr("⁇", "blue")
-        str(Chunk("⁇", {"fg": "blue"}))
+        str(Chunk("⁇", {"fg": 34}))
         str(fmtstr("⁇", "blue"))
         self.assertTrue(True)
 
