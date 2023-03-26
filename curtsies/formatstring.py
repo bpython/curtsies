@@ -203,6 +203,11 @@ class ChunkSplitter:
     """
 
     def __init__(self, chunk: Chunk) -> None:
+        self.reinit(chunk)
+
+    def reinit(self, chunk: Chunk) -> None:
+        """Reuse an existing Splitter instance for speed."""
+        # TODO benchmark to prove this is worthwhile
         self.chunk = chunk
         self.internal_offset = 0  # index into chunk.s
         self.internal_width = 0  # width of chunks.s[:self.internal_offset]
@@ -210,11 +215,6 @@ class ChunkSplitter:
         for c in self.chunk.s:
             divides.append(divides[-1] + wcwidth(c))
         self.divides = divides
-
-    def reinit(self, chunk: Chunk) -> None:
-        """Reuse an existing Splitter instance for speed."""
-        # TODO benchmark to prove this is worthwhile
-        self.__init__(chunk)  # type: ignore
 
     def request(self, max_width: int) -> Optional[Tuple[int, Chunk]]:
         """Requests a sub-chunk of max_width or shorter. Returns None if no chunks left."""
