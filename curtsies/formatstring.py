@@ -561,7 +561,7 @@ class FmtStr:
     # TODO ensure empty FmtStr isn't a problem
 
     @property
-    def shared_atts(self) -> Mapping[str, Union[int, bool]]:
+    def shared_atts(self) -> Dict[str, Union[int, bool]]:
         """Gets atts shared among all nonzero length component Chunks"""
         # TODO cache this, could get ugly for large FmtStrs
         atts = {}
