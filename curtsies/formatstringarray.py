@@ -268,13 +268,16 @@ def fsarray(
             raise ValueError(f"Those strings won't fit for width {width}")
     else:
         width = max(len(s) for s in strings) if strings else 0
-    fstrings = [
-        s if isinstance(s, FmtStr) else fmtstr(s, *args, **kwargs) for s in strings
-    ]
-    arr = FSArray(len(fstrings), width, *args, **kwargs)
+    arr = FSArray(len(strings), width, *args, **kwargs)
     rows = [
         fs.setslice_with_length(0, len(s), s, width)
-        for fs, s in zip(arr.rows, fstrings)
+        for fs, s in zip(
+            arr.rows,
+            (
+                s if isinstance(s, FmtStr) else fmtstr(s, *args, **kwargs)
+                for s in strings
+            ),
+        )
     ]
     arr.rows = rows
     return arr
