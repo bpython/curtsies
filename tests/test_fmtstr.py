@@ -557,8 +557,7 @@ class TestFSArray(unittest.TestCase):
     def test_assignment_working(self) -> None:
         t = FSArray(10, 10)
         t[2, 2] = "a"
-        # TODO: is this supposed to check something?
-        t[2, 2] == "a"
+        self.assertEqual(t[2, 2], ["a"])
 
     def test_normalize_slice(self) -> None:
         class SliceBuilder:
