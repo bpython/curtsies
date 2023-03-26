@@ -73,12 +73,10 @@ two_arg_xforms: Mapping[str, Callable[[str, int], str]] = {
 class FrozenAttributes(Dict[str, Union[int, bool]]):
     """Immutable dictionary class for format string attributes"""
 
-    @no_type_check
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Union[int, bool]) -> None:
         raise Exception("Cannot change value.")
 
-    @no_type_check
-    def update(self, *args, **kwds):
+    def update(self, *args: Any, **kwds: Any) -> None:
         raise Exception("Cannot change value.")
 
     def extend(self, dictlike: Mapping[str, Union[int, bool]]) -> "FrozenAttributes":
