@@ -31,6 +31,7 @@ from .formatstring import FmtStr
 
 from typing import (
     Any,
+    Optional,
     Union,
     List,
     Sequence,
@@ -249,7 +250,10 @@ class FSArray(Sequence):
 
 
 def fsarray(
-    strings: Sequence[Union[FmtStr, str]], *args: Any, **kwargs: Any
+    strings: Sequence[Union[FmtStr, str]],
+    width: Optional[int] = None,
+    *args: Any,
+    **kwargs: Any,
 ) -> FSArray:
     """fsarray(list_of_FmtStrs_or_strings, width=None) -> FSArray
 
@@ -259,9 +263,7 @@ def fsarray(
     are of length greater than this width"""
 
     strings = list(strings)
-    if "width" in kwargs:
-        width = kwargs["width"]
-        del kwargs["width"]
+    if width is not None:
         if strings and any(len(s) > width for s in strings):
             raise ValueError(f"Those strings won't fit for width {width}")
     else:
