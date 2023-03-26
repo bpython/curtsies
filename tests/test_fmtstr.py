@@ -401,7 +401,6 @@ class TestUnicode(unittest.TestCase):
         # self.assertEqual(len(fmtstr('┌─')), 2)
 
     def test_len_of_unicode_in_fsarray(self) -> None:
-
         fsa = FSArray(3, 2)
         fsa.rows[0] = fsa.rows[0].setslice_with_length(0, 2, "┌─", 2)
         self.assertEqual(fsa.shape, (3, 2))

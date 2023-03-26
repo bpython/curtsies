@@ -10,6 +10,7 @@ SPECIALS = {
     "C-_": "<Ctrl-/>",
 }
 
+
 # TODO make a precalculated version of this
 class KeyMap:
     """Maps config file key syntax to Curtsies names"""

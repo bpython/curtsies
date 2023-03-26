@@ -1,4 +1,3 @@
-import functools
 import locale
 import os
 import sys
@@ -154,7 +153,6 @@ class TestCursorAwareWindow(unittest.TestCase):
     # This isn't passing locally for me anymore :/
     @expectedFailure
     def test_inital_cursor_position(self):
-
         self.screen.cursor.y += 1
         with self.window:
             self.assertEqual(self.window.top_usable_row, 1)
