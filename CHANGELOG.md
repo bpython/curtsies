@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.2] - 2023-07-31
+- Small type annotation clean ups.
+- Publish wheels.
+
 ## [0.4.1] - 2022-10-05
 - Unbreak process suspension with blessed
 - Remove xforms.
