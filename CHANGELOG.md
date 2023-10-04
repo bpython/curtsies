@@ -27,7 +27,7 @@
 ## [0.3.5] - 2021-01-24
 - Drop supported for Python 2, 3.4 and 3.5.
 - Migrate to pytest. Thanks to Paolo Stivanin
-- Add new exmples. Thanks to rybarczykj
+- Add new examples. Thanks to rybarczykj
 - Improve error messages. Thanks to Etienne Richart
 - Replace wcwidth with cwcwidth
 
