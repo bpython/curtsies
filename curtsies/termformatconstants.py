@@ -6,7 +6,7 @@ colors = "black", "red", "green", "yellow", "blue", "magenta", "cyan", "gray"
 FG_COLORS: Mapping[str, int] = dict(zip(colors, range(30, 38)))
 BG_COLORS: Mapping[str, int] = dict(zip(colors, range(40, 48)))
 STYLES: Mapping[str, int] = dict(
-    zip(("bold", "dark", "underline", "blink", "invert"), (1, 2, 4, 5, 7))
+    zip(("bold", "dark", "italic", "underline", "blink", "invert"), (1, 2, 3, 4, 5, 7))
 )
 FG_NUMBER_TO_COLOR: Mapping[int, str] = dict(zip(FG_COLORS.values(), FG_COLORS.keys()))
 BG_NUMBER_TO_COLOR: Mapping[int, str] = dict(zip(BG_COLORS.values(), BG_COLORS.keys()))
