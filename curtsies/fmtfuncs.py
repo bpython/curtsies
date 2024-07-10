@@ -22,6 +22,7 @@ on_gray = _partial(fmtstr, style="on_gray")
 
 bold = _partial(fmtstr, style="bold")
 dark = _partial(fmtstr, style="dark")
+italic = _partial(fmtstr, style="italic")
 underline = _partial(fmtstr, style="underline")
 blink = _partial(fmtstr, style="blink")
 invert = _partial(fmtstr, style="invert")
