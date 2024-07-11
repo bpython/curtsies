@@ -59,7 +59,7 @@ from .termformatconstants import (
 one_arg_xforms: Mapping[str, Callable[[str], str]] = {
     "bold": lambda s: seq(STYLES["bold"]) + s + seq(RESET_ALL),
     "dark": lambda s: seq(STYLES["dark"]) + s + seq(RESET_ALL),
-	 "italic": lambda s: seq(STYLES["italic"]) + s + seq(RESET_ALL),
+    "italic": lambda s: seq(STYLES["italic"]) + s + seq(RESET_ALL),
     "underline": lambda s: seq(STYLES["underline"]) + s + seq(RESET_ALL),
     "blink": lambda s: seq(STYLES["blink"]) + s + seq(RESET_ALL),
     "invert": lambda s: seq(STYLES["invert"]) + s + seq(RESET_ALL),
