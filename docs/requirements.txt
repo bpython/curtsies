@@ -1,5 +1,4 @@
-ansi2html==1.0.7
-pexpect==3.3
-git+git://github.com/thomasballinger/wcwidth.git@fixes
-git+git://github.com/thomasballinger/curtsies.git@master
-sphinxcontrib-napoleon
+ansi2html==1.9.2
+pexpect==4.9.0
+sphinx==8.1.3
+-e ..
