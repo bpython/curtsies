@@ -1,7 +1,7 @@
 Curtsies documentation
 ^^^^^^^^^^^^^^^^^^^^^^
-.. |shoes| image:: http://ballingt.com/assets/curtsies-tritone-small.png
-.. |curtsiestitle| image:: http://ballingt.com/assets/curtsiestitle.png
+.. |shoes| image:: images/shoes.png
+.. |curtsiestitle| image:: images/logo.png
 
 |curtsiestitle|
 
