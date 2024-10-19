@@ -10,7 +10,7 @@ A window owns its output stream - it is assumed (but not enforced) that no addit
 an assumption which allows for example portions of the screen which do not change between renderings not to be redrawn during a rendering.
 
 There are two useful window classes, both subclasses of :py:class:`~curtsies.window.BaseWindow`. :py:class:`~curtsies.FullscreenWindow`
-renders to the terminal's `alternate screen buffer <http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#The%20Alternate%20Screen%20Buffer>`_
+renders to the terminal's `alternate screen buffer <https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#The%20Alternate%20Screen%20Buffer>`_
 (no history preserved, like command line tools ``Vim`` and ``top``)
 while :py:class:`~curtsies.CursorAwareWindow` renders to the normal screen.
 It is also is capable of querying the terminal for the cursor location,

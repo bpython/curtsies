@@ -1,15 +1,15 @@
 Examples
 ^^^^^^^^
 
-* `Tic-Tac-Toe <https://github.com/bpython/curtsies/blob/master/examples/tictactoeexample.py>`_
+* `Tic-Tac-Toe <https://github.com/bpython/curtsies/blob/main/examples/tictactoeexample.py>`_
 
 .. image:: http://i.imgur.com/AucB55B.png
 
-* `Avoid the X's game <https://github.com/bpython/curtsies/blob/master/examples/gameexample.py>`_
+* `Avoid the X's game <https://github.com/bpython/curtsies/blob/main/examples/gameexample.py>`_
 
 .. image:: http://i.imgur.com/nv1RQd3.png
 
-* `Bpython-curtsies uses curtsies <http://ballingt.com/2013/12/21/bpython-curtsies.html>`_
+* `Bpython-curtsies uses curtsies <https://ballingt.com/bpython-curtsies/>`_
 
 .. image:: http://i.imgur.com/r7rZiBS.png
-   :target: http://www.youtube.com/watch?v=lwbpC4IJlyA
+   :target: https://www.youtube.com/watch?v=lwbpC4IJlyA

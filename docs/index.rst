@@ -8,7 +8,7 @@ Curtsies documentation
 Curtsies is a Python 2.6+ & 3.3+ compatible library for interacting with the terminal.
 
 :py:class:`~curtsies.FmtStr` objects are strings formatted with
-colors and styles displayable in a terminal with `ANSI escape sequences <http://en.wikipedia.org/wiki/ANSI_escape_code>`_.
+colors and styles displayable in a terminal with `ANSI escape sequences <https://en.wikipedia.org/wiki/ANSI_escape_code>`_.
 :py:class:`~curtsies.FSArray` objects contain multiple such strings
 with each formatted string on its own row, and
 can be superimposed onto each other

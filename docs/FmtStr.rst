@@ -2,7 +2,7 @@ FmtStr
 ^^^^^^
 
 :py:class:`~curtsies.FmtStr` is a string with each character colored
-and styled in ways representable by `ANSI escape codes <http://en.wikipedia.org/wiki/ANSI_escape_code>`_.
+and styled in ways representable by `ANSI escape codes <https://en.wikipedia.org/wiki/ANSI_escape_code>`_.
 
 .. automodule:: curtsies.formatstring
 
@@ -64,14 +64,14 @@ invert     ``invert()``
 FmtStr - Rationale
 ==================
 
-If all you need is to print colored text, many other libraries also make `ANSI escape codes <http://en.wikipedia.org/wiki/ANSI_escape_code>`_ easy to use.
+If all you need is to print colored text, many other libraries also make `ANSI escape codes <https://en.wikipedia.org/wiki/ANSI_escape_code>`_ easy to use.
 
 * `Blessed <https://github.com/jquast/blessed>`_ (``pip install blessed``)
   As of version 0.1.0, Curtsies uses Blessed for terminal capabilities other
   than colored output.
-* `termcolor <https://pypi.python.org/pypi/termcolor>`_ (``pip install termcolor``)
+* `termcolor <https://pypi.org/project/termcolor/>`_ (``pip install termcolor``)
 * `Clint <https://github.com/kennethreitz/clint/blob/master/clint/textui/colored.py>`_ (``pip install clint``)
-* `colors <https://github.com/verigak/colors/>`_ (``pip install colors``)
+* `colors <https://github.com/verigak/colors>`_ (``pip install colors``)
 
 In all of the libraries listed above, the expression ``blue('hi') + ' ' + green('there)``
 or equivalent
@@ -218,7 +218,7 @@ To access this information, :py:class:`~curtsies.FmtStr` objects have a :py:clas
 >>> len(combined), combined.width, combined.s
 (2, 1, u'a\u0324')
 
-As shown above, `full width characters <http://en.wikipedia.org/wiki/Halfwidth_and_fullwidth_forms>`_ can take up two columns, and `combining characters <http://en.wikipedia.org/wiki/Combining_character>`_ may be combined with the previous character to form a single grapheme. Curtsies uses `Python bindings of wcwidth <https://github.com/sebastinas/cwcwidth>`_ to do this calculation.
+As shown above, `full width characters <https://en.wikipedia.org/wiki/Halfwidth_and_fullwidth_forms>`_ can take up two columns, and `combining characters <https://en.wikipedia.org/wiki/Combining_character>`_ may be combined with the previous character to form a single grapheme. Curtsies uses `Python bindings of wcwidth <https://github.com/sebastinas/cwcwidth>`_ to do this calculation.
 
 FmtStr - API Docs
 =================
