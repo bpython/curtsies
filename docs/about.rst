@@ -4,7 +4,7 @@ About
 Resources
 =========
 
-I've written a little bit about Curtsies on `my blog <http://ballingt.com/2014/05/13/bpython-curtsies-release.html>`_.
+I've written a little bit about Curtsies on `my blog <https://ballingt.com/bpython-curtsies-release/>`_.
 
 The source and issue tracker for Curtsies are on `Github <https://github.com/bpython/curtsies>`_.
 
@@ -13,8 +13,8 @@ A good place to ask questions about Curtsies is `#bpython on irc.freenode.net <h
 Authors
 =======
 
-Curtsies was written by `Thomas Ballinger <http://ballingt.com>`_ to create
-a frontend for `bpython <http://bpython-interpreter.org/>`_ that preserved terminal history.
+Curtsies was written by `Thomas Ballinger <https://ballingt.com/>`_ to create
+a frontend for `bpython <https://bpython-interpreter.org/>`_ that preserved terminal history.
 
 Thanks so much to the many people that have contributed to it!
 
