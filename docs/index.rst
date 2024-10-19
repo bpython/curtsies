@@ -29,6 +29,7 @@ all of these classes.
    FSArray
    window
    Input
+   game
    gameloop
    examples
    about
