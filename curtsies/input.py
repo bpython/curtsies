@@ -57,6 +57,8 @@ class ReplacedSigIntHandler(ContextManager):
 class Input(ContextManager["Input"]):
     """Keypress and control event generator"""
 
+    in_stream: TextIO
+
     def __init__(
         self,
         in_stream: Optional[TextIO] = None,
@@ -82,6 +84,7 @@ class Input(ContextManager["Input"]):
         """
         if in_stream is None:
             in_stream = sys.__stdin__
+            assert in_stream is not None
         self.in_stream = in_stream
         self.unprocessed_bytes: List[bytes] = []  # leftover from stdin, unprocessed yet
         if isinstance(keynames, str):
