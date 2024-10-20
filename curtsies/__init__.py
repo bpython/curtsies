@@ -1,4 +1,5 @@
 """Terminal-formatted strings"""
+
 __version__ = "0.4.2"
 
 from .window import FullscreenWindow, CursorAwareWindow
