@@ -1,4 +1,5 @@
 """Events for keystrokes and other input events"""
+
 import codecs
 import itertools
 import sys

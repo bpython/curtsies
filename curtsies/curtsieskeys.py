@@ -1,4 +1,5 @@
 """All the key sequences"""
+
 # If you add a binding, add something about your setup
 # if you can figure out why it's different
 

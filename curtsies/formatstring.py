@@ -93,9 +93,11 @@ def stable_format_dict(d: Mapping) -> str:
     Does not work for dicts with unicode strings as values."""
     inner = ", ".join(
         "{}: {}".format(
-            repr(k)[1:]
-            if repr(k).startswith("u'") or repr(k).startswith('u"')
-            else repr(k),
+            (
+                repr(k)[1:]
+                if repr(k).startswith("u'") or repr(k).startswith('u"')
+                else repr(k)
+            ),
             v,
         )
         for k, v in sorted(d.items())
