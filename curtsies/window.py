@@ -42,6 +42,7 @@ class BaseWindow(ContextManager):
         logger.debug("-------initializing Window object %r------" % self)
         if out_stream is None:
             out_stream = sys.__stdout__
+            assert out_stream is not None
         self.t = blessed.Terminal(stream=out_stream, force_styling=True)
         self.out_stream = out_stream
         self.hide_cursor = hide_cursor
@@ -241,10 +242,12 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
         Only use the render_to_terminal interface for moving the cursor.
     """
 
+    in_stream: TextIO
+
     def __init__(
         self,
-        out_stream: Optional[IO] = None,
-        in_stream: Optional[IO] = None,
+        out_stream: Optional[TextIO] = None,
+        in_stream: Optional[TextIO] = None,
         keep_last_line: bool = False,
         hide_cursor: bool = True,
         extra_bytes_callback: Optional[Callable[[bytes], None]] = None,
@@ -264,6 +267,7 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
         super().__init__(out_stream=out_stream, hide_cursor=hide_cursor)
         if in_stream is None:
             in_stream = sys.__stdin__
+            assert in_stream is not None
         self.in_stream = in_stream
         # whether we can use blessed to handle some operations
         self._use_blessed = (
