@@ -4,7 +4,8 @@ import codecs
 import itertools
 import sys
 from enum import Enum, auto
-from typing import Optional, List, Sequence, Union
+from typing import Optional, List, Union
+from collections.abc import Sequence
 
 from .termhelpers import Termmode
 from .curtsieskeys import CURTSIES_NAMES as special_curtsies_names
@@ -144,7 +145,7 @@ class PasteEvent(Event):
     """
 
     def __init__(self) -> None:
-        self.events: List[str] = []
+        self.events: list[str] = []
 
     def __repr__(self) -> str:
         return "<Paste Event with data: %r>" % self.events

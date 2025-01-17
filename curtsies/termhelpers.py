@@ -6,7 +6,7 @@ import os
 from typing import IO, ContextManager, Type, List, Union, Optional
 from types import TracebackType
 
-_Attr = List[Union[int, List[Union[bytes, int]]]]
+_Attr = list[Union[int, list[Union[bytes, int]]]]
 
 
 class Nonblocking(ContextManager):
@@ -24,7 +24,7 @@ class Nonblocking(ContextManager):
 
     def __exit__(
         self,
-        type: Optional[Type[BaseException]] = None,
+        type: Optional[type[BaseException]] = None,
         value: Optional[BaseException] = None,
         traceback: Optional[TracebackType] = None,
     ) -> None:
@@ -42,7 +42,7 @@ class Termmode(ContextManager):
 
     def __exit__(
         self,
-        type: Optional[Type[BaseException]] = None,
+        type: Optional[type[BaseException]] = None,
         value: Optional[BaseException] = None,
         traceback: Optional[TracebackType] = None,
     ) -> None:
@@ -60,7 +60,7 @@ class Cbreak(ContextManager[Termmode]):
 
     def __exit__(
         self,
-        type: Optional[Type[BaseException]] = None,
+        type: Optional[type[BaseException]] = None,
         value: Optional[BaseException] = None,
         traceback: Optional[TracebackType] = None,
     ) -> None:

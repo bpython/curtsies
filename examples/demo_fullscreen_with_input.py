@@ -10,7 +10,7 @@ def fullscreen_winch_with_input():
     print('this should be just off-screen')
     w = FullscreenWindow(sys.stdout)
     def sigwinch_handler(signum, frame):
-        print('sigwinch! Changed from {!r} to {!r}'.format((rows, columns), (w.height, w.width)))
+        print(f'sigwinch! Changed from {(rows, columns)!r} to {(w.height, w.width)!r}')
     signal.signal(signal.SIGWINCH, sigwinch_handler)
     with w:
         with Cbreak(sys.stdin):

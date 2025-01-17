@@ -17,7 +17,7 @@ def cursor_winch():
         dy = w.get_cursor_vertical_diff()
         old_rows, old_columns = rows, columns
         rows, columns = w.height, w.width
-        print('sigwinch! Changed from {!r} to {!r}'.format((old_rows, old_columns), (rows, columns)))
+        print(f'sigwinch! Changed from {(old_rows, old_columns)!r} to {(rows, columns)!r}')
         print('cursor moved %d lines down' % dy)
         w.write(w.t.move_up)
         w.write(w.t.move_up)

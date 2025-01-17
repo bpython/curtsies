@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2010, Sebastian Wiesner <lunaryorn@googlemail.com>
 # All rights reserved.
 
@@ -78,7 +77,7 @@ CODE_CLASS_MAP = {
 }
 
 
-class ANSIColorParser(object):
+class ANSIColorParser:
     """
     Traverse a document, look for ansi_literal_block nodes, parse these
     nodes, and replace them with literal blocks, containing proper child

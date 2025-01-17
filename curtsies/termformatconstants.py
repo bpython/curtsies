@@ -1,6 +1,6 @@
 """Constants for terminal formatting"""
 
-from typing import Mapping
+from collections.abc import Mapping
 
 colors = "black", "red", "green", "yellow", "blue", "magenta", "cyan", "gray"
 FG_COLORS: Mapping[str, int] = dict(zip(colors, range(30, 38)))

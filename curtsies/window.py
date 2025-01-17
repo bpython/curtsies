@@ -7,7 +7,6 @@ from typing import (
     Optional,
     IO,
     Dict,
-    Sequence,
     TypeVar,
     Type,
     Tuple,
@@ -17,6 +16,7 @@ from typing import (
     Union,
     List,
 )
+from collections.abc import Sequence
 from types import TracebackType
 
 import logging
@@ -46,7 +46,7 @@ class BaseWindow(ContextManager):
         self.t = blessed.Terminal(stream=out_stream, force_styling=True)
         self.out_stream = out_stream
         self.hide_cursor = hide_cursor
-        self._last_lines_by_row: Dict[int, Optional[FmtStr]] = {}
+        self._last_lines_by_row: dict[int, Optional[FmtStr]] = {}
         self._last_rendered_width: Optional[int] = None
         self._last_rendered_height: Optional[int] = None
 
@@ -69,7 +69,7 @@ class BaseWindow(ContextManager):
 
     def __exit__(
         self,
-        type: Optional[Type[BaseException]] = None,
+        type: Optional[type[BaseException]] = None,
         value: Optional[BaseException] = None,
         traceback: Optional[TracebackType] = None,
     ) -> None:
@@ -85,11 +85,11 @@ class BaseWindow(ContextManager):
         self._last_rendered_height = height
 
     def render_to_terminal(
-        self, array: Union[FSArray, List[FmtStr]], cursor_pos: Tuple[int, int] = (0, 0)
+        self, array: Union[FSArray, list[FmtStr]], cursor_pos: tuple[int, int] = (0, 0)
     ) -> Optional[int]:
         raise NotImplementedError
 
-    def get_term_hw(self) -> Tuple[int, int]:
+    def get_term_hw(self) -> tuple[int, int]:
         """Returns current terminal height and width"""
         return self.t.height, self.t.width
 
@@ -163,7 +163,7 @@ class FullscreenWindow(BaseWindow, ContextManager["FullscreenWindow"]):
 
     def __exit__(
         self,
-        type: Optional[Type[BaseException]] = None,
+        type: Optional[type[BaseException]] = None,
         value: Optional[BaseException] = None,
         traceback: Optional[TracebackType] = None,
     ) -> None:
@@ -171,7 +171,7 @@ class FullscreenWindow(BaseWindow, ContextManager["FullscreenWindow"]):
         super().__exit__(type, value, traceback)
 
     def render_to_terminal(
-        self, array: Union[FSArray, List[FmtStr]], cursor_pos: Tuple[int, int] = (0, 0)
+        self, array: Union[FSArray, list[FmtStr]], cursor_pos: tuple[int, int] = (0, 0)
     ) -> None:
         """Renders array to terminal and places (0-indexed) cursor
 
@@ -198,7 +198,7 @@ class FullscreenWindow(BaseWindow, ContextManager["FullscreenWindow"]):
         if height != self._last_rendered_height or width != self._last_rendered_width:
             self.on_terminal_size_change(height, width)
 
-        current_lines_by_row: Dict[int, Optional[FmtStr]] = {}
+        current_lines_by_row: dict[int, Optional[FmtStr]] = {}
 
         # rows which we have content for and don't require scrolling
         for row, line in enumerate(array):
@@ -296,7 +296,7 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
 
     def __exit__(
         self,
-        type: Optional[Type[BaseException]] = None,
+        type: Optional[type[BaseException]] = None,
         value: Optional[BaseException] = None,
         traceback: Optional[TracebackType] = None,
     ) -> None:
@@ -310,7 +310,7 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
         self.cbreak.__exit__(type, value, traceback)
         super().__exit__(type, value, traceback)
 
-    def get_cursor_position(self) -> Tuple[int, int]:
+    def get_cursor_position(self) -> tuple[int, int]:
         """Returns the terminal (row, column) of the cursor
 
         0-indexed, like blessed cursor positions"""
@@ -431,7 +431,7 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
     def render_to_terminal(
         self,
         array: Union[FSArray, Sequence[FmtStr]],
-        cursor_pos: Tuple[int, int] = (0, 0),
+        cursor_pos: tuple[int, int] = (0, 0),
     ) -> int:
         """Renders array to terminal, returns the number of lines scrolled offscreen
 
@@ -462,7 +462,7 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
         if height != self._last_rendered_height or width != self._last_rendered_width:
             self.on_terminal_size_change(height, width)
 
-        current_lines_by_row: Dict[int, Optional[FmtStr]] = {}
+        current_lines_by_row: dict[int, Optional[FmtStr]] = {}
         rows_for_use = list(range(self.top_usable_row, height))
 
         # rows which we have content for and don't require scrolling
@@ -531,7 +531,7 @@ def demo() -> None:
                 if c == "":
                     sys.exit()  # same as raise SystemExit()
                 elif c == "h":
-                    a: Union[List[FmtStr], FSArray] = w.array_from_text(
+                    a: Union[list[FmtStr], FSArray] = w.array_from_text(
                         "a for small array"
                     )
                 elif c == "a":

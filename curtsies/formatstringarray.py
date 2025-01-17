@@ -34,12 +34,12 @@ from typing import (
     Optional,
     Union,
     List,
-    Sequence,
     overload,
     Tuple,
     cast,
     no_type_check,
 )
+from collections.abc import Sequence
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class FSArray(Sequence):
         self, num_rows: int, num_columns: int, *args: Any, **kwargs: Any
     ) -> None:
         self.saved_args, self.saved_kwargs = args, kwargs
-        self.rows: List[FmtStr] = [fmtstr("", *args, **kwargs) for _ in range(num_rows)]
+        self.rows: list[FmtStr] = [fmtstr("", *args, **kwargs) for _ in range(num_rows)]
         self.num_columns = num_columns
 
     @overload
@@ -68,18 +68,18 @@ class FSArray(Sequence):
         pass
 
     @overload
-    def __getitem__(self, slicetuple: slice) -> List[FmtStr]:
+    def __getitem__(self, slicetuple: slice) -> list[FmtStr]:
         pass
 
     @overload
     def __getitem__(
-        self, slicetuple: Tuple[Union[slice, int], Union[slice, int]]
-    ) -> List[FmtStr]:
+        self, slicetuple: tuple[Union[slice, int], Union[slice, int]]
+    ) -> list[FmtStr]:
         pass
 
     def __getitem__(
-        self, slicetuple: Union[int, slice, Tuple[Union[int, slice], Union[int, slice]]]
-    ) -> Union[FmtStr, List[FmtStr]]:
+        self, slicetuple: Union[int, slice, tuple[Union[int, slice], Union[int, slice]]]
+    ) -> Union[FmtStr, list[FmtStr]]:
         if isinstance(slicetuple, int):
             if slicetuple < 0:
                 slicetuple = len(self.rows) - slicetuple
@@ -99,7 +99,7 @@ class FSArray(Sequence):
         return len(self.rows)
 
     @property
-    def shape(self) -> Tuple[int, int]:
+    def shape(self) -> tuple[int, int]:
         """Tuple of (len(rows, len(num_columns)) numpy-style shape"""
         return len(self.rows), self.num_columns
 
@@ -301,7 +301,7 @@ def assertFSArraysEqual(a: FSArray, b: FSArray) -> None:
 
 def assertFSArraysEqualIgnoringFormatting(a: FSArray, b: FSArray) -> None:
     """Also accepts arrays of strings"""
-    assert len(a) == len(b), "fsarray heights do not match: %s %s \n%s \n%s" % (
+    assert len(a) == len(b), "fsarray heights do not match: {} {} \n{} \n{}".format(
         len(a),
         len(b),
         simple_format(a),
@@ -310,7 +310,7 @@ def assertFSArraysEqualIgnoringFormatting(a: FSArray, b: FSArray) -> None:
     for i, (a_row, b_row) in enumerate(zip(a, b)):
         a_row = a_row.s if isinstance(a_row, FmtStr) else a_row
         b_row = b_row.s if isinstance(b_row, FmtStr) else b_row
-        assert a_row == b_row, "FSArrays differ first on line %s:\n%s" % (
+        assert a_row == b_row, "FSArrays differ first on line {}:\n{}".format(
             i,
             FSArray.diff(a, b, ignore_formatting=True),
         )
@@ -319,7 +319,7 @@ def assertFSArraysEqualIgnoringFormatting(a: FSArray, b: FSArray) -> None:
 if __name__ == "__main__":
     a = FSArray(3, 14, bg="blue")
     a[0:2, 5:11] = cast(
-        Tuple[FmtStr, ...],
+        tuple[FmtStr, ...],
         (fmtstr("hey", "on_blue") + " " + fmtstr("yo", "on_red"), fmtstr("qwe qw")),
     )
     a.dumb_display()

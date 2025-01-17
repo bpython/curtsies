@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Sphinx directive for ansi-formatted output
 
 sphinxcontrib-ansi seems to be the right thing to use, but it's
@@ -29,7 +28,7 @@ def htmlize(ansi):
     return conv.convert(ansi, full=False)
 
 
-class ANSIHTMLParser(object):
+class ANSIHTMLParser:
     def __call__(self, app, doctree, docname):
         handler = self._format_it
         if app.builder.name not in ["html", "readthedocs"]:
@@ -46,7 +45,7 @@ class ANSIHTMLParser(object):
     def _format_it(self, block):
         source = block.rawsource
         content = htmlize(source)
-        formatted = "<pre>%s</pre>" % (content,)
+        formatted = "<pre>{}</pre>".format(content)
         raw_node = nodes.raw(formatted, formatted, format="html")
         block.replace_self(raw_node)
 

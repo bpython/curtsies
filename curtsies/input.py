@@ -47,7 +47,7 @@ class ReplacedSigIntHandler(ContextManager):
 
     def __exit__(
         self,
-        type: Optional[Type[BaseException]] = None,
+        type: Optional[type[BaseException]] = None,
         value: Optional[BaseException] = None,
         traceback: Optional[TracebackType] = None,
     ) -> None:
@@ -86,7 +86,7 @@ class Input(ContextManager["Input"]):
             in_stream = sys.__stdin__
             assert in_stream is not None
         self.in_stream = in_stream
-        self.unprocessed_bytes: List[bytes] = []  # leftover from stdin, unprocessed yet
+        self.unprocessed_bytes: list[bytes] = []  # leftover from stdin, unprocessed yet
         if isinstance(keynames, str):
             # TODO: Remove this block with the next API breaking release.
             if keynames == "curtsies":
@@ -102,14 +102,14 @@ class Input(ContextManager["Input"]):
         self.paste_threshold = paste_threshold
         self.sigint_event = sigint_event
         self.disable_terminal_start_stop = disable_terminal_start_stop
-        self.sigints: List[events.SigIntEvent] = []
+        self.sigints: list[events.SigIntEvent] = []
         self.wakeup_read_fd: Optional[int] = None
         self.wakeup_write_fd: Optional[int] = None
 
-        self.readers: List[int] = []
-        self.queued_interrupting_events: List[Union[events.Event, str]] = []
-        self.queued_events: List[Union[events.Event, None]] = []
-        self.queued_scheduled_events: List[Tuple[float, events.ScheduledEvent]] = []
+        self.readers: list[int] = []
+        self.queued_interrupting_events: list[Union[events.Event, str]] = []
+        self.queued_events: list[Union[events.Event, None]] = []
+        self.queued_scheduled_events: list[tuple[float, events.ScheduledEvent]] = []
 
     # prospective: this could be useful for an external select loop
     def fileno(self) -> int:
@@ -121,7 +121,7 @@ class Input(ContextManager["Input"]):
 
         if self.disable_terminal_start_stop:
             attrs = termios.tcgetattr(self.in_stream)
-            tty_cc = cast(List[Union[bytes, int]], attrs[-1])
+            tty_cc = cast(list[Union[bytes, int]], attrs[-1])
             tty_cc[termios.VSTOP] = 0  # Ctrl-s
             tty_cc[termios.VSTART] = 0  # Ctrl-q
             termios.tcsetattr(self.in_stream, termios.TCSANOW, attrs)
@@ -129,7 +129,7 @@ class Input(ContextManager["Input"]):
         if sys.platform == "darwin":
             attrs = termios.tcgetattr(self.in_stream)
             VDSUSP = termios.VSUSP + 1
-            tty_cc = cast(List[Union[bytes, int]], attrs[-1])
+            tty_cc = cast(list[Union[bytes, int]], attrs[-1])
             tty_cc[VDSUSP] = 0
             termios.tcsetattr(self.in_stream, termios.TCSANOW, attrs)
 
@@ -148,7 +148,7 @@ class Input(ContextManager["Input"]):
 
     def __exit__(
         self,
-        type: Optional[Type[BaseException]] = None,
+        type: Optional[type[BaseException]] = None,
         value: Optional[BaseException] = None,
         traceback: Optional[TracebackType] = None,
     ) -> None:
@@ -187,7 +187,7 @@ class Input(ContextManager["Input"]):
 
     def _wait_for_read_ready_or_timeout(
         self, timeout: Union[float, int, None]
-    ) -> Tuple[bool, Optional[Union[events.Event, str]]]:
+    ) -> tuple[bool, Optional[Union[events.Event, str]]]:
         """Returns tuple of whether stdin is ready to read and an event.
 
         If an event is returned, that event is more pressing than reading
@@ -343,7 +343,7 @@ class Input(ContextManager["Input"]):
                 return 0
 
     def event_trigger(
-        self, event_type: Union[Type[events.Event], Callable[..., None]]
+        self, event_type: Union[type[events.Event], Callable[..., None]]
     ) -> Callable[..., None]:
         """Returns a callback that creates events.
 
@@ -356,7 +356,7 @@ class Input(ContextManager["Input"]):
         return callback
 
     def scheduled_event_trigger(
-        self, event_type: Type[events.ScheduledEvent]
+        self, event_type: type[events.ScheduledEvent]
     ) -> Callable[[float], None]:
         """Returns a callback that schedules events for the future.
 
@@ -369,7 +369,7 @@ class Input(ContextManager["Input"]):
         return callback
 
     def threadsafe_event_trigger(
-        self, event_type: Union[Type[events.Event], Callable[..., None]]
+        self, event_type: Union[type[events.Event], Callable[..., None]]
     ) -> Callable[..., None]:
         """Returns a callback to creates events, interrupting current event requests.
 

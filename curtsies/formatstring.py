@@ -27,17 +27,14 @@ from typing import (
     Any,
     Callable,
     Dict,
-    Iterable,
-    Iterator,
     List,
-    Mapping,
-    MutableMapping,
     Optional,
     Tuple,
     Union,
     cast,
     no_type_check,
 )
+from collections.abc import Iterable, Iterator, Mapping, MutableMapping
 
 from .escseqparse import parse, remove_ansi
 from .termformatconstants import (
@@ -67,7 +64,7 @@ two_arg_xforms: Mapping[str, Callable[[str, int], str]] = {
 }
 
 
-class FrozenAttributes(Dict[str, Union[int, bool]]):
+class FrozenAttributes(dict[str, Union[int, bool]]):
     """Immutable dictionary class for format string attributes"""
 
     def __setitem__(self, key: str, value: Union[int, bool]) -> None:
@@ -215,7 +212,7 @@ class ChunkSplitter:
             divides.append(divides[-1] + wcwidth(c))
         self.divides = divides
 
-    def request(self, max_width: int) -> Optional[Tuple[int, Chunk]]:
+    def request(self, max_width: int) -> Optional[tuple[int, Chunk]]:
         """Requests a sub-chunk of max_width or shorter. Returns None if no chunks left."""
         if max_width < 1:
             raise ValueError("requires positive integer max_width")
@@ -413,8 +410,8 @@ class FmtStr:
 
     def join(self, iterable: Iterable[Union[str, "FmtStr"]]) -> "FmtStr":
         """Joins an iterable yielding strings or FmtStrs with self as separator"""
-        before: List[Chunk] = []
-        chunks: List[Chunk] = []
+        before: list[Chunk] = []
+        chunks: list[Chunk] = []
         for s in iterable:
             chunks.extend(before)
             before = self.chunks
@@ -432,7 +429,7 @@ class FmtStr:
         sep: Optional[str] = None,
         maxsplit: Optional[int] = None,
         regex: bool = False,
-    ) -> List["FmtStr"]:
+    ) -> list["FmtStr"]:
         """Split based on separator, optionally using a regex.
 
         Capture groups are ignored in regex, the whole pattern is matched
@@ -453,7 +450,7 @@ class FmtStr:
             )
         ]
 
-    def splitlines(self, keepends: bool = False) -> List["FmtStr"]:
+    def splitlines(self, keepends: bool = False) -> list["FmtStr"]:
         """Return a list of lines, split on newline characters,
         include line boundaries, if keepends is true."""
         lines = self.split("\n")
@@ -560,7 +557,7 @@ class FmtStr:
     # TODO ensure empty FmtStr isn't a problem
 
     @property
-    def shared_atts(self) -> Dict[str, Union[int, bool]]:
+    def shared_atts(self) -> dict[str, Union[int, bool]]:
         """Gets atts shared among all nonzero length component Chunks"""
         # TODO cache this, could get ugly for large FmtStrs
         atts = {}
@@ -582,7 +579,7 @@ class FmtStr:
         return result
 
     @no_type_check
-    def __getattr__(self, att):
+    def __getattr__(self, att: str):
         # thanks to @aerenchyma/@jczett
         if not hasattr(self.s, att):
             raise AttributeError(f"No attribute {att!r}")
@@ -600,7 +597,7 @@ class FmtStr:
         return func_help
 
     @property
-    def divides(self) -> List[int]:
+    def divides(self) -> list[int]:
         """List of indices of divisions between the constituent chunks."""
         acc = [0]
         for s in self.chunks:
@@ -752,7 +749,7 @@ def width_aware_slice(s: str, start: int, end: int, replacement_char: str = " ")
     return "".join(new_chunk_chars)
 
 
-def linesplit(string: Union[str, FmtStr], columns: int) -> List[FmtStr]:
+def linesplit(string: Union[str, FmtStr], columns: int) -> list[FmtStr]:
     """Returns a list of lines, split on the last possible space of each line.
 
     Split spaces will be removed. Whitespaces will be normalized to one space.
@@ -820,9 +817,9 @@ def normalize_slice(length: int, index: Union[int, slice]) -> slice:
 
 
 def parse_args(
-    args: Tuple[str, ...],
+    args: tuple[str, ...],
     kwargs: MutableMapping[str, Union[int, bool, str]],
-) -> Mapping[str, Union[int, bool]]:
+) -> MutableMapping[str, Union[int, bool]]:
     """Returns a kwargs dictionary by turning args into kwargs"""
     if "style" in kwargs:
         args += (cast(str, kwargs["style"]),)
