@@ -21,6 +21,7 @@ red('hello')
 
 import re
 from cwcwidth import wcswidth, wcwidth
+from functools import cached_property
 from itertools import chain
 from typing import (
     Any,
@@ -37,11 +38,6 @@ from typing import (
     cast,
     no_type_check,
 )
-
-try:
-    from functools import cached_property
-except ImportError:
-    from backports.cached_property import cached_property  # type: ignore
 
 from .escseqparse import parse, remove_ansi
 from .termformatconstants import (
