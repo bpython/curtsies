@@ -32,7 +32,7 @@ jobs:
         pip install setuptools wheel "blessed>=1.5" cwcwidth pyte pytest
     - name: Build with Python ${{ matrix.python-version }}
       run: |
-        python setup.py build
+        python -m build -n .
     - name: Test with pytest
       run: |
         pytest -s --doctest-modules ./curtsies ./tests
