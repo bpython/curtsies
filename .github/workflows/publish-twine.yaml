@@ -16,11 +16,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install setuptools wheel "blessed>=1.5" cwcwidth
+        pip install build setuptools wheel "blessed>=1.5" cwcwidth
     - name: Build sdist
       run: |
-        python setup.py sdist
-        python setup.py bdist_wheel
+        python -m build -n -s -w
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:

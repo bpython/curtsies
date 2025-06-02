@@ -29,7 +29,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build setuptools "blessed>=1.5" cwcwidth pyte pytest
+        pip install build setuptools wheel "blessed>=1.5" cwcwidth pyte pytest
     - name: Build with Python ${{ matrix.python-version }}
       run: |
         python -m build -n .
