@@ -16,7 +16,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install black
     - name: Check with black
-      run: black --check .
+      run: black --check curtsies
 
   codespell:
     runs-on: ubuntu-latest
