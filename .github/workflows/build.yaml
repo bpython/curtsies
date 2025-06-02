@@ -15,12 +15,11 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         python-version:
-        - "3.9"
         - "3.10"
         - "3.11"
         - "3.12"
         - "3.13"
-        - "pypy-3.9"
+        - "pypy-3.10"
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
