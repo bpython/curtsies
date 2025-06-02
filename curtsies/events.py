@@ -105,9 +105,7 @@ class ScheduledEvent(Event):
 
 
 class WindowChangeEvent(Event):
-    def __init__(
-        self, rows: int, columns: int, cursor_dy: Optional[int] = None
-    ) -> None:
+    def __init__(self, rows: int, columns: int, cursor_dy: int | None = None) -> None:
         self.rows = rows
         self.columns = columns
         self.cursor_dy = cursor_dy
@@ -202,7 +200,7 @@ def get_key(
     encoding: str,
     keynames: Keynames = Keynames.CURTSIES,
     full: bool = False,
-) -> Optional[str]:
+) -> str | None:
     """Return key pressed from bytes_ or None
 
     Return a key name or None meaning it's an incomplete sequence of bytes
@@ -281,7 +279,7 @@ def could_be_unfinished_utf8(seq: bytes) -> bool:
     )
 
 
-def pp_event(seq: Union[Event, str]) -> Union[str, bytes]:
+def pp_event(seq: Event | str) -> str | bytes:
     """Returns pretty representation of an Event or keypress"""
 
     if isinstance(seq, Event):
@@ -290,7 +288,7 @@ def pp_event(seq: Union[Event, str]) -> Union[str, bytes]:
     # Get the original sequence back if seq is a pretty name already
     rev_curses = {v: k for k, v in CURSES_NAMES.items()}
     rev_curtsies = {v: k for k, v in CURTSIES_NAMES.items()}
-    bytes_seq: Optional[bytes] = None
+    bytes_seq: bytes | None = None
     if seq in rev_curses:
         bytes_seq = rev_curses[seq]
     elif seq in rev_curtsies:
@@ -303,7 +301,7 @@ def pp_event(seq: Union[Event, str]) -> Union[str, bytes]:
     return repr(seq).lstrip("u")[1:-1]
 
 
-def curtsies_name(seq: bytes) -> Union[str, bytes]:
+def curtsies_name(seq: bytes) -> str | bytes:
     return CURTSIES_NAMES.get(seq, seq)
 
 

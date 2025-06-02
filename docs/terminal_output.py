@@ -3,6 +3,7 @@
 sphinxcontrib-ansi seems to be the right thing to use, but it's
 missing sequences. It does the right thing and remove color when
 output format isn't html. This just always outputs raw html.  """
+
 import re
 import sys
 from textwrap import dedent

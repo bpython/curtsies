@@ -13,7 +13,6 @@ from .termhelpers import Nonblocking
 from . import events
 
 from typing import (
-    Callable,
     ContextManager,
     Type,
     TextIO,
@@ -24,6 +23,7 @@ from typing import (
     Tuple,
     Any,
 )
+from collections.abc import Callable
 from types import TracebackType, FrameType
 
 
@@ -47,9 +47,9 @@ class ReplacedSigIntHandler(ContextManager):
 
     def __exit__(
         self,
-        type: Optional[type[BaseException]] = None,
-        value: Optional[BaseException] = None,
-        traceback: Optional[TracebackType] = None,
+        type: type[BaseException] | None = None,
+        value: BaseException | None = None,
+        traceback: TracebackType | None = None,
     ) -> None:
         signal.signal(signal.SIGINT, self.orig_sigint_handler)
 
@@ -61,9 +61,9 @@ class Input(ContextManager["Input"]):
 
     def __init__(
         self,
-        in_stream: Optional[TextIO] = None,
-        keynames: Union[events.Keynames, str] = events.Keynames.CURTSIES,
-        paste_threshold: Optional[int] = events.MAX_KEYPRESS_SIZE + 1,
+        in_stream: TextIO | None = None,
+        keynames: events.Keynames | str = events.Keynames.CURTSIES,
+        paste_threshold: int | None = events.MAX_KEYPRESS_SIZE + 1,
         sigint_event: bool = False,
         disable_terminal_start_stop: bool = False,
     ) -> None:
@@ -103,12 +103,12 @@ class Input(ContextManager["Input"]):
         self.sigint_event = sigint_event
         self.disable_terminal_start_stop = disable_terminal_start_stop
         self.sigints: list[events.SigIntEvent] = []
-        self.wakeup_read_fd: Optional[int] = None
-        self.wakeup_write_fd: Optional[int] = None
+        self.wakeup_read_fd: int | None = None
+        self.wakeup_write_fd: int | None = None
 
         self.readers: list[int] = []
-        self.queued_interrupting_events: list[Union[events.Event, str]] = []
-        self.queued_events: list[Union[events.Event, None]] = []
+        self.queued_interrupting_events: list[events.Event | str] = []
+        self.queued_events: list[events.Event | None] = []
         self.queued_scheduled_events: list[tuple[float, events.ScheduledEvent]] = []
 
     # prospective: this could be useful for an external select loop
@@ -148,9 +148,9 @@ class Input(ContextManager["Input"]):
 
     def __exit__(
         self,
-        type: Optional[type[BaseException]] = None,
-        value: Optional[BaseException] = None,
-        traceback: Optional[TracebackType] = None,
+        type: type[BaseException] | None = None,
+        value: BaseException | None = None,
+        traceback: TracebackType | None = None,
     ) -> None:
         if (
             self.sigint_event
@@ -167,14 +167,14 @@ class Input(ContextManager["Input"]):
         termios.tcsetattr(self.in_stream, termios.TCSANOW, self.original_stty)
 
     def sigint_handler(
-        self, signum: Union[signal.Signals, int], frame: Optional[FrameType]
+        self, signum: signal.Signals | int, frame: FrameType | None
     ) -> None:
         self.sigints.append(events.SigIntEvent())
 
     def __iter__(self) -> "Input":
         return self
 
-    def __next__(self) -> Union[None, str, events.Event]:
+    def __next__(self) -> None | str | events.Event:
         return self.send(None)
 
     def unget_bytes(self, string: bytes) -> None:
@@ -186,8 +186,8 @@ class Input(ContextManager["Input"]):
         self.unprocessed_bytes.extend(string[i : i + 1] for i in range(len(string)))
 
     def _wait_for_read_ready_or_timeout(
-        self, timeout: Union[float, int, None]
-    ) -> tuple[bool, Optional[Union[events.Event, str]]]:
+        self, timeout: float | int | None
+    ) -> tuple[bool, events.Event | str | None]:
         """Returns tuple of whether stdin is ready to read and an event.
 
         If an event is returned, that event is more pressing than reading
@@ -232,9 +232,7 @@ class Input(ContextManager["Input"]):
                 if remaining_timeout is not None:
                     remaining_timeout = max(remaining_timeout - (time.time() - t0), 0)
 
-    def send(
-        self, timeout: Optional[Union[float, None]] = None
-    ) -> Union[None, str, events.Event]:
+    def send(self, timeout: float | None | None = None) -> None | str | events.Event:
         """Returns an event or None if no events occur before timeout."""
         if self.sigint_event and is_main_thread():
             with ReplacedSigIntHandler(self.sigint_handler):
@@ -242,8 +240,8 @@ class Input(ContextManager["Input"]):
         else:
             return self._send(timeout)
 
-    def _send(self, timeout: Union[float, int, None]) -> Union[None, str, events.Event]:
-        def find_key() -> Optional[str]:
+    def _send(self, timeout: float | int | None) -> None | str | events.Event:
+        def find_key() -> str | None:
             """Returns keypress identified by adding unprocessed bytes or None"""
             current_bytes = []
             while self.unprocessed_bytes:
@@ -343,7 +341,7 @@ class Input(ContextManager["Input"]):
                 return 0
 
     def event_trigger(
-        self, event_type: Union[type[events.Event], Callable[..., None]]
+        self, event_type: type[events.Event] | Callable[..., None]
     ) -> Callable[..., None]:
         """Returns a callback that creates events.
 
@@ -369,7 +367,7 @@ class Input(ContextManager["Input"]):
         return callback
 
     def threadsafe_event_trigger(
-        self, event_type: Union[type[events.Event], Callable[..., None]]
+        self, event_type: type[events.Event] | Callable[..., None]
     ) -> Callable[..., None]:
         """Returns a callback to creates events, interrupting current event requests.
 

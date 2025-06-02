@@ -25,7 +25,6 @@ from functools import cached_property
 from itertools import chain
 from typing import (
     Any,
-    Callable,
     Dict,
     List,
     Optional,
@@ -34,7 +33,7 @@ from typing import (
     cast,
     no_type_check,
 )
-from collections.abc import Iterable, Iterator, Mapping, MutableMapping
+from collections.abc import Callable, Iterable, Iterator, Mapping, MutableMapping
 
 from .escseqparse import parse, remove_ansi
 from .termformatconstants import (
@@ -59,7 +58,7 @@ one_arg_xforms: Mapping[str, Callable[[str], str]] = {
 }
 
 two_arg_xforms: Mapping[str, Callable[[str, int], str]] = {
-    "fg": lambda s, v: "{}{}{}".format(seq(v), s, seq(RESET_FG)),
+    "fg": lambda s, v: f"{seq(v)}{s}{seq(RESET_FG)}",
     "bg": lambda s, v: seq(v) + s + seq(RESET_BG),
 }
 
@@ -67,13 +66,13 @@ two_arg_xforms: Mapping[str, Callable[[str, int], str]] = {
 class FrozenAttributes(dict[str, Union[int, bool]]):
     """Immutable dictionary class for format string attributes"""
 
-    def __setitem__(self, key: str, value: Union[int, bool]) -> None:
+    def __setitem__(self, key: str, value: int | bool) -> None:
         raise Exception("Cannot change value.")
 
     def update(self, *args: Any, **kwds: Any) -> None:
         raise Exception("Cannot change value.")
 
-    def extend(self, dictlike: Mapping[str, Union[int, bool]]) -> "FrozenAttributes":
+    def extend(self, dictlike: Mapping[str, int | bool]) -> "FrozenAttributes":
         return FrozenAttributes(chain(self.items(), dictlike.items()))
 
     def remove(self, *keys: str) -> "FrozenAttributes":
@@ -103,9 +102,7 @@ class Chunk:
 
     Subject to change, not part of the API"""
 
-    def __init__(
-        self, string: str, atts: Optional[Mapping[str, Union[int, bool]]] = None
-    ):
+    def __init__(self, string: str, atts: Mapping[str, int | bool] | None = None):
         if not isinstance(string, str):
             raise ValueError("unicode string required, got %r" % string)
         self._s = string
@@ -212,7 +209,7 @@ class ChunkSplitter:
             divides.append(divides[-1] + wcwidth(c))
         self.divides = divides
 
-    def request(self, max_width: int) -> Optional[tuple[int, Chunk]]:
+    def request(self, max_width: int) -> tuple[int, Chunk] | None:
         """Requests a sub-chunk of max_width or shorter. Returns None if no chunks left."""
         if max_width < 1:
             raise ValueError("requires positive integer max_width")
@@ -279,10 +276,10 @@ class FmtStr:
         self.chunks = list(components)
 
         # caching these leads to a significant speedup
-        self._unicode: Optional[str] = None
-        self._len: Optional[int] = None
-        self._s: Optional[str] = None
-        self._width: Optional[int] = None
+        self._unicode: str | None = None
+        self._len: int | None = None
+        self._s: str | None = None
+        self._width: int | None = None
 
     @staticmethod
     def from_str(s: str) -> "FmtStr":
@@ -349,7 +346,7 @@ class FmtStr:
         return result
 
     def splice(
-        self, new_str: Union[str, "FmtStr"], start: int, end: Optional[int] = None
+        self, new_str: Union[str, "FmtStr"], start: int, end: int | None = None
     ) -> "FmtStr":
         """Returns a new FmtStr with the input string spliced into the
         the original FmtStr at start and end.
@@ -401,7 +398,7 @@ class FmtStr:
     def append(self, string: Union[str, "FmtStr"]) -> "FmtStr":
         return self.splice(string, len(self.s))
 
-    def copy_with_new_atts(self, **attributes: Union[bool, int]) -> "FmtStr":
+    def copy_with_new_atts(self, **attributes: bool | int) -> "FmtStr":
         """Returns a new FmtStr with the same content but new formatting"""
 
         return FmtStr(
@@ -426,8 +423,8 @@ class FmtStr:
     # TODO make this split work like str.split
     def split(
         self,
-        sep: Optional[str] = None,
-        maxsplit: Optional[int] = None,
+        sep: str | None = None,
+        maxsplit: int | None = None,
         regex: bool = False,
     ) -> list["FmtStr"]:
         """Split based on separator, optionally using a regex.
@@ -462,7 +459,7 @@ class FmtStr:
 
     # proxying to the string via __getattr__ is insufficient
     # because we shouldn't drop foreground or formatting info
-    def ljust(self, width: int, fillchar: Optional[str] = None) -> "FmtStr":
+    def ljust(self, width: int, fillchar: str | None = None) -> "FmtStr":
         """S.ljust(width[, fillchar]) -> string
 
         If a fillchar is provided, less formatting information will be preserved
@@ -477,7 +474,7 @@ class FmtStr:
             uniform = self.new_with_atts_removed("bg")
             return uniform + fmtstr(to_add, **self.shared_atts) if to_add else uniform
 
-    def rjust(self, width: int, fillchar: Optional[str] = None) -> "FmtStr":
+    def rjust(self, width: int, fillchar: str | None = None) -> "FmtStr":
         """S.rjust(width[, fillchar]) -> string
 
         If a fillchar is provided, less formatting information will be preserved
@@ -557,7 +554,7 @@ class FmtStr:
     # TODO ensure empty FmtStr isn't a problem
 
     @property
-    def shared_atts(self) -> dict[str, Union[int, bool]]:
+    def shared_atts(self) -> dict[str, int | bool]:
         """Gets atts shared among all nonzero length component Chunks"""
         # TODO cache this, could get ugly for large FmtStrs
         atts = {}
@@ -611,7 +608,7 @@ class FmtStr:
         self._s = "".join(fs.s for fs in self.chunks)
         return self._s
 
-    def __getitem__(self, index: Union[int, slice]) -> "FmtStr":
+    def __getitem__(self, index: int | slice) -> "FmtStr":
         index = normalize_slice(len(self), index)
         counter = 0
         parts = []
@@ -631,7 +628,7 @@ class FmtStr:
                 break
         return FmtStr(*parts) if parts else fmtstr("")
 
-    def width_aware_slice(self, index: Union[int, slice]) -> "FmtStr":
+    def width_aware_slice(self, index: int | slice) -> "FmtStr":
         """Slice based on the number of columns it would take to display the substring."""
         if wcswidth(self.s, None) == -1:
             raise ValueError("bad values for width aware slicing")
@@ -687,7 +684,7 @@ class FmtStr:
         if chunks_of_line:
             yield FmtStr(*chunks_of_line)
 
-    def _getitem_normalized(self, index: Union[int, slice]) -> "FmtStr":
+    def _getitem_normalized(self, index: int | slice) -> "FmtStr":
         """Builds the more compact fmtstrs by using fromstr( of the control sequences)"""
         index = normalize_slice(len(self), index)
         counter = 0
@@ -749,7 +746,7 @@ def width_aware_slice(s: str, start: int, end: int, replacement_char: str = " ")
     return "".join(new_chunk_chars)
 
 
-def linesplit(string: Union[str, FmtStr], columns: int) -> list[FmtStr]:
+def linesplit(string: str | FmtStr, columns: int) -> list[FmtStr]:
     """Returns a list of lines, split on the last possible space of each line.
 
     Split spaces will be removed. Whitespaces will be normalized to one space.
@@ -794,7 +791,7 @@ def linesplit(string: Union[str, FmtStr], columns: int) -> list[FmtStr]:
     return lines
 
 
-def normalize_slice(length: int, index: Union[int, slice]) -> slice:
+def normalize_slice(length: int, index: int | slice) -> slice:
     "Fill in the Nones in a slice."
     is_int = False
     if isinstance(index, int):
@@ -818,8 +815,8 @@ def normalize_slice(length: int, index: Union[int, slice]) -> slice:
 
 def parse_args(
     args: tuple[str, ...],
-    kwargs: MutableMapping[str, Union[int, bool, str]],
-) -> MutableMapping[str, Union[int, bool]]:
+    kwargs: MutableMapping[str, int | bool | str],
+) -> MutableMapping[str, int | bool]:
     """Returns a kwargs dictionary by turning args into kwargs"""
     if "style" in kwargs:
         args += (cast(str, kwargs["style"]),)
@@ -855,7 +852,7 @@ def parse_args(
     return cast(MutableMapping[str, Union[int, bool]], kwargs)
 
 
-def fmtstr(string: Union[str, FmtStr], *args: Any, **kwargs: Any) -> FmtStr:
+def fmtstr(string: str | FmtStr, *args: Any, **kwargs: Any) -> FmtStr:
     """
     Convenience function for creating a FmtStr
 

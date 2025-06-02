@@ -63,11 +63,7 @@ class Bugger:
             to.write(event.upper() + " ")
             to.write("; ".join(map(repr, args)))
             to.write(" ")
-            to.write(
-                ", ".join(
-                    f"{name}: {repr(arg)}" for name, arg in flags.items()
-                )
-            )
+            to.write(", ".join(f"{name}: {repr(arg)}" for name, arg in flags.items()))
             to.write(os.linesep)
 
         return inner

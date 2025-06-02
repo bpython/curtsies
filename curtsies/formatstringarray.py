@@ -72,14 +72,12 @@ class FSArray(Sequence):
         pass
 
     @overload
-    def __getitem__(
-        self, slicetuple: tuple[Union[slice, int], Union[slice, int]]
-    ) -> list[FmtStr]:
+    def __getitem__(self, slicetuple: tuple[slice | int, slice | int]) -> list[FmtStr]:
         pass
 
     def __getitem__(
-        self, slicetuple: Union[int, slice, tuple[Union[int, slice], Union[int, slice]]]
-    ) -> Union[FmtStr, list[FmtStr]]:
+        self, slicetuple: int | slice | tuple[int | slice, int | slice]
+    ) -> FmtStr | list[FmtStr]:
         if isinstance(slicetuple, int):
             if slicetuple < 0:
                 slicetuple = len(self.rows) - slicetuple
@@ -250,8 +248,8 @@ class FSArray(Sequence):
 
 
 def fsarray(
-    strings: Sequence[Union[FmtStr, str]],
-    width: Optional[int] = None,
+    strings: Sequence[FmtStr | str],
+    width: int | None = None,
     *args: Any,
     **kwargs: Any,
 ) -> FSArray:
@@ -283,7 +281,7 @@ def fsarray(
     return arr
 
 
-def simple_format(x: Union[FSArray, Sequence[FmtStr]]) -> str:
+def simple_format(x: FSArray | Sequence[FmtStr]) -> str:
     return "\n".join(str(l) for l in x)
 
 
