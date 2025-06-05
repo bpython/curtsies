@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.3] - 2025-06-06
+- Drop support for Python 3.7, 3.8, and 3.9.
+- Add support for italic.
+
 ## [0.4.2] - 2023-07-31
 - Small type annotation clean ups.
 - Publish wheels.
