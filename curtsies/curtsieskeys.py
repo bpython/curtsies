@@ -129,9 +129,9 @@ CURTSIES_NAMES = {
     b"\x1b[1;3H": '<Meta-HOME>',       # alt-home
     b"\x1b[1;3F": '<Meta-END>',        # alt-end
     b"\x1b[1;2C": '<Shift-RIGHT>',
-    b"\x1b[1;2B": '<Shift-RIGHT>',
-    b"\x1b[1;2D": '<Shift-RIGHT>',
-    b"\x1b[1;2A": '<Shift-RIGHT>',
+    b"\x1b[1;2B": '<Shift-DOWN>',
+    b"\x1b[1;2D": '<Shift-LEFT>',
+    b"\x1b[1;2A": '<Shift-UP>',
     b"\x1b[3;2~": '<Shift-DELETE>',
     b"\x1b[5;2~": '<Shift-PAGEUP>',
     b"\x1b[6;2~": '<Shift-PAGEDOWN>',
