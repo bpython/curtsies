@@ -145,3 +145,35 @@ class TestSpecialKeys(unittest.TestCase):
 class TestPPEvent(unittest.TestCase):
     def test(self):
         self.assertEqual(events.pp_event("a"), "a")
+
+
+class TestShiftArrowMappings(unittest.TestCase):
+    def test_curtsies_names(self):
+        self.assertEqual(events.CURTSIES_NAMES[b"\x1b[1;2A"], "<Shift-UP>")
+        self.assertEqual(events.CURTSIES_NAMES[b"\x1b[1;2B"], "<Shift-DOWN>")
+        self.assertEqual(events.CURTSIES_NAMES[b"\x1b[1;2C"], "<Shift-RIGHT>")
+        self.assertEqual(events.CURTSIES_NAMES[b"\x1b[1;2D"], "<Shift-LEFT>")
+
+    def test_get_key_sequences(self):
+        # Ensure get_key resolves complete Shift+Arrow sequences
+        seq_up = [b"\x1b", b"[", b"1", b";", b"2", b"A"]
+        seq_down = [b"\x1b", b"[", b"1", b";", b"2", b"B"]
+        seq_right = [b"\x1b", b"[", b"1", b";", b"2", b"C"]
+        seq_left = [b"\x1b", b"[", b"1", b";", b"2", b"D"]
+
+        self.assertEqual(
+            [events.get_key(seq_up[:i], encoding="utf8") for i in range(1, len(seq_up) + 1)],
+            [None, None, None, None, None, "<Shift-UP>"]
+        )
+        self.assertEqual(
+            [events.get_key(seq_down[:i], encoding="utf8") for i in range(1, len(seq_down) + 1)],
+            [None, None, None, None, None, "<Shift-DOWN>"]
+        )
+        self.assertEqual(
+            [events.get_key(seq_right[:i], encoding="utf8") for i in range(1, len(seq_right) + 1)],
+            [None, None, None, None, None, "<Shift-RIGHT>"]
+        )
+        self.assertEqual(
+            [events.get_key(seq_left[:i], encoding="utf8") for i in range(1, len(seq_left) + 1)],
+            [None, None, None, None, None, "<Shift-LEFT>"]
+        )
