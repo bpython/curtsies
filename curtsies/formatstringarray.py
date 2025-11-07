@@ -152,6 +152,12 @@ class FSArray(Sequence):
                 string please use a list [] with strings for the 
                 contents of each row"""
             )
+        if slicesize(colslice) > 1 and isinstance(value, FmtStr):
+            raise ValueError(
+                """You cannot replace a multi column slice with a
+            formatted string (FmtStr), please use a list [] with strings for the
+            contents of each row"""
+            )
         if slicesize(rowslice) != len(value):
             area = slicesize(rowslice) * slicesize(colslice)
             val_len = sum(len(i) for i in value)
