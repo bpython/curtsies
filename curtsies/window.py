@@ -200,7 +200,7 @@ class FullscreenWindow(BaseWindow, ContextManager["FullscreenWindow"]):
             current_lines_by_row[row] = line
             if line == self._last_lines_by_row.get(row, None):
                 continue
-            self.write(self.t.move(row, 0))
+            self.write(self.t.move_yx(row, 0))
             self.write(for_stdout(line))
             if len(line) < width:
                 self.write(self.t.clear_eol)
@@ -209,14 +209,14 @@ class FullscreenWindow(BaseWindow, ContextManager["FullscreenWindow"]):
         for row in range(len(array), height):
             if self._last_lines_by_row and row not in self._last_lines_by_row:
                 continue
-            self.write(self.t.move(row, 0))
+            self.write(self.t.move_yx(row, 0))
             self.write(self.t.clear_eol)
             self.write(self.t.clear_bol)
             current_lines_by_row[row] = None
 
         logger.debug("lines in last lines by row: %r" % self._last_lines_by_row.keys())
         logger.debug("lines in current lines by row: %r" % current_lines_by_row.keys())
-        self.write(self.t.move(*cursor_pos))
+        self.write(self.t.move_yx(*cursor_pos))
         self._last_lines_by_row = current_lines_by_row
         if not self.hide_cursor:
             self.write(self.t.normal_cursor)
@@ -299,7 +299,10 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
             # just moves cursor down if not on last line
             self.write(self.t.move_down)
 
-        self.write(self.t.move_x(0))
+        # Blessed's Terminal.move_x doesn't type this, see
+        # https://github.com/jquast/blessed/blob/master/tox.ini#L121-L130
+        move_x = cast(Callable[[int], str], self.t.move)
+        self.write(move_x(0))
         self.write(self.t.clear_eos)
         self.write(self.t.clear_eol)
         self.cbreak.__exit__(type, value, traceback)
@@ -467,7 +470,7 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
             current_lines_by_row[row] = line
             if line == self._last_lines_by_row.get(row, None):
                 continue
-            self.write(self.t.move(row, 0))
+            self.write(self.t.move_yx(row, 0))
             self.write(for_stdout(line))
             if len(line) < width:
                 self.write(self.t.clear_eol)
@@ -478,7 +481,7 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
         for row in rest_of_rows:  # if array too small
             if self._last_lines_by_row and row not in self._last_lines_by_row:
                 continue
-            self.write(self.t.move(row, 0))
+            self.write(self.t.move_yx(row, 0))
             self.write(self.t.clear_eol)
             # TODO probably not necessary - is first char cleared?
             self.write(self.t.clear_bol)
@@ -495,7 +498,7 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
             current_lines_by_row = {k - 1: v for k, v in current_lines_by_row.items()}
             logger.debug("new top_usable_row: %d" % self.top_usable_row)
             # since scrolling moves the cursor
-            self.write(self.t.move(height - 1, 0))
+            self.write(self.t.move_yx(height - 1, 0))
             self.write(for_stdout(line))
             current_lines_by_row[height - 1] = line
 
@@ -505,7 +508,7 @@ class CursorAwareWindow(BaseWindow, ContextManager["CursorAwareWindow"]):
             0, cursor_pos[0] - offscreen_scrolls + self.top_usable_row
         )
         self._last_cursor_column = cursor_pos[1]
-        self.write(self.t.move(self._last_cursor_row, self._last_cursor_column))
+        self.write(self.t.move_yx(self._last_cursor_row, self._last_cursor_column))
         self._last_lines_by_row = current_lines_by_row
         if not self.hide_cursor:
             self.write(self.t.normal_cursor)
