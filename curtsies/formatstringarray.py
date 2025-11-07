@@ -171,19 +171,21 @@ class FSArray(Sequence):
             msg = "You are trying to fit this value {} into the region {}: {}".format(
                 fmtstr("".join(value), bg="cyan"),
                 fmtstr("").join(grid_value),
-                "\n ".join(grid_fsarray[x] for x in range(len(self.rows))),
+                fmtstr("\n ").join(grid_fsarray[x] for x in range(len(self.rows))),
             )
             raise ValueError(
-                """Error you are trying to replace a region of {} rows by {}
-                columns for and area of {} with a value of len {}. The value
-                used to replace the region must equal the area of the region
-                replace.
-                {}""".format(
+                """{}
+You are trying to replace a region of {} rows by {}
+columns and area {} with a region of {} rows and total
+area of {}. The value used to replace the region must equal the
+area of the region replaced.
+""".format(
+                    msg,
                     rowslice.stop - rowslice.start,
                     colslice.stop - colslice.start,
                     area,
+                    len(value),
                     val_len,
-                    msg,
                 )
             )
         self.rows = (
