@@ -469,6 +469,37 @@ class TestCharacterWidth(unittest.TestCase):
         with self.assertRaises(ValueError):
             s.width_aware_splitlines(1)
 
+    def test_width_aware_splitlines_empty(self) -> None:
+        for s in (FmtStr(), fmtstr(""), fmtstr("\x1b[0m"), fmtstr("\x1b[34m")):
+            for columns in (2, 80):
+                with self.subTest(s=repr(s), columns=columns):
+                    self.assertEqual(list(s.width_aware_splitlines(columns)), [])
+
+    def test_width_aware_splitlines_empty_narrow_columns(self) -> None:
+        for s in (FmtStr(), fmtstr(""), fmtstr("\x1b[0m"), fmtstr("\x1b[34m")):
+            for columns in (-1, 0, 1):
+                with self.subTest(s=repr(s), columns=columns):
+                    with self.assertRaises(ValueError):
+                        s.width_aware_splitlines(columns)
+
+    def test_width_aware_splitlines_colorized_log(self) -> None:
+        log = "\x1b[34mDEBUG \x1b[0mmessage\r\n\x1b[0m"
+        for columns, expected in (
+            (80, [blue("DEBUG ") + "message"]),
+            (8, [blue("DEBUG ") + "me", fmtstr("ssage")]),
+        ):
+            with self.subTest(columns=columns):
+                lines = [
+                    wrapped
+                    for line in log.splitlines()
+                    for wrapped in fmtstr(line).width_aware_splitlines(columns)
+                ]
+                self.assertEqual(lines, expected)
+
+    def test_width_aware_splitlines_zero_width_text(self) -> None:
+        s = blue("\u0300")
+        self.assertEqual(list(s.width_aware_splitlines(2)), [s])
+
     def test_width_at_offset(self) -> None:
         self.assertEqual(fmtstr("abＥcdef").width_at_offset(0), 0)
         self.assertEqual(fmtstr("abＥcdef").width_at_offset(2), 2)

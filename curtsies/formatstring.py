@@ -663,6 +663,8 @@ class FmtStr:
         return self._width_aware_splitlines(columns)
 
     def _width_aware_splitlines(self, columns: int) -> Iterator["FmtStr"]:
+        if not self.chunks:
+            return
         splitter = self.chunks[0].splitter()
         chunks_of_line = []
         width_of_line = 0
