@@ -80,7 +80,7 @@ class FSArray(Sequence):
     ) -> FmtStr | list[FmtStr]:
         if isinstance(slicetuple, int):
             if slicetuple < 0:
-                slicetuple = len(self.rows) - slicetuple
+                slicetuple = len(self.rows) + slicetuple
             if slicetuple < 0 or slicetuple >= len(self.rows):
                 raise IndexError("out of bounds")
             return self.rows[slicetuple]
