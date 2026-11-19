@@ -550,6 +550,26 @@ class TestChunkSplitter(unittest.TestCase):
 
 
 class TestFSArray(unittest.TestCase):
+    def test_negative_row_indices(self) -> None:
+        a = fsarray([red("first"), blue("middle"), green("last")])
+        for index in range(-len(a), len(a)):
+            with self.subTest(index=index):
+                self.assertIs(a[index], a.rows[index])
+
+        a[2] = red("new")
+        self.assertEqual(a[-1], red("new"))
+        self.assertIs(a[-1], a[2])
+        self.assertEqual(a[:-1], a.rows[:-1])
+        self.assertEqual(a[-1:], a.rows[-1:])
+
+    def test_row_indices_out_of_bounds(self) -> None:
+        for rows in ([], ["a"], ["a", "b", "c"]):
+            a = fsarray(rows)
+            for index in (-len(a) - 1, len(a)):
+                with self.subTest(rows=rows, index=index):
+                    with self.assertRaises(IndexError):
+                        _ = a[index]
+
     def test_no_hanging_space(self) -> None:
         a = FSArray(4, 2)
         self.assertEqual(len(a.rows[0]), 0)
